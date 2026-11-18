@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RIR",
+    "IRI",
+    "FFF"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:fe_converter",
+    "count": 1
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FIF",
+    "SCS",
+    "FIF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "S": {
+      "item": "fulguritefusion:spark_cell"
+    },
+    "C": {
+      "item": "minecraft:copper_block"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:mini_collider",
+    "count": 1
+  }
+}

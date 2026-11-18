@@ -1,0 +1,213 @@
+package com.sideflowgames.fulguritefusion.power;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import com.sideflowgames.fulguritefusion.Config;
+import com.sideflowgames.fulguritefusion.block.MachineConnectorBlockEntity;
+import com.sideflowgames.fulguritefusion.block.StormBatteryBlockEntity;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+// A wire network: Machine Connectors joined by hanging wires.
+//
+// Every network has one "master" connector (the one with the lowest position) that runs it each tick:
+//  1. machines that use power (up to 8 of them) are fed first, from furnaces, then from batteries
+//  2. leftover furnace power charges the batteries
+// The whole network carries at most 256 Fm per tick (wireRate in the config).
+// Batteries and furnaces don't count towards the 8-machine limit; a 9th machine simply isn't linked.
+public final class FmNetwork {
+    private static final int SCAN_LIMIT = 1024;
+    private static final int HAZARD_INTERVAL = 40; // ticks (2 seconds)
+
+    // Last time each creature was shocked by wires, so it's at most one shock every 2 seconds.
+    private static final Map<UUID, Long> LAST_SHOCK = new HashMap<>();
+
+    // A raw (uninsulated) wire, from one connector cap to another.
+    public record RawSpan(Vec3 from, Vec3 to) {}
+
+    public record Snapshot(BlockPos master, List<BlockPos> connectors, List<RawSpan> rawSpans,
+                           List<BlockPos> generators, List<BlockPos> batteries,
+                           List<BlockPos> linkedMachines, Set<BlockPos> unlinkedMachines) {}
+
+    private FmNetwork() {}
+
+    // Follow the wires from a connector and work out everything in its network.
+    public static Snapshot scan(Level level, BlockPos start) {
+        Set<BlockPos> visited = new HashSet<>();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        List<BlockPos> connectors = new ArrayList<>();
+        List<RawSpan> rawSpans = new ArrayList<>();
+        visited.add(start);
+        queue.add(start);
+        while (!queue.isEmpty() && visited.size() < SCAN_LIMIT) {
+            BlockPos current = queue.poll();
+            if (!(level.getBlockEntity(current) instanceof MachineConnectorBlockEntity connector)) continue;
+            connectors.add(current);
+            for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
+                BlockPos other = link.other();
+                if (!(level.getBlockEntity(other) instanceof MachineConnectorBlockEntity)) continue; // unloaded or gone
+                // Count each raw wire once (from the end with the lower position).
+                if (!link.insulated() && current.asLong() < other.asLong()) {
+                    rawSpans.add(new RawSpan(WireMath.attachPoint(current), WireMath.attachPoint(other)));
+                }
+                if (visited.add(other)) queue.add(other);
+            }
+        }
+
+        List<BlockPos> generators = new ArrayList<>();
+        List<BlockPos> batteries = new ArrayList<>();
+        List<BlockPos> machines = new ArrayList<>();
+        for (BlockPos c : connectors) {
+            BlockEntity be = level.getBlockEntity(c.below());
+            if (be instanceof StormBatteryBlockEntity) {
+                batteries.add(c.below());
+            } else if (be instanceof FmSource) {
+                generators.add(c.below());
+            } else if (be instanceof FmHandler) {
+                machines.add(c.below());
+            }
+        }
+        // Same order everywhere, so every connector agrees which 8 machines are linked.
+        machines.sort(Comparator.comparingLong(BlockPos::asLong));
+        int max = Config.NETWORK_MAX_MACHINES.get();
+        List<BlockPos> linked = new ArrayList<>(machines.subList(0, Math.min(max, machines.size())));
+        Set<BlockPos> unlinked = new HashSet<>(machines.subList(Math.min(max, machines.size()), machines.size()));
+
+        BlockPos master = connectors.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(start);
+        return new Snapshot(master, connectors, rawSpans, generators, batteries, linked, unlinked);
+    }
+
+    // Move power around the network for one tick. Returns how much Fm moved.
+    public static int tick(Level level, Snapshot net) {
+        int budget = Config.WIRE_RATE.get();
+        List<FmSource> generators = new ArrayList<>();
+        for (BlockPos p : net.generators()) {
+            if (level.getBlockEntity(p) instanceof FmSource s) generators.add(s);
+        }
+        List<StormBatteryBlockEntity> batteries = new ArrayList<>();
+        for (BlockPos p : net.batteries()) {
+            if (level.getBlockEntity(p) instanceof StormBatteryBlockEntity b) batteries.add(b);
+        }
+        List<FmHandler> machines = new ArrayList<>();
+        for (BlockPos p : net.linkedMachines()) {
+            if (level.getBlockEntity(p) instanceof FmHandler h) machines.add(h);
+        }
+
+        int moved = 0;
+        // 1. Feed machines: an even share each, furnaces first, then batteries.
+        for (int i = 0; i < machines.size() && budget > 0; i++) {
+            FmHandler machine = machines.get(i);
+            int share = Math.max(1, budget / (machines.size() - i));
+            int wanted = machine.receiveFm(share, true);
+            if (wanted <= 0) continue;
+            int got = pull(generators, wanted);
+            if (got < wanted) got += pull(new ArrayList<>(batteries), wanted - got);
+            if (got > 0) {
+                machine.receiveFm(got, false);
+                budget -= got;
+                moved += got;
+            }
+        }
+        // 2. Charge batteries with what's left from the furnaces.
+        for (int i = 0; i < batteries.size() && budget > 0; i++) {
+            StormBatteryBlockEntity battery = batteries.get(i);
+            int share = Math.max(1, budget / (batteries.size() - i));
+            int wanted = battery.receiveFm(share, true);
+            if (wanted <= 0) continue;
+            int got = pull(generators, wanted);
+            if (got > 0) {
+                battery.receiveFm(got, false);
+                budget -= got;
+                moved += got;
+            }
+        }
+        return moved;
+    }
+
+    private static int pull(List<? extends FmSource> sources, int amount) {
+        int got = 0;
+        for (FmSource source : sources) {
+            if (got >= amount) break;
+            got += source.extractFm(amount - got, false);
+        }
+        return got;
+    }
+
+    // Raw wire hazards while power is flowing: shocks players near the wire and electrifies water it dips into.
+    public static void hazards(ServerLevel level, Snapshot net) {
+        if (level.getGameTime() % HAZARD_INTERVAL != 0) return;
+        long now = level.getGameTime();
+        float damage = Config.STATIC_DAMAGE.get().floatValue();
+        double range = Config.STATIC_RANGE.get();
+        boolean water = Config.WATER_ELECTRIFY.get();
+        double waterRange = Config.WATER_RANGE.get();
+        int checked = 0;
+        for (RawSpan span : net.rawSpans()) {
+            if (++checked > 128) break; // keep huge networks cheap
+            List<Vec3> points = samples(span);
+            if (Config.STATIC_ENABLED.get()) {
+                AABB area = new AABB(span.from(), span.to()).inflate(range).expandTowards(0, -WireMath.sag(span.from(), span.to()), 0);
+                for (Player player : level.getEntitiesOfClass(Player.class, area)) {
+                    if (closeTo(points, player.position().add(0, 1, 0), range)) shock(level, player, damage, now);
+                }
+            }
+            if (water) {
+                for (Vec3 p : points) {
+                    if (level.getFluidState(BlockPos.containing(p)).is(FluidTags.WATER)) {
+                        for (LivingEntity creature : level.getEntitiesOfClass(LivingEntity.class,
+                                new AABB(p, p).inflate(waterRange), LivingEntity::isInWater)) {
+                            shock(level, creature, damage, now);
+                        }
+                    }
+                }
+            }
+        }
+        if (LAST_SHOCK.size() > 4096) LAST_SHOCK.clear();
+    }
+
+    // Points about one block apart along a wire.
+    private static List<Vec3> samples(RawSpan span) {
+        int n = Math.max(2, (int) Math.ceil(span.from().distanceTo(span.to())) + 1);
+        List<Vec3> points = new ArrayList<>(n + 1);
+        for (int i = 0; i <= n; i++) points.add(WireMath.point(span.from(), span.to(), (double) i / n));
+        return points;
+    }
+
+    private static boolean closeTo(List<Vec3> points, Vec3 target, double range) {
+        double r2 = (range + 0.5) * (range + 0.5);
+        for (Vec3 p : points) {
+            if (p.distanceToSqr(target) <= r2) return true;
+        }
+        return false;
+    }
+
+    private static void shock(ServerLevel level, LivingEntity target, float damage, long now) {
+        Long last = LAST_SHOCK.get(target.getUUID());
+        if (last != null && now - last < HAZARD_INTERVAL) return;
+        LAST_SHOCK.put(target.getUUID(), now);
+        target.hurt(level.damageSources().lightningBolt(), damage);
+    }
+
+    // Tell every connector whether power is flowing (raw wires spark while it is).
+    public static void setPowered(Level level, Snapshot net, boolean powered) {
+        for (BlockPos c : net.connectors()) {
+            if (level.getBlockEntity(c) instanceof MachineConnectorBlockEntity connector) connector.setPowered(powered);
+        }
+    }
+}

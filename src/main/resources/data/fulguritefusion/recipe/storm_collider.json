@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FAF",
+    "FMF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "A": {
+      "item": "fulguritefusion:arc_core"
+    },
+    "M": {
+      "item": "fulguritefusion:mini_collider"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:storm_collider",
+    "count": 1
+  }
+}

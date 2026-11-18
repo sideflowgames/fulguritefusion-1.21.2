@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "gtceu:lv_machine_casing",
+      "required": false
+    },
+    {
+      "id": "modern_industrialization:basic_machine_hull",
+      "required": false
+    }
+  ]
+}

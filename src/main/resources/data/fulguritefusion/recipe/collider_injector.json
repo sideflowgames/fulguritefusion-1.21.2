@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FSF",
+    "IRI",
+    "FSF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "S": {
+      "item": "fulguritefusion:spark_cell"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:collider_injector",
+    "count": 1
+  }
+}

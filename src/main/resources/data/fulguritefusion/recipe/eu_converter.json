@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LFL",
+    "RIR",
+    "CCC"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:lightning_rod"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "tag": "fulguritefusion:lv_machine_casings"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:eu_converter",
+    "count": 1
+  }
+}

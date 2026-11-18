@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fulguritefusion:item/prime_spark_fragment"
+  }
+}
