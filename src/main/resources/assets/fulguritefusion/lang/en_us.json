@@ -1,0 +1,13 @@
+{
+  "itemGroup.fulguritefusion": "Example Mod Tab",
+  "block.fulguritefusion.example_block": "Example Block",
+  "item.fulguritefusion.example_item": "Example Item",
+
+  "fulguritefusion.configuration.title": "Fulgurite Fusion Configs",
+  "fulguritefusion.configuration.section.fulguritefusion.common.toml": "Fulgurite Fusion Configs",
+  "fulguritefusion.configuration.section.fulguritefusion.common.toml.title": "Fulgurite Fusion Configs",
+  "fulguritefusion.configuration.items": "Item List",
+  "fulguritefusion.configuration.logDirtBlock": "Log Dirt Block",
+  "fulguritefusion.configuration.magicNumberIntroduction": "Magic Number Text",
+  "fulguritefusion.configuration.magicNumber": "Magic Number"
+}
