@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fulguritefusion:item/empty_spark_cell"
+  }
+}

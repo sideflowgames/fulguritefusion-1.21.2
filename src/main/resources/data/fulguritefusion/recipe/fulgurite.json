@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "SSS",
+    "SSS"
+  ],
+  "key": {
+    "S": "fulguritefusion:fulgurite_shard"
+  },
+  "result": {
+    "id": "fulguritefusion:fulgurite",
+    "count": 2
+  }
+}

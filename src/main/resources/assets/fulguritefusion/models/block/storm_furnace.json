@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "fulguritefusion:block/storm_furnace_top",
+    "front": "fulguritefusion:block/storm_furnace_front",
+    "side": "fulguritefusion:block/storm_furnace_side"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GCG",
+    "GRG",
+    "GCG"
+  ],
+  "key": {
+    "G": "minecraft:glass",
+    "C": "minecraft:copper_ingot",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "fulguritefusion:empty_spark_cell",
+    "count": 1
+  }
+}

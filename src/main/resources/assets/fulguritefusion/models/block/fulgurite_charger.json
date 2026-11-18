@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/fulgurite_charger_top",
+    "bottom": "fulguritefusion:block/fulgurite_charger_bottom",
+    "side": "fulguritefusion:block/fulgurite_charger_side"
+  }
+}
