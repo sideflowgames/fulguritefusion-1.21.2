@@ -3,6 +3,11 @@
   "values": [
     "fulguritefusion:raw_fulgurite",
     "fulguritefusion:storm_furnace",
-    "fulguritefusion:fulgurite_charger"
+    "fulguritefusion:fulgurite_charger",
+    "fulguritefusion:fe_converter",
+    "fulguritefusion:enhanced_storm_furnace",
+    "fulguritefusion:charged_storm_furnace",
+    "fulguritefusion:eu_converter",
+    "fulguritefusion:storm_battery"
   ]
 }

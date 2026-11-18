@@ -2,38 +2,51 @@ package com.sideflowgames.fulguritefusion.block;
 
 import com.mojang.serialization.MapCodec;
 import com.sideflowgames.fulguritefusion.ModBlocks;
-import com.sideflowgames.fulguritefusion.ModItems;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
-// The Fulgurite Charger.
-// Right-click with Empty Spark Cells to load them (up to 16).
-// Right-click empty-handed to collect charged cells, or to see its status.
-// Sneak + right-click empty-handed to take back uncharged cells.
+// The Fulgurite Charger. Right-click to open its menu; sneak + right-click to see its status.
+// It has a front face (the glass window) that is never used for items.
 public class FulguriteChargerBlock extends BaseEntityBlock {
     public static final MapCodec<FulguriteChargerBlock> CODEC = simpleCodec(FulguriteChargerBlock::new);
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public FulguriteChargerBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -52,25 +65,12 @@ public class FulguriteChargerBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
-                                          Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!stack.is(ModItems.EMPTY_SPARK_CELL.get())) {
-            return InteractionResult.TRY_WITH_EMPTY_HAND;
-        }
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
-            charger.insertCells(stack);
-        }
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
-            ItemStack taken = player.isShiftKeyDown() ? charger.takeInput() : charger.takeOutput();
-            if (!taken.isEmpty()) {
-                player.getInventory().placeItemBackInInventory(taken);
-            } else {
+            if (player.isShiftKeyDown()) {
                 player.displayClientMessage(Component.literal(charger.statusText()), true);
+            } else {
+                player.openMenu(charger, buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.SUCCESS;
@@ -79,8 +79,9 @@ public class FulguriteChargerBlock extends BaseEntityBlock {
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
-            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), charger.takeInput());
-            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), charger.takeOutput());
+            for (int i = 0; i < charger.getItems().getSlots(); i++) {
+                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), charger.getItems().getStackInSlot(i));
+            }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

@@ -28,6 +28,10 @@ public class FulguriteFusion {
         // Register our blocks (ModBlocks.java), then items and the creative tab (ModItems.java)
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModMenus.register(modEventBus);
+
+        // Hopper and pipe support for our machines
+        modEventBus.addListener(ModCapabilities::register);
 
         // Lets this class listen for game events, like onServerStarting below
         NeoForge.EVENT_BUS.register(this);

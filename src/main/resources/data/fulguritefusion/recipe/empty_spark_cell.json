@@ -7,9 +7,15 @@
     "GCG"
   ],
   "key": {
-    "G": "minecraft:glass",
-    "C": "minecraft:copper_ingot",
-    "R": "minecraft:redstone"
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
   },
   "result": {
     "id": "fulguritefusion:empty_spark_cell",

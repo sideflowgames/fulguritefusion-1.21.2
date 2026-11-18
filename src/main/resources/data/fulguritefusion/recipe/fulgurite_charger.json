@@ -7,11 +7,21 @@
     "IEI"
   ],
   "key": {
-    "F": "fulguritefusion:fulgurite",
-    "C": "minecraft:copper_ingot",
-    "G": "minecraft:glass",
-    "I": "minecraft:iron_ingot",
-    "E": "fulguritefusion:empty_spark_cell"
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "E": {
+      "item": "fulguritefusion:empty_spark_cell"
+    }
   },
   "result": {
     "id": "fulguritefusion:fulgurite_charger",

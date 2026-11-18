@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
       "model": "fulguritefusion:block/fulgurite_charger"
+    },
+    "facing=east": {
+      "model": "fulguritefusion:block/fulgurite_charger",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fulguritefusion:block/fulgurite_charger",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fulguritefusion:block/fulgurite_charger",
+      "y": 270
     }
   }
 }

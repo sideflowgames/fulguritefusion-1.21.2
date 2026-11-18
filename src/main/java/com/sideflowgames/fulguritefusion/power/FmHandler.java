@@ -9,4 +9,10 @@ public interface FmHandler {
     int getFm();
 
     int getMaxFm();
+
+    // True for storage blocks (Storm Battery). Machines don't share their power back into storage,
+    // so power flows furnace -> battery -> machines instead of bouncing back and forth.
+    default boolean isStorage() {
+        return false;
+    }
 }

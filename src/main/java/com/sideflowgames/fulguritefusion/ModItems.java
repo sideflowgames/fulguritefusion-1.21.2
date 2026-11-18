@@ -47,7 +47,12 @@ public final class ModItems {
                         output.accept(EMPTY_SPARK_CELL.get());
                         output.accept(SPARK_CELL.get());
                         output.accept(ModBlocks.STORM_FURNACE_ITEM.get());
+                        output.accept(ModBlocks.ENHANCED_STORM_FURNACE_ITEM.get());
+                        output.accept(ModBlocks.CHARGED_STORM_FURNACE_ITEM.get());
                         output.accept(ModBlocks.FULGURITE_CHARGER_ITEM.get());
+                        output.accept(ModBlocks.STORM_BATTERY_ITEM.get());
+                        output.accept(ModBlocks.FE_CONVERTER_ITEM.get());
+                        output.accept(ModBlocks.EU_CONVERTER_ITEM.get());
                     })
                     .build());
 
