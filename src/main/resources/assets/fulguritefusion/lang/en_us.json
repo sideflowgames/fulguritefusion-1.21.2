@@ -1,13 +1,17 @@
 {
-  "itemGroup.fulguritefusion": "Example Mod Tab",
-  "block.fulguritefusion.example_block": "Example Block",
-  "item.fulguritefusion.example_item": "Example Item",
-
+  "itemGroup.fulguritefusion": "Fulgurite Fusion",
+  "item.fulguritefusion.empty_spark_cell": "Empty Spark Cell",
+  "item.fulguritefusion.spark_cell": "Spark Cell",
   "fulguritefusion.configuration.title": "Fulgurite Fusion Configs",
   "fulguritefusion.configuration.section.fulguritefusion.common.toml": "Fulgurite Fusion Configs",
   "fulguritefusion.configuration.section.fulguritefusion.common.toml.title": "Fulgurite Fusion Configs",
   "fulguritefusion.configuration.items": "Item List",
   "fulguritefusion.configuration.logDirtBlock": "Log Dirt Block",
   "fulguritefusion.configuration.magicNumberIntroduction": "Magic Number Text",
-  "fulguritefusion.configuration.magicNumber": "Magic Number"
+  "fulguritefusion.configuration.magicNumber": "Magic Number",
+  "item.fulguritefusion.fulgurite_shard": "Fulgurite Shard",
+  "item.fulguritefusion.fulgurite": "Fulgurite",
+  "block.fulguritefusion.raw_fulgurite": "Raw Fulgurite",
+  "block.fulguritefusion.storm_furnace": "Storm Furnace",
+  "block.fulguritefusion.fulgurite_charger": "Fulgurite Charger"
 }
