@@ -5,7 +5,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import com.sideflowgames.fulguritefusion.item.FusionFuelItem;
 import com.sideflowgames.fulguritefusion.item.WireRollItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -32,7 +35,7 @@ public final class ModItems {
     public static final DeferredItem<Item> FULGURITE_SHARD = ITEMS.registerSimpleItem("fulgurite_shard",
             new Item.Properties());
 
-    // Refined fulgurite: 9 shards in a crafting grid make 2.
+    // Fulgurite: 9 shards in a crafting grid make 2.
     public static final DeferredItem<Item> FULGURITE = ITEMS.registerSimpleItem("fulgurite",
             new Item.Properties());
 
@@ -45,6 +48,56 @@ public final class ModItems {
             props -> new WireRollItem(false, props), new Item.Properties());
     public static final DeferredItem<WireRollItem> INSULATED_WIRE = ITEMS.registerItem("insulated_wire",
             props -> new WireRollItem(true, props), new Item.Properties());
+
+    // ---------- Storm Collider materials and products ----------
+
+    // The 12 exotic materials, in design-doc order (index = material number - 1).
+    // How each is gathered in survival comes later; for now they are in the creative tab.
+    public static final DeferredItem<Item> AURORA_DUST = ITEMS.registerSimpleItem("aurora_dust", new Item.Properties());
+    public static final DeferredItem<Item> SUNMOTE = ITEMS.registerSimpleItem("sunmote", new Item.Properties());
+    public static final DeferredItem<Item> ABYSSAL_NACRE = ITEMS.registerSimpleItem("abyssal_nacre", new Item.Properties());
+    public static final DeferredItem<Item> SOUL_FROST = ITEMS.registerSimpleItem("soul_frost", new Item.Properties());
+    public static final DeferredItem<Item> ECHO_RESIN = ITEMS.registerSimpleItem("echo_resin", new Item.Properties());
+    public static final DeferredItem<Item> GALE_CORE = ITEMS.registerSimpleItem("gale_core", new Item.Properties());
+    public static final DeferredItem<Item> STORMWING_PLUME = ITEMS.registerSimpleItem("stormwing_plume", new Item.Properties());
+    public static final DeferredItem<Item> NULL_SCALE = ITEMS.registerSimpleItem("null_scale", new Item.Properties());
+    public static final DeferredItem<Item> LUMEN_GEL = ITEMS.registerSimpleItem("lumen_gel", new Item.Properties());
+    public static final DeferredItem<Item> CINDER_HEART = ITEMS.registerSimpleItem("cinder_heart", new Item.Properties());
+    public static final DeferredItem<Item> WITHER_ASH = ITEMS.registerSimpleItem("wither_ash", new Item.Properties());
+    public static final DeferredItem<Item> STRUCK_SPORE = ITEMS.registerSimpleItem("struck_spore", new Item.Properties());
+
+    @SuppressWarnings("unchecked")
+    public static final DeferredItem<Item>[] MATERIALS = new DeferredItem[]{AURORA_DUST, SUNMOTE, ABYSSAL_NACRE, SOUL_FROST, ECHO_RESIN, GALE_CORE, STORMWING_PLUME, NULL_SCALE, LUMEN_GEL, CINDER_HEART, WITHER_ASH, STRUCK_SPORE};
+
+    // Pairing byproducts.
+    public static final DeferredItem<Item> RESONANT_SHARD = ITEMS.registerSimpleItem("resonant_shard", new Item.Properties());
+    public static final DeferredItem<Item> PEARL_EMBER = ITEMS.registerSimpleItem("pearl_ember", new Item.Properties());
+    public static final DeferredItem<Item> LIVING_SPARK = ITEMS.registerSimpleItem("living_spark", new Item.Properties());
+    public static final DeferredItem<Item> PRIME_SPARK_FRAGMENT = ITEMS.registerSimpleItem("prime_spark_fragment",
+            new Item.Properties().rarity(Rarity.RARE));
+
+    // Storm Collider crafting products.
+    public static final DeferredItem<Item> PRIME_SPARK = ITEMS.registerSimpleItem("prime_spark",
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    public static final DeferredItem<Item> REFINED_FULGURITE = ITEMS.registerSimpleItem("refined_fulgurite", new Item.Properties());
+    public static final DeferredItem<Item> CHARGED_SPARK_CELL = ITEMS.registerSimpleItem("charged_spark_cell",
+            new Item.Properties().stacksTo(16).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    public static final DeferredItem<Item> OVERCHARGED_SPARK_CELL = ITEMS.registerSimpleItem("overcharged_spark_cell",
+            new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    // Dropped by the Arc Serpent (coming later). Creative tab only for now.
+    public static final DeferredItem<Item> ARC_CORE = ITEMS.registerSimpleItem("arc_core", new Item.Properties().rarity(Rarity.RARE));
+
+    // Fusion Fuel capsule: one per pairing, fuel for the big reactor.
+    public static final DeferredItem<FusionFuelItem> FUSION_FUEL = ITEMS.registerItem("fusion_fuel",
+            FusionFuelItem::new, new Item.Properties().stacksTo(16));
+
+    // Which exotic material (0-11) a stack is, or -1.
+    public static int materialIndex(ItemStack stack) {
+        for (int i = 0; i < MATERIALS.length; i++) {
+            if (stack.is(MATERIALS[i].get())) return i;
+        }
+        return -1;
+    }
 
     // The mod's own creative tab, shown after the Combat tab.
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_TABS.register("main",
@@ -73,6 +126,17 @@ public final class ModItems {
                         output.accept(ModBlocks.COLLIDER_INPUT_ITEM.get());
                         output.accept(ModBlocks.COLLIDER_INJECTOR_ITEM.get());
                         output.accept(ModBlocks.MINI_COLLIDER_ITEM.get());
+                        output.accept(ModBlocks.STORM_COLLIDER_ITEM.get());
+                        for (DeferredItem<Item> material : MATERIALS) output.accept(material.get());
+                        output.accept(RESONANT_SHARD.get());
+                        output.accept(PEARL_EMBER.get());
+                        output.accept(LIVING_SPARK.get());
+                        output.accept(PRIME_SPARK_FRAGMENT.get());
+                        output.accept(ARC_CORE.get());
+                        output.accept(REFINED_FULGURITE.get());
+                        output.accept(CHARGED_SPARK_CELL.get());
+                        output.accept(OVERCHARGED_SPARK_CELL.get());
+                        output.accept(PRIME_SPARK.get());
                     })
                     .build());
 

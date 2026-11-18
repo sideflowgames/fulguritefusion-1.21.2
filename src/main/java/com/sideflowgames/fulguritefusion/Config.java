@@ -37,6 +37,7 @@ public class Config {
     // --- Mini Collider ---
     public static final ModConfigSpec.IntValue COLLIDER_FM_PER_SHOT;
     public static final ModConfigSpec.IntValue COLLIDER_RELEASE_TICKS;
+    public static final ModConfigSpec.IntValue STORM_FM_PER_SHOT;
 
     // --- Converters ---
     public static final ModConfigSpec.IntValue FE_PER_FM;
@@ -110,6 +111,8 @@ public class Config {
                 .defineInRange("colliderFmPerShot", 5120, 1, 1000000);
         COLLIDER_RELEASE_TICKS = BUILDER.comment("Ticks over which a collision's Fm is released (20 ticks = 1 second).")
                 .defineInRange("colliderReleaseTicks", 800, 1, 72000);
+        STORM_FM_PER_SHOT = BUILDER.comment("Fm the Storm Collider uses for each pairing shot.")
+                .defineInRange("stormFmPerShot", 10000, 0, 1000000);
         BUILDER.pop();
 
         BUILDER.comment("Converters (one-way, from Fm to other mods' power)").push("converters");

@@ -13,6 +13,7 @@
     "fulguritefusion:fulgurite_ring",
     "fulguritefusion:collider_injector",
     "fulguritefusion:collider_input",
-    "fulguritefusion:mini_collider"
+    "fulguritefusion:mini_collider",
+    "fulguritefusion:storm_collider"
   ]
 }

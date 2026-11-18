@@ -3,6 +3,7 @@ package com.sideflowgames.fulguritefusion;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
+import com.sideflowgames.fulguritefusion.pairing.PairingDiscoveries;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,6 +33,9 @@ public class FulguriteFusion {
 
         // Hopper and pipe support for our machines
         modEventBus.addListener(ModCapabilities::register);
+
+        // Which pairings each player has discovered (hides fuel yields and side effects until then)
+        PairingDiscoveries.register(modEventBus);
 
         // Lets this class listen for game events, like onServerStarting below
         NeoForge.EVENT_BUS.register(this);
