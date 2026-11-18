@@ -5,6 +5,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import com.sideflowgames.fulguritefusion.item.WireRollItem;
+
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -34,6 +36,16 @@ public final class ModItems {
     public static final DeferredItem<Item> FULGURITE = ITEMS.registerSimpleItem("fulgurite",
             new Item.Properties());
 
+    // Copper Sheet: used for wire. (Temporary recipe: 2 copper ingots; a processing machine will make these later.)
+    public static final DeferredItem<Item> COPPER_SHEET = ITEMS.registerSimpleItem("copper_sheet",
+            new Item.Properties());
+
+    // Wire Rolls: string hanging wires between Machine Connectors.
+    public static final DeferredItem<WireRollItem> RAW_WIRE = ITEMS.registerItem("raw_wire",
+            props -> new WireRollItem(false, props), new Item.Properties());
+    public static final DeferredItem<WireRollItem> INSULATED_WIRE = ITEMS.registerItem("insulated_wire",
+            props -> new WireRollItem(true, props), new Item.Properties());
+
     // The mod's own creative tab, shown after the Combat tab.
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_TABS.register("main",
             () -> CreativeModeTab.builder()
@@ -51,8 +63,16 @@ public final class ModItems {
                         output.accept(ModBlocks.CHARGED_STORM_FURNACE_ITEM.get());
                         output.accept(ModBlocks.FULGURITE_CHARGER_ITEM.get());
                         output.accept(ModBlocks.STORM_BATTERY_ITEM.get());
+                        output.accept(COPPER_SHEET.get());
+                        output.accept(RAW_WIRE.get());
+                        output.accept(INSULATED_WIRE.get());
+                        output.accept(ModBlocks.MACHINE_CONNECTOR_ITEM.get());
                         output.accept(ModBlocks.FE_CONVERTER_ITEM.get());
                         output.accept(ModBlocks.EU_CONVERTER_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_RING_ITEM.get());
+                        output.accept(ModBlocks.COLLIDER_INPUT_ITEM.get());
+                        output.accept(ModBlocks.COLLIDER_INJECTOR_ITEM.get());
+                        output.accept(ModBlocks.MINI_COLLIDER_ITEM.get());
                     })
                     .build());
 

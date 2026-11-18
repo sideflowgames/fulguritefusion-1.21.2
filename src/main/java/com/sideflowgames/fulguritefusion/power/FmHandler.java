@@ -15,4 +15,12 @@ public interface FmHandler {
     default boolean isStorage() {
         return false;
     }
+
+    // Daisy chains (see DaisyChain): a machine passing power to a touching machine tells it its position in
+    // the chain. Every machine type follows this; batteries keep the defaults below and don't take part.
+    default void touchChain(int depth) {}
+
+    default int receiveFmFromChain(int amount, int depth) {
+        return receiveFm(amount, false);
+    }
 }

@@ -45,5 +45,22 @@
   "block.fulguritefusion.storm_battery": "Storm Battery",
   "fulguritefusion.configuration.batteryCapacity": "Battery Capacity (Fm)",
   "fulguritefusion.configuration.batteryMaxBank": "Max Battery Bank Size",
-  "fulguritefusion.configuration.batteryOutput": "Battery Output Fm/t"
+  "fulguritefusion.configuration.batteryOutput": "Battery Output Fm/t",
+  "block.fulguritefusion.machine_connector": "Machine Connector",
+  "item.fulguritefusion.copper_sheet": "Copper Sheet",
+  "fulguritefusion.configuration.wireRate": "Wire Fm/t",
+  "fulguritefusion.configuration.networkMaxMachines": "Max Machines per Network",
+  "fulguritefusion.configuration.waterElectrify": "Raw Wire Electrifies Water",
+  "fulguritefusion.configuration.waterRange": "Electrified Water Range",
+  "item.fulguritefusion.raw_wire": "Raw Wire Roll",
+  "item.fulguritefusion.insulated_wire": "Insulated Wire Roll",
+  "fulguritefusion.configuration.wireMaxLength": "Max Wire Length",
+  "fulguritefusion.configuration.chainMaxMachines": "Max Machines per Daisy Chain",
+  "block.fulguritefusion.fulgurite_ring": "Fulgurite Ring",
+  "block.fulguritefusion.collider_injector": "Collider Injector",
+  "block.fulguritefusion.collider_input": "Collider Input",
+  "block.fulguritefusion.mini_collider": "Mini Collider",
+  "fulguritefusion.configuration.collider": "Mini Collider",
+  "fulguritefusion.configuration.colliderFmPerShot": "Fm per Collision",
+  "fulguritefusion.configuration.colliderReleaseTicks": "Release Time (ticks)"
 }

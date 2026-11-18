@@ -3,7 +3,7 @@ package com.sideflowgames.fulguritefusion;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 // Fulgurite Fusion settings. Saved in config/fulguritefusion-common.toml and editable from the Mods menu.
-// Grouped into sections: safety, static, power, converters, ritual.
+// Grouped into sections: safety, static, power, collider, converters, ritual.
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -27,6 +27,16 @@ public class Config {
     public static final ModConfigSpec.IntValue BATTERY_CAPACITY;
     public static final ModConfigSpec.IntValue BATTERY_MAX_BANK;
     public static final ModConfigSpec.IntValue BATTERY_OUTPUT;
+    public static final ModConfigSpec.IntValue WIRE_RATE;
+    public static final ModConfigSpec.IntValue WIRE_MAX_LENGTH;
+    public static final ModConfigSpec.IntValue NETWORK_MAX_MACHINES;
+    public static final ModConfigSpec.IntValue CHAIN_MAX_MACHINES;
+    public static final ModConfigSpec.BooleanValue WATER_ELECTRIFY;
+    public static final ModConfigSpec.DoubleValue WATER_RANGE;
+
+    // --- Mini Collider ---
+    public static final ModConfigSpec.IntValue COLLIDER_FM_PER_SHOT;
+    public static final ModConfigSpec.IntValue COLLIDER_RELEASE_TICKS;
 
     // --- Converters ---
     public static final ModConfigSpec.IntValue FE_PER_FM;
@@ -60,6 +70,10 @@ public class Config {
                 .defineInRange("staticDamage", 1.0, 0.0, 40.0);
         STATIC_RANGE = BUILDER.comment("How far the shock reaches, in blocks.")
                 .defineInRange("staticRange", 2.0, 0.0, 16.0);
+        WATER_ELECTRIFY = BUILDER.comment("Raw wire carrying power electrifies water it touches.")
+                .define("waterElectrify", true);
+        WATER_RANGE = BUILDER.comment("How far from the wire creatures in water get shocked, in blocks.")
+                .defineInRange("waterRange", 4.0, 0.0, 16.0);
         BUILDER.pop();
 
         BUILDER.comment("Power balance (Fm = Fulmen, the mod's power)").push("power");
@@ -81,6 +95,21 @@ public class Config {
                 .defineInRange("batteryMaxBank", 6, 1, 64);
         BATTERY_OUTPUT = BUILDER.comment("Fm per tick each Storm Battery block can send to each touching machine.")
                 .defineInRange("batteryOutput", 512, 1, 1000000);
+        WIRE_RATE = BUILDER.comment("Fm per tick a wire network can carry.")
+                .defineInRange("wireRate", 256, 1, 1000000);
+        WIRE_MAX_LENGTH = BUILDER.comment("Longest hanging wire between two Machine Connectors, in blocks.")
+                .defineInRange("wireMaxLength", 16, 2, 64);
+        CHAIN_MAX_MACHINES = BUILDER.comment("Most machines in a daisy chain (machines touching each other) that can pass power along.")
+                .defineInRange("chainMaxMachines", 8, 1, 256);
+        NETWORK_MAX_MACHINES = BUILDER.comment("Most machines one wire network can power (batteries and furnaces don't count).")
+                .defineInRange("networkMaxMachines", 8, 1, 256);
+        BUILDER.pop();
+
+        BUILDER.comment("Mini Collider").push("collider");
+        COLLIDER_FM_PER_SHOT = BUILDER.comment("Fm released by one collision (two Spark Cells).")
+                .defineInRange("colliderFmPerShot", 5120, 1, 1000000);
+        COLLIDER_RELEASE_TICKS = BUILDER.comment("Ticks over which a collision's Fm is released (20 ticks = 1 second).")
+                .defineInRange("colliderReleaseTicks", 800, 1, 72000);
         BUILDER.pop();
 
         BUILDER.comment("Converters (one-way, from Fm to other mods' power)").push("converters");

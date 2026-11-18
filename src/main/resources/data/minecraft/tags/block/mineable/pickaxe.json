@@ -8,6 +8,11 @@
     "fulguritefusion:enhanced_storm_furnace",
     "fulguritefusion:charged_storm_furnace",
     "fulguritefusion:eu_converter",
-    "fulguritefusion:storm_battery"
+    "fulguritefusion:storm_battery",
+    "fulguritefusion:machine_connector",
+    "fulguritefusion:fulgurite_ring",
+    "fulguritefusion:collider_injector",
+    "fulguritefusion:collider_input",
+    "fulguritefusion:mini_collider"
   ]
 }

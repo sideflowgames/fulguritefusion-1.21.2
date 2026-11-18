@@ -10,7 +10,9 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import com.sideflowgames.fulguritefusion.client.ConnectorRenderer;
 import com.sideflowgames.fulguritefusion.client.EuConverterScreen;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.sideflowgames.fulguritefusion.client.FulguriteChargerScreen;
 import com.sideflowgames.fulguritefusion.client.StormBatteryScreen;
 import com.sideflowgames.fulguritefusion.client.StormFurnaceScreen;
@@ -41,5 +43,11 @@ public class FulguriteFusionClient {
         event.register(ModMenus.FULGURITE_CHARGER.get(), FulguriteChargerScreen::new);
         event.register(ModMenus.EU_CONVERTER.get(), EuConverterScreen::new);
         event.register(ModMenus.STORM_BATTERY.get(), StormBatteryScreen::new);
+    }
+
+    // Draws the hanging wires between Machine Connectors.
+    @SubscribeEvent
+    static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONNECTOR_BE.get(), ConnectorRenderer::new);
     }
 }

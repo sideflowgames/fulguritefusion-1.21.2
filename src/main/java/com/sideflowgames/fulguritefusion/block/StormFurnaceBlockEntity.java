@@ -8,6 +8,7 @@ import com.sideflowgames.fulguritefusion.machine.SideConfigurable;
 import com.sideflowgames.fulguritefusion.machine.SidedItemHandler;
 import com.sideflowgames.fulguritefusion.menu.StormFurnaceMenu;
 import com.sideflowgames.fulguritefusion.power.FmHandler;
+import com.sideflowgames.fulguritefusion.power.FmSource;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,7 +37,7 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 // Power is scarce: every fuel is worth a fixed amount of Fm (coal = 5,120 Fm = 4 Spark Cells,
 // other fuels scale with their vanilla burn time). Higher tiers don't get more out of a fuel,
 // they deliver it faster: Weak 16 Fm/t, Enhanced 32 Fm/t, Charged 64 Fm/t.
-public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider, SideConfigurable {
+public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider, SideConfigurable, FmSource {
     // Rates, fuel value and static damage come from the config (Config.java).
     public static final int BASE_CAPACITY = 16000;         // Fm stored by a Weak furnace (doubles per tier)
     public static final int COAL_BURN_TICKS = 1600;        // vanilla coal burn time
@@ -165,11 +166,12 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
         }
 
         // Push power into machines on every face except the front.
+        // The furnace counts as the first machine of a daisy chain, so the machines it touches are 2nd (position 1).
         int pushLimit = rate * 4;
         for (Direction dir : Direction.values()) {
             if (dir == front || be.fm <= 0) continue;
             if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine) {
-                int sent = machine.receiveFm(Math.min(be.fm, pushLimit), false);
+                int sent = machine.receiveFmFromChain(Math.min(be.fm, pushLimit), 1);
                 if (sent > 0) {
                     be.fm -= sent;
                     changed = true;
@@ -214,6 +216,17 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
             if (!level.getBlockState(pos.below(i)).is(Blocks.LIGHTNING_ROD)) return false;
         }
         return true;
+    }
+
+    // Wire networks draw stored Fm out through the Machine Connector.
+    @Override
+    public int extractFm(int max, boolean simulate) {
+        int out = Math.max(0, Math.min(max, fm));
+        if (!simulate && out > 0) {
+            fm -= out;
+            setChanged();
+        }
+        return out;
     }
 
     public ItemStackHandler getItems() {

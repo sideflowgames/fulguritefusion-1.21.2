@@ -8,6 +8,7 @@ import com.sideflowgames.fulguritefusion.machine.SideConfig;
 import com.sideflowgames.fulguritefusion.machine.SideConfigurable;
 import com.sideflowgames.fulguritefusion.machine.SidedItemHandler;
 import com.sideflowgames.fulguritefusion.menu.FulguriteChargerMenu;
+import com.sideflowgames.fulguritefusion.power.DaisyChain;
 import com.sideflowgames.fulguritefusion.power.FmHandler;
 
 import net.minecraft.core.BlockPos;
@@ -33,7 +34,6 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandler, MenuProvider, SideConfigurable {
     // Cell cost and draw rate come from the config (Config.java). The charger holds enough Fm for two cells.
     public static final int MAX_CELLS = 16;
-    public static final int SHARE_PER_TICK = 64;
     public static final int TRANSFER_INTERVAL = 8;
     public static final int INPUT = 0, OUTPUT = 1;
     public static final int DATA_COUNT = 4 + SideConfig.COUNT;
@@ -62,6 +62,8 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
 
     private int fm;
     private int progress;
+
+    private final DaisyChain chain = new DaisyChain();
     private int transferTimer;
 
     private final ContainerData data = new ContainerData() {
@@ -114,22 +116,11 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
             changed = true;
         }
 
-        // Daisy chain: even out power with any touching machine that has less (by fill level).
-        for (Direction dir : Direction.values()) {
-            if (be.fm <= 0) break;
-            if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler other && other != be && !other.isStorage()) {
-                double mine = (double) be.fm / be.maxFm();
-                double theirs = (double) other.getFm() / other.getMaxFm();
-                if (mine > theirs) {
-                    int gap = (int) ((mine - theirs) * Math.min(be.maxFm(), other.getMaxFm()) / 2);
-                    int offer = Math.min(Math.min(gap, SHARE_PER_TICK), be.fm);
-                    if (offer > 0) {
-                        int sent = other.receiveFm(offer, false);
-                        be.fm -= sent;
-                        if (sent > 0) changed = true;
-                    }
-                }
-            }
+        // Daisy chain: pass power to touching machines (stops after 8 machines).
+        int shared = be.chain.share(level, pos, be, be.fm, null);
+        if (shared > 0) {
+            be.fm -= shared;
+            changed = true;
         }
 
         // Items on Push / Pull faces.
@@ -150,14 +141,32 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
         if (changed) be.setChanged();
     }
 
+    // Being offered power directly (by a battery or wire network) puts this machine at the start of a chain.
     @Override
     public int receiveFm(int amount, boolean simulate) {
+        chain.touch(level, 0);
         int accepted = Math.max(0, Math.min(amount, maxFm() - fm));
         if (!simulate && accepted > 0) {
             fm += accepted;
             setChanged();
         }
         return accepted;
+    }
+
+    @Override
+    public int receiveFmFromChain(int amount, int depth) {
+        chain.touch(level, depth);
+        int accepted = Math.max(0, Math.min(amount, maxFm() - fm));
+        if (accepted > 0) {
+            fm += accepted;
+            setChanged();
+        }
+        return accepted;
+    }
+
+    @Override
+    public void touchChain(int depth) {
+        chain.touch(level, depth);
     }
 
     @Override
