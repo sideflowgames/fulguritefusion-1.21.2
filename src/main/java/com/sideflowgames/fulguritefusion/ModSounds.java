@@ -16,6 +16,16 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> STORMWING_ARC = SOUNDS.register("stormwing_arc",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormwing_arc")));
 
+    // Stormwing calls: a clear, rising whistled cry (ambient), a sharp squawk with sparks (hurt),
+    // and a long sagging cry (death). Hatchlings use the same calls, higher and softer.
+    public static final Supplier<SoundEvent> STORMWING_CALL = register("stormwing_call");
+    public static final Supplier<SoundEvent> STORMWING_HURT = register("stormwing_hurt");
+    public static final Supplier<SoundEvent> STORMWING_DEATH = register("stormwing_death");
+
+    private static Supplier<SoundEvent> register(String name) {
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name)));
+    }
+
     private ModSounds() {}
 
     public static void register(IEventBus modEventBus) {

@@ -226,6 +226,10 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         instance.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
 
+    public void setSitting(boolean sitting) {
+        this.sitting = sitting;
+    }
+
     // Worldgen: this bird lives at an existing nest.
     public void adoptNest(BlockPos center) {
         nestPos = center;
@@ -235,7 +239,8 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     // The owner right-clicks with an empty hand: sit / follow.
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (isLoyal() && player.getUUID().equals(owner) && player.getItemInHand(hand).isEmpty()) {
+        // Main hand only: right-click fires once per hand, and two toggles would cancel out.
+        if (isLoyal() && player.getUUID().equals(owner) && hand == InteractionHand.MAIN_HAND && player.getItemInHand(hand).isEmpty()) {
             if (!level().isClientSide) {
                 sitting = !sitting;
                 setTarget(null);
@@ -442,22 +447,28 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return isNesting() ? null : SoundEvents.PHANTOM_AMBIENT;
+        return isNesting() ? null : ModSounds.STORMWING_CALL.get();
+    }
+
+    // Calls are a few seconds long: call now and then, not constantly.
+    @Override
+    public int getAmbientSoundInterval() {
+        return 240;
     }
 
     @Override
-    public float getVoicePitch() {
-        return 0.6f;
+    protected float getSoundVolume() {
+        return 0.8f;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.PHANTOM_HURT;
+        return ModSounds.STORMWING_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.PHANTOM_DEATH;
+        return ModSounds.STORMWING_DEATH.get();
     }
 
     @Override
@@ -587,7 +598,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
                 if (bird.position().distanceToSqr(above) < 9 || phaseTicks > 80) {
                     diving = true;
                     bird.setDiving(true);
-                    bird.level().playSound(null, bird.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE, 1.5f, 0.7f);
+                    bird.level().playSound(null, bird.blockPosition(), ModSounds.STORMWING_CALL.get(), SoundSource.HOSTILE, 0.9f, 1.15f);
                 }
             } else {
                 // Dive straight at the target.

@@ -49,8 +49,7 @@ public class MiniColliderBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof MiniColliderBlockEntity collider) {
-            collider.checkStructure();
-            player.displayClientMessage(Component.literal(collider.statusText()), true);
+            collider.interact(player); // menu (sneak: status line)
         }
         return InteractionResult.SUCCESS;
     }

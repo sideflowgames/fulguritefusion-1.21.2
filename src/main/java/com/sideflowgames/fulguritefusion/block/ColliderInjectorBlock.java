@@ -61,8 +61,10 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
             if (player.isShiftKeyDown()) {
                 ItemStack out = injector.takeAll();
                 if (!out.isEmpty() && !player.getInventory().add(out)) player.drop(out, false);
+                player.displayClientMessage(Component.literal(injector.statusText()), true);
+            } else {
+                ColliderInputBlock.openFor(level, pos, player, injector, false);
             }
-            player.displayClientMessage(Component.literal(injector.statusText()), true);
         }
         return InteractionResult.SUCCESS;
     }

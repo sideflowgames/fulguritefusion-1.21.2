@@ -5,10 +5,14 @@ import java.util.UUID;
 
 import com.sideflowgames.fulguritefusion.Config;
 import com.sideflowgames.fulguritefusion.ModEntities;
+import com.sideflowgames.fulguritefusion.ModSounds;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -45,6 +49,7 @@ import javax.annotation.Nullable;
 // Stormwing Hatchling: hatches from an incubated egg. It can't fly yet: it walks, leaps and glides.
 // After one Minecraft day (config) it grows into an adult Stormwing.
 //   - Loyal: follows the player who placed the egg, and grows into a loyal bird.
+//     The owner right-clicks it with an empty hand to make it stay or follow (it keeps that when it grows up).
 //   - Feral: does anything it can to escape (runs, leaps 3+ blocks high, glides away) and grows into a
 //     strong hostile bird. Feral hatchlings look exactly like loyal ones; the only way to make one safe is to kill it.
 public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity, StormwingVariant.Holder {
@@ -57,6 +62,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     private boolean feral;
     @Nullable private UUID owner;
     private int age;
+    private boolean sitting;
 
     public StormwingHatchlingEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -91,6 +97,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(1, new StayGoal(this));
         goalSelector.addGoal(1, new LeapAwayGoal(this));
         goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 16f, 1.2, 1.6) {
             @Override
@@ -107,6 +114,21 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     @Nullable
     private Player ownerPlayer() {
         return owner != null ? level().getPlayerByUUID(owner) : null;
+    }
+
+    // The owner right-clicks with an empty hand: stay / follow.
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        // Main hand only: right-click fires once per hand, and two toggles would cancel out.
+        if (!feral && owner != null && player.getUUID().equals(owner) && hand == InteractionHand.MAIN_HAND && player.getItemInHand(hand).isEmpty()) {
+            if (!level().isClientSide) {
+                sitting = !sitting;
+                getNavigation().stop();
+                player.displayClientMessage(Component.literal(sitting ? "Hatchling: staying" : "Hatchling: following"), true);
+            }
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+        return super.mobInteract(player, hand);
     }
 
     @Override
@@ -128,10 +150,11 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
         if (adult == null) return;
         adult.moveTo(getX(), getY() + 0.5, getZ(), getYRot(), 0f);
         adult.raise(stormwingVariant(), feral, owner);
+        adult.setSitting(sitting);
         if (hasCustomName()) adult.setCustomName(getCustomName());
         level.addFreshEntity(adult);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1, getZ(), 60, 1.0, 0.8, 1.0, 0.3);
-        level.playSound(null, blockPosition(), SoundEvents.PHANTOM_FLAP, SoundSource.NEUTRAL, 1.2f, 0.7f);
+        level.playSound(null, blockPosition(), ModSounds.STORMWING_CALL.get(), SoundSource.NEUTRAL, 0.8f, 1.0f);
         discard();
     }
 
@@ -153,22 +176,33 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.PARROT_AMBIENT;
+        return ModSounds.STORMWING_CALL.get();
     }
 
     @Override
+    public int getAmbientSoundInterval() {
+        return 300;
+    }
+
+    // Same calls as the adult, higher and softer.
+    @Override
     public float getVoicePitch() {
-        return 1.5f;
+        return 1.4f + (random.nextFloat() - 0.5f) * 0.1f;
+    }
+
+    @Override
+    protected float getSoundVolume() {
+        return 0.4f;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.PARROT_HURT;
+        return ModSounds.STORMWING_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.PARROT_DEATH;
+        return ModSounds.STORMWING_DEATH.get();
     }
 
     @Override
@@ -178,6 +212,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
         tag.putBoolean("Feral", feral);
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putInt("Age", age);
+        tag.putBoolean("Sitting", sitting);
     }
 
     @Override
@@ -187,6 +222,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
         feral = tag.getBoolean("Feral");
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         age = tag.getInt("Age");
+        sitting = tag.getBoolean("Sitting");
     }
 
     // ---------- Animation ----------
@@ -238,6 +274,26 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
         }
     }
 
+    // Told to stay: holds still (it still looks around).
+    private static class StayGoal extends Goal {
+        private final StormwingHatchlingEntity chick;
+
+        StayGoal(StormwingHatchlingEntity chick) {
+            this.chick = chick;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
+        }
+
+        @Override
+        public boolean canUse() {
+            return chick.sitting && !chick.feral;
+        }
+
+        @Override
+        public void start() {
+            chick.getNavigation().stop();
+        }
+    }
+
     // Loyal: walks after its owner; catches up by teleporting if left far behind.
     private static class FollowOwnerGoal extends Goal {
         private final StormwingHatchlingEntity chick;
@@ -251,13 +307,13 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
         @Override
         public boolean canUse() {
             Player owner = chick.ownerPlayer();
-            return !chick.feral && owner != null && chick.distanceToSqr(owner) > 16;
+            return !chick.feral && !chick.sitting && owner != null && chick.distanceToSqr(owner) > 16;
         }
 
         @Override
         public boolean canContinueToUse() {
             Player owner = chick.ownerPlayer();
-            return !chick.feral && owner != null && chick.distanceToSqr(owner) > 6;
+            return !chick.feral && !chick.sitting && owner != null && chick.distanceToSqr(owner) > 6;
         }
 
         @Override

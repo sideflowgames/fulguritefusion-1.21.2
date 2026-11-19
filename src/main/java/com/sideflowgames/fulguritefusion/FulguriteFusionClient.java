@@ -23,6 +23,9 @@ import com.sideflowgames.fulguritefusion.client.VoidmothRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.sideflowgames.fulguritefusion.client.FulguriteChargerScreen;
 import com.sideflowgames.fulguritefusion.client.StormBatteryScreen;
+import com.sideflowgames.fulguritefusion.client.MiniColliderScreen;
+import com.sideflowgames.fulguritefusion.client.StormColliderScreen;
+import com.sideflowgames.fulguritefusion.client.ColliderPartScreen;
 import com.sideflowgames.fulguritefusion.client.StormFurnaceScreen;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -52,6 +55,9 @@ public class FulguriteFusionClient {
         event.register(ModMenus.EU_CONVERTER.get(), EuConverterScreen::new);
         event.register(ModMenus.STORM_BATTERY.get(), StormBatteryScreen::new);
         event.register(ModMenus.PROCESSING_MACHINE.get(), ProcessingMachineScreen::new);
+        event.register(ModMenus.MINI_COLLIDER.get(), MiniColliderScreen::new);
+        event.register(ModMenus.STORM_COLLIDER.get(), StormColliderScreen::new);
+        event.register(ModMenus.COLLIDER_PART.get(), ColliderPartScreen::new);
     }
 
     // Draws the hanging wires between Machine Connectors, and our mobs.

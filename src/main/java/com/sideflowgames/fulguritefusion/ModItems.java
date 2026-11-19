@@ -7,6 +7,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import com.sideflowgames.fulguritefusion.item.FusionFuelItem;
 import com.sideflowgames.fulguritefusion.item.WireRollItem;
+import com.sideflowgames.fulguritefusion.item.StormCallerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
@@ -89,6 +90,9 @@ public final class ModItems {
     public static final DeferredItem<Item> OVERCHARGED_SPARK_CELL = ITEMS.registerSimpleItem("overcharged_spark_cell",
             new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
     // Molted Plumes: shed feathers from Stormwing nests; the Arc Serpent drops them too.
+    // Storm Caller: calls a thunderstorm from clear skies for 1 Charged Spark Cell.
+    public static final DeferredItem<StormCallerItem> STORM_CALLER = ITEMS.registerItem("storm_caller",
+            StormCallerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> MOLTED_PLUME = ITEMS.registerSimpleItem("molted_plume", new Item.Properties());
     // Dropped (always) by the Arc Serpent.
     public static final DeferredItem<Item> ARC_CORE = ITEMS.registerSimpleItem("arc_core", new Item.Properties().rarity(Rarity.RARE));
@@ -182,6 +186,7 @@ public final class ModItems {
                         output.accept(STORMWING_SPAWN_EGG.get());
                         output.accept(ARC_SERPENT_SPAWN_EGG.get());
                         output.accept(MOLTED_PLUME.get());
+                        output.accept(STORM_CALLER.get());
                         output.accept(ModBlocks.STORMWING_NEST_ITEM.get());
                         output.accept(ModBlocks.STORMWING_NEST_RIM_ITEM.get());
                         output.accept(ModBlocks.STORMWING_EGG_ITEM.get());

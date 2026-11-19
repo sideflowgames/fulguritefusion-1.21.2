@@ -6,6 +6,9 @@ import com.sideflowgames.fulguritefusion.menu.EuConverterMenu;
 import com.sideflowgames.fulguritefusion.menu.FulguriteChargerMenu;
 import com.sideflowgames.fulguritefusion.menu.ProcessingMachineMenu;
 import com.sideflowgames.fulguritefusion.menu.StormBatteryMenu;
+import com.sideflowgames.fulguritefusion.menu.MiniColliderMenu;
+import com.sideflowgames.fulguritefusion.menu.StormColliderMenu;
+import com.sideflowgames.fulguritefusion.menu.ColliderPartMenu;
 import com.sideflowgames.fulguritefusion.menu.StormFurnaceMenu;
 
 import net.minecraft.core.registries.Registries;
@@ -32,6 +35,16 @@ public final class ModMenus {
 
     public static final Supplier<MenuType<StormBatteryMenu>> STORM_BATTERY =
             MENUS.register("storm_battery", () -> IMenuTypeExtension.create(StormBatteryMenu::new));
+
+    public static final Supplier<MenuType<MiniColliderMenu>> MINI_COLLIDER =
+            MENUS.register("mini_collider", () -> IMenuTypeExtension.create(MiniColliderMenu::new));
+
+    public static final Supplier<MenuType<StormColliderMenu>> STORM_COLLIDER =
+            MENUS.register("storm_collider", () -> IMenuTypeExtension.create(StormColliderMenu::new));
+
+    // Collider Input / Injector on their own (not yet in a finished ring).
+    public static final Supplier<MenuType<ColliderPartMenu>> COLLIDER_PART =
+            MENUS.register("collider_part", () -> IMenuTypeExtension.create(ColliderPartMenu::new));
 
     private ModMenus() {}
 

@@ -5,6 +5,7 @@ import net.minecraft.world.item.Item;
 import com.sideflowgames.fulguritefusion.block.StormwingEggBlockEntity;
 import com.sideflowgames.fulguritefusion.block.StormwingEggBlock;
 import com.sideflowgames.fulguritefusion.block.MoltedPlumePileBlock;
+import com.sideflowgames.fulguritefusion.block.FulguriteRingBlock;
 import java.util.function.Supplier;
 
 import com.sideflowgames.fulguritefusion.block.ArcCasingBlock;
@@ -100,8 +101,8 @@ public final class ModBlocks {
     // Mini Collider multiblock: a 7x7 ring of Fulgurite Ring blocks with one Collider Input,
     // two Collider Injectors and the Mini Collider in the middle.
     // Fulgurite Ring is see-through (like stained glass) so the cells' trails can be watched racing inside it.
-    public static final DeferredBlock<TransparentBlock> FULGURITE_RING = BLOCKS.registerBlock("fulgurite_ring",
-            TransparentBlock::new,
+    public static final DeferredBlock<FulguriteRingBlock> FULGURITE_RING = BLOCKS.registerBlock("fulgurite_ring",
+            FulguriteRingBlock::new,
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(3.0f)
                     .requiresCorrectToolForDrops().sound(SoundType.GLASS).lightLevel(state -> 4).noOcclusion()
                     .isValidSpawn((state, level, pos, type) -> false).isRedstoneConductor((state, level, pos) -> false)

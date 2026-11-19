@@ -20,6 +20,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import com.sideflowgames.fulguritefusion.menu.StormColliderMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -41,7 +47,12 @@ import java.util.function.Supplier;
 // This is the safe way to pair: bad results only shock, smoke or knock back, they never break blocks.
 // It costs Fm per shot (fed from any side, or a connector on top). Products come out of the bottom into a
 // hopper/pipe, or sneak + right-click to take them.
-public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements FmHandler {
+public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements FmHandler, MenuProvider {
+    // Menu data (big numbers split into two 16-bit halves).
+    public static final int D_FM = 0, D_MAX = 2, D_COST = 4, D_SHOT = 6, D_LENGTH = 7, D_CELLS = 8, D_MASK = 9,
+            D_COMPLETE = 11, D_STATE = 12, DATA_COUNT = 13;
+    public static final int S_READY = 0, S_FLIGHT = 1, S_POWER = 2, S_LOAD = 3, S_NO_PAIR = 4, S_CELLS = 5, S_FULL = 6, S_RING = 7;
+
     public static final int MAX_FM = 20000;
     public static final int OUTPUT_SLOTS = 9;
 
@@ -302,19 +313,76 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
         }
     }
 
+    private int state() {
+        if (problem != null) return S_RING;
+        ColliderInjectorBlockEntity a = injector(1), b = injector(-1);
+        if (shotTimer >= 0) return S_FLIGHT;
+        if (fm < cost()) return S_POWER;
+        if (a == null || b == null || a.peek().isEmpty() || b.peek().isEmpty()) return S_LOAD;
+        if (!validPair(a.peek(), b.peek())) return S_NO_PAIR;
+        if (loadedCells() < 2) return S_CELLS;
+        if (freeSlots() < 2) return S_FULL;
+        return S_READY;
+    }
+
+    private final ContainerData data = new ContainerData() {
+        @Override
+        public int get(int i) {
+            int cost = cost();
+            return switch (i) {
+                case D_FM -> fm & 0xFFFF;
+                case D_FM + 1 -> fm >>> 16;
+                case D_MAX -> MAX_FM & 0xFFFF;
+                case D_MAX + 1 -> MAX_FM >>> 16;
+                case D_COST -> cost & 0xFFFF;
+                case D_COST + 1 -> cost >>> 16;
+                case D_SHOT -> shotTimer;
+                case D_LENGTH -> shotLength();
+                case D_CELLS -> loadedCells();
+                case D_MASK -> ringMask() & 0xFFF;
+                case D_MASK + 1 -> ringMask() >>> 12;
+                case D_COMPLETE -> isComplete() ? 1 : 0;
+                case D_STATE -> state();
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int i, int value) {}
+
+        @Override
+        public int getCount() {
+            return DATA_COUNT;
+        }
+    };
+
+    public ItemStackHandler getOutput() {
+        return output;
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.fulguritefusion.storm_collider");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
+        return new StormColliderMenu(id, inventory, this, data);
+    }
+
     public String statusText() {
         if (problem != null) return "Storm Collider: ring incomplete | " + problem;
         int stored = 0;
         for (int i = 0; i < OUTPUT_SLOTS; i++) stored += output.getStackInSlot(i).getCount();
-        String state;
-        ColliderInjectorBlockEntity a = injector(1), b = injector(-1);
-        if (shotTimer >= 0) state = "pairing in flight";
-        else if (fm < cost()) state = "needs " + cost() + " Fm per shot";
-        else if (a == null || b == null || a.peek().isEmpty() || b.peek().isEmpty()) state = "load both injectors";
-        else if (!validPair(a.peek(), b.peek())) state = "those two can't be paired";
-        else if (loadedCells() < 2) state = "needs 2 Spark Cells in the input";
-        else if (freeSlots() < 2) state = "output full";
-        else state = "ready";
+        String state = switch (state()) {
+            case S_FLIGHT -> "pairing in flight";
+            case S_POWER -> "needs " + cost() + " Fm per shot";
+            case S_LOAD -> "load both injectors";
+            case S_NO_PAIR -> "those two can't be paired";
+            case S_CELLS -> "needs 2 Spark Cells in the input";
+            case S_FULL -> "output full";
+            default -> "ready";
+        };
         return "Storm Collider: " + state + " | " + fm + " / " + MAX_FM + " Fm | " + stored
                 + " items waiting | last: " + lastResult;
     }

@@ -6,6 +6,8 @@ import com.sideflowgames.fulguritefusion.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleMenuProvider;
+import com.sideflowgames.fulguritefusion.menu.ColliderPartMenu;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -63,11 +65,28 @@ public class ColliderInputBlock extends BaseEntityBlock {
             if (player.isShiftKeyDown()) {
                 ItemStack out = input.takeAll();
                 if (!out.isEmpty() && !player.getInventory().add(out)) player.drop(out, false);
+                player.displayClientMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
+                        + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded (2 per shot)"), true);
+            } else {
+                openFor(level, pos, player, input, true);
             }
-            player.displayClientMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
-                    + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded (2 per shot)"), true);
         }
         return InteractionResult.SUCCESS;
+    }
+
+
+    // Part of a finished ring: open the collider's menu. On its own: a small one-slot menu.
+    static void openFor(Level level, BlockPos pos, Player player, BlockEntity be, boolean input) {
+        ColliderCoreBlockEntity core = ColliderCoreBlockEntity.findFor(level, pos);
+        if (core != null) {
+            core.interact(player);
+            return;
+        }
+        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new ColliderPartMenu(id, inv, be), be.getBlockState().getBlock().getName()),
+                buf -> {
+                    buf.writeBlockPos(pos);
+                    buf.writeBoolean(input);
+                });
     }
 
     @Override

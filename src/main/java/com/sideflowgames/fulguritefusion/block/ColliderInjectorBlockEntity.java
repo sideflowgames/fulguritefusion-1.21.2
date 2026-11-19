@@ -78,6 +78,10 @@ public class ColliderInjectorBlockEntity extends BlockEntity {
         return items.extractItem(0, 64, false);
     }
 
+    public ItemStackHandler getItems() {
+        return items;
+    }
+
     public IItemHandler getItemHandler(@Nullable Direction side) {
         return insertOnly;
     }

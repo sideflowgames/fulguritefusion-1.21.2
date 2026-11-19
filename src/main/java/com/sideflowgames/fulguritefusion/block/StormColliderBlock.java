@@ -49,8 +49,7 @@ public class StormColliderBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof StormColliderBlockEntity collider) {
             if (player.isShiftKeyDown()) collider.takeOutputs(player);
-            collider.checkStructure();
-            player.displayClientMessage(Component.literal(collider.statusText()), true);
+            collider.interact(player); // menu (sneak: take products + status line)
         }
         return InteractionResult.SUCCESS;
     }

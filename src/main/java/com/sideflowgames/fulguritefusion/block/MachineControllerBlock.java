@@ -79,7 +79,13 @@ public class MachineControllerBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof MachineControllerBlockEntity machine) {
+        if (!level.isClientSide) interact(level, pos, state, player);
+        return InteractionResult.SUCCESS;
+    }
+
+    // Shared with the Arc Casings: clicking any part of a formed machine opens its menu.
+    public static void interact(Level level, BlockPos pos, BlockState state, Player player) {
+        if (level.getBlockEntity(pos) instanceof MachineControllerBlockEntity machine) {
             machine.requestCheck();
             if (!state.getValue(FORMED)) {
                 int missing = machine.showPreview();
@@ -92,7 +98,6 @@ public class MachineControllerBlock extends BaseEntityBlock {
                 player.openMenu(machine, buf -> buf.writeBlockPos(pos));
             }
         }
-        return InteractionResult.SUCCESS;
     }
 
     @Override

@@ -59,6 +59,7 @@ public class Config {
     public static final ModConfigSpec.DoubleValue FERAL_CHANCE_BAD;
     public static final ModConfigSpec.DoubleValue FERAL_CHANCE_CATASTROPHIC;
     public static final ModConfigSpec.IntValue HATCHLING_GROW_MINUTES;
+    public static final ModConfigSpec.IntValue STORM_CALLER_MINUTES;
 
     // --- Lightning upgrade ritual ---
     public static final ModConfigSpec.BooleanValue RITUAL_ENABLED;
@@ -162,6 +163,8 @@ public class Config {
                 .defineInRange("feralChanceCatastrophic", 0.40, 0.0, 1.0);
         HATCHLING_GROW_MINUTES = BUILDER.comment("Real minutes for a hatchling to grow up (20 = one Minecraft day).")
                 .defineInRange("hatchlingGrowMinutes", 20, 1, 600);
+        STORM_CALLER_MINUTES = BUILDER.comment("How long (real minutes) a thunderstorm called by the Storm Caller lasts.")
+                .defineInRange("stormCallerMinutes", 5, 1, 60);
         BUILDER.pop();
 
         BUILDER.comment("Lightning upgrade ritual for Storm Furnaces").push("ritual");

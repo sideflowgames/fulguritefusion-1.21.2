@@ -11,6 +11,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -142,6 +145,84 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
         }
         inputDir = found;
         problem = null;
+    }
+
+    public boolean isComplete() {
+        return inputDir != null;
+    }
+
+    // For the menu's ring diagram: one bit per edge spot (ColliderRing order), set when the right block is there.
+    // Lined up on the Collider Input if there is one (otherwise facing north).
+    public int ringMask() {
+        if (level == null) return 0;
+        Direction dir = inputDir;
+        if (dir == null) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                if (level.getBlockState(worldPosition.relative(d, RADIUS)).is(ModBlocks.COLLIDER_INPUT.get())) {
+                    dir = d;
+                    break;
+                }
+            }
+        }
+        if (dir == null) dir = Direction.NORTH;
+        int mask = 0;
+        for (int i = 0; i < ColliderRing.SPOTS; i++) {
+            int u = ColliderRing.u(i), v = ColliderRing.v(i);
+            Block expected = switch (ColliderRing.kind(u, v)) {
+                case ColliderRing.INPUT -> ModBlocks.COLLIDER_INPUT.get();
+                case ColliderRing.INJECTOR -> ModBlocks.COLLIDER_INJECTOR.get();
+                default -> ModBlocks.FULGURITE_RING.get();
+            };
+            if (level.getBlockState(local(dir, u, v)).is(expected)) mask |= 1 << i;
+        }
+        return mask;
+    }
+
+    // The collider whose complete ring 'ringPos' is part of (ring, input or injector), or null.
+    public static ColliderCoreBlockEntity findFor(BlockGetter level, BlockPos ringPos) {
+        for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+            for (int dz = -RADIUS; dz <= RADIUS; dz++) {
+                if (Math.max(Math.abs(dx), Math.abs(dz)) != RADIUS) continue;
+                if (level.getBlockEntity(ringPos.offset(dx, 0, dz)) instanceof ColliderCoreBlockEntity core && core.isComplete()) {
+                    return core;
+                }
+            }
+        }
+        return null;
+    }
+
+    public abstract String statusText();
+
+    // Right-click on the collider or any part of its ring: open the menu (sneak: one-line status).
+    public void interact(Player player) {
+        checkStructure();
+        if (player.isShiftKeyDown() || !(this instanceof MenuProvider menu)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.literal(statusText()), true);
+        } else {
+            player.openMenu(menu, buf -> buf.writeBlockPos(worldPosition));
+        }
+    }
+
+    // Seen by the menu.
+    public int shotTimer() {
+        return shotTimer;
+    }
+
+    public static int shotLength() {
+        return travelTicks();
+    }
+
+    public int cellsLoaded() {
+        return loadedCells();
+    }
+
+    // The input / injector block entities, or null while the ring is incomplete.
+    public ColliderInputBlockEntity inputBlock() {
+        return level != null && inputDir != null && level.getBlockEntity(inputPos()) instanceof ColliderInputBlockEntity i ? i : null;
+    }
+
+    public ColliderInjectorBlockEntity injectorBlock(int mirror) {
+        return level != null && inputDir != null && level.getBlockEntity(injectorPos(mirror)) instanceof ColliderInjectorBlockEntity i ? i : null;
     }
 
     private void fail(String why) {
