@@ -11,9 +11,14 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.sideflowgames.fulguritefusion.client.ConnectorRenderer;
+import com.sideflowgames.fulguritefusion.client.StormBatteryRenderer;
 import com.sideflowgames.fulguritefusion.client.EuConverterScreen;
+import com.sideflowgames.fulguritefusion.client.ArcSerpentRenderer;
 import com.sideflowgames.fulguritefusion.client.LumenSlugRenderer;
+import com.sideflowgames.fulguritefusion.client.MachineControllerRenderer;
+import com.sideflowgames.fulguritefusion.client.ProcessingMachineScreen;
 import com.sideflowgames.fulguritefusion.client.StormwingRenderer;
+import com.sideflowgames.fulguritefusion.client.StormwingHatchlingRenderer;
 import com.sideflowgames.fulguritefusion.client.VoidmothRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.sideflowgames.fulguritefusion.client.FulguriteChargerScreen;
@@ -46,14 +51,19 @@ public class FulguriteFusionClient {
         event.register(ModMenus.FULGURITE_CHARGER.get(), FulguriteChargerScreen::new);
         event.register(ModMenus.EU_CONVERTER.get(), EuConverterScreen::new);
         event.register(ModMenus.STORM_BATTERY.get(), StormBatteryScreen::new);
+        event.register(ModMenus.PROCESSING_MACHINE.get(), ProcessingMachineScreen::new);
     }
 
     // Draws the hanging wires between Machine Connectors, and our mobs.
     @SubscribeEvent
     static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONNECTOR_BE.get(), ConnectorRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.STORM_BATTERY_BE.get(), StormBatteryRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONTROLLER_BE.get(), MachineControllerRenderer::new);
         event.registerEntityRenderer(ModEntities.LUMEN_SLUG.get(), LumenSlugRenderer::new);
         event.registerEntityRenderer(ModEntities.VOIDMOTH.get(), VoidmothRenderer::new);
         event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);
+        event.registerEntityRenderer(ModEntities.STORMWING_HATCHLING.get(), StormwingHatchlingRenderer::new);
+        event.registerEntityRenderer(ModEntities.ARC_SERPENT.get(), ArcSerpentRenderer::new);
     }
 }

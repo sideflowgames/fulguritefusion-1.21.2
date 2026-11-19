@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks",
+    "minecraft:stony_peaks"
+  ],
+  "features": "fulguritefusion:stormwing_nest",
+  "step": "surface_structures"
+}

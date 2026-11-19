@@ -1,7 +1,14 @@
 package com.sideflowgames.fulguritefusion;
 
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Item;
+import com.sideflowgames.fulguritefusion.block.StormwingEggBlockEntity;
+import com.sideflowgames.fulguritefusion.block.StormwingEggBlock;
+import com.sideflowgames.fulguritefusion.block.MoltedPlumePileBlock;
 import java.util.function.Supplier;
 
+import com.sideflowgames.fulguritefusion.block.ArcCasingBlock;
+import com.sideflowgames.fulguritefusion.block.ArcCasingBlockEntity;
 import com.sideflowgames.fulguritefusion.block.ColliderInjectorBlock;
 import com.sideflowgames.fulguritefusion.block.ColliderInjectorBlockEntity;
 import com.sideflowgames.fulguritefusion.block.ColliderInputBlock;
@@ -14,6 +21,9 @@ import com.sideflowgames.fulguritefusion.block.FulguriteChargerBlock;
 import com.sideflowgames.fulguritefusion.block.FulguriteChargerBlockEntity;
 import com.sideflowgames.fulguritefusion.block.LumenTrailBlock;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlock;
+import com.sideflowgames.fulguritefusion.block.MachineControllerBlock;
+import com.sideflowgames.fulguritefusion.block.MachineControllerBlockEntity;
+import com.sideflowgames.fulguritefusion.machine.MachineType;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlockEntity;
 import com.sideflowgames.fulguritefusion.block.MiniColliderBlock;
 import com.sideflowgames.fulguritefusion.block.MiniColliderBlockEntity;
@@ -121,9 +131,51 @@ public final class ModBlocks {
                     .sound(SoundType.HONEY_BLOCK).lightLevel(state -> 6).replaceable().noLootTable()
                     .pushReaction(PushReaction.DESTROY));
 
-    // Stormwing Nest: a 3x3 nest of twigs a Stormwing builds where it lives. Placeholder until nests are designed.
+    // Stormwing Nest: the woven floor of a nest (see worldgen/StormwingNests for the full 5x5 bowl).
     public static final DeferredBlock<Block> STORMWING_NEST = BLOCKS.registerSimpleBlock("stormwing_nest",
             BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0f).sound(SoundType.GRASS).ignitedByLava());
+    // The twig rim and stilts of a nest.
+    public static final DeferredBlock<Block> STORMWING_NEST_RIM = BLOCKS.registerSimpleBlock("stormwing_nest_rim",
+            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0f).sound(SoundType.GRASS).ignitedByLava());
+    // Molted Plumes lying in a nest. No item form; picking it up gives Molted Plumes.
+    public static final DeferredBlock<MoltedPlumePileBlock> MOLTED_PLUME_PILE = BLOCKS.registerBlock("molted_plume_pile",
+            MoltedPlumePileBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).noCollission().instabreak()
+                    .sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.DESTROY));
+    // Stormwing Egg: rare, found in wild nests; incubates beside a running Storm Collider.
+    public static final DeferredBlock<StormwingEggBlock> STORMWING_EGG = BLOCKS.registerBlock("stormwing_egg",
+            StormwingEggBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.5f)
+                    .sound(SoundType.METAL).noOcclusion().lightLevel(state -> 3).pushReaction(PushReaction.DESTROY));
+
+    // ---------- Multiblock processing machines ----------
+
+    // Arc Casings, tiers 1-4. A machine runs at the tier of its lowest casing.
+    public static final DeferredBlock<ArcCasingBlock> CRUDE_ARC_CASING = casing("crude_arc_casing", 1);
+    public static final DeferredBlock<ArcCasingBlock> TEMPERED_ARC_CASING = casing("tempered_arc_casing", 2);
+    public static final DeferredBlock<ArcCasingBlock> CHARGED_ARC_CASING = casing("charged_arc_casing", 3);
+    public static final DeferredBlock<ArcCasingBlock> PRIME_ARC_CASING = casing("prime_arc_casing", 4);
+
+    // Controllers: the block you place first; it shows where the casings go.
+    public static final DeferredBlock<MachineControllerBlock> PRESS = controller("press", MachineType.PRESS);
+    public static final DeferredBlock<MachineControllerBlock> ARC_FURNACE = controller("arc_furnace", MachineType.FURNACE);
+    public static final DeferredBlock<MachineControllerBlock> WIRE_EXTRUDER = controller("wire_extruder", MachineType.WIRE_EXTRUDER);
+    public static final DeferredBlock<MachineControllerBlock> KILN = controller("kiln", MachineType.KILN);
+    public static final DeferredBlock<MachineControllerBlock> CRUSHER = controller("crusher", MachineType.CRUSHER);
+
+    private static BlockBehaviour.Properties machineProperties() {
+        // noOcclusion: when formed the blocks turn invisible and light must reach the machine model.
+        return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.5f, 6.0f)
+                .requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion();
+    }
+
+    private static DeferredBlock<ArcCasingBlock> casing(String name, int tier) {
+        return BLOCKS.registerBlock(name, props -> new ArcCasingBlock(tier, props), machineProperties());
+    }
+
+    private static DeferredBlock<MachineControllerBlock> controller(String name, MachineType type) {
+        return BLOCKS.registerBlock(name, props -> new MachineControllerBlock(type, props), machineProperties());
+    }
 
     public static final DeferredItem<BlockItem> RAW_FULGURITE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("raw_fulgurite", RAW_FULGURITE);
     public static final DeferredItem<BlockItem> STORM_FURNACE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_furnace", STORM_FURNACE);
@@ -140,6 +192,18 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> COLLIDER_INPUT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("collider_input", COLLIDER_INPUT);
     public static final DeferredItem<BlockItem> MINI_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("mini_collider", MINI_COLLIDER);
     public static final DeferredItem<BlockItem> STORMWING_NEST_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormwing_nest", STORMWING_NEST);
+    public static final DeferredItem<BlockItem> STORMWING_NEST_RIM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormwing_nest_rim", STORMWING_NEST_RIM);
+    public static final DeferredItem<BlockItem> STORMWING_EGG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormwing_egg", STORMWING_EGG,
+            new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
+    public static final DeferredItem<BlockItem> CRUDE_ARC_CASING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("crude_arc_casing", CRUDE_ARC_CASING);
+    public static final DeferredItem<BlockItem> TEMPERED_ARC_CASING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("tempered_arc_casing", TEMPERED_ARC_CASING);
+    public static final DeferredItem<BlockItem> CHARGED_ARC_CASING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("charged_arc_casing", CHARGED_ARC_CASING);
+    public static final DeferredItem<BlockItem> PRIME_ARC_CASING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("prime_arc_casing", PRIME_ARC_CASING);
+    public static final DeferredItem<BlockItem> PRESS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("press", PRESS);
+    public static final DeferredItem<BlockItem> ARC_FURNACE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arc_furnace", ARC_FURNACE);
+    public static final DeferredItem<BlockItem> WIRE_EXTRUDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("wire_extruder", WIRE_EXTRUDER);
+    public static final DeferredItem<BlockItem> KILN_ITEM = ModItems.ITEMS.registerSimpleBlockItem("kiln", KILN);
+    public static final DeferredItem<BlockItem> CRUSHER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("crusher", CRUSHER);
     public static final DeferredItem<BlockItem> STORM_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_collider", STORM_COLLIDER);
 
     public static final Supplier<BlockEntityType<StormFurnaceBlockEntity>> STORM_FURNACE_BE = BLOCK_ENTITIES.register("storm_furnace",
@@ -172,6 +236,17 @@ public final class ModBlocks {
 
     public static final Supplier<BlockEntityType<StormColliderBlockEntity>> STORM_COLLIDER_BE = BLOCK_ENTITIES.register("storm_collider",
             () -> BlockEntityType.Builder.of(StormColliderBlockEntity::new, STORM_COLLIDER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ArcCasingBlockEntity>> ARC_CASING_BE = BLOCK_ENTITIES.register("arc_casing",
+            () -> BlockEntityType.Builder.of(ArcCasingBlockEntity::new, CRUDE_ARC_CASING.get(), TEMPERED_ARC_CASING.get(),
+                    CHARGED_ARC_CASING.get(), PRIME_ARC_CASING.get()).build(null));
+
+    public static final Supplier<BlockEntityType<MachineControllerBlockEntity>> MACHINE_CONTROLLER_BE = BLOCK_ENTITIES.register("machine_controller",
+            () -> BlockEntityType.Builder.of(MachineControllerBlockEntity::new, PRESS.get(), ARC_FURNACE.get(),
+                    WIRE_EXTRUDER.get(), KILN.get(), CRUSHER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<StormwingEggBlockEntity>> STORMWING_EGG_BE = BLOCK_ENTITIES.register("stormwing_egg",
+            () -> BlockEntityType.Builder.of(StormwingEggBlockEntity::new, STORMWING_EGG.get()).build(null));
 
     private ModBlocks() {}
 

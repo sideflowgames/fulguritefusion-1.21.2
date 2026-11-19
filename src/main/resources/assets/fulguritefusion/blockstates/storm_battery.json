@@ -1,7 +1,65 @@
 {
-  "variants": {
-    "": {
-      "model": "fulguritefusion:block/storm_battery"
+  "multipart": [
+    {
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery"
+      }
+    },
+    {
+      "when": {
+        "up": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge"
+      }
+    },
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/storm_battery_edge",
+        "x": 90,
+        "y": 90
+      }
     }
-  }
+  ]
 }

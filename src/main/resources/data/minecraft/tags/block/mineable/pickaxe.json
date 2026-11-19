@@ -14,6 +14,15 @@
     "fulguritefusion:collider_injector",
     "fulguritefusion:collider_input",
     "fulguritefusion:mini_collider",
-    "fulguritefusion:storm_collider"
+    "fulguritefusion:storm_collider",
+    "fulguritefusion:crude_arc_casing",
+    "fulguritefusion:tempered_arc_casing",
+    "fulguritefusion:charged_arc_casing",
+    "fulguritefusion:prime_arc_casing",
+    "fulguritefusion:press",
+    "fulguritefusion:arc_furnace",
+    "fulguritefusion:wire_extruder",
+    "fulguritefusion:kiln",
+    "fulguritefusion:crusher"
   ]
 }

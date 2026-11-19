@@ -3,7 +3,7 @@ package com.sideflowgames.fulguritefusion;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 // Fulgurite Fusion settings. Saved in config/fulguritefusion-common.toml and editable from the Mods menu.
-// Grouped into sections: safety, static, power, collider, converters, ritual.
+// Grouped into sections: safety, static, power, collider, converters, mobs, ritual.
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -29,6 +29,7 @@ public class Config {
     public static final ModConfigSpec.IntValue BATTERY_OUTPUT;
     public static final ModConfigSpec.IntValue WIRE_RATE;
     public static final ModConfigSpec.IntValue WIRE_MAX_LENGTH;
+    public static final ModConfigSpec.IntValue HEAVY_WIRE_MAX_LENGTH;
     public static final ModConfigSpec.IntValue NETWORK_MAX_MACHINES;
     public static final ModConfigSpec.IntValue CHAIN_MAX_MACHINES;
     public static final ModConfigSpec.BooleanValue WATER_ELECTRIFY;
@@ -46,6 +47,18 @@ public class Config {
     public static final ModConfigSpec.IntValue EU_MV;
     public static final ModConfigSpec.IntValue EU_HV;
     public static final ModConfigSpec.IntValue EU_EV;
+
+    // --- Mobs ---
+    public static final ModConfigSpec.IntValue STORMWING_TRIP_MIN_MINUTES;
+    public static final ModConfigSpec.IntValue STORMWING_TRIP_MAX_MINUTES;
+    public static final ModConfigSpec.IntValue STORMWING_AWAY_MAX_MINUTES;
+    public static final ModConfigSpec.DoubleValue STORMWING_EGG_CHANCE;
+    public static final ModConfigSpec.IntValue EGG_INCUBATION_MIN_MINUTES;
+    public static final ModConfigSpec.IntValue EGG_INCUBATION_MAX_MINUTES;
+    public static final ModConfigSpec.IntValue EGG_INCUBATION_RADIUS;
+    public static final ModConfigSpec.DoubleValue FERAL_CHANCE_BAD;
+    public static final ModConfigSpec.DoubleValue FERAL_CHANCE_CATASTROPHIC;
+    public static final ModConfigSpec.IntValue HATCHLING_GROW_MINUTES;
 
     // --- Lightning upgrade ritual ---
     public static final ModConfigSpec.BooleanValue RITUAL_ENABLED;
@@ -100,6 +113,8 @@ public class Config {
                 .defineInRange("wireRate", 256, 1, 1000000);
         WIRE_MAX_LENGTH = BUILDER.comment("Longest hanging wire between two Machine Connectors, in blocks.")
                 .defineInRange("wireMaxLength", 16, 2, 64);
+        HEAVY_WIRE_MAX_LENGTH = BUILDER.comment("Longest Heavy Wire between two Machine Connectors, in blocks.")
+                .defineInRange("heavyWireMaxLength", 32, 2, 128);
         CHAIN_MAX_MACHINES = BUILDER.comment("Most machines in a daisy chain (machines touching each other) that can pass power along.")
                 .defineInRange("chainMaxMachines", 8, 1, 256);
         NETWORK_MAX_MACHINES = BUILDER.comment("Most machines one wire network can power (batteries and furnaces don't count).")
@@ -124,6 +139,29 @@ public class Config {
         EU_MV = BUILDER.comment("EU per tick for the MV tier.").defineInRange("euMv", 128, 1, Integer.MAX_VALUE);
         EU_HV = BUILDER.comment("EU per tick for the HV tier.").defineInRange("euHv", 512, 1, Integer.MAX_VALUE);
         EU_EV = BUILDER.comment("EU per tick for the EV tier.").defineInRange("euEv", 2048, 1, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.comment("Mobs").push("mobs");
+        STORMWING_TRIP_MIN_MINUTES = BUILDER.comment("Shortest time (real minutes) a Stormwing stays on its nest between hunting trips.")
+                .defineInRange("stormwingTripMinMinutes", 20, 1, 600);
+        STORMWING_TRIP_MAX_MINUTES = BUILDER.comment("Longest time (real minutes) a Stormwing stays on its nest between hunting trips.")
+                .defineInRange("stormwingTripMaxMinutes", 30, 1, 600);
+        STORMWING_AWAY_MAX_MINUTES = BUILDER.comment("Longest a hunting trip lasts (real minutes). The Arc Serpent guards the nest meanwhile.")
+                .defineInRange("stormwingAwayMaxMinutes", 10, 1, 600);
+        STORMWING_EGG_CHANCE = BUILDER.comment("Chance a new Stormwing nest holds an egg (0.1 = 1 in 10).")
+                .defineInRange("stormwingEggChance", 0.1, 0.0, 1.0);
+        EGG_INCUBATION_MIN_MINUTES = BUILDER.comment("Shortest incubation (real minutes beside a running Storm Collider).")
+                .defineInRange("eggIncubationMinMinutes", 20, 1, 600);
+        EGG_INCUBATION_MAX_MINUTES = BUILDER.comment("Longest incubation (real minutes beside a running Storm Collider).")
+                .defineInRange("eggIncubationMaxMinutes", 40, 1, 600);
+        EGG_INCUBATION_RADIUS = BUILDER.comment("How close (blocks) an egg must be to the Storm Collider's core to incubate.")
+                .defineInRange("eggIncubationRadius", 8, 2, 16);
+        FERAL_CHANCE_BAD = BUILDER.comment("Chance each Bad pairing fired during incubation makes the hatchling Feral.")
+                .defineInRange("feralChanceBad", 0.15, 0.0, 1.0);
+        FERAL_CHANCE_CATASTROPHIC = BUILDER.comment("Chance each Catastrophic pairing fired during incubation makes the hatchling Feral.")
+                .defineInRange("feralChanceCatastrophic", 0.40, 0.0, 1.0);
+        HATCHLING_GROW_MINUTES = BUILDER.comment("Real minutes for a hatchling to grow up (20 = one Minecraft day).")
+                .defineInRange("hatchlingGrowMinutes", 20, 1, 600);
         BUILDER.pop();
 
         BUILDER.comment("Lightning upgrade ritual for Storm Furnaces").push("ritual");

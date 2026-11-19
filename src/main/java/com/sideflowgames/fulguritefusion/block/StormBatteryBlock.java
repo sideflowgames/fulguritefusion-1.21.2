@@ -32,7 +32,14 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 // Storm Battery: touching batteries form a bank of up to 6 blocks, built in any shape and any order.
@@ -45,6 +52,34 @@ public class StormBatteryBlock extends BaseEntityBlock {
 
     public StormBatteryBlock(Properties properties) {
         super(properties);
+        BlockState state = stateDefinition.any();
+        for (BooleanProperty side : PipeBlock.PROPERTY_BY_DIRECTION.values()) state = state.setValue(side, false);
+        registerDefaultState(state);
+    }
+
+    // One flag per side: true when another battery touches that side. The model hides the dark frame
+    // on connected sides, so a bank looks like one big block.
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        for (BooleanProperty side : PipeBlock.PROPERTY_BY_DIRECTION.values()) builder.add(side);
+    }
+
+    private BlockState connected(BlockState state, BlockGetter level, BlockPos pos) {
+        for (Direction dir : Direction.values()) {
+            state = state.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(dir), level.getBlockState(pos.relative(dir)).is(this));
+        }
+        return state;
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return connected(defaultBlockState(), context.getLevel(), context.getClickedPos());
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState,
+                                     LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
+        return state.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction), neighbourState.is(this));
     }
 
     @Override

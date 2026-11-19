@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " I ",
+    "ICI",
+    " I "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "fulguritefusion:crude_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:tempered_arc_casing",
+    "count": 1
+  }
+}

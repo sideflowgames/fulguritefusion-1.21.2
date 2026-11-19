@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "minecraft:lush_caves",
+  "spawners": {
+    "type": "fulguritefusion:lumen_slug",
+    "weight": 30,
+    "minCount": 1,
+    "maxCount": 3
+  }
+}

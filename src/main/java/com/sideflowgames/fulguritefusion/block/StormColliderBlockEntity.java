@@ -61,6 +61,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
     private ItemStack carriedA = ItemStack.EMPTY; // materials riding the cells in flight
     private ItemStack carriedB = ItemStack.EMPTY;
     private String lastResult = "none yet";
+    private long lastShotTime = Long.MIN_VALUE / 2; // game time of the last firing (not saved)
 
     private final ItemStackHandler output = new ItemStackHandler(OUTPUT_SLOTS) {
         @Override
@@ -137,6 +138,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
     @Override
     protected void onFire() {
         fm -= cost();
+        if (level != null) lastShotTime = level.getGameTime();
         carriedA = injector(1).takeOne();
         carriedB = injector(-1).takeOne();
     }
@@ -171,6 +173,8 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
         }
         Pairing pairing = Pairings.of(ia, ib);
         Pairing result = resolve(pairing, level.random);
+        // Stormwing Eggs incubating nearby remember what was fired.
+        StormwingEggBlockEntity.onPairing(level, worldPosition, pairing.a(), pairing.b(), result.tier());
         lastResult = result == pairing ? result.name() + " (" + result.tier().display() + ")"
                 : pairing.name() + " -> " + result.name() + " (" + result.tier().display() + ")";
 
@@ -185,6 +189,11 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
             level.playSound(null, worldPosition, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 1.2f);
         }
         sideEffects(level, result.tier());
+    }
+
+    // Running = a pairing is in flight, or one was fired in the last 2 minutes. Warms Stormwing Eggs.
+    public boolean isRunning() {
+        return level != null && inputDir != null && (shotTimer >= 0 || level.getGameTime() - lastShotTime < 2400);
     }
 
     // Struck Spore has no fixed result: it rolls one of its partner's other pairings.

@@ -1,0 +1,85 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": {
+    "plume": "fulguritefusion:block/molted_plume_pile",
+    "particle": "fulguritefusion:block/molted_plume_pile"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.25,
+        0
+      ],
+      "to": [
+        16,
+        0.25,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#plume",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#plume",
+          "uv": [
+            0,
+            16,
+            16,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        1.25,
+        3
+      ],
+      "to": [
+        13,
+        1.25,
+        13
+      ],
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          1,
+          8
+        ]
+      },
+      "faces": {
+        "up": {
+          "texture": "#plume",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ],
+          "rotation": 90
+        },
+        "down": {
+          "texture": "#plume",
+          "uv": [
+            2,
+            14,
+            14,
+            2
+          ]
+        }
+      }
+    }
+  ]
+}

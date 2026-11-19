@@ -21,6 +21,9 @@ public final class ModCapabilities {
                 (be, side) -> be.getItemHandler(side));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlocks.STORM_COLLIDER_BE.get(),
                 (be, side) -> be.getItemHandler(side));
+        // Multiblock machines: items in and out only through their input and output port casings.
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlocks.ARC_CASING_BE.get(),
+                (be, side) -> be.getItemHandler(side));
         // FE cables can pull Forge Energy from the FE Converter's front face.
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlocks.FE_CONVERTER_BE.get(),
                 (be, side) -> be.getEnergyHandler(side));

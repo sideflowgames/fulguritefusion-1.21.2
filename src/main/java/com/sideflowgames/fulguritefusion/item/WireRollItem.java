@@ -24,17 +24,28 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-// Raw / Insulated Wire Roll. Right-click one Machine Connector, then another, to string a hanging wire
-// between them (one roll per wire, up to 16 blocks long). Sneak + right-click in the air to cancel.
+// Raw / Insulated / Heavy Wire Roll. Right-click one Machine Connector, then another, to string a hanging wire
+// between them (one roll per wire). Raw and Insulated span up to 16 blocks, Heavy up to 32 (both in the config).
+// Sneak + right-click in the air to cancel.
 public class WireRollItem extends Item {
     private static final String START = "WireStart";
     public static final int MAX_LINKS_PER_CONNECTOR = 8;
 
     private final boolean insulated;
+    private final boolean heavy;
 
     public WireRollItem(boolean insulated, Properties properties) {
+        this(insulated, false, properties);
+    }
+
+    public WireRollItem(boolean insulated, boolean heavy, Properties properties) {
         super(properties);
         this.insulated = insulated;
+        this.heavy = heavy;
+    }
+
+    public int maxLength() {
+        return heavy ? Config.HEAVY_WIRE_MAX_LENGTH.get() : Config.WIRE_MAX_LENGTH.get();
     }
 
     public boolean isInsulated() {
@@ -72,7 +83,7 @@ public class WireRollItem extends Item {
         // First click: remember this connector.
         if (start == null || start.equals(pos)) {
             setStart(stack, pos);
-            message(player, "Wire attached. Right-click another Machine Connector (max " + Config.WIRE_MAX_LENGTH.get() + " blocks).");
+            message(player, "Wire attached. Right-click another Machine Connector (max " + maxLength() + " blocks).");
             return InteractionResult.CONSUME;
         }
 
@@ -82,9 +93,9 @@ public class WireRollItem extends Item {
             message(player, "The first connector is gone. Start again.");
             return InteractionResult.CONSUME;
         }
-        double length = WireMath.attachPoint(start).distanceTo(WireMath.attachPoint(pos));
-        if (length > Config.WIRE_MAX_LENGTH.get()) {
-            message(player, "Too far: " + (int) Math.ceil(length) + " blocks (max " + Config.WIRE_MAX_LENGTH.get() + ").");
+        double length = WireMath.attachPoint(level, start).distanceTo(WireMath.attachPoint(level, pos));
+        if (length > maxLength()) {
+            message(player, "Too far: " + (int) Math.ceil(length) + " blocks (max " + maxLength() + ").");
             return InteractionResult.CONSUME;
         }
         if (here.isLinkedTo(start)) {
@@ -95,8 +106,8 @@ public class WireRollItem extends Item {
             message(player, "A connector can hold at most " + MAX_LINKS_PER_CONNECTOR + " wires.");
             return InteractionResult.CONSUME;
         }
-        here.addLink(start, insulated);
-        there.addLink(pos, insulated);
+        here.addLink(start, insulated, heavy);
+        there.addLink(pos, insulated, heavy);
         if (player == null || !player.getAbilities().instabuild) stack.shrink(1);
         level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.0f, 1.0f);
         message(player, "Wired (" + (int) Math.ceil(length) + " blocks).");
@@ -125,6 +136,7 @@ public class WireRollItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Right-click two Machine Connectors to wire them").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal("Spans up to " + maxLength() + " blocks").withStyle(ChatFormatting.GRAY));
         if (!insulated) tooltip.add(Component.literal("Bare copper: shocks and electrifies water").withStyle(ChatFormatting.GOLD));
     }
 

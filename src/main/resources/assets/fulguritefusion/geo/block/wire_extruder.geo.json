@@ -1,0 +1,233 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.wire_extruder",
+        "texture_width": 256,
+        "texture_height": 256,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 4,
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "base",
+          "parent": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -16,
+                0,
+                -16
+              ],
+              "size": [
+                32,
+                12,
+                32
+              ],
+              "uv": [
+                128,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -16,
+                12,
+                -16
+              ],
+              "size": [
+                32,
+                16,
+                32
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -16,
+                28,
+                -16
+              ],
+              "size": [
+                32,
+                4,
+                32
+              ],
+              "uv": [
+                0,
+                48
+              ]
+            },
+            {
+              "origin": [
+                16,
+                8,
+                -6
+              ],
+              "size": [
+                2,
+                12,
+                12
+              ],
+              "uv": [
+                128,
+                48
+              ]
+            },
+            {
+              "origin": [
+                -1,
+                4,
+                -17
+              ],
+              "size": [
+                2,
+                8,
+                1
+              ],
+              "uv": [
+                40,
+                84
+              ]
+            }
+          ]
+        },
+        {
+          "name": "roller_top",
+          "parent": "root",
+          "pivot": [
+            0,
+            20,
+            -17
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -12,
+                18,
+                -19
+              ],
+              "size": [
+                24,
+                4,
+                4
+              ],
+              "uv": [
+                46,
+                84
+              ]
+            }
+          ]
+        },
+        {
+          "name": "roller_bottom",
+          "parent": "root",
+          "pivot": [
+            0,
+            14,
+            -17
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -12,
+                12,
+                -19
+              ],
+              "size": [
+                24,
+                4,
+                4
+              ],
+              "uv": [
+                102,
+                84
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ports",
+          "parent": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                3,
+                32,
+                3
+              ],
+              "size": [
+                10,
+                1,
+                10
+              ],
+              "uv": [
+                182,
+                48
+              ]
+            },
+            {
+              "origin": [
+                -13,
+                32,
+                -13
+              ],
+              "size": [
+                10,
+                1,
+                10
+              ],
+              "uv": [
+                0,
+                84
+              ]
+            },
+            {
+              "origin": [
+                2,
+                2,
+                16
+              ],
+              "size": [
+                12,
+                12,
+                1
+              ],
+              "uv": [
+                156,
+                48
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

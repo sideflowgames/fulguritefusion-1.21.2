@@ -1,6 +1,7 @@
 package com.sideflowgames.fulguritefusion.power;
 
 import com.sideflowgames.fulguritefusion.Config;
+import com.sideflowgames.fulguritefusion.block.ArcCasingBlockEntity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -50,6 +51,8 @@ public final class DaisyChain {
             if (dir == skip) continue;
             BlockEntity be = level.getBlockEntity(pos.relative(dir));
             if (!(be instanceof FmHandler other) || other == self || other.isStorage()) continue;
+            // A multiblock machine doesn't feed its own casings (that power would just come straight back).
+            if (be instanceof ArcCasingBlockEntity casing && casing.belongsTo(pos)) continue;
             other.touchChain(next);
             int left = available - sent;
             if (left <= 0) continue;

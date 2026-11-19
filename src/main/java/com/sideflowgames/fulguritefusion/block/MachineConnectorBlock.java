@@ -32,25 +32,86 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+
+import java.util.EnumMap;
+import java.util.Map;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-// Machine Connector: sits on top of a machine (Storm Furnace, Storm Battery, Charger, converters...).
-// Wire Rolls string hanging wires between connectors to build a network.
-// It pops off if the machine underneath is removed, dropping a roll for each wire attached to it.
-// Right-click (empty hand) to see the network's status.
+// Machine Connector: sticks to any face of any block, like a torch.
+//   - On a machine (Storm Furnace, Storm Battery, Charger, converters...): links that machine to the network.
+//   - On a plain block (fence, log, wall...): a relay, so you can build power poles. Relays don't count as machines.
+//   - On a multiblock machine: only its power port accepts a connector.
+// Wire Rolls string hanging wires between connectors. It pops off if the block it's on is removed,
+// dropping a roll for each wire attached to it. Right-click (empty hand) to see the network's status.
 public class MachineConnectorBlock extends BaseEntityBlock {
     public static final MapCodec<MachineConnectorBlock> CODEC = simpleCodec(MachineConnectorBlock::new);
-    private static final VoxelShape SHAPE = Shapes.or(
-            Block.box(2, 0, 2, 14, 2, 14),
-            Block.box(6, 2, 6, 10, 9, 10),
-            Block.box(5, 9, 5, 11, 11, 11));
+    // Which way the connector points (away from the block it's stuck to).
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    // The connector's shape when pointing up: {side min, out min, side min, side max, out max, side max}.
+    private static final double[][] BOXES = {{2, 0, 2, 14, 2, 14}, {6, 2, 6, 10, 9, 10}, {5, 9, 5, 11, 11, 11}};
+    // On thin blocks (fences, walls, posts...) the wide base is swapped for a small collar that hugs the post.
+    public static final BooleanProperty SLIM = BooleanProperty.create("slim");
+    private static final double[][] SLIM_BOXES = {{5, 0, 5, 11, 2, 11}, BOXES[1], BOXES[2]};
+    private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
+    private static final Map<Direction, VoxelShape> SLIM_SHAPES = new EnumMap<>(Direction.class);
+
+    static {
+        for (Direction d : Direction.values()) {
+            SHAPES.put(d, build(BOXES, d));
+            SLIM_SHAPES.put(d, build(SLIM_BOXES, d));
+        }
+    }
+
+    private static VoxelShape build(double[][] boxes, Direction d) {
+        VoxelShape shape = Shapes.empty();
+        for (double[] b : boxes) shape = Shapes.or(shape, turned(b, d));
+        return shape;
+    }
+
+    // Slim when the face it's stuck to isn't a full block face (fence posts, walls, bars, slabs...).
+    private static boolean slimFor(BlockGetter level, BlockPos pos, Direction facing) {
+        BlockPos attached = pos.relative(facing.getOpposite());
+        BlockState on = level.getBlockState(attached);
+        return !Block.isFaceFull(on.getShape(level, attached), facing);
+    }
+
+    // Turn an upward-pointing box to point in direction d (the base always sits against the attached face).
+    private static VoxelShape turned(double[] b, Direction d) {
+        double a0 = b[0], h0 = b[1], c0 = b[2], a1 = b[3], h1 = b[4], c1 = b[5];
+        return switch (d) {
+            case UP -> Block.box(a0, h0, c0, a1, h1, c1);
+            case DOWN -> Block.box(a0, 16 - h1, c0, a1, 16 - h0, c1);
+            case SOUTH -> Block.box(a0, c0, h0, a1, c1, h1);
+            case NORTH -> Block.box(a0, c0, 16 - h1, a1, c1, 16 - h0);
+            case EAST -> Block.box(h0, c0, a0, h1, c1, a1);
+            case WEST -> Block.box(16 - h1, c0, a0, 16 - h0, c1, a1);
+        };
+    }
 
     public MachineConnectorBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP).setValue(SLIM, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING, SLIM);
+    }
+
+    // The block this connector is stuck to.
+    public static BlockPos attachedPos(BlockState state, BlockPos pos) {
+        Direction facing = state.hasProperty(FACING) ? state.getValue(FACING) : Direction.UP;
+        return pos.relative(facing.getOpposite());
     }
 
     @Override
@@ -65,31 +126,52 @@ public class MachineConnectorBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        return (state.getValue(SLIM) ? SLIM_SHAPES : SHAPES).get(state.getValue(FACING));
     }
 
-    // A machine = anything that stores, makes or uses Fm.
+    // A machine = anything that stores, makes or uses Fm (and, for multiblocks, accepts a connector there).
     public static boolean isMachine(BlockGetter level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
-        return be instanceof FmHandler || be instanceof FmSource;
+        return (be instanceof FmHandler handler && handler.acceptsConnector()) || be instanceof FmSource;
     }
 
+    // Any solid block will hold it, except multiblock machines, which only take it on their power port.
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return isMachine(level, pos.below());
+        BlockPos attached = attachedPos(state, pos);
+        BlockState on = level.getBlockState(attached);
+        if (on.isAir() || on.canBeReplaced()) return false;
+        BlockEntity be = level.getBlockEntity(attached);
+        if (be instanceof ArcCasingBlockEntity || be instanceof MachineControllerBlockEntity) {
+            return ((FmHandler) be).acceptsConnector();
+        }
+        return true;
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockState state = defaultBlockState();
+        Direction facing = context.getClickedFace();
+        BlockState state = defaultBlockState().setValue(FACING, facing)
+                .setValue(SLIM, slimFor(context.getLevel(), context.getClickedPos(), facing));
         return state.canSurvive(context.getLevel(), context.getClickedPos()) ? state : null;
+    }
+
+    @Override
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    protected BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
-        if (direction == Direction.DOWN && !state.canSurvive(level, pos)) {
-            return Blocks.AIR.defaultBlockState();
+        if (direction == state.getValue(FACING).getOpposite()) {
+            if (!state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
+            return state.setValue(SLIM, slimFor(level, pos, state.getValue(FACING)));
         }
         return super.updateShape(state, direction, neighbourState, level, pos, neighbourPos);
     }
@@ -119,7 +201,8 @@ public class MachineConnectorBlock extends BaseEntityBlock {
                 && level.getBlockEntity(pos) instanceof MachineConnectorBlockEntity connector) {
             for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
                 if (level.getBlockEntity(link.other()) instanceof MachineConnectorBlockEntity other) other.removeLink(pos);
-                ItemStack roll = new ItemStack(link.insulated() ? ModItems.INSULATED_WIRE.get() : ModItems.RAW_WIRE.get());
+                ItemStack roll = new ItemStack(link.heavy() ? ModItems.HEAVY_WIRE.get()
+                        : link.insulated() ? ModItems.INSULATED_WIRE.get() : ModItems.RAW_WIRE.get());
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), roll);
             }
         }
@@ -130,11 +213,11 @@ public class MachineConnectorBlock extends BaseEntityBlock {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (!(level.getBlockEntity(pos) instanceof MachineConnectorBlockEntity connector) || !connector.isPowered()) return;
-        Vec3 a = WireMath.attachPoint(pos);
+        Vec3 a = WireMath.attachPoint(pos, state.getValue(FACING));
         for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
             if (link.insulated() || pos.asLong() > link.other().asLong()) continue; // draw each wire once
             if (random.nextFloat() < 0.35f) {
-                Vec3 p = WireMath.point(a, WireMath.attachPoint(link.other()), random.nextDouble());
+                Vec3 p = WireMath.point(a, WireMath.attachPoint(level, link.other()), random.nextDouble());
                 level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 0, -0.02, 0);
             }
         }

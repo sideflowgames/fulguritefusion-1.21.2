@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import com.sideflowgames.fulguritefusion.Config;
+import com.sideflowgames.fulguritefusion.block.MachineConnectorBlock;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlockEntity;
 import com.sideflowgames.fulguritefusion.block.StormBatteryBlockEntity;
 
@@ -64,25 +66,31 @@ public final class FmNetwork {
                 if (!(level.getBlockEntity(other) instanceof MachineConnectorBlockEntity)) continue; // unloaded or gone
                 // Count each raw wire once (from the end with the lower position).
                 if (!link.insulated() && current.asLong() < other.asLong()) {
-                    rawSpans.add(new RawSpan(WireMath.attachPoint(current), WireMath.attachPoint(other)));
+                    rawSpans.add(new RawSpan(WireMath.attachPoint(level, current), WireMath.attachPoint(level, other)));
                 }
                 if (visited.add(other)) queue.add(other);
             }
         }
 
-        List<BlockPos> generators = new ArrayList<>();
-        List<BlockPos> batteries = new ArrayList<>();
-        List<BlockPos> machines = new ArrayList<>();
+        // Each connector belongs to the block it's stuck to. Connectors on plain blocks are just relays.
+        // (Sets, so two connectors on the same machine still count it once.)
+        Set<BlockPos> generatorSet = new LinkedHashSet<>();
+        Set<BlockPos> batterySet = new LinkedHashSet<>();
+        Set<BlockPos> machineSet = new LinkedHashSet<>();
         for (BlockPos c : connectors) {
-            BlockEntity be = level.getBlockEntity(c.below());
+            BlockPos on = MachineConnectorBlock.attachedPos(level.getBlockState(c), c);
+            BlockEntity be = level.getBlockEntity(on);
             if (be instanceof StormBatteryBlockEntity) {
-                batteries.add(c.below());
+                batterySet.add(on);
             } else if (be instanceof FmSource) {
-                generators.add(c.below());
-            } else if (be instanceof FmHandler) {
-                machines.add(c.below());
+                generatorSet.add(on);
+            } else if (be instanceof FmHandler handler && handler.acceptsConnector()) {
+                machineSet.add(on);
             }
         }
+        List<BlockPos> generators = new ArrayList<>(generatorSet);
+        List<BlockPos> batteries = new ArrayList<>(batterySet);
+        List<BlockPos> machines = new ArrayList<>(machineSet);
         // Same order everywhere, so every connector agrees which 8 machines are linked.
         machines.sort(Comparator.comparingLong(BlockPos::asLong));
         int max = Config.NETWORK_MAX_MACHINES.get();

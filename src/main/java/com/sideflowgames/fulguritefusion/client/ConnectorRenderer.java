@@ -24,6 +24,9 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_wire.png");
     private static final ResourceLocation INSULATED =
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/insulated_wire.png");
+    private static final ResourceLocation HEAVY =
+            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/heavy_wire.png");
+    private static final float HEAVY_RADIUS = 0.07f; // twice as thick
     private static final int SEGMENTS = 24;
     private static final float RADIUS = 0.035f; // about half a pixel each side
 
@@ -34,30 +37,32 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
                        MultiBufferSource buffers, int packedLight, int packedOverlay) {
         BlockPos pos = be.getBlockPos();
         Vec3 origin = Vec3.atLowerCornerOf(pos);
-        Vec3 a = WireMath.attachPoint(pos);
+        Vec3 a = WireMath.attachPoint(be.getLevel(), pos);
         PoseStack.Pose pose = poseStack.last();
         for (MachineConnectorBlockEntity.Link link : be.getLinks()) {
             if (pos.asLong() > link.other().asLong()) continue;
-            Vec3 b = WireMath.attachPoint(link.other());
-            VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(link.insulated() ? INSULATED : RAW));
+            Vec3 b = WireMath.attachPoint(be.getLevel(), link.other());
+            ResourceLocation texture = link.heavy() ? HEAVY : link.insulated() ? INSULATED : RAW;
+            float radius = link.heavy() ? HEAVY_RADIUS : RADIUS;
+            VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
             Vec3 prev = WireMath.point(a, b, 0);
             for (int i = 1; i <= SEGMENTS; i++) {
                 Vec3 cur = WireMath.point(a, b, (double) i / SEGMENTS);
                 int light = be.getLevel() != null
                         ? LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(prev.add(cur).scale(0.5)))
                         : packedLight;
-                segment(vc, pose, prev.subtract(origin), cur.subtract(origin), light, i);
+                segment(vc, pose, prev.subtract(origin), cur.subtract(origin), light, i, radius);
                 prev = cur;
             }
         }
     }
 
     // One piece of wire: two crossed thin strips, so it looks round from every angle.
-    private static void segment(VertexConsumer vc, PoseStack.Pose pose, Vec3 from, Vec3 to, int light, int index) {
+    private static void segment(VertexConsumer vc, PoseStack.Pose pose, Vec3 from, Vec3 to, int light, int index, float radius) {
         Vec3 dir = to.subtract(from).normalize();
         Vec3 up = Math.abs(dir.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
-        Vec3 side1 = dir.cross(up).normalize().scale(RADIUS);
-        Vec3 side2 = dir.cross(side1).normalize().scale(RADIUS);
+        Vec3 side1 = dir.cross(up).normalize().scale(radius);
+        Vec3 side2 = dir.cross(side1).normalize().scale(radius);
         float v0 = (index % 4) / 4f, v1 = v0 + 0.25f;
         quad(vc, pose, from, to, side1, side2.normalize(), light, v0, v1);
         quad(vc, pose, from, to, side2, side1.normalize(), light, v0, v1);

@@ -28,7 +28,12 @@ import net.minecraft.world.phys.Vec3;
 // Each connector re-reads its network once a second; only the network's master connector moves power.
 public class MachineConnectorBlockEntity extends BlockEntity {
     // One hanging wire from this connector to another one.
-    public record Link(BlockPos other, boolean insulated) {}
+    // heavy = Heavy Wire: insulated, thicker, and can span twice as far.
+    public record Link(BlockPos other, boolean insulated, boolean heavy) {
+        public Link(BlockPos other, boolean insulated) {
+            this(other, insulated, false);
+        }
+    }
 
     private final List<Link> links = new ArrayList<>();
     private FmNetwork.Snapshot network;
@@ -45,15 +50,17 @@ public class MachineConnectorBlockEntity extends BlockEntity {
             be.rescanTimer = 0;
             be.network = FmNetwork.scan(level, pos);
         }
-        if (!be.network.master().equals(pos)) return;
+        // Keep our own copy: switching the network's power on/off clears be.network for a rescan next tick.
+        FmNetwork.Snapshot net = be.network;
+        if (!net.master().equals(pos)) return;
 
-        be.lastFlow = FmNetwork.tick(level, be.network);
+        be.lastFlow = FmNetwork.tick(level, net);
         boolean flowing = be.lastFlow > 0;
         if (flowing != be.powered) {
-            FmNetwork.setPowered(level, be.network, flowing);
+            FmNetwork.setPowered(level, net, flowing);
         }
         if (flowing && level instanceof ServerLevel serverLevel) {
-            FmNetwork.hazards(serverLevel, be.network);
+            FmNetwork.hazards(serverLevel, net);
         }
     }
 
@@ -70,8 +77,8 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         return false;
     }
 
-    public void addLink(BlockPos other, boolean insulated) {
-        links.add(new Link(other, insulated));
+    public void addLink(BlockPos other, boolean insulated, boolean heavy) {
+        links.add(new Link(other, insulated, heavy));
         changedAndSync();
     }
 
@@ -102,9 +109,9 @@ public class MachineConnectorBlockEntity extends BlockEntity {
     // The box the wires are drawn in (so they don't vanish when this block is off-screen).
     public AABB wireBounds() {
         AABB box = new AABB(worldPosition);
-        Vec3 a = WireMath.attachPoint(worldPosition);
+        Vec3 a = WireMath.attachPoint(level, worldPosition);
         for (Link link : links) {
-            Vec3 b = WireMath.attachPoint(link.other());
+            Vec3 b = WireMath.attachPoint(level, link.other());
             box = box.minmax(new AABB(a, b).inflate(0.5).expandTowards(0, -WireMath.sag(a, b) - 0.5, 0));
         }
         return box;
@@ -115,9 +122,11 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         if (links.isEmpty()) return "Machine Connector: no wires attached (right-click it with a Wire Roll)";
         int linked = network.linkedMachines().size();
         int max = Config.NETWORK_MAX_MACHINES.get();
-        BlockPos machine = worldPosition.below();
+        BlockPos machine = MachineConnectorBlock.attachedPos(getBlockState(), worldPosition);
         String self;
-        if (network.unlinkedMachines().contains(machine)) {
+        if (!MachineConnectorBlock.isMachine(level, machine)) {
+            self = "relay (not on a machine)";
+        } else if (network.unlinkedMachines().contains(machine)) {
             self = "this machine is NOT linked (network full)";
         } else if (network.generators().contains(machine)) {
             self = "this machine supplies power";
@@ -142,6 +151,7 @@ public class MachineConnectorBlockEntity extends BlockEntity {
             CompoundTag l = new CompoundTag();
             l.putLong("Pos", link.other().asLong());
             l.putBoolean("Insulated", link.insulated());
+            l.putBoolean("Heavy", link.heavy());
             list.add(l);
         }
         tag.put("Links", list);
@@ -155,7 +165,7 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag l = list.getCompound(i);
-            links.add(new Link(BlockPos.of(l.getLong("Pos")), l.getBoolean("Insulated")));
+            links.add(new Link(BlockPos.of(l.getLong("Pos")), l.getBoolean("Insulated"), l.getBoolean("Heavy")));
         }
         powered = tag.getBoolean("Powered");
     }

@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.sideflowgames.fulguritefusion.menu.EuConverterMenu;
 import com.sideflowgames.fulguritefusion.menu.FulguriteChargerMenu;
+import com.sideflowgames.fulguritefusion.menu.ProcessingMachineMenu;
 import com.sideflowgames.fulguritefusion.menu.StormBatteryMenu;
 import com.sideflowgames.fulguritefusion.menu.StormFurnaceMenu;
 
@@ -24,6 +25,10 @@ public final class ModMenus {
 
     public static final Supplier<MenuType<EuConverterMenu>> EU_CONVERTER =
             MENUS.register("eu_converter", () -> IMenuTypeExtension.create(EuConverterMenu::new));
+
+    // Shared by all five multiblock processing machines.
+    public static final Supplier<MenuType<ProcessingMachineMenu>> PROCESSING_MACHINE =
+            MENUS.register("processing_machine", () -> IMenuTypeExtension.create(ProcessingMachineMenu::new));
 
     public static final Supplier<MenuType<StormBatteryMenu>> STORM_BATTERY =
             MENUS.register("storm_battery", () -> IMenuTypeExtension.create(StormBatteryMenu::new));

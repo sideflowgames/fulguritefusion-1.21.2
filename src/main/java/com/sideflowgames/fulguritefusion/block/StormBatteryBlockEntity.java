@@ -15,6 +15,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +36,9 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
     public static final int DATA_COUNT = 6;
 
     private int fm;
+    // Client side: the charge and capacity last sent by the server, used to draw the bank's gauge.
+    private int syncedCapacity;
+    private int lastSentFm = -1;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -97,6 +103,29 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
             }
         }
         if (changed) be.setChanged();
+        // Keep the gauge on players' screens up to date (twice a second, only when the charge moved).
+        if (level.getGameTime() % 10 == 0 && be.fm != be.lastSentFm) {
+            be.lastSentFm = be.fm;
+            level.sendBlockUpdated(pos, state, state, 2);
+        }
+    }
+
+    // Capacity of this block, as known on this side (the client gets it from the server).
+    public int displayCapacity() {
+        return level != null && level.isClientSide ? syncedCapacity : capacity();
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        tag.putInt("Fm", fm);
+        tag.putInt("Cap", capacity());
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     // All batteries connected to 'start' through touching faces (up to 'limit' blocks).
@@ -186,5 +215,6 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         fm = tag.getInt("Fm");
+        if (tag.contains("Cap")) syncedCapacity = tag.getInt("Cap");
     }
 }

@@ -40,7 +40,7 @@ public final class ModItems {
     public static final DeferredItem<Item> FULGURITE = ITEMS.registerSimpleItem("fulgurite",
             new Item.Properties());
 
-    // Copper Sheet: used for wire. (Temporary recipe: 2 copper ingots; a processing machine will make these later.)
+    // Copper Sheet: used for wire. Made in the Press from copper ingots.
     public static final DeferredItem<Item> COPPER_SHEET = ITEMS.registerSimpleItem("copper_sheet",
             new Item.Properties());
 
@@ -49,6 +49,9 @@ public final class ModItems {
             props -> new WireRollItem(false, props), new Item.Properties());
     public static final DeferredItem<WireRollItem> INSULATED_WIRE = ITEMS.registerItem("insulated_wire",
             props -> new WireRollItem(true, props), new Item.Properties());
+    // Heavy Wire: insulated and thick, spans up to 32 blocks (for long power-pole runs).
+    public static final DeferredItem<WireRollItem> HEAVY_WIRE = ITEMS.registerItem("heavy_wire",
+            props -> new WireRollItem(true, true, props), new Item.Properties());
 
     // ---------- Storm Collider materials and products ----------
 
@@ -85,7 +88,9 @@ public final class ModItems {
             new Item.Properties().stacksTo(16).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
     public static final DeferredItem<Item> OVERCHARGED_SPARK_CELL = ITEMS.registerSimpleItem("overcharged_spark_cell",
             new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
-    // Dropped by the Arc Serpent (coming later). Creative tab only for now.
+    // Molted Plumes: shed feathers from Stormwing nests; the Arc Serpent drops them too.
+    public static final DeferredItem<Item> MOLTED_PLUME = ITEMS.registerSimpleItem("molted_plume", new Item.Properties());
+    // Dropped (always) by the Arc Serpent.
     public static final DeferredItem<Item> ARC_CORE = ITEMS.registerSimpleItem("arc_core", new Item.Properties().rarity(Rarity.RARE));
 
     // Spawn eggs (creative tab).
@@ -95,6 +100,16 @@ public final class ModItems {
             props -> new DeferredSpawnEggItem(ModEntities.VOIDMOTH, 0x2B1B3A, 0xC8A8F0, props), new Item.Properties());
     public static final DeferredItem<DeferredSpawnEggItem> STORMWING_SPAWN_EGG = ITEMS.registerItem("stormwing_spawn_egg",
             props -> new DeferredSpawnEggItem(ModEntities.STORMWING, 0x5A6170, 0xBFE6FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> ARC_SERPENT_SPAWN_EGG = ITEMS.registerItem("arc_serpent_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.ARC_SERPENT, 0x1B3A6B, 0xE6F7FF, props), new Item.Properties());
+
+    // Processing machine products.
+    public static final DeferredItem<Item> IRON_SHEET = ITEMS.registerSimpleItem("iron_sheet", new Item.Properties());
+    public static final DeferredItem<Item> GOLD_SHEET = ITEMS.registerSimpleItem("gold_sheet", new Item.Properties());
+    public static final DeferredItem<Item> COIL_SEGMENT = ITEMS.registerSimpleItem("coil_segment", new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_IRON = ITEMS.registerSimpleItem("crushed_iron", new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_COPPER = ITEMS.registerSimpleItem("crushed_copper", new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_GOLD = ITEMS.registerSimpleItem("crushed_gold", new Item.Properties());
 
     // Fusion Fuel capsule: one per pairing, fuel for the big reactor.
     public static final DeferredItem<FusionFuelItem> FUSION_FUEL = ITEMS.registerItem("fusion_fuel",
@@ -128,6 +143,7 @@ public final class ModItems {
                         output.accept(COPPER_SHEET.get());
                         output.accept(RAW_WIRE.get());
                         output.accept(INSULATED_WIRE.get());
+                        output.accept(HEAVY_WIRE.get());
                         output.accept(ModBlocks.MACHINE_CONNECTOR_ITEM.get());
                         output.accept(ModBlocks.FE_CONVERTER_ITEM.get());
                         output.accept(ModBlocks.EU_CONVERTER_ITEM.get());
@@ -148,8 +164,27 @@ public final class ModItems {
                         output.accept(PRIME_SPARK.get());
                         output.accept(LUMEN_SLUG_SPAWN_EGG.get());
                         output.accept(VOIDMOTH_SPAWN_EGG.get());
+                        output.accept(ModBlocks.CRUDE_ARC_CASING_ITEM.get());
+                        output.accept(ModBlocks.TEMPERED_ARC_CASING_ITEM.get());
+                        output.accept(ModBlocks.CHARGED_ARC_CASING_ITEM.get());
+                        output.accept(ModBlocks.PRIME_ARC_CASING_ITEM.get());
+                        output.accept(ModBlocks.PRESS_ITEM.get());
+                        output.accept(ModBlocks.ARC_FURNACE_ITEM.get());
+                        output.accept(ModBlocks.WIRE_EXTRUDER_ITEM.get());
+                        output.accept(ModBlocks.KILN_ITEM.get());
+                        output.accept(ModBlocks.CRUSHER_ITEM.get());
+                        output.accept(IRON_SHEET.get());
+                        output.accept(GOLD_SHEET.get());
+                        output.accept(COIL_SEGMENT.get());
+                        output.accept(CRUSHED_IRON.get());
+                        output.accept(CRUSHED_COPPER.get());
+                        output.accept(CRUSHED_GOLD.get());
                         output.accept(STORMWING_SPAWN_EGG.get());
+                        output.accept(ARC_SERPENT_SPAWN_EGG.get());
+                        output.accept(MOLTED_PLUME.get());
                         output.accept(ModBlocks.STORMWING_NEST_ITEM.get());
+                        output.accept(ModBlocks.STORMWING_NEST_RIM_ITEM.get());
+                        output.accept(ModBlocks.STORMWING_EGG_ITEM.get());
                     })
                     .build());
 

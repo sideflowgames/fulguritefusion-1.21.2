@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BFB",
+    "BCB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:bricks"
+    },
+    "F": {
+      "item": "minecraft:blast_furnace"
+    },
+    "C": {
+      "item": "fulguritefusion:crude_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:kiln",
+    "count": 1
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "fulguritefusion:block/charged_arc_casing"
+    },
+    "formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    }
+  }
+}

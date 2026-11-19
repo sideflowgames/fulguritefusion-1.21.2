@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=north,formed=false": {
+      "model": "fulguritefusion:block/press"
+    },
+    "facing=north,formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    },
+    "facing=east,formed=false": {
+      "model": "fulguritefusion:block/press",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    },
+    "facing=south,formed=false": {
+      "model": "fulguritefusion:block/press",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    },
+    "facing=west,formed=false": {
+      "model": "fulguritefusion:block/press",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    }
+  }
+}

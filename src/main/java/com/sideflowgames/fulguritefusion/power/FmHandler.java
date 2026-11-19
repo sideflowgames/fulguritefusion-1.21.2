@@ -20,6 +20,11 @@ public interface FmHandler {
     // the chain. Every machine type follows this; batteries keep the defaults below and don't take part.
     default void touchChain(int depth) {}
 
+    // Whether a Machine Connector may sit on top of this block. Multiblock machines only allow it on their power port.
+    default boolean acceptsConnector() {
+        return true;
+    }
+
     default int receiveFmFromChain(int amount, int depth) {
         return receiveFm(amount, false);
     }
