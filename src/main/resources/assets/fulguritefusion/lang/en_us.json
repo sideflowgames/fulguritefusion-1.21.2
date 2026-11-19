@@ -86,5 +86,14 @@
   "item.fulguritefusion.overcharged_spark_cell": "Overcharged Spark Cell",
   "item.fulguritefusion.fusion_fuel": "Fusion Fuel",
   "block.fulguritefusion.storm_collider": "Storm Collider",
-  "fulguritefusion.configuration.stormFmPerShot": "Storm Collider Fm per Shot"
+  "fulguritefusion.configuration.stormFmPerShot": "Storm Collider Fm per Shot",
+  "entity.fulguritefusion.lumen_slug": "Lumen Slug",
+  "item.fulguritefusion.lumen_slug_spawn_egg": "Lumen Slug Spawn Egg",
+  "block.fulguritefusion.lumen_trail": "Lumen Trail",
+  "entity.fulguritefusion.voidmoth": "Voidmoth",
+  "item.fulguritefusion.voidmoth_spawn_egg": "Voidmoth Spawn Egg",
+  "entity.fulguritefusion.stormwing": "Stormwing",
+  "item.fulguritefusion.stormwing_spawn_egg": "Stormwing Spawn Egg",
+  "block.fulguritefusion.stormwing_nest": "Stormwing Nest",
+  "subtitles.fulguritefusion.stormwing_arc": "Electric arc crackles"
 }

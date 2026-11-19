@@ -12,6 +12,7 @@ import com.sideflowgames.fulguritefusion.block.FeConverterBlock;
 import com.sideflowgames.fulguritefusion.block.FeConverterBlockEntity;
 import com.sideflowgames.fulguritefusion.block.FulguriteChargerBlock;
 import com.sideflowgames.fulguritefusion.block.FulguriteChargerBlockEntity;
+import com.sideflowgames.fulguritefusion.block.LumenTrailBlock;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlock;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlockEntity;
 import com.sideflowgames.fulguritefusion.block.MiniColliderBlock;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -112,6 +114,17 @@ public final class ModBlocks {
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(4.0f)
                     .requiresCorrectToolForDrops().sound(SoundType.METAL).lightLevel(state -> 9));
 
+    // Lumen Trail: left by the Lumen Slug; bottle it for Lumen Gel. No item form.
+    public static final DeferredBlock<LumenTrailBlock> LUMEN_TRAIL = BLOCKS.registerBlock("lumen_trail",
+            LumenTrailBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).noCollission().instabreak()
+                    .sound(SoundType.HONEY_BLOCK).lightLevel(state -> 6).replaceable().noLootTable()
+                    .pushReaction(PushReaction.DESTROY));
+
+    // Stormwing Nest: a 3x3 nest of twigs a Stormwing builds where it lives. Placeholder until nests are designed.
+    public static final DeferredBlock<Block> STORMWING_NEST = BLOCKS.registerSimpleBlock("stormwing_nest",
+            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0f).sound(SoundType.GRASS).ignitedByLava());
+
     public static final DeferredItem<BlockItem> RAW_FULGURITE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("raw_fulgurite", RAW_FULGURITE);
     public static final DeferredItem<BlockItem> STORM_FURNACE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_furnace", STORM_FURNACE);
     public static final DeferredItem<BlockItem> ENHANCED_STORM_FURNACE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("enhanced_storm_furnace", ENHANCED_STORM_FURNACE);
@@ -126,6 +139,7 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> COLLIDER_INJECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("collider_injector", COLLIDER_INJECTOR);
     public static final DeferredItem<BlockItem> COLLIDER_INPUT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("collider_input", COLLIDER_INPUT);
     public static final DeferredItem<BlockItem> MINI_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("mini_collider", MINI_COLLIDER);
+    public static final DeferredItem<BlockItem> STORMWING_NEST_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormwing_nest", STORMWING_NEST);
     public static final DeferredItem<BlockItem> STORM_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_collider", STORM_COLLIDER);
 
     public static final Supplier<BlockEntityType<StormFurnaceBlockEntity>> STORM_FURNACE_BE = BLOCK_ENTITIES.register("storm_furnace",

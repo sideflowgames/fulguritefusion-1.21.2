@@ -30,6 +30,8 @@ public class FulguriteFusion {
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModMenus.register(modEventBus);
+        ModEntities.register(modEventBus);
+        ModSounds.register(modEventBus);
 
         // Hopper and pipe support for our machines
         modEventBus.addListener(ModCapabilities::register);

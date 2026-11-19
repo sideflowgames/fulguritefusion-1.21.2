@@ -12,6 +12,9 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.sideflowgames.fulguritefusion.client.ConnectorRenderer;
 import com.sideflowgames.fulguritefusion.client.EuConverterScreen;
+import com.sideflowgames.fulguritefusion.client.LumenSlugRenderer;
+import com.sideflowgames.fulguritefusion.client.StormwingRenderer;
+import com.sideflowgames.fulguritefusion.client.VoidmothRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import com.sideflowgames.fulguritefusion.client.FulguriteChargerScreen;
 import com.sideflowgames.fulguritefusion.client.StormBatteryScreen;
@@ -45,9 +48,12 @@ public class FulguriteFusionClient {
         event.register(ModMenus.STORM_BATTERY.get(), StormBatteryScreen::new);
     }
 
-    // Draws the hanging wires between Machine Connectors.
+    // Draws the hanging wires between Machine Connectors, and our mobs.
     @SubscribeEvent
     static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONNECTOR_BE.get(), ConnectorRenderer::new);
+        event.registerEntityRenderer(ModEntities.LUMEN_SLUG.get(), LumenSlugRenderer::new);
+        event.registerEntityRenderer(ModEntities.VOIDMOTH.get(), VoidmothRenderer::new);
+        event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);
     }
 }

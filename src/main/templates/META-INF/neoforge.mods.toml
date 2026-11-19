@@ -91,3 +91,11 @@ A power generation and processing mod designed around lightening and Fusion.
 # stop your mod loading on the server for example.
 #[features.${mod_id}]
 #openGLVersion="[3.2,)"
+
+# GeckoLib: animated mob models. Players must install it alongside Fulgurite Fusion.
+[[dependencies.${mod_id}]]
+    modId="geckolib"
+    type="required"
+    versionRange="[4.9,)"
+    ordering="NONE"
+    side="BOTH"

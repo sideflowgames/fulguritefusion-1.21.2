@@ -44,6 +44,8 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+        // Empty hand: fall through to useWithoutItem (status, or sneak to take the item out).
+        if (stack.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
             ItemStack left = injector.insert(stack.copy());
             int added = stack.getCount() - left.getCount();

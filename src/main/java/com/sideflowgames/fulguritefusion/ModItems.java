@@ -9,6 +9,7 @@ import com.sideflowgames.fulguritefusion.item.FusionFuelItem;
 import com.sideflowgames.fulguritefusion.item.WireRollItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -87,6 +88,14 @@ public final class ModItems {
     // Dropped by the Arc Serpent (coming later). Creative tab only for now.
     public static final DeferredItem<Item> ARC_CORE = ITEMS.registerSimpleItem("arc_core", new Item.Properties().rarity(Rarity.RARE));
 
+    // Spawn eggs (creative tab).
+    public static final DeferredItem<DeferredSpawnEggItem> LUMEN_SLUG_SPAWN_EGG = ITEMS.registerItem("lumen_slug_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.LUMEN_SLUG, 0x2E7D6B, 0xA8FFC4, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> VOIDMOTH_SPAWN_EGG = ITEMS.registerItem("voidmoth_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.VOIDMOTH, 0x2B1B3A, 0xC8A8F0, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STORMWING_SPAWN_EGG = ITEMS.registerItem("stormwing_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STORMWING, 0x5A6170, 0xBFE6FF, props), new Item.Properties());
+
     // Fusion Fuel capsule: one per pairing, fuel for the big reactor.
     public static final DeferredItem<FusionFuelItem> FUSION_FUEL = ITEMS.registerItem("fusion_fuel",
             FusionFuelItem::new, new Item.Properties().stacksTo(16));
@@ -137,6 +146,10 @@ public final class ModItems {
                         output.accept(CHARGED_SPARK_CELL.get());
                         output.accept(OVERCHARGED_SPARK_CELL.get());
                         output.accept(PRIME_SPARK.get());
+                        output.accept(LUMEN_SLUG_SPAWN_EGG.get());
+                        output.accept(VOIDMOTH_SPAWN_EGG.get());
+                        output.accept(STORMWING_SPAWN_EGG.get());
+                        output.accept(ModBlocks.STORMWING_NEST_ITEM.get());
                     })
                     .build());
 
