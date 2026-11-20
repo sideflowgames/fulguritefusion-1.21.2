@@ -34,5 +34,41 @@
     "sounds": [
       "fulguritefusion:stormwing_death"
     ]
+  },
+  "reactor_hum": {
+    "subtitle": "subtitles.fulguritefusion.reactor_hum",
+    "sounds": [
+      {
+        "name": "fulguritefusion:reactor_hum",
+        "attenuation_distance": 128
+      }
+    ]
+  },
+  "reactor_beam": {
+    "subtitle": "subtitles.fulguritefusion.reactor_beam",
+    "sounds": [
+      {
+        "name": "fulguritefusion:reactor_beam",
+        "attenuation_distance": 96
+      }
+    ]
+  },
+  "reactor_impact": {
+    "subtitle": "subtitles.fulguritefusion.reactor_impact",
+    "sounds": [
+      {
+        "name": "fulguritefusion:reactor_impact",
+        "attenuation_distance": 128
+      }
+    ]
+  },
+  "reactor_inner": {
+    "subtitle": "subtitles.fulguritefusion.reactor_inner",
+    "sounds": [
+      {
+        "name": "fulguritefusion:reactor_inner",
+        "attenuation_distance": 96
+      }
+    ]
   }
 }

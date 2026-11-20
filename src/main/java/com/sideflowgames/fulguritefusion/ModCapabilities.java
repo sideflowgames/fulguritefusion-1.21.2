@@ -24,6 +24,10 @@ public final class ModCapabilities {
         // Multiblock machines: items in and out only through their input and output port casings.
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlocks.ARC_CASING_BE.get(),
                 (be, side) -> be.getItemHandler(side));
+        // Fusion Reactor: hoppers and pipes load fuel into a Console Fuel Input (front or back).
+        event.registerBlock(Capabilities.ItemHandler.BLOCK,
+                (level, pos, state, be, side) -> com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity.fuelInputHandler(level, pos),
+                ModBlocks.CONSOLE_FUEL_INPUT.get());
         // FE cables can pull Forge Energy from the FE Converter's front face.
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlocks.FE_CONVERTER_BE.get(),
                 (be, side) -> be.getEnergyHandler(side));

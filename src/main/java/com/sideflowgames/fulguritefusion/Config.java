@@ -9,6 +9,10 @@ public class Config {
 
     // --- Server safety (used by the fusion reactor's failure events, coming later) ---
     public static final ModConfigSpec.BooleanValue BLOCK_DAMAGE;
+    public static final ModConfigSpec.IntValue REACTOR_MAX_FM;
+    public static final ModConfigSpec.IntValue REACTOR_STARTUP_FM;
+    public static final ModConfigSpec.DoubleValue REACTOR_FM_MULTIPLIER;
+    public static final ModConfigSpec.IntValue REACTOR_OUTPUT_RATE;
     public static final ModConfigSpec.BooleanValue RING_MELT;
     public static final ModConfigSpec.BooleanValue BOSS_SPAWNS;
 
@@ -30,6 +34,7 @@ public class Config {
     public static final ModConfigSpec.IntValue WIRE_RATE;
     public static final ModConfigSpec.IntValue WIRE_MAX_LENGTH;
     public static final ModConfigSpec.IntValue HEAVY_WIRE_MAX_LENGTH;
+    public static final ModConfigSpec.IntValue DATA_CABLE_MAX_LENGTH;
     public static final ModConfigSpec.IntValue NETWORK_MAX_MACHINES;
     public static final ModConfigSpec.IntValue CHAIN_MAX_MACHINES;
     public static final ModConfigSpec.BooleanValue WATER_ELECTRIFY;
@@ -116,6 +121,8 @@ public class Config {
                 .defineInRange("wireMaxLength", 16, 2, 64);
         HEAVY_WIRE_MAX_LENGTH = BUILDER.comment("Longest Heavy Wire between two Machine Connectors, in blocks.")
                 .defineInRange("heavyWireMaxLength", 32, 2, 128);
+        DATA_CABLE_MAX_LENGTH = BUILDER.comment("Longest Data Cable run (in cable blocks) from the Reactor Control Console to a Ring Injection Port.")
+                .defineInRange("dataCableMaxLength", 128, 4, 1024);
         CHAIN_MAX_MACHINES = BUILDER.comment("Most machines in a daisy chain (machines touching each other) that can pass power along.")
                 .defineInRange("chainMaxMachines", 8, 1, 256);
         NETWORK_MAX_MACHINES = BUILDER.comment("Most machines one wire network can power (batteries and furnaces don't count).")
@@ -140,6 +147,17 @@ public class Config {
         EU_MV = BUILDER.comment("EU per tick for the MV tier.").defineInRange("euMv", 128, 1, Integer.MAX_VALUE);
         EU_HV = BUILDER.comment("EU per tick for the HV tier.").defineInRange("euHv", 512, 1, Integer.MAX_VALUE);
         EU_EV = BUILDER.comment("EU per tick for the EV tier.").defineInRange("euEv", 2048, 1, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.comment("Fusion Reactor").push("reactor");
+        REACTOR_MAX_FM = BUILDER.comment("How much Fm the Reactor Control Console can store.")
+                .defineInRange("reactorMaxFm", 2_000_000, 10_000, Integer.MAX_VALUE);
+        REACTOR_STARTUP_FM = BUILDER.comment("Fm needed to start a fusion run (taken from the console's store, or pulled from a battery behind a power port).")
+                .defineInRange("reactorStartupFm", 8_000, 0, 1_000_000);
+        REACTOR_FM_MULTIPLIER = BUILDER.comment("Multiplies every fusion run's Fm yield.")
+                .defineInRange("reactorFmMultiplier", 1.0, 0.0, 100.0);
+        REACTOR_OUTPUT_RATE = BUILDER.comment("Fm per tick each Console Power Port pushes into the block behind it.")
+                .defineInRange("reactorOutputRate", 2048, 1, 1_000_000);
         BUILDER.pop();
 
         BUILDER.comment("Mobs").push("mobs");

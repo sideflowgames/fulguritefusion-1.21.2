@@ -3,6 +3,7 @@ package com.sideflowgames.fulguritefusion;
 import java.util.function.Supplier;
 
 import com.sideflowgames.fulguritefusion.menu.EuConverterMenu;
+import com.sideflowgames.fulguritefusion.menu.ReactorConsoleMenu;
 import com.sideflowgames.fulguritefusion.menu.FulguriteChargerMenu;
 import com.sideflowgames.fulguritefusion.menu.ProcessingMachineMenu;
 import com.sideflowgames.fulguritefusion.menu.StormBatteryMenu;
@@ -45,6 +46,9 @@ public final class ModMenus {
     // Collider Input / Injector on their own (not yet in a finished ring).
     public static final Supplier<MenuType<ColliderPartMenu>> COLLIDER_PART =
             MENUS.register("collider_part", () -> IMenuTypeExtension.create(ColliderPartMenu::new));
+
+    public static final Supplier<MenuType<ReactorConsoleMenu>> REACTOR_CONSOLE =
+            MENUS.register("reactor_console", () -> IMenuTypeExtension.create(ReactorConsoleMenu::new));
 
     private ModMenus() {}
 

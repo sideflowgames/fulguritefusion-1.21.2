@@ -22,6 +22,13 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> STORMWING_HURT = register("stormwing_hurt");
     public static final Supplier<SoundEvent> STORMWING_DEATH = register("stormwing_death");
 
+    // Fusion Reactor: the rumbling hum that builds over the 30 seconds of outer laps, the portal beam, and the impact.
+    public static final Supplier<SoundEvent> REACTOR_HUM = register("reactor_hum");
+    public static final Supplier<SoundEvent> REACTOR_BEAM = register("reactor_beam");
+    // The 3 fast inner-ring laps: a quick, climbing whine.
+    public static final Supplier<SoundEvent> REACTOR_INNER = register("reactor_inner");
+    public static final Supplier<SoundEvent> REACTOR_IMPACT = register("reactor_impact");
+
     private static Supplier<SoundEvent> register(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name)));
     }

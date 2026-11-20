@@ -23,6 +23,20 @@
     "fulguritefusion:arc_furnace",
     "fulguritefusion:wire_extruder",
     "fulguritefusion:kiln",
-    "fulguritefusion:crusher"
+    "fulguritefusion:crusher",
+    "fulguritefusion:fusion_collider",
+    "fulguritefusion:reinforced_fulgurite",
+    "fulguritefusion:fulgurite_blast_glass",
+    "fulguritefusion:blast_chamber_frame",
+    "fulguritefusion:transfer_portal",
+    "fulguritefusion:receiver_portal",
+    "fulguritefusion:fusion_injector",
+    "fulguritefusion:reactor_console",
+    "fulguritefusion:console_casing",
+    "fulguritefusion:console_power_port",
+    "fulguritefusion:console_data_port",
+    "fulguritefusion:console_fuel_input",
+    "fulguritefusion:ring_injection_port",
+    "fulguritefusion:data_cable"
   ]
 }

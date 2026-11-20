@@ -208,7 +208,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
     }
 
     // Struck Spore has no fixed result: it rolls one of its partner's other pairings.
-    private static Pairing resolve(Pairing p, RandomSource random) {
+    public static Pairing resolve(Pairing p, RandomSource random) {
         if (p.tier() != Tier.WILDCARD) return p;
         if (p.id() == 78) { // Chain Mutation: Jackpot with a fragment, or a Catastrophe
             if (random.nextBoolean()) return Pairings.byId(18);

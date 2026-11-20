@@ -115,6 +115,9 @@ public final class ModItems {
     public static final DeferredItem<Item> CRUSHED_COPPER = ITEMS.registerSimpleItem("crushed_copper", new Item.Properties());
     public static final DeferredItem<Item> CRUSHED_GOLD = ITEMS.registerSimpleItem("crushed_gold", new Item.Properties());
 
+    // Fulgurite Fusion Guide: the in-game guide book.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.GuideBookItem> GUIDE_BOOK = ITEMS.registerItem("guide_book",
+            com.sideflowgames.fulguritefusion.item.GuideBookItem::new, new Item.Properties().stacksTo(1));
     // Fusion Fuel capsule: one per pairing, fuel for the big reactor.
     public static final DeferredItem<FusionFuelItem> FUSION_FUEL = ITEMS.registerItem("fusion_fuel",
             FusionFuelItem::new, new Item.Properties().stacksTo(16));
@@ -134,6 +137,7 @@ public final class ModItems {
                     .withTabsBefore(CreativeModeTabs.COMBAT)
                     .icon(() -> SPARK_CELL.get().getDefaultInstance())
                     .displayItems((parameters, output) -> {
+                        output.accept(GUIDE_BOOK.get());
                         output.accept(ModBlocks.RAW_FULGURITE_ITEM.get());
                         output.accept(FULGURITE_SHARD.get());
                         output.accept(FULGURITE.get());
@@ -144,6 +148,7 @@ public final class ModItems {
                         output.accept(ModBlocks.CHARGED_STORM_FURNACE_ITEM.get());
                         output.accept(ModBlocks.FULGURITE_CHARGER_ITEM.get());
                         output.accept(ModBlocks.STORM_BATTERY_ITEM.get());
+                        output.accept(ModBlocks.CREATIVE_POWER_SOURCE_ITEM.get());
                         output.accept(COPPER_SHEET.get());
                         output.accept(RAW_WIRE.get());
                         output.accept(INSULATED_WIRE.get());
@@ -155,6 +160,20 @@ public final class ModItems {
                         output.accept(ModBlocks.COLLIDER_INPUT_ITEM.get());
                         output.accept(ModBlocks.COLLIDER_INJECTOR_ITEM.get());
                         output.accept(ModBlocks.MINI_COLLIDER_ITEM.get());
+                        output.accept(ModBlocks.FUSION_COLLIDER_ITEM.get());
+                        output.accept(ModBlocks.REINFORCED_FULGURITE_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_BLAST_GLASS_ITEM.get());
+                        output.accept(ModBlocks.BLAST_CHAMBER_FRAME_ITEM.get());
+                        output.accept(ModBlocks.TRANSFER_PORTAL_ITEM.get());
+                        output.accept(ModBlocks.RECEIVER_PORTAL_ITEM.get());
+                        output.accept(ModBlocks.FUSION_INJECTOR_ITEM.get());
+                        output.accept(ModBlocks.RING_INJECTION_PORT_ITEM.get());
+                        output.accept(ModBlocks.REACTOR_CONSOLE_ITEM.get());
+                        output.accept(ModBlocks.CONSOLE_CASING_ITEM.get());
+                        output.accept(ModBlocks.CONSOLE_POWER_PORT_ITEM.get());
+                        output.accept(ModBlocks.CONSOLE_DATA_PORT_ITEM.get());
+                        output.accept(ModBlocks.CONSOLE_FUEL_INPUT_ITEM.get());
+                        output.accept(ModBlocks.DATA_CABLE_ITEM.get());
                         output.accept(ModBlocks.STORM_COLLIDER_ITEM.get());
                         for (DeferredItem<Item> material : MATERIALS) output.accept(material.get());
                         output.accept(RESONANT_SHARD.get());

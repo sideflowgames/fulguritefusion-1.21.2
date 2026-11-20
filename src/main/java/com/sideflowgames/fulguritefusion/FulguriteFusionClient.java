@@ -12,6 +12,8 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.sideflowgames.fulguritefusion.client.ConnectorRenderer;
 import com.sideflowgames.fulguritefusion.client.StormBatteryRenderer;
+import com.sideflowgames.fulguritefusion.client.FusionColliderRenderer;
+import com.sideflowgames.fulguritefusion.client.DataCableRenderer;
 import com.sideflowgames.fulguritefusion.client.EuConverterScreen;
 import com.sideflowgames.fulguritefusion.client.ArcSerpentRenderer;
 import com.sideflowgames.fulguritefusion.client.LumenSlugRenderer;
@@ -58,6 +60,7 @@ public class FulguriteFusionClient {
         event.register(ModMenus.MINI_COLLIDER.get(), MiniColliderScreen::new);
         event.register(ModMenus.STORM_COLLIDER.get(), StormColliderScreen::new);
         event.register(ModMenus.COLLIDER_PART.get(), ColliderPartScreen::new);
+        event.register(ModMenus.REACTOR_CONSOLE.get(), com.sideflowgames.fulguritefusion.client.ReactorConsoleScreen::new);
     }
 
     // Draws the hanging wires between Machine Connectors, and our mobs.
@@ -65,6 +68,8 @@ public class FulguriteFusionClient {
     static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONNECTOR_BE.get(), ConnectorRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.STORM_BATTERY_BE.get(), StormBatteryRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.FUSION_COLLIDER_BE.get(), FusionColliderRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.DATA_CABLE_BE.get(), DataCableRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONTROLLER_BE.get(), MachineControllerRenderer::new);
         event.registerEntityRenderer(ModEntities.LUMEN_SLUG.get(), LumenSlugRenderer::new);
         event.registerEntityRenderer(ModEntities.VOIDMOTH.get(), VoidmothRenderer::new);
