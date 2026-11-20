@@ -1,0 +1,105 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "pipe": "fulguritefusion:block/data_cable",
+    "particle": "fulguritefusion:block/data_cable"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        5.5,
+        5.5
+      ],
+      "to": [
+        16,
+        10.5,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pipe"
+        },
+        "south": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "down": {
+          "texture": "#pipe"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        4.5,
+        4.5
+      ],
+      "to": [
+        1.5,
+        11.5,
+        11.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pipe"
+        },
+        "south": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "down": {
+          "texture": "#pipe"
+        }
+      }
+    },
+    {
+      "from": [
+        14.5,
+        4.5,
+        4.5
+      ],
+      "to": [
+        16,
+        11.5,
+        11.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pipe"
+        },
+        "south": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "down": {
+          "texture": "#pipe"
+        }
+      }
+    }
+  ]
+}

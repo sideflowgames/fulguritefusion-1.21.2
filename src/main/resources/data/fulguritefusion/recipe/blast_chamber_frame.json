@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "RIR",
+    "IOI",
+    "RIR"
+  ],
+  "key": {
+    "R": {
+      "item": "fulguritefusion:reinforced_fulgurite"
+    },
+    "I": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:blast_chamber_frame",
+    "count": 8
+  }
+}

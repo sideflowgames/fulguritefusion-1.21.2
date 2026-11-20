@@ -1,0 +1,419 @@
+{
+  "intro": {
+    "title": "Fulgurite Fusion",
+    "text": "Harness the storm.\n\nThis guide follows the mod from your first lightning strike to the Fusion Reactor.\n\nPower in this mod is Fulmen (Fm). You make it from fuel, store it in batteries, send it down wires and use it to run machines, colliders and finally a fusion reactor.\n\nPick a chapter on the right, or turn the pages with the arrows, the arrow keys or the mouse wheel."
+  },
+  "chapters": [
+    {
+      "title": "Fulgurite",
+      "icon": "fulguritefusion:raw_fulgurite",
+      "pages": [
+        {
+          "title": "Glass made by lightning",
+          "items": [
+            "fulguritefusion:raw_fulgurite",
+            "minecraft:lightning_rod",
+            "minecraft:sand"
+          ],
+          "text": "When lightning strikes sand, it fuses a vein of Raw Fulgurite down into the ground.\n\nA lightning rod standing on a block passes its strike to the block below it, so a rod on sand grows fulgurite on demand. Stand rods on sand and wait for a thunderstorm."
+        },
+        {
+          "title": "Mining it",
+          "items": [
+            "fulguritefusion:fulgurite_shard",
+            "fulguritefusion:fulgurite"
+          ],
+          "recipe": "fulguritefusion:fulgurite",
+          "text": "Mine Raw Fulgurite for 4-8 Fulgurite Shards (Silk Touch gives the block itself).\n\nNine shards craft into two Fulgurite, the mod's main material."
+        },
+        {
+          "title": "Fulmen (Fm)",
+          "text": "Fm is the mod's power. Generators push it into machines touching them, batteries store it, and wires carry it between Machine Connectors.\n\nRates are in Fm per tick (Fm/t); there are 20 ticks in a second."
+        }
+      ]
+    },
+    {
+      "title": "Storm Furnaces",
+      "icon": "fulguritefusion:storm_furnace",
+      "pages": [
+        {
+          "title": "Your first generator",
+          "items": [
+            "fulguritefusion:storm_furnace",
+            "fulguritefusion:enhanced_storm_furnace",
+            "fulguritefusion:charged_storm_furnace"
+          ],
+          "text": "Strike a vanilla furnace with lightning (a lightning rod on top works) and it becomes a Weak Storm Furnace.\n\nIt burns fuel into Fm and pushes it into machines touching any face except its front."
+        },
+        {
+          "title": "Fuel",
+          "text": "Every fuel is worth a fixed amount of Fm: one coal is 5,120 Fm. Other fuels scale with how long they burn in a normal furnace.\n\nHigher tiers don't get more out of a fuel, they deliver it faster:\n Weak: 16 Fm/t\n Enhanced: 32 Fm/t\n Charged: 64 Fm/t"
+        },
+        {
+          "title": "Grounding",
+          "text": "An ungrounded Storm Furnace builds up static and shocks players nearby. The shock gets stronger with each tier.\n\nGround it with three lightning rods stacked straight down under the furnace. Its menu shows whether it's grounded."
+        },
+        {
+          "title": "Upgrade ritual",
+          "text": "Lightning upgrades a Storm Furnace one tier if the right offerings are in place. Blocks go against all four side faces; items are dropped on top.\n\nWeak to Enhanced: 4 copper blocks, 2 Charged Spark Cells, 1 diamond.\n\nEnhanced to Charged: 4 gold blocks, 6 Charged Spark Cells, 6 netherite ingots.\n\nIf anything is missing, nothing upgrades, and the lightning will likely burn your offering."
+        }
+      ]
+    },
+    {
+      "title": "Spark Cells",
+      "icon": "fulguritefusion:spark_cell",
+      "pages": [
+        {
+          "title": "Bottled power",
+          "items": [
+            "fulguritefusion:empty_spark_cell",
+            "fulguritefusion:spark_cell",
+            "fulguritefusion:charged_spark_cell",
+            "fulguritefusion:overcharged_spark_cell"
+          ],
+          "recipe": "fulguritefusion:empty_spark_cell",
+          "text": "Empty Spark Cells hold a little Fm. They're used in recipes, the ritual and the colliders."
+        },
+        {
+          "title": "Fulgurite Charger",
+          "items": [
+            "fulguritefusion:fulgurite_charger"
+          ],
+          "recipe": "fulguritefusion:fulgurite_charger",
+          "text": "Charges Empty Spark Cells: 1,280 Fm each, drawing 16 Fm/t (4 seconds a cell).\n\nIt passes power on to machines touching it, so it can sit in a daisy chain."
+        },
+        {
+          "title": "Stronger cells",
+          "text": "Charged and Overcharged Spark Cells are made in the Storm Collider:\n\nSpark Cell + Redstone Block = Charged Spark Cell\n\nCharged Spark Cell + Arc Core = Overcharged Spark Cell"
+        }
+      ]
+    },
+    {
+      "title": "Storing & Moving Power",
+      "icon": "fulguritefusion:storm_battery",
+      "pages": [
+        {
+          "title": "Storm Battery",
+          "items": [
+            "fulguritefusion:storm_battery"
+          ],
+          "recipe": "fulguritefusion:storm_battery",
+          "text": "Holds 64,000 Fm. Power comes in on any face and goes out to any touching machine.\n\nTouching batteries form a bank (up to 6) that fills and drains as one, with one big gauge across the whole bank."
+        },
+        {
+          "title": "Machine Connector",
+          "items": [
+            "fulguritefusion:machine_connector"
+          ],
+          "recipe": "fulguritefusion:machine_connector",
+          "text": "Sticks to any face of any block, like a torch.\n\nOn a machine it links that machine to a wire network. On a plain block (fence, wall, log) it's a relay, so you can build power poles. On a multiblock machine only the power port takes one.\n\nRight-click it with an empty hand to see the network's status."
+        },
+        {
+          "title": "Wires",
+          "items": [
+            "fulguritefusion:raw_wire",
+            "fulguritefusion:insulated_wire",
+            "fulguritefusion:heavy_wire"
+          ],
+          "recipe": "fulguritefusion:insulated_wire",
+          "text": "Wire Rolls string hanging wires between connectors: use the roll on one connector, then the next.\n\nRaw Wire: 16 blocks. Bare copper: carrying power, it shocks creatures in water nearby.\nInsulated Wire: 16 blocks, safe.\nHeavy Wire: 32 blocks.\n\nA network can feed up to 8 machines."
+        },
+        {
+          "title": "Daisy chains",
+          "text": "Machines touching each other pass power along, in any mix of types. A chain stops after 8 machines.\n\nBatteries don't pass power through chains; they feed what they touch."
+        },
+        {
+          "title": "Converters",
+          "items": [
+            "fulguritefusion:fe_converter",
+            "fulguritefusion:eu_converter"
+          ],
+          "recipe": "fulguritefusion:fe_converter",
+          "text": "FE Converter: Fm in, Forge Energy out of the front (1 Fm = 10 FE).\n\nUniversal EU Converter: Fm in on any side, EU out of the front. It matches the voltage of the GregTech or Modern Industrialization cable or machine on its front."
+        }
+      ]
+    },
+    {
+      "title": "Processing Machines",
+      "icon": "fulguritefusion:press",
+      "pages": [
+        {
+          "title": "Multiblock machines",
+          "items": [
+            "fulguritefusion:press",
+            "fulguritefusion:arc_furnace",
+            "fulguritefusion:wire_extruder",
+            "fulguritefusion:kiln",
+            "fulguritefusion:crusher"
+          ],
+          "text": "Each machine is a cube of Arc Casings with a controller on the front face, bottom row.\n\nSmall (2x2x2): Press, Arc Furnace, Wire Extruder. The controller is at the front-left bottom.\n\nLarge (3x3x3): Kiln, Crusher. The controller is at the front-centre bottom."
+        },
+        {
+          "title": "Arc Casings",
+          "items": [
+            "fulguritefusion:crude_arc_casing",
+            "fulguritefusion:tempered_arc_casing",
+            "fulguritefusion:charged_arc_casing",
+            "fulguritefusion:prime_arc_casing"
+          ],
+          "recipe": "fulguritefusion:crude_arc_casing",
+          "text": "A machine runs at the tier of its lowest casing. Each tier runs twice as fast as the one before:\n Crude 1x, Tempered 2x, Charged 4x, Prime 8x."
+        },
+        {
+          "title": "Ports",
+          "text": "Power port: top layer, at the back. A Machine Connector goes on it.\n\nInput port: top layer, at the front. A hopper above fills the machine.\n\nOutput port: bottom layer, at the back. A hopper below (or a pipe beside) empties it.\n\nRight-click any part of the machine to open its menu."
+        },
+        {
+          "title": "What they make",
+          "items": [
+            "fulguritefusion:copper_sheet",
+            "fulguritefusion:iron_sheet",
+            "fulguritefusion:raw_wire",
+            "fulguritefusion:coil_segment",
+            "fulguritefusion:crushed_iron"
+          ],
+          "text": "Press: ingots into Copper, Iron and Gold Sheets.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire.\n\nKiln: 2 Fulgurite into a Coil Segment.\n\nArc Furnace: anything a furnace smelts.\n\nCrusher: raw ore into 2 crushed ore (smelt it into ingots)."
+        },
+        {
+          "recipe": "fulguritefusion:press",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "title": "Mini Collider",
+      "icon": "fulguritefusion:mini_collider",
+      "pages": [
+        {
+          "title": "The collider ring",
+          "items": [
+            "fulguritefusion:fulgurite_ring",
+            "fulguritefusion:collider_input",
+            "fulguritefusion:collider_injector",
+            "fulguritefusion:mini_collider"
+          ],
+          "text": "A 7x7 ring, one layer, with the collider block in the middle:\n\n 21 Fulgurite Ring blocks round the edge\n 1 Collider Input in the middle of one side\n 2 Collider Injectors in the middle of the two sides next to it\n the fourth side's middle is a ring block"
+        },
+        {
+          "title": "A shot",
+          "text": "Two Spark Cells leave the input in opposite directions, run one full lap of the ring, then carry on to the first injector they reach, which fires them into the middle to collide.\n\nIn the Mini Collider each collision releases 5,120 Fm over 40 seconds. Power comes out of the top: a machine or battery on top, or a Machine Connector.\n\nRight-click any part of the ring for its menu."
+        },
+        {
+          "recipe": "fulguritefusion:mini_collider",
+          "text": ""
+        },
+        {
+          "recipe": "fulguritefusion:fulgurite_ring",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "title": "Storm Collider",
+      "icon": "fulguritefusion:storm_collider",
+      "pages": [
+        {
+          "title": "Pairing machine",
+          "items": [
+            "fulguritefusion:storm_collider"
+          ],
+          "recipe": "fulguritefusion:storm_collider",
+          "text": "Swap the Storm Collider in for the Mini Collider and the ring becomes a pairing machine.\n\nEach injector holds one material; every shot carries one from each into the middle and the pair decides the result. It costs 10,000 Fm a shot, fed from any side or a connector on top.\n\nProducts come out of the bottom into a hopper or pipe, or sneak + right-click to take them."
+        },
+        {
+          "title": "Crafting pairs",
+          "items": [
+            "fulguritefusion:refined_fulgurite",
+            "fulguritefusion:prime_spark",
+            "fulguritefusion:charged_spark_cell",
+            "fulguritefusion:overcharged_spark_cell"
+          ],
+          "text": "Fulgurite + Fulgurite = Refined Fulgurite\n\nPrime Spark Fragment + Prime Spark Fragment = Prime Spark\n\nSpark Cell + Redstone Block = Charged Spark Cell\n\nCharged Spark Cell + Arc Core = Overcharged Spark Cell"
+        },
+        {
+          "title": "Fusion Fuel",
+          "items": [
+            "fulguritefusion:fusion_fuel"
+          ],
+          "text": "Pair two exotic materials and the collision makes a Fusion Fuel capsule for the Fusion Reactor, sometimes with a byproduct.\n\nThis is the safe way to find out what a pairing does: bad results here only shock, smoke or knock back. They never break blocks."
+        }
+      ]
+    },
+    {
+      "title": "Exotic Materials",
+      "icon": "fulguritefusion:aurora_dust",
+      "pages": [
+        {
+          "title": "The twelve",
+          "items": [
+            "fulguritefusion:aurora_dust",
+            "fulguritefusion:sunmote",
+            "fulguritefusion:abyssal_nacre",
+            "fulguritefusion:soul_frost",
+            "fulguritefusion:echo_resin",
+            "fulguritefusion:gale_core",
+            "fulguritefusion:stormwing_plume",
+            "fulguritefusion:null_scale",
+            "fulguritefusion:lumen_gel",
+            "fulguritefusion:cinder_heart",
+            "fulguritefusion:wither_ash",
+            "fulguritefusion:struck_spore"
+          ],
+          "text": "Twelve rare materials, each with its own energy. Any two can be paired, 78 pairings in all, and each has its own result.\n\nThe Stormwing Plume comes from Stormwings."
+        },
+        {
+          "title": "Pairing results",
+          "text": "Fizzle: no reaction, wasted.\nSteady: reliable power.\nStrong: lots of power.\nJackpot: huge power, sometimes a rare byproduct.\nUnstable: big but spiky; shocks.\nBad: poor power, smoke and harm.\nCatastrophic: an explosion, and in the reactor, real damage.\nWildcard: Struck Spore pairings roll a different result each time."
+        },
+        {
+          "title": "Learning them",
+          "text": "Pairings you've made are remembered, so you learn which are safe. Try new pairings in the Storm Collider first: there, a bad result can't wreck anything."
+        }
+      ]
+    },
+    {
+      "title": "Stormwings",
+      "icon": "fulguritefusion:stormwing_plume",
+      "pages": [
+        {
+          "title": "Storm eagles",
+          "items": [
+            "fulguritefusion:stormwing_plume",
+            "fulguritefusion:molted_plume",
+            "fulguritefusion:stormwing_nest"
+          ],
+          "text": "Great storm birds that nest on the high peaks: jagged, frozen and stony.\n\nIn clear or rainy weather they sit calmly on their nests. In a thunderstorm they circle and attack any player they see, and once they fight you they don't give up.\n\nHurt and angry, they dive with lightning."
+        },
+        {
+          "title": "Plumes and guards",
+          "text": "Hitting a Stormwing can shake loose a Stormwing Plume.\n\nA bird sitting on its nest sheds Molted Plumes into the bowl now and then.\n\nEvery so often a Stormwing flies off to hunt. While it's away an Arc Serpent guards the nest."
+        },
+        {
+          "title": "Storm Caller",
+          "items": [
+            "fulguritefusion:storm_caller"
+          ],
+          "recipe": "fulguritefusion:storm_caller",
+          "text": "Hold right-click for 2 seconds to call a thunderstorm (5 minutes). It costs a Charged Spark Cell, and only works from clear skies under open sky.\n\nAny thunderstorm wakes the Stormwings up."
+        },
+        {
+          "title": "Eggs",
+          "items": [
+            "fulguritefusion:stormwing_egg"
+          ],
+          "text": "About one nest in ten holds a Stormwing Egg.\n\nAn egg only warms beside a running Storm Collider, and hatches after 20-40 minutes of it. Whatever the collider fires while the egg warms shapes the bird inside, and risky pairings can hatch something wild."
+        },
+        {
+          "title": "Hatchlings",
+          "text": "A hatchling can't fly yet: it walks, leaps and glides. It grows up after one Minecraft day.\n\nA loyal hatchling follows the player who placed the egg. Right-click it with an empty hand to make it stay or follow; it keeps that when it grows up. A grown loyal bird follows you, sits on command and defends you.\n\nA feral one runs from everyone and grows into a dangerous bird."
+        }
+      ]
+    },
+    {
+      "title": "Fusion Reactor: Build",
+      "icon": "fulguritefusion:fusion_collider",
+      "pages": [
+        {
+          "title": "Overview",
+          "items": [
+            "fulguritefusion:fusion_collider",
+            "fulguritefusion:reinforced_fulgurite",
+            "fulguritefusion:fulgurite_blast_glass",
+            "fulguritefusion:blast_chamber_frame"
+          ],
+          "text": "The Fusion Reactor fires two fuels round two huge rings and smashes them together in a blast chamber, for enormous amounts of Fm.\n\nIt has four parts: the blast chamber with the Fusion Collider in its middle, the inner ring, the outer ring and the control console.\n\nEvery part is explosion-proof. Right-click the Fusion Collider to see what's missing."
+        },
+        {
+          "title": "Blast chamber",
+          "items": [
+            "fulguritefusion:blast_chamber_frame",
+            "fulguritefusion:fulgurite_blast_glass"
+          ],
+          "recipe": "fulguritefusion:blast_chamber_frame",
+          "text": "A hollow 5x5x5 cube with the Fusion Collider in the very middle.\n\nEdges: Blast Chamber Frame. Faces: Fulgurite Blast Glass. Leave the middle block of two opposite side faces open (east and west, or north and south): that's where the beams come in.\n\nOnce it's right it forms on its own into an armoured sphere with portholes."
+        },
+        {
+          "title": "The ring tubes",
+          "items": [
+            "fulguritefusion:reinforced_fulgurite",
+            "fulguritefusion:fulgurite_blast_glass"
+          ],
+          "recipe": "fulguritefusion:reinforced_fulgurite",
+          "text": "Both rings are the same diamond-shaped tube running round a square channel: glass at the four tips (top, bottom, inside, outside), Reinforced Fulgurite on the four diagonals, and air down the middle.\n\nThe inner ring's channel is 9 blocks out from the collider, the outer ring's 44 blocks out.\n\nWhen everything is right the tubes form into smooth glowing rings."
+        },
+        {
+          "title": "Inner ring parts",
+          "items": [
+            "fulguritefusion:fusion_injector",
+            "fulguritefusion:receiver_portal"
+          ],
+          "recipe": "fulguritefusion:fusion_injector",
+          "text": "Two Fusion Injectors on the inner ring's inside face, 7 blocks out from the collider, in line with the chamber's open faces, fronts facing the chamber.\n\nTwo Receiver Portals on its outside face, at opposite corners, at the end of a straight side."
+        },
+        {
+          "title": "Outer ring parts",
+          "items": [
+            "fulguritefusion:transfer_portal",
+            "fulguritefusion:ring_injection_port"
+          ],
+          "recipe": "fulguritefusion:transfer_portal",
+          "text": "Two Transfer Portals on the outer ring's inside face, each straight in line with a Receiver Portal. The charge jumps across the open air between them, so keep that gap clear.\n\nTwo Ring Injection Ports on the outside face at one corner, each in line with the channel of the other side. They replace the middle outer glass there."
+        },
+        {
+          "recipe": "fulguritefusion:receiver_portal",
+          "text": ""
+        },
+        {
+          "recipe": "fulguritefusion:ring_injection_port",
+          "text": ""
+        },
+        {
+          "title": "Control console",
+          "items": [
+            "fulguritefusion:reactor_console",
+            "fulguritefusion:console_casing",
+            "fulguritefusion:console_power_port",
+            "fulguritefusion:console_data_port",
+            "fulguritefusion:console_fuel_input"
+          ],
+          "recipe": "fulguritefusion:reactor_console",
+          "text": "7 wide, 3 tall, 1 deep. Place the Reactor Control Console (control panel) first, facing you, in the middle of the middle row. Seen from the front:\n\nTop: casings all along.\nMiddle: Power Port, casing, casing, CONTROL PANEL, casing, casing, Power Port.\nBottom: casing, Fuel Input, Data Port, casing, Data Port, Fuel Input, casing.\n\nOnce formed, the casings turn into the frame, power gauge, displays and fuel screens."
+        },
+        {
+          "title": "Data cables",
+          "items": [
+            "fulguritefusion:data_cable"
+          ],
+          "recipe": "fulguritefusion:data_cable",
+          "text": "Run a Data Cable from each Console Data Port to a Ring Injection Port, one cable per port. The left port carries fuel 1, the right fuel 2. Keep the two cables apart, and each under 128 blocks.\n\nThe cable is a free-standing metal pipe with smooth bends.\n\nThe rings only form once both cables are connected."
+        }
+      ]
+    },
+    {
+      "title": "Fusion Reactor: Running",
+      "icon": "fulguritefusion:fusion_fuel",
+      "pages": [
+        {
+          "title": "Fuel",
+          "items": [
+            "fulguritefusion:fusion_fuel",
+            "fulguritefusion:console_fuel_input"
+          ],
+          "text": "Each fuel slot takes a Fusion Fuel capsule or a raw exotic material. Load them in the console's menu, or with hoppers or pipes into the Fuel Inputs from the front or back.\n\nTwo capsules: both capsules' power added, then doubled. The best.\nTwo raw materials: their pairing's normal power.\nOne of each: in between."
+        },
+        {
+          "title": "A run",
+          "text": "Each run needs an 8,000 Fm startup charge. The console takes it from a battery or generator behind a power port.\n\nPress Start (or turn Auto on). The two charges fire from the Ring Injection Ports and race opposite ways round the outer ring for 6 laps, 30 seconds, speeding up all the way.\n\nThey jump from the Transfer Portals to the Receiver Portals, scream through 6 laps of the inner ring, and are fired into the chamber to collide."
+        },
+        {
+          "title": "Power out",
+          "text": "The collision's Fm fills the console's store (2,000,000 Fm). The power ports push it out of their backs, 2,048 Fm/t each, into a battery or machine behind them.\n\nThe menu shows the store, the run's progress and the last result."
+        },
+        {
+          "title": "When it goes wrong",
+          "text": "A cut data cable: that injector gets no fuel. The other charge fires anyway, finds nothing to hit, and is lost.\n\nSomething in a portal beam's path: that charge fizzles out.\n\nUnstable, Bad and Catastrophic fuels unleash shocks, smoke, withering or an explosion. A Catastrophic run also blasts several ring and chamber blocks out, and the reactor stays down until you replace them.\n\nA lost run turns Auto off."
+        }
+      ]
+    }
+  ]
+}

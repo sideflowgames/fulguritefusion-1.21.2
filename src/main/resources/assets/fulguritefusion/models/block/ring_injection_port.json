@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "fulguritefusion:block/ring_injection_port_front",
+    "side": "fulguritefusion:block/reinforced_fulgurite",
+    "top": "fulguritefusion:block/reinforced_fulgurite"
+  }
+}

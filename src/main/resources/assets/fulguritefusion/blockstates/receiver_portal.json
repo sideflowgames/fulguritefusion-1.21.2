@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=north,formed=false": {
+      "model": "fulguritefusion:block/receiver_portal"
+    },
+    "facing=north,formed=true": {
+      "model": "fulguritefusion:block/reactor_hidden"
+    },
+    "facing=east,formed=false": {
+      "model": "fulguritefusion:block/receiver_portal",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "fulguritefusion:block/reactor_hidden"
+    },
+    "facing=south,formed=false": {
+      "model": "fulguritefusion:block/receiver_portal",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "fulguritefusion:block/reactor_hidden"
+    },
+    "facing=west,formed=false": {
+      "model": "fulguritefusion:block/receiver_portal",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "fulguritefusion:block/reactor_hidden"
+    }
+  }
+}

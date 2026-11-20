@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "HPH",
+    "MCM",
+    "HCH"
+  ],
+  "key": {
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    },
+    "P": {
+      "item": "fulguritefusion:prime_spark"
+    },
+    "M": {
+      "item": "fulguritefusion:mini_collider"
+    },
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:fusion_collider",
+    "count": 1
+  }
+}

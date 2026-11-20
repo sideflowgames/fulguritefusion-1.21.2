@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "DDD",
+    "DFD",
+    "DDD"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite_shard"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:reinforced_fulgurite",
+    "count": 8
+  }
+}

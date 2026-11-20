@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " C ",
+    "RIR",
+    " H "
+  ],
+  "key": {
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "R": {
+      "item": "fulguritefusion:reinforced_fulgurite"
+    },
+    "I": {
+      "item": "fulguritefusion:collider_injector"
+    },
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:ring_injection_port",
+    "count": 1
+  }
+}

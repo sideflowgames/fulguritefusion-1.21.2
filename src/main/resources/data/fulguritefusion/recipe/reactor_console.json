@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS",
+    "CKC",
+    "SHS"
+  ],
+  "key": {
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "K": {
+      "item": "minecraft:comparator"
+    },
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:reactor_console",
+    "count": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:console_casing"
+    },
+    {
+      "item": "fulguritefusion:data_cable"
+    },
+    {
+      "item": "minecraft:comparator"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:console_data_port",
+    "count": 1
+  }
+}

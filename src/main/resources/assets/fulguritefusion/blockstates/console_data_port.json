@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,formed=false": {
+      "model": "fulguritefusion:block/console_data_port"
+    },
+    "facing=north,formed=true": {
+      "model": "fulguritefusion:block/console_data_port"
+    },
+    "facing=east,formed=false": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 90
+    },
+    "facing=south,formed=false": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 180
+    },
+    "facing=west,formed=false": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "fulguritefusion:block/console_data_port",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "variants": {
+    "facing=north,part=none": {
+      "model": "fulguritefusion:block/console_casing"
+    },
+    "facing=north,part=frame": {
+      "model": "fulguritefusion:block/console_frame"
+    },
+    "facing=north,part=gauge_top": {
+      "model": "fulguritefusion:block/console_gauge_top"
+    },
+    "facing=north,part=gauge_bottom": {
+      "model": "fulguritefusion:block/console_gauge_bottom"
+    },
+    "facing=north,part=display": {
+      "model": "fulguritefusion:block/console_display"
+    },
+    "facing=north,part=fuel_screen_top": {
+      "model": "fulguritefusion:block/console_fuel_screen_top"
+    },
+    "facing=north,part=fuel_screen_bottom": {
+      "model": "fulguritefusion:block/console_fuel_screen_bottom"
+    },
+    "facing=east,part=none": {
+      "model": "fulguritefusion:block/console_casing",
+      "y": 90
+    },
+    "facing=east,part=frame": {
+      "model": "fulguritefusion:block/console_frame",
+      "y": 90
+    },
+    "facing=east,part=gauge_top": {
+      "model": "fulguritefusion:block/console_gauge_top",
+      "y": 90
+    },
+    "facing=east,part=gauge_bottom": {
+      "model": "fulguritefusion:block/console_gauge_bottom",
+      "y": 90
+    },
+    "facing=east,part=display": {
+      "model": "fulguritefusion:block/console_display",
+      "y": 90
+    },
+    "facing=east,part=fuel_screen_top": {
+      "model": "fulguritefusion:block/console_fuel_screen_top",
+      "y": 90
+    },
+    "facing=east,part=fuel_screen_bottom": {
+      "model": "fulguritefusion:block/console_fuel_screen_bottom",
+      "y": 90
+    },
+    "facing=south,part=none": {
+      "model": "fulguritefusion:block/console_casing",
+      "y": 180
+    },
+    "facing=south,part=frame": {
+      "model": "fulguritefusion:block/console_frame",
+      "y": 180
+    },
+    "facing=south,part=gauge_top": {
+      "model": "fulguritefusion:block/console_gauge_top",
+      "y": 180
+    },
+    "facing=south,part=gauge_bottom": {
+      "model": "fulguritefusion:block/console_gauge_bottom",
+      "y": 180
+    },
+    "facing=south,part=display": {
+      "model": "fulguritefusion:block/console_display",
+      "y": 180
+    },
+    "facing=south,part=fuel_screen_top": {
+      "model": "fulguritefusion:block/console_fuel_screen_top",
+      "y": 180
+    },
+    "facing=south,part=fuel_screen_bottom": {
+      "model": "fulguritefusion:block/console_fuel_screen_bottom",
+      "y": 180
+    },
+    "facing=west,part=none": {
+      "model": "fulguritefusion:block/console_casing",
+      "y": 270
+    },
+    "facing=west,part=frame": {
+      "model": "fulguritefusion:block/console_frame",
+      "y": 270
+    },
+    "facing=west,part=gauge_top": {
+      "model": "fulguritefusion:block/console_gauge_top",
+      "y": 270
+    },
+    "facing=west,part=gauge_bottom": {
+      "model": "fulguritefusion:block/console_gauge_bottom",
+      "y": 270
+    },
+    "facing=west,part=display": {
+      "model": "fulguritefusion:block/console_display",
+      "y": 270
+    },
+    "facing=west,part=fuel_screen_top": {
+      "model": "fulguritefusion:block/console_fuel_screen_top",
+      "y": 270
+    },
+    "facing=west,part=fuel_screen_bottom": {
+      "model": "fulguritefusion:block/console_fuel_screen_bottom",
+      "y": 270
+    }
+  }
+}

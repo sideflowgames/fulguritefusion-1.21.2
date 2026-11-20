@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "fulguritefusion:block/console_fuel_screen_bottom",
+    "side": "fulguritefusion:block/console_casing",
+    "top": "fulguritefusion:block/console_casing"
+  }
+}

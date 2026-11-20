@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "fulguritefusion:block/console_casing",
+    "north": "fulguritefusion:block/console_power_port_indicator",
+    "south": "fulguritefusion:block/console_power_port_front",
+    "east": "fulguritefusion:block/console_casing",
+    "west": "fulguritefusion:block/console_casing",
+    "up": "fulguritefusion:block/console_casing",
+    "down": "fulguritefusion:block/console_casing"
+  }
+}

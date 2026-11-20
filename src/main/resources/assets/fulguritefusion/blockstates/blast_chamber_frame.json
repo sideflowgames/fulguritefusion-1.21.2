@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "fulguritefusion:block/blast_chamber_frame"
+    },
+    "formed=true": {
+      "model": "fulguritefusion:block/reactor_hidden"
+    }
+  }
+}

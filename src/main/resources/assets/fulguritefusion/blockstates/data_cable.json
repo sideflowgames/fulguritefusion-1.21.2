@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "fulguritefusion:block/data_cable"
+      }
+    }
+  ]
+}

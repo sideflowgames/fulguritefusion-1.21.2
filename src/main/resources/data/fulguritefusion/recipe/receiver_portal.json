@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " E ",
+    "RIR",
+    " C "
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "R": {
+      "item": "fulguritefusion:reinforced_fulgurite"
+    },
+    "I": {
+      "item": "fulguritefusion:collider_injector"
+    },
+    "C": {
+      "item": "fulguritefusion:charged_spark_cell"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:receiver_portal",
+    "count": 1
+  }
+}

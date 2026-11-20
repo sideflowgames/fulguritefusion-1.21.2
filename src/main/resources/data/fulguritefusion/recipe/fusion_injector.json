@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RCR",
+    "CIC",
+    "RHR"
+  ],
+  "key": {
+    "R": {
+      "item": "fulguritefusion:reinforced_fulgurite"
+    },
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "I": {
+      "item": "fulguritefusion:collider_injector"
+    },
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:fusion_injector",
+    "count": 1
+  }
+}
