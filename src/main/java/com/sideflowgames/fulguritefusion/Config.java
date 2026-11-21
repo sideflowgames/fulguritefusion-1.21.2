@@ -131,16 +131,16 @@ public class Config {
 
         BUILDER.comment("Mini Collider").push("collider");
         COLLIDER_FM_PER_SHOT = BUILDER.comment("Fm released by one collision (two Spark Cells).")
-                .defineInRange("colliderFmPerShot", 5120, 1, 1000000);
+                .defineInRange("colliderFmPerShot", 20480, 1, 1000000);
         COLLIDER_RELEASE_TICKS = BUILDER.comment("Ticks over which a collision's Fm is released (20 ticks = 1 second).")
-                .defineInRange("colliderReleaseTicks", 800, 1, 72000);
+                .defineInRange("colliderReleaseTicks", 160, 1, 72000);
         STORM_FM_PER_SHOT = BUILDER.comment("Fm the Storm Collider uses for each pairing shot.")
-                .defineInRange("stormFmPerShot", 10000, 0, 1000000);
+                .defineInRange("stormFmPerShot", 4096, 0, 1000000);
         BUILDER.pop();
 
         BUILDER.comment("Converters (one-way, from Fm to other mods' power)").push("converters");
         FE_PER_FM = BUILDER.comment("Forge Energy (FE) produced per Fm.")
-                .defineInRange("fePerFm", 10, 1, 10000);
+                .defineInRange("fePerFm", 4, 1, 10000);
         EU_PER_FM = BUILDER.comment("EU produced per Fm.")
                 .defineInRange("euPerFm", 1, 1, 10000);
         EU_LV = BUILDER.comment("EU per tick for the LV tier.").defineInRange("euLv", 32, 1, Integer.MAX_VALUE);
@@ -151,13 +151,13 @@ public class Config {
 
         BUILDER.comment("Fusion Reactor").push("reactor");
         REACTOR_MAX_FM = BUILDER.comment("How much Fm the Reactor Control Console can store.")
-                .defineInRange("reactorMaxFm", 2_000_000, 10_000, Integer.MAX_VALUE);
+                .defineInRange("reactorMaxFm", 16_000_000, 10_000, Integer.MAX_VALUE);
         REACTOR_STARTUP_FM = BUILDER.comment("Fm needed to start a fusion run (taken from the console's store, or pulled from a battery behind a power port).")
                 .defineInRange("reactorStartupFm", 8_000, 0, 1_000_000);
         REACTOR_FM_MULTIPLIER = BUILDER.comment("Multiplies every fusion run's Fm yield.")
                 .defineInRange("reactorFmMultiplier", 1.0, 0.0, 100.0);
         REACTOR_OUTPUT_RATE = BUILDER.comment("Fm per tick each Console Power Port pushes into the block behind it.")
-                .defineInRange("reactorOutputRate", 2048, 1, 1_000_000);
+                .defineInRange("reactorOutputRate", 4096, 1, 1_000_000);
         BUILDER.pop();
 
         BUILDER.comment("Mobs").push("mobs");

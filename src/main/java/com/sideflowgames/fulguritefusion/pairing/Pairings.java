@@ -26,7 +26,9 @@ public final class Pairings {
             "Gale Core", "Stormwing Plume", "Null Scale", "Lumen Gel", "Cinder Heart", "Wither Ash", "Struck Spore"};
     public static final int[] ENERGY = {2, 4, 3, 3, 4, 4, 5, 1, 2, 5, 3, 0};
     public static final int STRUCK_SPORE = 11;
-    public static final int FM_PER_ENERGY = 2048;
+    // Fm per point of Energy in the big reactor. Balanced so a run of two Strong capsules averages about
+    // 4,000 Fm/t over its 37 seconds (Steady pairs about 1,000, a Jackpot pair about 6,000).
+    public static final int FM_PER_ENERGY = 49152;
 
     public record Pairing(int id, int a, int b, String name, Tier tier, String effect) {
         public boolean involves(int material) {

@@ -129,7 +129,7 @@
             "fulguritefusion:eu_converter"
           ],
           "recipe": "fulguritefusion:fe_converter",
-          "text": "FE Converter: Fm in, Forge Energy out of the front (1 Fm = 10 FE).\n\nUniversal EU Converter: Fm in on any side, EU out of the front. It matches the voltage of the GregTech or Modern Industrialization cable or machine on its front."
+          "text": "FE Converter: Fm in, Forge Energy out of the front (1 Fm = 4 FE).\n\nUniversal EU Converter: Fm in on any side, EU out of the front. It matches the voltage of the GregTech or Modern Industrialization cable or machine on its front."
         }
       ]
     },
@@ -196,7 +196,7 @@
         },
         {
           "title": "A shot",
-          "text": "Two Spark Cells leave the input in opposite directions, run one full lap of the ring, then carry on to the first injector they reach, which fires them into the middle to collide.\n\nIn the Mini Collider each collision releases 5,120 Fm over 40 seconds. Power comes out of the top: a machine or battery on top, or a Machine Connector.\n\nRight-click any part of the ring for its menu."
+          "text": "Two Spark Cells leave the input in opposite directions, run one full lap of the ring, then carry on to the first injector they reach, which fires them into the middle to collide.\n\nIn the Mini Collider each collision releases 20,480 Fm over 8 seconds. Power comes out of the top: a machine or battery on top, or a Machine Connector.\n\nRight-click any part of the ring for its menu."
         },
         {
           "recipe": "fulguritefusion:mini_collider",
@@ -218,7 +218,7 @@
             "fulguritefusion:storm_collider"
           ],
           "recipe": "fulguritefusion:storm_collider",
-          "text": "Swap the Storm Collider in for the Mini Collider and the ring becomes a pairing machine.\n\nEach injector holds one material; every shot carries one from each into the middle and the pair decides the result. It costs 10,000 Fm a shot, fed from any side or a connector on top.\n\nProducts come out of the bottom into a hopper or pipe, or sneak + right-click to take them."
+          "text": "Swap the Storm Collider in for the Mini Collider and the ring becomes a pairing machine.\n\nEach injector holds one material; every shot carries one from each into the middle and the pair decides the result. It costs 4,096 Fm a shot, fed from any side or a connector on top.\n\nProducts come out of the bottom into a hopper or pipe, or sneak + right-click to take them."
         },
         {
           "title": "Crafting pairs",
@@ -516,7 +516,7 @@
         },
         {
           "title": "Power out",
-          "text": "The collision's Fm fills the console's store (2,000,000 Fm). The power ports push it out of their backs, 2,048 Fm/t each, into a battery or machine behind them.\n\nByproducts come out at twice the Storm Collider's rate, into the console's byproduct slot. Take them in the menu, or put a hopper under a Fuel Input.\n\nThe menu shows the store, the run's progress and the last result."
+          "text": "The collision's Fm fills the console's store (16,000,000 Fm). The power ports push it out of their backs, 4,096 Fm/t each, into a battery or machine behind them.\n\nByproducts come out at twice the Storm Collider's rate, into the console's byproduct slot. Take them in the menu, or put a hopper under a Fuel Input.\n\nThe menu shows the store, the run's progress and the last result."
         },
         {
           "title": "When it goes wrong",
