@@ -63,7 +63,8 @@ public class MiniColliderBlockEntity extends ColliderCoreBlockEntity implements 
             changed = true;
         }
         // Power out of the top: the machine above counts as the 2nd in its daisy chain (the collider is 1st).
-        if (fm > 0 && level.getBlockEntity(worldPosition.above()) instanceof FmHandler machine) {
+        if (fm > 0 && level.getBlockEntity(worldPosition.above()) instanceof FmHandler machine
+                && machine.acceptsFrom(net.minecraft.core.Direction.DOWN)) {
             int sent = machine.receiveFmFromChain(Math.min(fm, PUSH_LIMIT), 1);
             if (sent > 0) {
                 fm -= sent;

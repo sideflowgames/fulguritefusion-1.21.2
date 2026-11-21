@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SHS",
+    "HTH",
+    "SHS"
+  ],
+  "key": {
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    },
+    "T": {
+      "item": "fulguritefusion:tempered_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:forge_power_port",
+    "count": 1
+  }
+}

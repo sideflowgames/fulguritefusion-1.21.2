@@ -170,7 +170,7 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
         int pushLimit = rate * 4;
         for (Direction dir : Direction.values()) {
             if (dir == front || be.fm <= 0) continue;
-            if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine) {
+            if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine && machine.acceptsFrom(dir.getOpposite())) {
                 int sent = machine.receiveFmFromChain(Math.min(be.fm, pushLimit), 1);
                 if (sent > 0) {
                     be.fm -= sent;

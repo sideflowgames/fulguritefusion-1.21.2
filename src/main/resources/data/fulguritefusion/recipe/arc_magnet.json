@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "F F",
+    "C C",
+    "CRC"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite_shard"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:arc_magnet",
+    "count": 1
+  }
+}

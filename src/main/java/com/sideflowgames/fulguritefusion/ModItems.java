@@ -94,6 +94,75 @@ public final class ModItems {
     public static final DeferredItem<StormCallerItem> STORM_CALLER = ITEMS.registerItem("storm_caller",
             StormCallerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> MOLTED_PLUME = ITEMS.registerSimpleItem("molted_plume", new Item.Properties());
+    // ---------- Fulgurite tools and sword (early; between diamond and netherite) ----------
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Sword> FULGURITE_SWORD =
+            ITEMS.registerItem("fulgurite_sword", com.sideflowgames.fulguritefusion.item.FulguriteTools.Sword::new,
+                    new Item.Properties().attributes(net.minecraft.world.item.SwordItem.createAttributes(
+                            com.sideflowgames.fulguritefusion.item.FulguriteTools.TIER, 3, -2.4f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Pickaxe> FULGURITE_PICKAXE =
+            ITEMS.registerItem("fulgurite_pickaxe", com.sideflowgames.fulguritefusion.item.FulguriteTools.Pickaxe::new,
+                    new Item.Properties().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                            com.sideflowgames.fulguritefusion.item.FulguriteTools.TIER, 1.0f, -2.8f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Axe> FULGURITE_AXE =
+            ITEMS.registerItem("fulgurite_axe", com.sideflowgames.fulguritefusion.item.FulguriteTools.Axe::new,
+                    new Item.Properties().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                            com.sideflowgames.fulguritefusion.item.FulguriteTools.TIER, 5.0f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Shovel> FULGURITE_SHOVEL =
+            ITEMS.registerItem("fulgurite_shovel", com.sideflowgames.fulguritefusion.item.FulguriteTools.Shovel::new,
+                    new Item.Properties().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                            com.sideflowgames.fulguritefusion.item.FulguriteTools.TIER, 1.5f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Hoe> FULGURITE_HOE =
+            ITEMS.registerItem("fulgurite_hoe", com.sideflowgames.fulguritefusion.item.FulguriteTools.Hoe::new,
+                    new Item.Properties().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                            com.sideflowgames.fulguritefusion.item.FulguriteTools.TIER, -3.5f, 0.0f)));
+    // ---------- Stormforged armor (mid; made in the Storm Forge, runs on stored Fm) ----------
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedArmorItem> STORMFORGED_HELMET =
+            ITEMS.registerItem("stormforged_helmet", p -> new com.sideflowgames.fulguritefusion.item.StormforgedArmorItem(
+                    net.minecraft.world.item.ArmorItem.Type.HELMET, p), new Item.Properties().stacksTo(1).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedArmorItem> STORMFORGED_CHESTPLATE =
+            ITEMS.registerItem("stormforged_chestplate", p -> new com.sideflowgames.fulguritefusion.item.StormforgedArmorItem(
+                    net.minecraft.world.item.ArmorItem.Type.CHESTPLATE, p), new Item.Properties().stacksTo(1).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedArmorItem> STORMFORGED_LEGGINGS =
+            ITEMS.registerItem("stormforged_leggings", p -> new com.sideflowgames.fulguritefusion.item.StormforgedArmorItem(
+                    net.minecraft.world.item.ArmorItem.Type.LEGGINGS, p), new Item.Properties().stacksTo(1).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedArmorItem> STORMFORGED_BOOTS =
+            ITEMS.registerItem("stormforged_boots", p -> new com.sideflowgames.fulguritefusion.item.StormforgedArmorItem(
+                    net.minecraft.world.item.ArmorItem.Type.BOOTS, p), new Item.Properties().stacksTo(1).fireResistant());
+
+    // ---------- Spears ----------
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.SpearItem> FULGURITE_SPEAR = ITEMS.registerItem("fulgurite_spear",
+            com.sideflowgames.fulguritefusion.item.SpearItem::new, new Item.Properties().durability(1800)
+                    .attributes(com.sideflowgames.fulguritefusion.item.SpearItem.attributes(com.sideflowgames.fulguritefusion.item.SpearItem.FULGURITE_MELEE, -2.9f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormSpearItem> STORM_SPEAR = ITEMS.registerItem("storm_spear",
+            com.sideflowgames.fulguritefusion.item.StormSpearItem::new, new Item.Properties().stacksTo(1).fireResistant()
+                    .attributes(com.sideflowgames.fulguritefusion.item.SpearItem.attributes(com.sideflowgames.fulguritefusion.item.StormSpearItem.MELEE, -2.9f)));
+
+    // ---------- Stormforged tools and Storm Blade (mid; forged from Fulgurite gear, run on Fm, never break) ----------
+    private static Item.Properties stormforged() {
+        return new Item.Properties().fireResistant()
+                .component(DataComponents.UNBREAKABLE, new net.minecraft.world.item.component.Unbreakable(false));
+    }
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedTools.Blade> STORM_BLADE = ITEMS.registerItem("storm_blade",
+            com.sideflowgames.fulguritefusion.item.StormforgedTools.Blade::new, stormforged().attributes(net.minecraft.world.item.SwordItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, 4, -2.4f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedTools.Pickaxe> STORMFORGED_PICKAXE = ITEMS.registerItem("stormforged_pickaxe",
+            com.sideflowgames.fulguritefusion.item.StormforgedTools.Pickaxe::new, stormforged().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, 1.0f, -2.8f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedTools.Axe> STORMFORGED_AXE = ITEMS.registerItem("stormforged_axe",
+            com.sideflowgames.fulguritefusion.item.StormforgedTools.Axe::new, stormforged().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, 5.0f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedTools.Shovel> STORMFORGED_SHOVEL = ITEMS.registerItem("stormforged_shovel",
+            com.sideflowgames.fulguritefusion.item.StormforgedTools.Shovel::new, stormforged().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, 1.5f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormforgedTools.Hoe> STORMFORGED_HOE = ITEMS.registerItem("stormforged_hoe",
+            com.sideflowgames.fulguritefusion.item.StormforgedTools.Hoe::new, stormforged().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, -6.0f, 0.0f)));
+
+    // Arc Magnet (early): toggled, no power.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.ArcMagnetItem> ARC_MAGNET =
+            ITEMS.registerItem("arc_magnet", com.sideflowgames.fulguritefusion.item.ArcMagnetItem::new,
+                    new Item.Properties().stacksTo(1));
+
     // Molted Plume Bundle: 4 Molted Plumes tied with string. Goes into the Thunderbond Talisman.
     public static final DeferredItem<Item> MOLTED_PLUME_BUNDLE = ITEMS.registerSimpleItem("molted_plume_bundle", new Item.Properties());
     // Thunderbond Talisman: bonds a Stormwing to its owner so it can be ridden. Used up on bonding.
@@ -192,6 +261,25 @@ public final class ModItems {
                         output.accept(ARC_CORE.get());
                         output.accept(MOLTED_PLUME_BUNDLE.get());
                         output.accept(THUNDERBOND_TALISMAN.get());
+                        output.accept(FULGURITE_SWORD.get());
+                        output.accept(FULGURITE_PICKAXE.get());
+                        output.accept(FULGURITE_AXE.get());
+                        output.accept(FULGURITE_SHOVEL.get());
+                        output.accept(FULGURITE_HOE.get());
+                        output.accept(ARC_MAGNET.get());
+                        output.accept(FULGURITE_SPEAR.get());
+                        for (var gear : java.util.List.of(STORM_BLADE, STORM_SPEAR, STORMFORGED_PICKAXE, STORMFORGED_AXE, STORMFORGED_SHOVEL, STORMFORGED_HOE)) {
+                            ItemStack full = new ItemStack(gear.get());
+                            com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.StormforgedTools.MAX_FM);
+                            output.accept(full);
+                        }
+                        output.accept(ModBlocks.STORM_FORGE_ITEM.get());
+                        output.accept(ModBlocks.FORGE_POWER_PORT_ITEM.get());
+                        for (var armor : java.util.List.of(STORMFORGED_HELMET, STORMFORGED_CHESTPLATE, STORMFORGED_LEGGINGS, STORMFORGED_BOOTS)) {
+                            ItemStack full = new ItemStack(armor.get());
+                            com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.StormforgedArmorItem.MAX_FM);
+                            output.accept(full);
+                        }
                         output.accept(REFINED_FULGURITE.get());
                         output.accept(CHARGED_SPARK_CELL.get());
                         output.accept(OVERCHARGED_SPARK_CELL.get());

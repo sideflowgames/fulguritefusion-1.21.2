@@ -107,6 +107,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
 
     // ---------- Riding tuning ----------
     private static final double RIDE_SPEED = 1.15;        // blocks per tick at full speed (about 23 blocks a second)
+    private static final double SPRINT_BOOST = 1.7;       // Ctrl (sprint key) while flying forward: about 39 blocks a second
     private static final double CLIMB_SPEED = 0.55;       // blocks per tick up (Space) or down (Shift)
     private static final double DIVE_SPEED = 2.0;         // lunge speed during a lightning dive
     private static final int DIVE_LUNGE_TICKS = 10;       // how long the lunge lasts
@@ -121,6 +122,8 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
 
     // Set by the client: +1 while Space is held, -1 while Shift is held, 0 otherwise.
     public static IntSupplier riderVertical = () -> 0;
+    // Set by the client: true while the sprint key (Ctrl) is held.
+    public static java.util.function.BooleanSupplier riderSprint = () -> false;
 
     private long nextRiderDive;          // server: game time the next dive is allowed
     private int strikeDelay;             // server: ticks until a pending dive strike lands (0 = none)
@@ -406,6 +409,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
                 if (forward < 0) forward *= 0.4f; // backing up is slow
                 double rad = Math.toRadians(yaw), sin = Math.sin(rad), cos = Math.cos(rad);
                 double speed = RIDE_SPEED * stormwingVariant().speed;
+                if (forward > 0 && riderSprint.getAsBoolean()) speed *= SPRINT_BOOST;
                 Vec3 want = new Vec3((strafe * cos - forward * sin) * speed, riderVertical.getAsInt() * CLIMB_SPEED,
                         (forward * cos + strafe * sin) * speed);
                 Vec3 now = getDeltaMovement();

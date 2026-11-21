@@ -52,7 +52,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // Data port 1 (left) carries fuel 1 to one Ring Injection Port, data port 2 (right) carries fuel 2 to the other.
 // The console links the reactor (lets the rings form) while both cables are connected; once formed, the reactor
 // stays formed on one cable (that injector just won't get its fuel).
-public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvider {
+public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvider, com.sideflowgames.fulguritefusion.power.FmSource {
     private static final int CHECK_EVERY = 20;
 
     // Layout rows, bottom to top; each is columns -3..3.
@@ -184,9 +184,10 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     private void pushPower() {
         if (fm <= 0) return;
         int rate = Config.REACTOR_OUTPUT_RATE.get();
+        Direction into = front(); // the face of the block behind a port that touches the port
         for (BlockPos p : powerBacks()) {
             if (fm <= 0) break;
-            if (level.getBlockEntity(p) instanceof FmHandler h) {
+            if (level.getBlockEntity(p) instanceof FmHandler h && h.acceptsFrom(into)) {
                 int sent = h.receiveFm((int) Math.min(fm, rate), false);
                 if (sent > 0) {
                     fm -= sent;
@@ -571,6 +572,26 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     }
 
     // Right-clicking any console block shows the console's status.
+    // Wire networks: a Machine Connector on a Console Power Port draws from the console's store.
+    @Override
+    public int extractFm(int max, boolean simulate) {
+        if (!formed) return 0;
+        int out = (int) Math.max(0, Math.min(max, fm));
+        if (!simulate && out > 0) {
+            fm -= out;
+            setChanged();
+        }
+        return out;
+    }
+
+    // The formed console a Console Power Port belongs to, or null.
+    @javax.annotation.Nullable
+    public static ReactorConsoleBlockEntity forPowerPort(Level level, BlockPos port) {
+        ReactorConsoleBlockEntity c = findNear(level, port);
+        if (c == null || !c.formed) return null;
+        return c.spot(-3, 1).equals(port) || c.spot(3, 1).equals(port) ? c : null;
+    }
+
     public static InteractionResult showStatusFrom(Level level, BlockPos pos, Player player) {
         ReactorConsoleBlockEntity console = findNear(level, pos);
         if (console == null) return InteractionResult.PASS;

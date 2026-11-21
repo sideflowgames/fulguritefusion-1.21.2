@@ -58,12 +58,31 @@ public class FulguriteFusionClient {
             if (mc.options.keyShift.isDown()) return -1;
             return 0;
         };
+        StormwingEntity.riderSprint = () -> {
+            Minecraft mc = Minecraft.getInstance();
+            return mc.screen == null && mc.options.keySprint.isDown();
+        };
         NeoForge.EVENT_BUS.addListener(FulguriteFusionClient::onClientTick);
     }
 
     // R while riding a bonded Stormwing: lightning dive. Rebindable under Controls > Fulgurite Fusion.
     public static final KeyMapping STORMWING_DIVE = new KeyMapping("key.fulguritefusion.stormwing_dive",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.fulguritefusion");
+
+    // Spears: a first-person wind-up pose that suits our flat spear sprites.
+    @SubscribeEvent
+    static void onClientExtensions(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
+        event.registerItem(new com.sideflowgames.fulguritefusion.client.SpearHandTransform(),
+                ModItems.FULGURITE_SPEAR.get(), ModItems.STORM_SPEAR.get());
+    }
+
+    // Armor charge HUD, just left of the XP bar.
+    @SubscribeEvent
+    static void onRegisterGuiLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
+        event.registerAbove(net.neoforged.neoforge.client.gui.VanillaGuiLayers.EXPERIENCE_BAR,
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "armor_charge"),
+                com.sideflowgames.fulguritefusion.client.ArmorChargeHud::render);
+    }
 
     @SubscribeEvent
     static void onRegisterKeys(RegisterKeyMappingsEvent event) {
@@ -109,6 +128,7 @@ public class FulguriteFusionClient {
         event.registerBlockEntityRenderer(ModBlocks.FUSION_COLLIDER_BE.get(), FusionColliderRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.DATA_CABLE_BE.get(), DataCableRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONTROLLER_BE.get(), MachineControllerRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.STORM_FORGE_BE.get(), com.sideflowgames.fulguritefusion.client.StormForgeRenderer::new);
         // Ghost build outlines (shown while the block is powered by redstone).
         event.registerBlockEntityRenderer(ModBlocks.REACTOR_CONSOLE_BE.get(),
                 ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::console, 6));
@@ -121,5 +141,6 @@ public class FulguriteFusionClient {
         event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);
         event.registerEntityRenderer(ModEntities.STORMWING_HATCHLING.get(), StormwingHatchlingRenderer::new);
         event.registerEntityRenderer(ModEntities.ARC_SERPENT.get(), ArcSerpentRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPEAR.get(), com.sideflowgames.fulguritefusion.client.SpearRenderer::new);
     }
 }

@@ -35,7 +35,7 @@ public class CreativePowerSourceBlockEntity extends BlockEntity implements FmSou
         for (Direction dir : Direction.values()) {
             int left = be.left();
             if (left <= 0) return;
-            if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine) {
+            if (level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine && machine.acceptsFrom(dir.getOpposite())) {
                 be.used += machine.receiveFmFromChain(left, 1);
             }
         }

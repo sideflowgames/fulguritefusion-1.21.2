@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RXR",
+    " A ",
+    "TTT"
+  ],
+  "key": {
+    "R": {
+      "item": "fulguritefusion:refined_fulgurite"
+    },
+    "X": {
+      "item": "fulguritefusion:charged_spark_cell"
+    },
+    "A": {
+      "item": "minecraft:anvil"
+    },
+    "T": {
+      "item": "fulguritefusion:tempered_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:storm_forge",
+    "count": 1
+  }
+}

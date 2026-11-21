@@ -45,7 +45,8 @@ public final class FmNetwork {
 
     public record Snapshot(BlockPos master, List<BlockPos> connectors, List<RawSpan> rawSpans,
                            List<BlockPos> generators, List<BlockPos> batteries,
-                           List<BlockPos> linkedMachines, Set<BlockPos> unlinkedMachines) {}
+                           List<BlockPos> linkedMachines, Set<BlockPos> unlinkedMachines,
+                           Set<BlockPos> batteryIn, Set<BlockPos> batteryOut) {}
 
     private FmNetwork() {}
 
@@ -77,11 +78,22 @@ public final class FmNetwork {
         Set<BlockPos> generatorSet = new LinkedHashSet<>();
         Set<BlockPos> batterySet = new LinkedHashSet<>();
         Set<BlockPos> machineSet = new LinkedHashSet<>();
+        Set<BlockPos> batteryIn = new HashSet<>(), batteryOut = new HashSet<>();
         for (BlockPos c : connectors) {
             BlockPos on = MachineConnectorBlock.attachedPos(level.getBlockState(c), c);
             BlockEntity be = level.getBlockEntity(on);
-            if (be instanceof StormBatteryBlockEntity) {
+            if (be instanceof StormBatteryBlockEntity battery) {
                 batterySet.add(on);
+                // The bank's setting for the face the connector sits on decides which way power may go.
+                net.minecraft.core.Direction face = net.minecraft.core.Direction.fromDelta(
+                        c.getX() - on.getX(), c.getY() - on.getY(), c.getZ() - on.getZ());
+                if (face == null || battery.canInput(face)) batteryIn.add(on);
+                if (face == null || battery.canOutput(face)) batteryOut.add(on);
+            } else if (level.getBlockState(on).is(com.sideflowgames.fulguritefusion.ModBlocks.CONSOLE_POWER_PORT.get())) {
+                // A connector on a reactor Console Power Port draws from the console's store.
+                com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity console =
+                        com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity.forPowerPort(level, on);
+                if (console != null) generatorSet.add(console.getBlockPos());
             } else if (be instanceof FmSource) {
                 generatorSet.add(on);
             } else if (be instanceof FmHandler handler && handler.acceptsConnector()) {
@@ -98,7 +110,7 @@ public final class FmNetwork {
         Set<BlockPos> unlinked = new HashSet<>(machines.subList(Math.min(max, machines.size()), machines.size()));
 
         BlockPos master = connectors.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(start);
-        return new Snapshot(master, connectors, rawSpans, generators, batteries, linked, unlinked);
+        return new Snapshot(master, connectors, rawSpans, generators, batteries, linked, unlinked, batteryIn, batteryOut);
     }
 
     // Move power around the network for one tick. Returns how much Fm moved.
@@ -108,9 +120,13 @@ public final class FmNetwork {
         for (BlockPos p : net.generators()) {
             if (level.getBlockEntity(p) instanceof FmSource s) generators.add(s);
         }
-        List<StormBatteryBlockEntity> batteries = new ArrayList<>();
+        // Batteries charge only through faces set to In, and feed the network only through faces set to Out.
+        List<StormBatteryBlockEntity> batteries = new ArrayList<>(), sources = new ArrayList<>();
         for (BlockPos p : net.batteries()) {
-            if (level.getBlockEntity(p) instanceof StormBatteryBlockEntity b) batteries.add(b);
+            if (level.getBlockEntity(p) instanceof StormBatteryBlockEntity b) {
+                if (net.batteryIn().contains(p)) batteries.add(b);
+                if (net.batteryOut().contains(p)) sources.add(b);
+            }
         }
         List<FmHandler> machines = new ArrayList<>();
         for (BlockPos p : net.linkedMachines()) {
@@ -125,7 +141,7 @@ public final class FmNetwork {
             int wanted = machine.receiveFm(share, true);
             if (wanted <= 0) continue;
             int got = pull(generators, wanted);
-            if (got < wanted) got += pull(new ArrayList<>(batteries), wanted - got);
+            if (got < wanted) got += pull(sources, wanted - got);
             if (got > 0) {
                 machine.receiveFm(got, false);
                 budget -= got;

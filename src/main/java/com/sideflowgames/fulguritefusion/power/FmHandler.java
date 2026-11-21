@@ -25,6 +25,12 @@ public interface FmHandler {
         return true;
     }
 
+    // Whether power may come in through this face (the face of this block that touches the sender).
+    // Storm Batteries use their side settings; everything else takes power on every face.
+    default boolean acceptsFrom(net.minecraft.core.Direction face) {
+        return true;
+    }
+
     default int receiveFmFromChain(int amount, int depth) {
         return receiveFm(amount, false);
     }

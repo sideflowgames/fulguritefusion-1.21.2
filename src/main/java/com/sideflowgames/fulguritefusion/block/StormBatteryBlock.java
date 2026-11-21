@@ -146,6 +146,12 @@ public class StormBatteryBlock extends BaseEntityBlock {
             }
         }
 
+        // Joining a bank: take its side settings.
+        if (!contacts.isEmpty() && level.getBlockEntity(pos) instanceof StormBatteryBlockEntity self
+                && level.getBlockEntity(contacts.get(0)) instanceof StormBatteryBlockEntity other) {
+            self.copySidesFrom(other);
+        }
+
         // Everything this block would connect: itself plus every bank it touches.
         int total = 1;
         for (Set<BlockPos> bank : banks) total += bank.size();

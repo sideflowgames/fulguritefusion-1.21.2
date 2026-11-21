@@ -50,6 +50,15 @@ public final class ModEntities {
                     .fireImmune()
                     .build("stormwing_hatchling"));
 
+    // A thrown Fulgurite Spear or Storm Spear.
+    public static final Supplier<EntityType<com.sideflowgames.fulguritefusion.entity.SpearEntity>> SPEAR = ENTITIES.register("spear",
+            () -> EntityType.Builder.<com.sideflowgames.fulguritefusion.entity.SpearEntity>of(
+                            com.sideflowgames.fulguritefusion.entity.SpearEntity::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f)
+                    .clientTrackingRange(4)
+                    .updateInterval(20)
+                    .build("spear"));
+
     // Not a natural spawn: appears at a nest while its Stormwing is away hunting.
     public static final Supplier<EntityType<ArcSerpentEntity>> ARC_SERPENT = ENTITIES.register("arc_serpent",
             () -> EntityType.Builder.of(ArcSerpentEntity::new, MobCategory.MONSTER)

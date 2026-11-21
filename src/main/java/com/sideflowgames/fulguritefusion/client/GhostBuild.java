@@ -234,6 +234,30 @@ public final class GhostBuild {
         return out;
     }
 
+    // ---------- Storm Forge ----------
+
+    public static List<Ghost> stormForge(Level level, BlockPos anvil) {
+        List<Ghost> out = new ArrayList<>();
+        BlockState casing = ModBlocks.TEMPERED_ARC_CASING.get().defaultBlockState();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                BlockPos p = anvil.offset(dx, -1, dz);
+                BlockState have = level.getBlockState(p);
+                boolean port = com.sideflowgames.fulguritefusion.block.StormForgeBlockEntity.isEdge(dx, dz)
+                        && have.is(ModBlocks.FORGE_POWER_PORT.get());
+                if (!port) need(level, out, p, casing);
+            }
+        }
+        BlockState pillar = ModBlocks.REINFORCED_FULGURITE.get().defaultBlockState();
+        for (int[] c : com.sideflowgames.fulguritefusion.block.StormForgeBlockEntity.CORNERS) {
+            BlockPos base = anvil.offset(c[0], 0, c[1]);
+            need(level, out, base, pillar);
+            need(level, out, base.above(), pillar);
+            need(level, out, base.above(2), net.minecraft.world.level.block.Blocks.LIGHTNING_ROD.defaultBlockState());
+        }
+        return out;
+    }
+
     // ---------- Helpers ----------
 
     private static boolean air(Level level, BlockPos p) {

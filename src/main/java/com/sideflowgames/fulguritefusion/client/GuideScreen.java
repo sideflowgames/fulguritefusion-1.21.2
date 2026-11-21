@@ -48,6 +48,7 @@ public class GuideScreen extends Screen {
     private static int lastSpread; // reopen where you left off
 
     private record Chapter(String title, ItemStack icon, int firstPage) {}
+    private static final int ROW = 11, ROWS = (PAGE_H - 15) / ROW; // contents rows per page
 
     private static final class Page {
         String title;              // section title (first page of a section)
@@ -56,6 +57,7 @@ public class GuideScreen extends Screen {
         String recipe;             // recipe id (first page of a section)
         List<FormattedCharSequence> lines = new ArrayList<>();
         boolean contents;          // the table of contents
+        int contentsFrom;          // first chapter listed on this contents page
     }
 
     private final List<Page> pages = new ArrayList<>();
@@ -83,16 +85,17 @@ public class GuideScreen extends Screen {
         addRenderableWidget(new PageButton(left + 20, top + BOOK_H - 22, false, b -> turn(-1), true));
         // Back to the chapter list (just under the book).
         chaptersButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
-                        Component.literal("\u00AB Chapters"), b -> jumpToPage(0))
+                        Component.literal("\u00AB Chapters"), b -> jumpToPage(contentsPage))
                 .bounds(left + BOOK_W / 2 - 40, top + BOOK_H + 2, 80, 16).build());
     }
 
     private net.minecraft.client.gui.components.Button chaptersButton;
+    private int contentsPage = 1; // the first contents page
 
     @Override
     public void tick() {
         super.tick();
-        if (chaptersButton != null) chaptersButton.active = spread != 0;
+        if (chaptersButton != null) chaptersButton.active = spread != contentsPage / 2;
     }
 
     private void build() {
@@ -119,14 +122,28 @@ public class GuideScreen extends Screen {
         JsonObject intro = root.has("intro") ? root.getAsJsonObject("intro") : new JsonObject();
         Page first = new Page();
         first.chapterTitle = str(intro, "title", "Fulgurite Fusion");
-        first.lines.addAll(wrap(str(intro, "text", "")));
+        List<FormattedCharSequence> introLines = wrap(str(intro, "text", ""));
+        int introRoom = (PAGE_H - headerHeight(first)) / LINE;
+        first.lines.addAll(introLines.subList(0, Math.min(introRoom, introLines.size())));
         pages.add(first);
-        Page contents = new Page();
-        contents.contents = true;
-        contents.title = "Contents";
-        pages.add(contents);
-
+        // A long introduction runs on over more pages.
+        for (int i = first.lines.size(); i < introLines.size(); ) {
+            Page more = new Page();
+            more.lines.addAll(introLines.subList(i, Math.min(introLines.size(), i + PAGE_H / LINE)));
+            i += more.lines.size();
+            pages.add(more);
+        }
+        contentsPage = pages.size();
         JsonArray chs = root.has("chapters") ? root.getAsJsonArray("chapters") : new JsonArray();
+        // Contents: as many pages as the chapter list needs (ROWS chapters each), starting on the right page.
+        for (int from = 0; from == 0 || from < chs.size(); from += ROWS) {
+            Page contents = new Page();
+            contents.contents = true;
+            contents.contentsFrom = from;
+            contents.title = "Contents";
+            pages.add(contents);
+        }
+
         for (JsonElement ce : chs) {
             JsonObject ch = ce.getAsJsonObject();
             if (pages.size() % 2 == 1) pages.add(new Page()); // chapters start on a fresh spread
@@ -227,7 +244,7 @@ public class GuideScreen extends Screen {
             return true;
         }
         if (key == GLFW.GLFW_KEY_HOME) {
-            jumpToPage(0);
+            jumpToPage(contentsPage);
             return true;
         }
         return super.keyPressed(key, scan, mods);
@@ -247,9 +264,10 @@ public class GuideScreen extends Screen {
                 int index = spread * 2 + side;
                 if (index >= pages.size() || !pages.get(index).contents) continue;
                 int x = left + (side == 0 ? LEFT_X : RIGHT_X), y = top + PAGE_Y + 15;
-                for (int c = 0; c < chapters.size(); c++) {
-                    int ry = y + c * 13;
-                    if (mx >= x && mx < x + PAGE_W && my >= ry && my < ry + 13) {
+                int from = pages.get(index).contentsFrom;
+                for (int c = from; c < Math.min(chapters.size(), from + ROWS); c++) {
+                    int ry = y + (c - from) * ROW;
+                    if (mx >= x && mx < x + PAGE_W && my >= ry && my < ry + ROW) {
                         jumpToPage(chapters.get(c).firstPage());
                         return true;
                     }
@@ -292,15 +310,23 @@ public class GuideScreen extends Screen {
             g.drawString(font, "Contents", x, y, CHAPTER, false);
             g.fill(x, y + 10, x + PAGE_W, y + 11, CHAPTER);
             int ry = y + 15;
-            for (Chapter c : chapters) {
-                boolean over = mx >= x && mx < x + PAGE_W && my >= ry && my < ry + 13;
+            for (int i = p.contentsFrom; i < Math.min(chapters.size(), p.contentsFrom + ROWS); i++) {
+                Chapter c = chapters.get(i);
+                boolean over = mx >= x && mx < x + PAGE_W && my >= ry && my < ry + ROW;
                 g.pose().pushPose();
-                g.pose().translate(x, ry - 1, 0);
-                g.pose().scale(0.75f, 0.75f, 1);
+                g.pose().translate(x, ry, 0);
+                g.pose().scale(0.625f, 0.625f, 1);
                 g.renderItem(c.icon(), 0, 0);
                 g.pose().popPose();
-                g.drawString(font, font.plainSubstrByWidth(c.title(), PAGE_W - 16), x + 15, ry + 2, over ? LINK : TEXT, false);
-                ry += 13;
+                // Long titles shrink to fit instead of being cut off.
+                int room = PAGE_W - 13, w = font.width(c.title());
+                float sc = w > room ? room / (float) w : 1f;
+                g.pose().pushPose();
+                g.pose().translate(x + 13, ry + 1 + (1 - sc) * 4, 0);
+                g.pose().scale(sc, sc, 1);
+                g.drawString(font, c.title(), 0, 0, over ? LINK : TEXT, false);
+                g.pose().popPose();
+                ry += ROW;
             }
             return;
         }

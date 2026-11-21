@@ -33,6 +33,40 @@
       ]
     },
     {
+      "title": "Fulgurite Tools",
+      "icon": "fulguritefusion:fulgurite_pickaxe",
+      "pages": [
+        {
+          "title": "Fulgurite tools",
+          "items": [
+            "fulguritefusion:fulgurite_pickaxe",
+            "fulguritefusion:fulgurite_axe",
+            "fulguritefusion:fulgurite_shovel",
+            "fulguritefusion:fulgurite_hoe",
+            "fulguritefusion:fulgurite_sword"
+          ],
+          "recipe": "fulguritefusion:fulgurite_pickaxe",
+          "text": "Fulgurite tools and the Fulgurite Sword sit between diamond and netherite: tougher and faster than diamond.\n\nEvery hit adds a little lightning damage (+1 for tools, +2 for the sword) with a crackle of sparks.\n\nThey wear out like normal tools; repair them with Fulgurite. Later, the Storm Forge upgrades them into Stormforged gear."
+        },
+        {
+          "title": "Fulgurite Spear",
+          "items": [
+            "fulguritefusion:fulgurite_spear"
+          ],
+          "recipe": "fulguritefusion:fulgurite_spear",
+          "text": "Hold right-click to wind up, let go to throw it like a trident, then pick it up where it lands.\n\n8 damage in melee, 9 thrown, each with +2 lightning. It wears out like the other Fulgurite tools; repair it with Fulgurite."
+        },
+        {
+          "title": "Arc Magnet",
+          "items": [
+            "fulguritefusion:arc_magnet"
+          ],
+          "recipe": "fulguritefusion:arc_magnet",
+          "text": "Right-click to switch it on or off. While it glows, it pulls items and XP within 6 blocks to you. It needs no power.\n\nItems you've just dropped are left alone for a moment, so you can still throw things away."
+        }
+      ]
+    },
+    {
       "title": "Storm Furnaces",
       "icon": "fulguritefusion:storm_furnace",
       "pages": [
@@ -98,7 +132,7 @@
             "fulguritefusion:storm_battery"
           ],
           "recipe": "fulguritefusion:storm_battery",
-          "text": "Holds 64,000 Fm. Power comes in on any face and goes out to any touching machine.\n\nTouching batteries form a bank (up to 6) that fills and drains as one, with one big gauge across the whole bank."
+          "text": "Holds 64,000 Fm. Touching batteries form a bank (up to 6) that fills and drains as one, with one big gauge across the whole bank.\n\nOpen the menu and press I/O to set each face to In, Out, Both or None (Both by default). The setting covers the whole bank.\n\nIn: power can enter there. Out: the bank feeds touching machines and wire connectors on that face."
         },
         {
           "title": "Machine Connector",
@@ -412,6 +446,65 @@
       ]
     },
     {
+      "title": "Storm Forge",
+      "icon": "fulguritefusion:storm_forge",
+      "pages": [
+        {
+          "title": "Storm Forge",
+          "items": [
+            "fulguritefusion:storm_forge",
+            "fulguritefusion:forge_power_port"
+          ],
+          "recipe": "fulguritefusion:storm_forge",
+          "text": "The Storm Forge pours huge amounts of Fm into gear. Build it:\n\n- the Storm Forge (anvil) on top of a 5x5 floor of Tempered Arc Casing\n- a pylon on each floor corner: 2 Reinforced Fulgurite with a Lightning Rod on top\n\nPower it with a redstone signal to see a ghost of the build."
+        },
+        {
+          "title": "Powering the forge",
+          "items": [
+            "fulguritefusion:forge_power_port"
+          ],
+          "recipe": "fulguritefusion:forge_power_port",
+          "text": "The forge draws up to 8,192 Fm/t. Feed Fm into the anvil itself, or swap any edge casing of the floor (not a corner) for a Forge Power Port and feed that: a battery, a wire, or the back of a reactor Power Port.\n\nSneak + right-click the anvil with an empty hand to see its status."
+        },
+        {
+          "title": "Forging",
+          "text": "Right-click the anvil with an item to set one on it. When the items match a recipe, arcs jump from the pylons and the forge fills them with Fm. When it's done, right-click to take the result.\n\nEmpty hand: take the last item back (any Fm already spent on it is lost).\n\nForged gear keeps the enchantments and name of the item it came from, and comes out half charged."
+        },
+        {
+          "title": "Stormforged armor",
+          "items": [
+            "fulguritefusion:stormforged_helmet",
+            "fulguritefusion:stormforged_chestplate",
+            "fulguritefusion:stormforged_leggings",
+            "fulguritefusion:stormforged_boots"
+          ],
+          "text": "Forge: a diamond armor piece + 2 Refined Fulgurite + 1 Strong or Jackpot Fusion Fuel, for 500,000 Fm.\n\nNetherite-level protection that never breaks. Its abilities run on stored Fm (1,000,000 per piece) and stop when a piece is empty.\n\nRecharge in a Fulgurite Charger. Small bars left of your XP bar show each piece's charge."
+        },
+        {
+          "title": "Stormforged abilities",
+          "text": "Full set: lightning can't hurt you (strikes recharge every piece), knockback resistance and faster movement.\n\nHelmet: breathe underwater. It splits water for oxygen and stores the hydrogen: 10 minutes until the tank is full. Surface and it vents on its own. Don't vent near fire or lava!\n\nBoots: fall damage cut to a quarter."
+        },
+        {
+          "title": "Stormforged tools",
+          "items": [
+            "fulguritefusion:stormforged_pickaxe",
+            "fulguritefusion:stormforged_axe",
+            "fulguritefusion:stormforged_shovel",
+            "fulguritefusion:stormforged_hoe"
+          ],
+          "text": "Forge a Fulgurite tool + 2 Refined Fulgurite + 1 Strong or Jackpot Fusion Fuel (500,000 Fm).\n\nFaster than netherite, never break, run on Fm (blue bar). Sneak + right-click the air to switch mode:\n\nArc Smelting: drops come out smelted.\nVein Mining: breaks the whole connected vein or tree (up to 64 blocks)."
+        },
+        {
+          "title": "Storm weapons",
+          "items": [
+            "fulguritefusion:storm_blade",
+            "fulguritefusion:storm_spear"
+          ],
+          "text": "Storm Blade (from a Fulgurite Sword): 11 damage +4 lightning; every hit chains lightning to up to 5 nearby enemies.\n\nStorm Spear (from a Fulgurite Spear): 11 melee, 13 thrown +4 lightning, and a charged throw calls lightning down where it lands.\n\nBoth lose their lightning when out of Fm."
+        }
+      ]
+    },
+    {
       "title": "Fusion Reactor: Build",
       "icon": "fulguritefusion:fusion_collider",
       "pages": [
@@ -516,7 +609,7 @@
         },
         {
           "title": "Power out",
-          "text": "The collision's Fm fills the console's store (16,000,000 Fm). The power ports push it out of their backs, 4,096 Fm/t each, into a battery or machine behind them.\n\nByproducts come out at twice the Storm Collider's rate, into the console's byproduct slot. Take them in the menu, or put a hopper under a Fuel Input.\n\nThe menu shows the store, the run's progress and the last result."
+          "text": "The collision's Fm fills the console's store (16,000,000 Fm). The power ports push it out of their backs, 4,096 Fm/t each, into a battery or machine behind them. A Machine Connector on a Power Port links the console into a wire network as a power source.\n\nByproducts come out at twice the Storm Collider's rate, into the console's byproduct slot. Take them in the menu, or put a hopper under a Fuel Input.\n\nThe menu shows the store, the run's progress and the last result."
         },
         {
           "title": "When it goes wrong",

@@ -3,6 +3,10 @@ package com.sideflowgames.fulguritefusion;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item;
 import com.sideflowgames.fulguritefusion.block.StormwingEggBlockEntity;
+import com.sideflowgames.fulguritefusion.block.StormForgeBlock;
+import com.sideflowgames.fulguritefusion.block.StormForgeBlockEntity;
+import com.sideflowgames.fulguritefusion.block.ForgePowerPortBlock;
+import com.sideflowgames.fulguritefusion.block.ForgePowerPortBlockEntity;
 import com.sideflowgames.fulguritefusion.block.StormwingEggBlock;
 import com.sideflowgames.fulguritefusion.block.MoltedPlumePileBlock;
 import com.sideflowgames.fulguritefusion.block.FulguriteRingBlock;
@@ -224,6 +228,14 @@ public final class ModBlocks {
             FrozenSoulFireBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(0.5f)
                     .sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 7));
 
+    // Storm Forge: the Forge Anvil core and its power port (see StormForgeBlockEntity).
+    public static final DeferredBlock<StormForgeBlock> STORM_FORGE = BLOCKS.registerBlock("storm_forge",
+            StormForgeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(5.0f, 1200f).requiresCorrectToolForDrops().sound(SoundType.ANVIL).noOcclusion());
+    public static final DeferredBlock<ForgePowerPortBlock> FORGE_POWER_PORT = BLOCKS.registerBlock("forge_power_port",
+            ForgePowerPortBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.NETHERITE_BLOCK));
+
     // Creative Power Source: creative only (no recipe, unbreakable in survival). 4,086 Fm/t, endless.
     public static final DeferredBlock<CreativePowerSourceBlock> CREATIVE_POWER_SOURCE = BLOCKS.registerBlock("creative_power_source",
             CreativePowerSourceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA)
@@ -311,6 +323,8 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> SKY_COLLECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sky_collector", SKY_COLLECTOR);
     public static final DeferredItem<BlockItem> NACRE_CLUSTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("abyssal_nacre_cluster", NACRE_CLUSTER);
     public static final DeferredItem<BlockItem> FROZEN_SOUL_FIRE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("frozen_soul_fire", FROZEN_SOUL_FIRE);
+    public static final DeferredItem<BlockItem> STORM_FORGE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_forge", STORM_FORGE);
+    public static final DeferredItem<BlockItem> FORGE_POWER_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("forge_power_port", FORGE_POWER_PORT);
     public static final DeferredItem<BlockItem> CREATIVE_POWER_SOURCE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("creative_power_source",
             CREATIVE_POWER_SOURCE, new Item.Properties().rarity(Rarity.EPIC));
     public static final DeferredItem<BlockItem> MINI_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("mini_collider", MINI_COLLIDER);
@@ -337,6 +351,10 @@ public final class ModBlocks {
             () -> BlockEntityType.Builder.of(DataCableBlockEntity::new, DATA_CABLE.get()).build(null));
     public static final Supplier<BlockEntityType<SkyCollectorBlockEntity>> SKY_COLLECTOR_BE = BLOCK_ENTITIES.register("sky_collector",
             () -> BlockEntityType.Builder.of(SkyCollectorBlockEntity::new, SKY_COLLECTOR.get()).build(null));
+    public static final Supplier<BlockEntityType<StormForgeBlockEntity>> STORM_FORGE_BE = BLOCK_ENTITIES.register("storm_forge",
+            () -> BlockEntityType.Builder.of(StormForgeBlockEntity::new, STORM_FORGE.get()).build(null));
+    public static final Supplier<BlockEntityType<ForgePowerPortBlockEntity>> FORGE_POWER_PORT_BE = BLOCK_ENTITIES.register("forge_power_port",
+            () -> BlockEntityType.Builder.of(ForgePowerPortBlockEntity::new, FORGE_POWER_PORT.get()).build(null));
     public static final Supplier<BlockEntityType<CreativePowerSourceBlockEntity>> CREATIVE_POWER_SOURCE_BE = BLOCK_ENTITIES.register("creative_power_source",
             () -> BlockEntityType.Builder.of(CreativePowerSourceBlockEntity::new, CREATIVE_POWER_SOURCE.get()).build(null));
     public static final Supplier<BlockEntityType<StormFurnaceBlockEntity>> STORM_FURNACE_BE = BLOCK_ENTITIES.register("storm_furnace",

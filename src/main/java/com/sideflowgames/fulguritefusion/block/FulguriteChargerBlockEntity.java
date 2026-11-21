@@ -35,6 +35,7 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
     // Cell cost and draw rate come from the config (Config.java). The charger holds enough Fm for two cells.
     public static final int MAX_CELLS = 16;
     public static final int TRANSFER_INTERVAL = 8;
+    public static final int GEAR_RATE = 4096; // Fm per tick into forged gear (limited by how fast power arrives)
     public static final int INPUT = 0, OUTPUT = 1;
     public static final int DATA_COUNT = 4 + SideConfig.COUNT;
 
@@ -42,7 +43,8 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
     private final ItemStackHandler items = new ItemStackHandler(2) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return slot == INPUT && stack.is(ModItems.EMPTY_SPARK_CELL.get());
+            return slot == INPUT && (stack.is(ModItems.EMPTY_SPARK_CELL.get())
+                    || stack.getItem() instanceof com.sideflowgames.fulguritefusion.item.FmChargeable);
         }
 
         @Override
@@ -96,6 +98,21 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
         ItemStack input = be.items.getStackInSlot(INPUT);
         ItemStack output = be.items.getStackInSlot(OUTPUT);
 
+        // Forged gear (FmChargeable): fill it straight from the charger's store, then move it to the output.
+        if (input.getItem() instanceof com.sideflowgames.fulguritefusion.item.FmChargeable) {
+            if (be.fm > 0) {
+                int added = com.sideflowgames.fulguritefusion.item.FmChargeable.add(input, Math.min(be.fm, GEAR_RATE));
+                if (added > 0) {
+                    be.fm -= added;
+                    changed = true;
+                }
+            }
+            if (com.sideflowgames.fulguritefusion.item.FmChargeable.fraction(input) >= 1f && output.isEmpty()) {
+                be.items.setStackInSlot(OUTPUT, input.copy());
+                be.items.setStackInSlot(INPUT, ItemStack.EMPTY);
+                changed = true;
+            }
+        } else
         // Charge the current cell.
         if (!input.isEmpty() && output.getCount() < MAX_CELLS && be.fm > 0) {
             int draw = Math.max(0, Math.min(Config.CHARGER_DRAW.get(), Math.min(be.fm, fmPerCell() - be.progress)));

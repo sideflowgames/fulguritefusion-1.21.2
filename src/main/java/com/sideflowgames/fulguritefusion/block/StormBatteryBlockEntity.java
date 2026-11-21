@@ -29,11 +29,20 @@ import net.minecraft.world.level.block.state.BlockState;
 
 // One Storm Battery block (64,000 Fm by default). Touching batteries form a bank that shares its charge:
 // every tick each block evens out with its battery neighbours, so the bank fills and drains as one.
-// Power comes in on any face (from a Storm Furnace or other source) and goes out to any touching machine.
+// Each face of the bank can be set to In, Out, Both or None (Both by default). The setting covers the whole bank:
+// changing it on one block changes every block in the bank, and a block added to a bank takes the bank's settings.
+//   In: power can enter through that face (touching generators, reactor power ports, wire connectors).
+//   Out: the bank feeds touching machines through that face, and wire connectors on it can draw power.
 public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, FmSource, MenuProvider {
     // Menu data (big numbers split into two 16-bit halves).
     public static final int D_FM = 0, D_CAPACITY = 2, D_COUNT = 4, D_MAX = 5;
-    public static final int DATA_COUNT = 6;
+    public static final int D_SIDES = 6; // 6 entries, by Direction.get3DDataValue()
+    public static final int DATA_COUNT = 12;
+    public static final int NONE = 0, IN = 1, OUT = 2, BOTH = 3;
+    public static final String[] MODE_NAMES = {"None", "In", "Out", "Both"};
+
+    // Per-face mode, indexed by Direction.get3DDataValue() (down, up, north, south, west, east).
+    private final int[] sides = {BOTH, BOTH, BOTH, BOTH, BOTH, BOTH};
 
     private int fm;
     // Client side: the charge and capacity last sent by the server, used to draw the bank's gauge.
@@ -59,7 +68,7 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
                 case D_CAPACITY + 1 -> c >>> 16;
                 case D_COUNT -> bank.size();
                 case D_MAX -> Config.BATTERY_MAX_BANK.get();
-                default -> 0;
+                default -> index >= D_SIDES && index < D_SIDES + 6 ? sides[index - D_SIDES] : 0;
             };
         }
 
@@ -93,7 +102,8 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
                     other.setChanged();
                     changed = true;
                 }
-            } else if (be.fm > 0 && level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine && !machine.isStorage()) {
+            } else if (be.fm > 0 && be.canOutput(dir) && level.getBlockEntity(pos.relative(dir)) instanceof FmHandler machine
+                    && !machine.isStorage() && machine.acceptsFrom(dir.getOpposite())) {
                 // Feed touching machines.
                 int sent = machine.receiveFm(Math.min(be.fm, outputLimit), false);
                 if (sent > 0) {
@@ -108,6 +118,43 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
             be.lastSentFm = be.fm;
             level.sendBlockUpdated(pos, state, state, 2);
         }
+    }
+
+    // ---------- Side settings ----------
+
+    public int sideMode(Direction face) {
+        return sides[face.get3DDataValue()];
+    }
+
+    public boolean canInput(Direction face) {
+        return (sideMode(face) & IN) != 0;
+    }
+
+    public boolean canOutput(Direction face) {
+        return (sideMode(face) & OUT) != 0;
+    }
+
+    @Override
+    public boolean acceptsFrom(Direction face) {
+        return canInput(face);
+    }
+
+    // Step one face to its next mode, on every block of the bank.
+    public void cycleSide(int faceIndex) {
+        if (level == null || faceIndex < 0 || faceIndex >= 6) return;
+        int next = (sides[faceIndex] + 1) % 4;
+        for (BlockPos p : findBank(level, worldPosition, null, 64)) {
+            if (level.getBlockEntity(p) instanceof StormBatteryBlockEntity b) {
+                b.sides[faceIndex] = next;
+                b.setChanged();
+            }
+        }
+    }
+
+    // A block joining a bank takes the bank's settings.
+    public void copySidesFrom(StormBatteryBlockEntity other) {
+        System.arraycopy(other.sides, 0, sides, 0, 6);
+        setChanged();
     }
 
     // Capacity of this block, as known on this side (the client gets it from the server).
@@ -209,6 +256,7 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt("Fm", fm);
+        tag.putIntArray("Sides", sides);
     }
 
     @Override
@@ -216,5 +264,7 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
         super.loadAdditional(tag, registries);
         fm = tag.getInt("Fm");
         if (tag.contains("Cap")) syncedCapacity = tag.getInt("Cap");
+        int[] saved = tag.getIntArray("Sides");
+        if (saved.length == 6) System.arraycopy(saved, 0, sides, 0, 6);
     }
 }

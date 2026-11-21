@@ -10,7 +10,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 
-// Information-only menu for a battery bank: total stored Fm, capacity, and bank size.
+// Battery bank menu: total stored Fm, capacity, bank size, and the bank's side settings (buttons 0-5 step
+// Down, Up, North, South, West, East through None / In / Out / Both).
 public class StormBatteryMenu extends MachineMenu {
     public StormBatteryMenu(int containerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(containerId, inventory, new SimpleContainerData(StormBatteryBlockEntity.DATA_COUNT), ContainerLevelAccess.NULL);
@@ -19,6 +20,22 @@ public class StormBatteryMenu extends MachineMenu {
 
     public StormBatteryMenu(int containerId, Inventory inventory, StormBatteryBlockEntity be, ContainerData data) {
         this(containerId, inventory, data, ContainerLevelAccess.create(be.getLevel(), be.getBlockPos()));
+        this.battery = be;
+    }
+
+    @javax.annotation.Nullable private StormBatteryBlockEntity battery; // server side only
+
+    @Override
+    public boolean clickMenuButton(net.minecraft.world.entity.player.Player player, int id) {
+        if (id >= 0 && id < 6 && battery != null) {
+            battery.cycleSide(id);
+            return true;
+        }
+        return false;
+    }
+
+    public int getSideMode(int faceIndex) {
+        return data.get(StormBatteryBlockEntity.D_SIDES + faceIndex);
     }
 
     private StormBatteryMenu(int containerId, Inventory inventory, ContainerData data, ContainerLevelAccess access) {

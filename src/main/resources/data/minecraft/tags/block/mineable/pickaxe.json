@@ -39,6 +39,8 @@
     "fulguritefusion:ring_injection_port",
     "fulguritefusion:data_cable",
     "fulguritefusion:sky_collector",
-    "fulguritefusion:abyssal_nacre_cluster"
+    "fulguritefusion:abyssal_nacre_cluster",
+    "fulguritefusion:storm_forge",
+    "fulguritefusion:forge_power_port"
   ]
 }

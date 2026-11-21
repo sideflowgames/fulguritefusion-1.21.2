@@ -124,7 +124,10 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         int max = Config.NETWORK_MAX_MACHINES.get();
         BlockPos machine = MachineConnectorBlock.attachedPos(getBlockState(), worldPosition);
         String self;
-        if (!MachineConnectorBlock.isMachine(level, machine)) {
+        if (level.getBlockState(machine).is(com.sideflowgames.fulguritefusion.ModBlocks.CONSOLE_POWER_PORT.get())) {
+            self = com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity.forPowerPort(level, machine) != null
+                    ? "reactor power port: supplies power" : "reactor power port (console not formed)";
+        } else if (!MachineConnectorBlock.isMachine(level, machine)) {
             self = "relay (not on a machine)";
         } else if (network.unlinkedMachines().contains(machine)) {
             self = "this machine is NOT linked (network full)";

@@ -29,6 +29,8 @@ public class FulguriteFusion {
         // Register our blocks (ModBlocks.java), then items and the creative tab (ModItems.java)
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModDataComponents.register(modEventBus);
+        ModArmorMaterials.register(modEventBus);
         ModMenus.register(modEventBus);
         ModEntities.register(modEventBus);
         ModSounds.register(modEventBus);
