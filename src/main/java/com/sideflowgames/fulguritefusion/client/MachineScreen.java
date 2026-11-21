@@ -16,8 +16,8 @@ public abstract class MachineScreen<M extends MachineMenu> extends AbstractConta
     protected static final int TEX_SIZE = 256;
     // Power bar: frame drawn into the background, fill sprite at (176, 0), 12 x 50.
     protected static final int BAR_X = 152, BAR_Y = 18, BAR_W = 12, BAR_H = 50;
-    private static final int TAB_PANEL_COLOR = 0xFFA9DCF2;
-    private static final int TAB_BORDER_COLOR = 0xFF26262C;
+    private static final int TAB_PANEL_COLOR = GuiStyle.PANEL;
+    private static final int TAB_BORDER_COLOR = GuiStyle.DARK;
 
     protected final ResourceLocation texture;
     private boolean sidesOpen;
@@ -80,6 +80,13 @@ public abstract class MachineScreen<M extends MachineMenu> extends AbstractConta
             g.fill(x + 1, y + 1, x + 91, y + 5 + SideConfig.COUNT * 20, TAB_PANEL_COLOR);
         }
         renderMachine(g, partialTick);
+    }
+
+    // Title and inventory label in the shared text colour (vanilla's grey is hard to read on the blue panel).
+    @Override
+    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+        g.drawString(font, title, titleLabelX, titleLabelY, GuiStyle.TEXT, false);
+        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.TEXT, false);
     }
 
     // Draw the machine's moving parts (bars, arrows, animations).

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fulguritefusion:block/stormforged_backpack"
+    },
+    "facing=east": {
+      "model": "fulguritefusion:block/stormforged_backpack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fulguritefusion:block/stormforged_backpack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fulguritefusion:block/stormforged_backpack",
+      "y": 270
+    }
+  }
+}

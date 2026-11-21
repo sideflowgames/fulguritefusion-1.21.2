@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:copper_backpack",
+    "fulguritefusion:iron_backpack",
+    "fulguritefusion:fulgurite_backpack",
+    "fulguritefusion:stormforged_backpack"
+  ]
+}

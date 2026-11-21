@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "FSF",
+    "PXP",
+    "FSF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "S": {
+      "item": "minecraft:string"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "X": {
+      "item": "minecraft:crafting_table"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:compacting_upgrade",
+    "count": 1
+  }
+}

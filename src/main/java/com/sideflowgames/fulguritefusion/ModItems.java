@@ -163,6 +163,34 @@ public final class ModItems {
             ITEMS.registerItem("arc_magnet", com.sideflowgames.fulguritefusion.item.ArcMagnetItem::new,
                     new Item.Properties().stacksTo(1));
 
+    // Backpack upgrades (see backpack/UpgradeKind). Stormforged ones are made in the Storm Forge.
+    private static DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> upgrade(
+            com.sideflowgames.fulguritefusion.backpack.UpgradeKind kind, boolean storm) {
+        Item.Properties props = new Item.Properties().stacksTo(1);
+        if (storm) props = props.rarity(Rarity.RARE).fireResistant();
+        final Item.Properties p = props;
+        return ITEMS.register((storm ? "storm_" : "") + kind.id + "_upgrade",
+                () -> new com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem(kind, storm, p));
+    }
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> PICKUP_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.PICKUP, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> MAGNET_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.MAGNET, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> VOID_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.VOID, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> COMPACTING_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.COMPACTING, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_PICKUP_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.PICKUP, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_MAGNET_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.MAGNET, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_VOID_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.VOID, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_COMPACTING_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.COMPACTING, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> FEEDING_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.FEEDING, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_FEEDING_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.FEEDING, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> REFILL_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.REFILL, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_REFILL_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.REFILL, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> RESTOCK_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.RESTOCK, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_RESTOCK_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.RESTOCK, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> DEPOSIT_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.DEPOSIT, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_DEPOSIT_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.DEPOSIT, true);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> TOOL_SWAPPER_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.TOOL_SWAPPER, false);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeItem> STORM_TOOL_SWAPPER_UPGRADE = upgrade(com.sideflowgames.fulguritefusion.backpack.UpgradeKind.TOOL_SWAPPER, true);
+
     // Molted Plume Bundle: 4 Molted Plumes tied with string. Goes into the Thunderbond Talisman.
     public static final DeferredItem<Item> MOLTED_PLUME_BUNDLE = ITEMS.registerSimpleItem("molted_plume_bundle", new Item.Properties());
     // Thunderbond Talisman: bonds a Stormwing to its owner so it can be ridden. Used up on bonding.
@@ -268,6 +296,28 @@ public final class ModItems {
                         output.accept(FULGURITE_HOE.get());
                         output.accept(ARC_MAGNET.get());
                         output.accept(FULGURITE_SPEAR.get());
+                        output.accept(ModBlocks.COPPER_BACKPACK_ITEM.get());
+                        output.accept(ModBlocks.IRON_BACKPACK_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_BACKPACK_ITEM.get());
+                        output.accept(ModBlocks.STORMFORGED_BACKPACK_ITEM.get());
+                        output.accept(PICKUP_UPGRADE.get());
+                        output.accept(MAGNET_UPGRADE.get());
+                        output.accept(VOID_UPGRADE.get());
+                        output.accept(COMPACTING_UPGRADE.get());
+                        output.accept(STORM_PICKUP_UPGRADE.get());
+                        output.accept(STORM_MAGNET_UPGRADE.get());
+                        output.accept(STORM_VOID_UPGRADE.get());
+                        output.accept(STORM_COMPACTING_UPGRADE.get());
+                        output.accept(FEEDING_UPGRADE.get());
+                        output.accept(STORM_FEEDING_UPGRADE.get());
+                        output.accept(REFILL_UPGRADE.get());
+                        output.accept(STORM_REFILL_UPGRADE.get());
+                        output.accept(RESTOCK_UPGRADE.get());
+                        output.accept(STORM_RESTOCK_UPGRADE.get());
+                        output.accept(DEPOSIT_UPGRADE.get());
+                        output.accept(STORM_DEPOSIT_UPGRADE.get());
+                        output.accept(TOOL_SWAPPER_UPGRADE.get());
+                        output.accept(STORM_TOOL_SWAPPER_UPGRADE.get());
                         for (var gear : java.util.List.of(STORM_BLADE, STORM_SPEAR, STORMFORGED_PICKAXE, STORMFORGED_AXE, STORMFORGED_SHOVEL, STORMFORGED_HOE)) {
                             ItemStack full = new ItemStack(gear.get());
                             com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.StormforgedTools.MAX_FM);

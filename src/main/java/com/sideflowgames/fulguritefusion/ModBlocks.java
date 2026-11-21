@@ -228,6 +228,16 @@ public final class ModBlocks {
             FrozenSoulFireBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(0.5f)
                     .sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 7));
 
+    // ---------- Backpacks (placed in the world; see backpack/) ----------
+    private static DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier tier) {
+        return BLOCKS.registerBlock(tier.id + "_backpack", p -> new com.sideflowgames.fulguritefusion.backpack.BackpackBlock(tier, p),
+                BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(0.5f).sound(SoundType.WOOL).noOcclusion());
+    }
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> COPPER_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.COPPER);
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> IRON_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.IRON);
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> FULGURITE_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.FULGURITE);
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> STORMFORGED_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.STORMFORGED);
+
     // Storm Forge: the Forge Anvil core and its power port (see StormForgeBlockEntity).
     public static final DeferredBlock<StormForgeBlock> STORM_FORGE = BLOCKS.registerBlock("storm_forge",
             StormForgeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -323,6 +333,14 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> SKY_COLLECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sky_collector", SKY_COLLECTOR);
     public static final DeferredItem<BlockItem> NACRE_CLUSTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("abyssal_nacre_cluster", NACRE_CLUSTER);
     public static final DeferredItem<BlockItem> FROZEN_SOUL_FIRE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("frozen_soul_fire", FROZEN_SOUL_FIRE);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> COPPER_BACKPACK_ITEM = ModItems.ITEMS.register("copper_backpack",
+            () -> new com.sideflowgames.fulguritefusion.backpack.BackpackItem(COPPER_BACKPACK.get(), new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> IRON_BACKPACK_ITEM = ModItems.ITEMS.register("iron_backpack",
+            () -> new com.sideflowgames.fulguritefusion.backpack.BackpackItem(IRON_BACKPACK.get(), new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> FULGURITE_BACKPACK_ITEM = ModItems.ITEMS.register("fulgurite_backpack",
+            () -> new com.sideflowgames.fulguritefusion.backpack.BackpackItem(FULGURITE_BACKPACK.get(), new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> STORMFORGED_BACKPACK_ITEM = ModItems.ITEMS.register("stormforged_backpack",
+            () -> new com.sideflowgames.fulguritefusion.backpack.StormBackpackItem(STORMFORGED_BACKPACK.get(), new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<BlockItem> STORM_FORGE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_forge", STORM_FORGE);
     public static final DeferredItem<BlockItem> FORGE_POWER_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("forge_power_port", FORGE_POWER_PORT);
     public static final DeferredItem<BlockItem> CREATIVE_POWER_SOURCE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("creative_power_source",
@@ -351,6 +369,16 @@ public final class ModBlocks {
             () -> BlockEntityType.Builder.of(DataCableBlockEntity::new, DATA_CABLE.get()).build(null));
     public static final Supplier<BlockEntityType<SkyCollectorBlockEntity>> SKY_COLLECTOR_BE = BLOCK_ENTITIES.register("sky_collector",
             () -> BlockEntityType.Builder.of(SkyCollectorBlockEntity::new, SKY_COLLECTOR.get()).build(null));
+    public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.backpack.BackpackBlockEntity>> BACKPACK_BE = BLOCK_ENTITIES.register("backpack",
+            () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.backpack.BackpackBlockEntity::new, COPPER_BACKPACK.get(), IRON_BACKPACK.get(),
+                    FULGURITE_BACKPACK.get(), STORMFORGED_BACKPACK.get()).build(null));
+
+    // Recipe serializers.
+    public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
+            DeferredRegister.create(net.minecraft.core.registries.Registries.RECIPE_SERIALIZER, FulguriteFusion.MODID);
+    public static final Supplier<com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeRecipe.Serializer> BACKPACK_UPGRADE =
+            RECIPE_SERIALIZERS.register("backpack_upgrade", com.sideflowgames.fulguritefusion.backpack.BackpackUpgradeRecipe.Serializer::new);
+
     public static final Supplier<BlockEntityType<StormForgeBlockEntity>> STORM_FORGE_BE = BLOCK_ENTITIES.register("storm_forge",
             () -> BlockEntityType.Builder.of(StormForgeBlockEntity::new, STORM_FORGE.get()).build(null));
     public static final Supplier<BlockEntityType<ForgePowerPortBlockEntity>> FORGE_POWER_PORT_BE = BLOCK_ENTITIES.register("forge_power_port",
@@ -410,5 +438,6 @@ public final class ModBlocks {
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
     }
 }

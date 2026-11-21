@@ -34,6 +34,9 @@ public final class ModMenus {
     public static final Supplier<MenuType<ProcessingMachineMenu>> PROCESSING_MACHINE =
             MENUS.register("processing_machine", () -> IMenuTypeExtension.create(ProcessingMachineMenu::new));
 
+    public static final Supplier<MenuType<com.sideflowgames.fulguritefusion.backpack.BackpackMenu>> BACKPACK =
+            MENUS.register("backpack", () -> IMenuTypeExtension.create(com.sideflowgames.fulguritefusion.backpack.BackpackMenu::new));
+
     public static final Supplier<MenuType<StormBatteryMenu>> STORM_BATTERY =
             MENUS.register("storm_battery", () -> IMenuTypeExtension.create(StormBatteryMenu::new));
 
@@ -49,6 +52,10 @@ public final class ModMenus {
 
     public static final Supplier<MenuType<ReactorConsoleMenu>> REACTOR_CONSOLE =
             MENUS.register("reactor_console", () -> IMenuTypeExtension.create(ReactorConsoleMenu::new));
+
+    // Backpack upgrade filter (right-click an upgrade).
+    public static final Supplier<MenuType<com.sideflowgames.fulguritefusion.backpack.UpgradeFilterMenu>> UPGRADE_FILTER =
+            MENUS.register("upgrade_filter", () -> IMenuTypeExtension.create(com.sideflowgames.fulguritefusion.backpack.UpgradeFilterMenu::new));
 
     private ModMenus() {}
 

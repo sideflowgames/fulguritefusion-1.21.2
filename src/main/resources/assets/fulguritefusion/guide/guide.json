@@ -67,6 +67,66 @@
       ]
     },
     {
+      "title": "Backpacks",
+      "icon": "fulguritefusion:copper_backpack",
+      "pages": [
+        {
+          "title": "Backpacks",
+          "items": [
+            "fulguritefusion:copper_backpack",
+            "fulguritefusion:iron_backpack",
+            "fulguritefusion:fulgurite_backpack",
+            "fulguritefusion:stormforged_backpack"
+          ],
+          "recipe": "fulguritefusion:copper_backpack",
+          "text": "Right-click to open, or press B to open the one you're wearing or carrying.\n\nWear it in your chestplate slot (or Curios' back slot, if installed) to carry it on your back.\n\nSneak + right-click a block to set it down; it opens like a chest and keeps everything when you break it."
+        },
+        {
+          "title": "Bigger backpacks",
+          "text": "Copper: 27 slots.\nIron: 54 slots. Surround a Copper Backpack with 8 iron ingots.\nFulgurite: 81 slots. Surround an Iron Backpack with 8 Fulgurite.\nStormforged: 108 slots. Storm Forge: Fulgurite Backpack + 2 Refined Fulgurite + a Strong or Jackpot fuel (250,000 Fm).\n\nUpgrading keeps everything inside."
+        },
+        {
+          "title": "Upgrades",
+          "items": [
+            "fulguritefusion:pickup_upgrade",
+            "fulguritefusion:magnet_upgrade",
+            "fulguritefusion:void_upgrade",
+            "fulguritefusion:compacting_upgrade"
+          ],
+          "text": "Upgrades go in the slots left of the storage (Copper 1, Iron 2, Fulgurite 3, Stormforged 5), one of each kind.\n\nPickup: picked-up items go into the pack.\nMagnet (Iron+): pulls items from 6 blocks.\nVoid: destroys listed items you pick up.\nCompacting (Fulgurite+): packs 2x2 sets into blocks."
+        },
+        {
+          "title": "Upgrade filters",
+          "text": "Right-click an upgrade in your hand to set its filter. Click an item into a filter slot to list it (it's only a copy); click with an empty hand to clear.\n\nAllow list: only listed items. Block list: everything except them. Pickup, Magnet and Compacting start as an empty block list (everything). Void starts as an allow list, and an empty Void list destroys nothing.\n\nCompacting only packs blocks that craft back into the same items."
+        },
+        {
+          "title": "Storm upgrades",
+          "items": [
+            "fulguritefusion:storm_pickup_upgrade",
+            "fulguritefusion:storm_magnet_upgrade",
+            "fulguritefusion:storm_void_upgrade",
+            "fulguritefusion:storm_compacting_upgrade"
+          ],
+          "text": "Storm Forge: basic upgrade + Refined Fulgurite + Overcharged Spark Cell (100,000 Fm). Stormforged Backpack only.\n\nThey run on the pack's own Fm (charge it in a Fulgurite Charger); without Fm they act like the basic upgrade.\nPickup: grabs items within 3 blocks (also when the pack is set down).\nMagnet: 12 blocks.\nVoid: can also remove XP orbs.\nCompacting: 3x3 as well."
+        },
+        {
+          "title": "Utility upgrades",
+          "items": [
+            "fulguritefusion:feeding_upgrade",
+            "fulguritefusion:refill_upgrade",
+            "fulguritefusion:restock_upgrade",
+            "fulguritefusion:deposit_upgrade",
+            "fulguritefusion:tool_swapper_upgrade"
+          ],
+          "text": "Feeding: eats from the pack when you're hungry (never wastes food; skips harmful food unless allow-listed).\nRefill: tops up hotbar stacks.\nRestock / Deposit (Iron+): buttons beside an open chest.\nTool Swapper (Fulgurite+): best tool from the pack when you start mining."
+        },
+        {
+          "title": "Storm utility",
+          "text": "Feeding: heals you when you're full.\nRefill: instant; also offhand, and re-equips armor that breaks.\nRestock / Deposit: look at a container (8 blocks), open the pack, use its buttons (500 Fm).\nTool Swapper: also swaps in your best weapon when you attack (the next hit uses it)."
+        }
+      ]
+    },
+    {
       "title": "Storm Furnaces",
       "icon": "fulguritefusion:storm_furnace",
       "pages": [

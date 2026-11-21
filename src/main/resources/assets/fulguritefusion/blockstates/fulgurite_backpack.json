@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fulguritefusion:block/fulgurite_backpack"
+    },
+    "facing=east": {
+      "model": "fulguritefusion:block/fulgurite_backpack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fulguritefusion:block/fulgurite_backpack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fulguritefusion:block/fulgurite_backpack",
+      "y": 270
+    }
+  }
+}

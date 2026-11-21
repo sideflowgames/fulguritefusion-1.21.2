@@ -84,13 +84,33 @@ public class FulguriteFusionClient {
                 com.sideflowgames.fulguritefusion.client.ArmorChargeHud::render);
     }
 
+    // B: open the backpack you're wearing or carrying. Rebindable under Controls > Fulgurite Fusion.
+    public static final KeyMapping OPEN_BACKPACK = new KeyMapping("key.fulguritefusion.open_backpack",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, "key.categories.fulguritefusion");
+
+    // Worn backpacks show on the player's back.
+    @SubscribeEvent
+    static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
+        for (var skin : event.getSkins()) {
+            if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
+                renderer.addLayer(new com.sideflowgames.fulguritefusion.client.BackpackLayer(renderer));
+            }
+        }
+    }
+
     @SubscribeEvent
     static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+        event.register(OPEN_BACKPACK);
         event.register(STORMWING_DIVE);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
+        while (OPEN_BACKPACK.consumeClick()) {
+            if (mc.player != null && mc.screen == null) {
+                PacketDistributor.sendToServer(new com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.OpenPayload());
+            }
+        }
         while (STORMWING_DIVE.consumeClick()) {
             if (mc.player != null && mc.player.getVehicle() instanceof StormwingEntity bird
                     && bird.getControllingPassenger() == mc.player && bird.clientStartDive()) {
@@ -110,6 +130,8 @@ public class FulguriteFusionClient {
     @SubscribeEvent
     static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.STORM_FURNACE.get(), StormFurnaceScreen::new);
+        event.register(ModMenus.BACKPACK.get(), com.sideflowgames.fulguritefusion.client.BackpackScreen::new);
+        event.register(ModMenus.UPGRADE_FILTER.get(), com.sideflowgames.fulguritefusion.client.UpgradeFilterScreen::new);
         event.register(ModMenus.FULGURITE_CHARGER.get(), FulguriteChargerScreen::new);
         event.register(ModMenus.EU_CONVERTER.get(), EuConverterScreen::new);
         event.register(ModMenus.STORM_BATTERY.get(), StormBatteryScreen::new);

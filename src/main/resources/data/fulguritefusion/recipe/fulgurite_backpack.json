@@ -1,0 +1,21 @@
+{
+  "type": "fulguritefusion:backpack_upgrade",
+  "category": "equipment",
+  "pattern": [
+    "FFF",
+    "FBF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "B": {
+      "item": "fulguritefusion:iron_backpack"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:fulgurite_backpack",
+    "count": 1
+  }
+}

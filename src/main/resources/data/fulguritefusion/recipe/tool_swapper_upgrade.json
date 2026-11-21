@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "FSF",
+    "PRA",
+    "FSF"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "S": {
+      "item": "minecraft:string"
+    },
+    "P": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "A": {
+      "item": "minecraft:iron_axe"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:tool_swapper_upgrade",
+    "count": 1
+  }
+}

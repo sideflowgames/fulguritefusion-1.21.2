@@ -44,6 +44,8 @@ public class FulguriteFusion {
 
         // Stormwing riding: the dive key packet, and no falling off mid-air when Shift is held to descend
         com.sideflowgames.fulguritefusion.entity.StormwingRiding.register(modEventBus);
+        // Backpacks: the open-backpack key packet
+        com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.register(modEventBus);
 
         // Lets this class listen for game events, like onServerStarting below
         NeoForge.EVENT_BUS.register(this);

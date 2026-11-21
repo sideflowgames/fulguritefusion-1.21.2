@@ -38,6 +38,10 @@ public final class ForgeRecipes {
                 if (base.test().test(s)) {
                     if (s.has(DataComponents.ENCHANTMENTS)) out.set(DataComponents.ENCHANTMENTS, s.get(DataComponents.ENCHANTMENTS));
                     if (s.has(DataComponents.CUSTOM_NAME)) out.set(DataComponents.CUSTOM_NAME, s.get(DataComponents.CUSTOM_NAME));
+                    if (s.has(DataComponents.CONTAINER)) out.set(DataComponents.CONTAINER, s.get(DataComponents.CONTAINER));
+                    copy(s, out, com.sideflowgames.fulguritefusion.ModDataComponents.BACKPACK_UPGRADES.get());
+                    copy(s, out, com.sideflowgames.fulguritefusion.ModDataComponents.FILTER.get());
+                    copy(s, out, com.sideflowgames.fulguritefusion.ModDataComponents.FILTER_MODE.get());
                     break;
                 }
             }
@@ -46,7 +50,13 @@ public final class ForgeRecipes {
         }
     }
 
+    private static <T> void copy(ItemStack from, ItemStack to, net.minecraft.core.component.DataComponentType<T> type) {
+        if (from.has(type)) to.set(type, from.get(type));
+    }
+
     public static final int STORMFORGED_COST = 500_000;
+    public static final int UPGRADE_COST = 100_000;
+    public static final int BACKPACK_COST = 250_000;
 
     private static Part item(Item item, int count) {
         return new Part(item.getDescription().getString(), s -> s.is(item), count);
@@ -68,6 +78,18 @@ public final class ForgeRecipes {
             stormforged("Stormforged Chestplate", Items.DIAMOND_CHESTPLATE, ModItems.STORMFORGED_CHESTPLATE::get);
             stormforged("Stormforged Leggings", Items.DIAMOND_LEGGINGS, ModItems.STORMFORGED_LEGGINGS::get);
             stormforged("Stormforged Boots", Items.DIAMOND_BOOTS, ModItems.STORMFORGED_BOOTS::get);
+            all.add(new Recipe("Stormforged Backpack", item(com.sideflowgames.fulguritefusion.ModBlocks.FULGURITE_BACKPACK_ITEM.get(), 1),
+                    List.of(item(ModItems.REFINED_FULGURITE.get(), 2), STRONG_FUEL),
+                    () -> com.sideflowgames.fulguritefusion.ModBlocks.STORMFORGED_BACKPACK_ITEM.get(), BACKPACK_COST));
+            stormUpgrade("Storm Pickup Upgrade", ModItems.PICKUP_UPGRADE.get(), ModItems.STORM_PICKUP_UPGRADE::get);
+            stormUpgrade("Storm Magnet Upgrade", ModItems.MAGNET_UPGRADE.get(), ModItems.STORM_MAGNET_UPGRADE::get);
+            stormUpgrade("Storm Void Upgrade", ModItems.VOID_UPGRADE.get(), ModItems.STORM_VOID_UPGRADE::get);
+            stormUpgrade("Storm Compacting Upgrade", ModItems.COMPACTING_UPGRADE.get(), ModItems.STORM_COMPACTING_UPGRADE::get);
+            stormUpgrade("Storm Feeding Upgrade", ModItems.FEEDING_UPGRADE.get(), ModItems.STORM_FEEDING_UPGRADE::get);
+            stormUpgrade("Storm Refill Upgrade", ModItems.REFILL_UPGRADE.get(), ModItems.STORM_REFILL_UPGRADE::get);
+            stormUpgrade("Storm Restock Upgrade", ModItems.RESTOCK_UPGRADE.get(), ModItems.STORM_RESTOCK_UPGRADE::get);
+            stormUpgrade("Storm Deposit Upgrade", ModItems.DEPOSIT_UPGRADE.get(), ModItems.STORM_DEPOSIT_UPGRADE::get);
+            stormUpgrade("Storm Tool Swapper Upgrade", ModItems.TOOL_SWAPPER_UPGRADE.get(), ModItems.STORM_TOOL_SWAPPER_UPGRADE::get);
             stormforged("Storm Blade", ModItems.FULGURITE_SWORD.get(), ModItems.STORM_BLADE::get);
             stormforged("Storm Spear", ModItems.FULGURITE_SPEAR.get(), ModItems.STORM_SPEAR::get);
             stormforged("Stormforged Pickaxe", ModItems.FULGURITE_PICKAXE.get(), ModItems.STORMFORGED_PICKAXE::get);
@@ -81,6 +103,13 @@ public final class ForgeRecipes {
     private static void stormforged(String name, Item base, Supplier<Item> result) {
         all.add(new Recipe(name, item(base, 1),
                 List.of(item(ModItems.REFINED_FULGURITE.get(), 2), STRONG_FUEL), result, STORMFORGED_COST));
+    }
+
+    // Stormforged backpack upgrade: the basic upgrade (its filter is kept) + Refined Fulgurite + an
+    // Overcharged Spark Cell.
+    private static void stormUpgrade(String name, Item base, Supplier<Item> result) {
+        all.add(new Recipe(name, item(base, 1),
+                List.of(item(ModItems.REFINED_FULGURITE.get(), 1), item(ModItems.OVERCHARGED_SPARK_CELL.get(), 1)), result, UPGRADE_COST));
     }
 
     // The recipe the anvil's contents make, or null. Every item must be used, in exactly the right amounts.

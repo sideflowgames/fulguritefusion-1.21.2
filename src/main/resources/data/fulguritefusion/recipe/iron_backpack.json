@@ -1,0 +1,21 @@
+{
+  "type": "fulguritefusion:backpack_upgrade",
+  "category": "equipment",
+  "pattern": [
+    "III",
+    "IBI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "B": {
+      "item": "fulguritefusion:copper_backpack"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:iron_backpack",
+    "count": 1
+  }
+}
