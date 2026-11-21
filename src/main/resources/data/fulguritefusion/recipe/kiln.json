@@ -2,18 +2,24 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
     "BFB",
-    "BCB"
+    "SXS",
+    "BKB"
   ],
   "key": {
     "B": {
       "item": "minecraft:bricks"
     },
     "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "X": {
       "item": "minecraft:blast_furnace"
     },
-    "C": {
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
     }
   },

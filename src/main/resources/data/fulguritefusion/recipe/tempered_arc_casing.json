@@ -2,20 +2,23 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " I ",
-    "ICI",
-    " I "
+    "KSK",
+    "SFS",
+    "KSK"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "C": {
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
+    },
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite"
     }
   },
   "result": {
     "id": "fulguritefusion:tempered_arc_casing",
-    "count": 1
+    "count": 4
   }
 }

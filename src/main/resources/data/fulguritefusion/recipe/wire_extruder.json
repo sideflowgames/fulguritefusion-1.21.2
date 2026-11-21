@@ -2,18 +2,21 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "ISI",
-    "ICI",
+    "IHI",
+    "CKC",
     "III"
   ],
   "key": {
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "S": {
+    "H": {
       "item": "minecraft:shears"
     },
     "C": {
+      "item": "fulguritefusion:copper_sheet"
+    },
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
     }
   },

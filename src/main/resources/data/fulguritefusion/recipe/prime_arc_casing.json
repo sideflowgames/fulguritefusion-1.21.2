@@ -2,20 +2,26 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " R ",
-    "RCR",
-    " R "
+    "XRX",
+    "HOH",
+    "XRX"
   ],
   "key": {
+    "X": {
+      "item": "fulguritefusion:charged_arc_casing"
+    },
     "R": {
       "item": "fulguritefusion:refined_fulgurite"
     },
-    "C": {
-      "item": "fulguritefusion:charged_arc_casing"
+    "H": {
+      "item": "fulguritefusion:heavy_wire"
+    },
+    "O": {
+      "item": "fulguritefusion:overcharged_spark_cell"
     }
   },
   "result": {
     "id": "fulguritefusion:prime_arc_casing",
-    "count": 1
+    "count": 4
   }
 }

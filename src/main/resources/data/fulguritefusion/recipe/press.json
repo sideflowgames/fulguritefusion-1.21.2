@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "IPI",
-    "ICI",
+    "RKR",
     "III"
   ],
   "key": {
@@ -13,7 +13,10 @@
     "P": {
       "item": "minecraft:piston"
     },
-    "C": {
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
     }
   },

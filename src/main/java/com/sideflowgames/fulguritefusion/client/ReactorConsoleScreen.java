@@ -71,7 +71,7 @@ public class ReactorConsoleScreen extends MachineScreen<ReactorConsoleMenu> {
 
     private static String phase(int t) {
         if (t < 0) return "Idle";
-        if (t < ReactorPath.T_JUMP) return "Outer ring: lap " + Math.min(6, 1 + t * 6 / ReactorPath.T_JUMP) + " of 6";
+        if (t < ReactorPath.T_JUMP) return "Outer ring: lap " + Math.min(6, 1 + (int) (ReactorPath.outerProgress((float) t / ReactorPath.T_JUMP) * 6)) + " of 6";
         if (t < ReactorPath.T_INNER) return "Portal jump";
         if (t < ReactorPath.T_INJECT) return "Inner ring: lap " + Math.min(6, 1 + (t - ReactorPath.T_INNER) * 6 / 60) + " of 6";
         if (t < ReactorPath.T_IMPACT) return "Injecting";
@@ -85,6 +85,7 @@ public class ReactorConsoleScreen extends MachineScreen<ReactorConsoleMenu> {
             case ReactorConsoleBlockEntity.S_REACTOR -> "Reactor not formed / linked";
             case ReactorConsoleBlockEntity.S_FUEL -> "Load fuel 1 and fuel 2";
             case ReactorConsoleBlockEntity.S_POWER -> "Needs " + menu.getStartup() + " Fm to start";
+            case ReactorConsoleBlockEntity.S_HEAT -> "Reactor cooling down";
             default -> "Ready";
         };
     }
@@ -140,6 +141,11 @@ public class ReactorConsoleScreen extends MachineScreen<ReactorConsoleMenu> {
         }
         fuelTip(g, 0, ReactorConsoleMenu.FUEL1_Y, "Fuel 1 (data cable 1)", mouseX, mouseY);
         fuelTip(g, 1, ReactorConsoleMenu.FUEL2_Y, "Fuel 2 (data cable 2)", mouseX, mouseY);
+        if (menu.slots.get(2).getItem().isEmpty() && isHovering(ReactorConsoleMenu.FUEL_X - 1, ReactorConsoleMenu.BYPRODUCT_Y - 1, 18, 18, mouseX, mouseY)) {
+            g.renderComponentTooltip(font, List.of(Component.literal("Byproducts"),
+                    Component.literal("Rare drops from the collisions land here").withColor(0xAAAAAA),
+                    Component.literal("A hopper under a Fuel Input can empty it").withColor(0xAAAAAA)), mouseX, mouseY);
+        }
     }
 
     private void fuelTip(GuiGraphics g, int slot, int y, String name, int mouseX, int mouseY) {

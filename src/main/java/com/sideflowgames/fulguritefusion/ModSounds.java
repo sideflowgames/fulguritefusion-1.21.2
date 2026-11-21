@@ -23,11 +23,18 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> STORMWING_DEATH = register("stormwing_death");
 
     // Fusion Reactor: the rumbling hum that builds over the 30 seconds of outer laps, the portal beam, and the impact.
-    public static final Supplier<SoundEvent> REACTOR_HUM = register("reactor_hum");
-    public static final Supplier<SoundEvent> REACTOR_BEAM = register("reactor_beam");
+    public static final Supplier<SoundEvent> REACTOR_HUM = registerFar("reactor_hum", 160f);
+    public static final Supplier<SoundEvent> REACTOR_BEAM = registerFar("reactor_beam", 160f);
     // The 3 fast inner-ring laps: a quick, climbing whine.
-    public static final Supplier<SoundEvent> REACTOR_INNER = register("reactor_inner");
-    public static final Supplier<SoundEvent> REACTOR_IMPACT = register("reactor_impact");
+    public static final Supplier<SoundEvent> REACTOR_INNER = registerFar("reactor_inner", 160f);
+    public static final Supplier<SoundEvent> REACTOR_IMPACT = registerFar("reactor_impact", 160f);
+
+    // The server only sends a sound to players within its range; variable-range sounds reach just 16 blocks at
+    // volume 1. The reactor is huge, so its sounds get a fixed long range (players can stand at the console,
+    // or anywhere round the 93-block outer ring, and still hear a run).
+    private static Supplier<SoundEvent> registerFar(String name, float range) {
+        return SOUNDS.register(name, () -> SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name), range));
+    }
 
     private static Supplier<SoundEvent> register(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name)));

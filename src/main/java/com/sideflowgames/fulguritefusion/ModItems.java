@@ -94,6 +94,12 @@ public final class ModItems {
     public static final DeferredItem<StormCallerItem> STORM_CALLER = ITEMS.registerItem("storm_caller",
             StormCallerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> MOLTED_PLUME = ITEMS.registerSimpleItem("molted_plume", new Item.Properties());
+    // Molted Plume Bundle: 4 Molted Plumes tied with string. Goes into the Thunderbond Talisman.
+    public static final DeferredItem<Item> MOLTED_PLUME_BUNDLE = ITEMS.registerSimpleItem("molted_plume_bundle", new Item.Properties());
+    // Thunderbond Talisman: bonds a Stormwing to its owner so it can be ridden. Used up on bonding.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.ThunderbondTalismanItem> THUNDERBOND_TALISMAN =
+            ITEMS.registerItem("thunderbond_talisman", com.sideflowgames.fulguritefusion.item.ThunderbondTalismanItem::new,
+                    new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
     // Dropped (always) by the Arc Serpent.
     public static final DeferredItem<Item> ARC_CORE = ITEMS.registerSimpleItem("arc_core", new Item.Properties().rarity(Rarity.RARE));
 
@@ -176,11 +182,16 @@ public final class ModItems {
                         output.accept(ModBlocks.DATA_CABLE_ITEM.get());
                         output.accept(ModBlocks.STORM_COLLIDER_ITEM.get());
                         for (DeferredItem<Item> material : MATERIALS) output.accept(material.get());
+                        output.accept(ModBlocks.SKY_COLLECTOR_ITEM.get());
+                        output.accept(ModBlocks.NACRE_CLUSTER_ITEM.get());
+                        output.accept(ModBlocks.FROZEN_SOUL_FIRE_ITEM.get());
                         output.accept(RESONANT_SHARD.get());
                         output.accept(PEARL_EMBER.get());
                         output.accept(LIVING_SPARK.get());
                         output.accept(PRIME_SPARK_FRAGMENT.get());
                         output.accept(ARC_CORE.get());
+                        output.accept(MOLTED_PLUME_BUNDLE.get());
+                        output.accept(THUNDERBOND_TALISMAN.get());
                         output.accept(REFINED_FULGURITE.get());
                         output.accept(CHARGED_SPARK_CELL.get());
                         output.accept(OVERCHARGED_SPARK_CELL.get());

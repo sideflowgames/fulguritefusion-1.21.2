@@ -2,21 +2,24 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IGI",
-    "ICI",
-    "IOI"
+    "SGS",
+    "IKI",
+    "SOS"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
     },
     "G": {
       "item": "minecraft:grindstone"
     },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
     "O": {
       "item": "minecraft:obsidian"
     },
-    "C": {
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
     }
   },

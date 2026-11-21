@@ -2,22 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "FSF",
-    "IRI",
-    "FSF"
+    "FRF",
+    "CSC",
+    "FRF"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
     "S": {
       "item": "fulguritefusion:spark_cell"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
     }
   },
   "result": {

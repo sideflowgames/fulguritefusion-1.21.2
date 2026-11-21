@@ -24,6 +24,8 @@ public final class ModCapabilities {
         // Multiblock machines: items in and out only through their input and output port casings.
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlocks.ARC_CASING_BE.get(),
                 (be, side) -> be.getItemHandler(side));
+        // Sky Collector: hoppers and pipes can take what it gathered.
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlocks.SKY_COLLECTOR_BE.get(), (be, side) -> be.getOutput());
         // Fusion Reactor: hoppers and pipes load fuel into a Console Fuel Input (front or back).
         event.registerBlock(Capabilities.ItemHandler.BLOCK,
                 (level, pos, state, be, side) -> com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity.fuelInputHandler(level, pos),

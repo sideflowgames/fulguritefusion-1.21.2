@@ -1,6 +1,15 @@
 package com.sideflowgames.fulguritefusion;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import org.lwjgl.glfw.GLFW;
+import com.sideflowgames.fulguritefusion.entity.StormwingEntity;
+import com.sideflowgames.fulguritefusion.entity.StormwingRiding;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -40,6 +49,35 @@ public class FulguriteFusionClient {
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+
+        // Stormwing riding: Space climbs and Shift descends; the dive key is checked every tick.
+        StormwingEntity.riderVertical = () -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.screen != null) return 0;
+            if (mc.options.keyJump.isDown()) return 1;
+            if (mc.options.keyShift.isDown()) return -1;
+            return 0;
+        };
+        NeoForge.EVENT_BUS.addListener(FulguriteFusionClient::onClientTick);
+    }
+
+    // R while riding a bonded Stormwing: lightning dive. Rebindable under Controls > Fulgurite Fusion.
+    public static final KeyMapping STORMWING_DIVE = new KeyMapping("key.fulguritefusion.stormwing_dive",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.fulguritefusion");
+
+    @SubscribeEvent
+    static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+        event.register(STORMWING_DIVE);
+    }
+
+    private static void onClientTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        while (STORMWING_DIVE.consumeClick()) {
+            if (mc.player != null && mc.player.getVehicle() instanceof StormwingEntity bird
+                    && bird.getControllingPassenger() == mc.player && bird.clientStartDive()) {
+                PacketDistributor.sendToServer(new StormwingRiding.DivePayload());
+            }
+        }
     }
 
     @SubscribeEvent
@@ -71,6 +109,13 @@ public class FulguriteFusionClient {
         event.registerBlockEntityRenderer(ModBlocks.FUSION_COLLIDER_BE.get(), FusionColliderRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.DATA_CABLE_BE.get(), DataCableRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONTROLLER_BE.get(), MachineControllerRenderer::new);
+        // Ghost build outlines (shown while the block is powered by redstone).
+        event.registerBlockEntityRenderer(ModBlocks.REACTOR_CONSOLE_BE.get(),
+                ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::console, 6));
+        event.registerBlockEntityRenderer(ModBlocks.STORM_COLLIDER_BE.get(),
+                ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::colliderRing, 5));
+        event.registerBlockEntityRenderer(ModBlocks.MINI_COLLIDER_BE.get(),
+                ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::colliderRing, 5));
         event.registerEntityRenderer(ModEntities.LUMEN_SLUG.get(), LumenSlugRenderer::new);
         event.registerEntityRenderer(ModEntities.VOIDMOTH.get(), VoidmothRenderer::new);
         event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);

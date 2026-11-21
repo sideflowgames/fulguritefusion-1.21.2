@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CBC",
+    "RPR",
+    "CBC"
+  ],
+  "key": {
+    "C": {
+      "item": "fulguritefusion:overcharged_spark_cell"
+    },
+    "B": {
+      "item": "fulguritefusion:molted_plume_bundle"
+    },
+    "R": {
+      "item": "fulguritefusion:refined_fulgurite"
+    },
+    "P": {
+      "item": "fulguritefusion:prime_spark_fragment"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:thunderbond_talisman",
+    "count": 1
+  }
+}

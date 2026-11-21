@@ -2,20 +2,26 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " F ",
-    "FCF",
-    " F "
+    "TKT",
+    "GSG",
+    "TKT"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "C": {
+    "T": {
       "item": "fulguritefusion:tempered_arc_casing"
+    },
+    "K": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    "S": {
+      "item": "fulguritefusion:spark_cell"
     }
   },
   "result": {
     "id": "fulguritefusion:charged_arc_casing",
-    "count": 1
+    "count": 4
   }
 }

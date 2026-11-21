@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "mode=idle": {
+      "model": "fulguritefusion:block/sky_collector"
+    },
+    "mode=aurora": {
+      "model": "fulguritefusion:block/sky_collector"
+    },
+    "mode=sun": {
+      "model": "fulguritefusion:block/sky_collector"
+    }
+  }
+}

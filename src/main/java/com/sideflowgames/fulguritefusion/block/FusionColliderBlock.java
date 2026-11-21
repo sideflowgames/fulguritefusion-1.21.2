@@ -18,11 +18,20 @@ import net.minecraft.world.phys.BlockHitResult;
 
 // Fusion Collider: the heart of the Fusion Reactor, in the middle of the blast chamber.
 // Right-click: the reactor's status (what's built, or the first block that's missing or wrong).
+// Once the blast chamber forms, the block itself hides and FusionColliderRenderer draws the energy core:
+// a plasma orb in a cage of spinning rings, with lightning arcing to two prongs facing the beam ports.
 public class FusionColliderBlock extends BaseEntityBlock {
     public static final MapCodec<FusionColliderBlock> CODEC = simpleCodec(FusionColliderBlock::new);
 
     public FusionColliderBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(FormableBlock.FORMED, false));
+    }
+
+    // FORMED = the blast chamber is formed: the block hides and the renderer draws the energy core instead.
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(FormableBlock.FORMED);
     }
 
     @Override

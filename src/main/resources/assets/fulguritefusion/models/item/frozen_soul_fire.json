@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fulguritefusion:block/frozen_soul_fire"
+  }
+}

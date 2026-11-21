@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GGG",
+    "FDF",
+    "III"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    },
+    "D": {
+      "item": "minecraft:daylight_detector"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:sky_collector",
+    "count": 1
+  }
+}

@@ -162,5 +162,12 @@
   "fulguritefusion.configuration.reactorOutputRate": "Power Port Output Fm/t",
   "block.fulguritefusion.creative_power_source": "Creative Power Source",
   "subtitles.fulguritefusion.reactor_inner": "Inner ring whines",
-  "item.fulguritefusion.guide_book": "Fulgurite Fusion Guide"
+  "item.fulguritefusion.guide_book": "Fulgurite Fusion Guide",
+  "block.fulguritefusion.sky_collector": "Sky Collector",
+  "block.fulguritefusion.abyssal_nacre_cluster": "Abyssal Nacre Cluster",
+  "block.fulguritefusion.frozen_soul_fire": "Frozen Soul Fire",
+  "item.fulguritefusion.thunderbond_talisman": "Thunderbond Talisman",
+  "item.fulguritefusion.molted_plume_bundle": "Molted Plume Bundle",
+  "key.categories.fulguritefusion": "Fulgurite Fusion",
+  "key.fulguritefusion.stormwing_dive": "Stormwing Lightning Dive"
 }

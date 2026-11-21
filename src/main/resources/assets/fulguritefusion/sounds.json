@@ -40,7 +40,7 @@
     "sounds": [
       {
         "name": "fulguritefusion:reactor_hum",
-        "attenuation_distance": 128
+        "attenuation_distance": 160
       }
     ]
   },
@@ -49,7 +49,7 @@
     "sounds": [
       {
         "name": "fulguritefusion:reactor_beam",
-        "attenuation_distance": 96
+        "attenuation_distance": 160
       }
     ]
   },
@@ -58,7 +58,7 @@
     "sounds": [
       {
         "name": "fulguritefusion:reactor_impact",
-        "attenuation_distance": 128
+        "attenuation_distance": 160
       }
     ]
   },
@@ -67,7 +67,7 @@
     "sounds": [
       {
         "name": "fulguritefusion:reactor_inner",
-        "attenuation_distance": 96
+        "attenuation_distance": 160
       }
     ]
   }

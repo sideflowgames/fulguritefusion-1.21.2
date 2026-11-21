@@ -225,7 +225,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
         return options.get(random.nextInt(options.size()));
     }
 
-    private static ItemStack byproduct(Pairing pairing, Pairing result, RandomSource random) {
+    public static ItemStack byproduct(Pairing pairing, Pairing result, RandomSource random) {
         if (pairing.id() == 72 && random.nextFloat() < 0.05f) { // Mutation: rare Jackpot chance
             return new ItemStack(ModItems.PRIME_SPARK_FRAGMENT.get());
         }

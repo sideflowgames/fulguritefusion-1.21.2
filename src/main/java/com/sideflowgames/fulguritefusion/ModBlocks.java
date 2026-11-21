@@ -13,6 +13,10 @@ import com.sideflowgames.fulguritefusion.block.ConsoleCasingBlock;
 import com.sideflowgames.fulguritefusion.block.ConsolePortBlock;
 import com.sideflowgames.fulguritefusion.block.DataCableBlock;
 import com.sideflowgames.fulguritefusion.block.CreativePowerSourceBlock;
+import com.sideflowgames.fulguritefusion.block.SkyCollectorBlock;
+import com.sideflowgames.fulguritefusion.block.SkyCollectorBlockEntity;
+import com.sideflowgames.fulguritefusion.block.NacreClusterBlock;
+import com.sideflowgames.fulguritefusion.block.FrozenSoulFireBlock;
 import com.sideflowgames.fulguritefusion.block.CreativePowerSourceBlockEntity;
 import com.sideflowgames.fulguritefusion.block.DataCableBlockEntity;
 import com.sideflowgames.fulguritefusion.block.FormableBlock;
@@ -206,6 +210,20 @@ public final class ModBlocks {
             DataCableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5f, 6.0f)
                     .sound(SoundType.COPPER).noOcclusion().dynamicShape());
 
+    // ---------- Exotic material sources ----------
+    // Sky Collector: Aurora Dust on clear high nights, Sunmote at clear desert/badlands middays.
+    public static final DeferredBlock<SkyCollectorBlock> SKY_COLLECTOR = BLOCKS.registerBlock("sky_collector",
+            SkyCollectorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0f, 6.0f)
+                    .requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(SkyCollectorBlock::light));
+    // Abyssal Nacre Cluster: grows on prismarine near an active Conduit in a deep ocean.
+    public static final DeferredBlock<NacreClusterBlock> NACRE_CLUSTER = BLOCKS.registerBlock("abyssal_nacre_cluster",
+            NacreClusterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(1.5f)
+                    .sound(SoundType.AMETHYST_CLUSTER).noOcclusion().lightLevel(state -> 5).pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY));
+    // Frozen Soul Fire: soul fire smothered with powder snow; breaks into Soul Frost.
+    public static final DeferredBlock<FrozenSoulFireBlock> FROZEN_SOUL_FIRE = BLOCKS.registerBlock("frozen_soul_fire",
+            FrozenSoulFireBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(0.5f)
+                    .sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 7));
+
     // Creative Power Source: creative only (no recipe, unbreakable in survival). 4,086 Fm/t, endless.
     public static final DeferredBlock<CreativePowerSourceBlock> CREATIVE_POWER_SOURCE = BLOCKS.registerBlock("creative_power_source",
             CreativePowerSourceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA)
@@ -290,6 +308,9 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> CONSOLE_DATA_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("console_data_port", CONSOLE_DATA_PORT);
     public static final DeferredItem<BlockItem> CONSOLE_FUEL_INPUT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("console_fuel_input", CONSOLE_FUEL_INPUT);
     public static final DeferredItem<BlockItem> DATA_CABLE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("data_cable", DATA_CABLE);
+    public static final DeferredItem<BlockItem> SKY_COLLECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sky_collector", SKY_COLLECTOR);
+    public static final DeferredItem<BlockItem> NACRE_CLUSTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("abyssal_nacre_cluster", NACRE_CLUSTER);
+    public static final DeferredItem<BlockItem> FROZEN_SOUL_FIRE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("frozen_soul_fire", FROZEN_SOUL_FIRE);
     public static final DeferredItem<BlockItem> CREATIVE_POWER_SOURCE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("creative_power_source",
             CREATIVE_POWER_SOURCE, new Item.Properties().rarity(Rarity.EPIC));
     public static final DeferredItem<BlockItem> MINI_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("mini_collider", MINI_COLLIDER);
@@ -314,6 +335,8 @@ public final class ModBlocks {
             () -> BlockEntityType.Builder.of(ReactorConsoleBlockEntity::new, REACTOR_CONSOLE.get()).build(null));
     public static final Supplier<BlockEntityType<DataCableBlockEntity>> DATA_CABLE_BE = BLOCK_ENTITIES.register("data_cable",
             () -> BlockEntityType.Builder.of(DataCableBlockEntity::new, DATA_CABLE.get()).build(null));
+    public static final Supplier<BlockEntityType<SkyCollectorBlockEntity>> SKY_COLLECTOR_BE = BLOCK_ENTITIES.register("sky_collector",
+            () -> BlockEntityType.Builder.of(SkyCollectorBlockEntity::new, SKY_COLLECTOR.get()).build(null));
     public static final Supplier<BlockEntityType<CreativePowerSourceBlockEntity>> CREATIVE_POWER_SOURCE_BE = BLOCK_ENTITIES.register("creative_power_source",
             () -> BlockEntityType.Builder.of(CreativePowerSourceBlockEntity::new, CREATIVE_POWER_SOURCE.get()).build(null));
     public static final Supplier<BlockEntityType<StormFurnaceBlockEntity>> STORM_FURNACE_BE = BLOCK_ENTITIES.register("storm_furnace",

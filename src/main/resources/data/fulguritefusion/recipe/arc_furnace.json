@@ -2,18 +2,21 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "III",
-    "IFI",
-    "ICI"
+    "SFS",
+    "WKW",
+    "SSS"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
     },
     "F": {
       "item": "minecraft:furnace"
     },
-    "C": {
+    "W": {
+      "item": "fulguritefusion:raw_wire"
+    },
+    "K": {
       "item": "fulguritefusion:crude_arc_casing"
     }
   },

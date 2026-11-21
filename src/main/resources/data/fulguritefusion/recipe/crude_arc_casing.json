@@ -2,13 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "CCC",
-    "CRC",
-    "CCC"
+    "CIC",
+    "IRI",
+    "CIC"
   ],
   "key": {
     "C": {
       "item": "minecraft:copper_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
     },
     "R": {
       "item": "minecraft:redstone"
@@ -16,6 +19,6 @@
   },
   "result": {
     "id": "fulguritefusion:crude_arc_casing",
-    "count": 4
+    "count": 8
   }
 }

@@ -67,6 +67,11 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
     public void render(FusionColliderBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
                        int packedLight, int packedOverlay) {
         if (be.getLevel() == null) return;
+        // Ghost build outline while a redstone signal reaches the collider.
+        if (GhostBuild.powered(be.getLevel(), be.getBlockPos())) {
+            GhostBuild.render(GhostBuild.get(be.getLevel(), be.getBlockPos(), l -> GhostBuild.fusionReactor(l, be.getBlockPos())),
+                    be.getBlockPos(), be.getLevel(), partialTick, poseStack, buffers);
+        }
         boolean ring = be.isFormed(), chamber = be.isChamberFormed();
         if (!ring && !chamber) {
             if (be.isRunning()) drawRun(be, buffers.getBuffer(RenderType.lightning()), poseStack.last(), partialTick, false);
@@ -114,7 +119,10 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
             tube(solid, pose, OUTER_PATH, cx, cy, cz, TUBE_R, light, false, time);
         }
         for (float[] p : ports) fittingSolid(solid, pose, cx + p[0], cy, cz + p[1], p[2], p[3], light);
-        if (chamber) chamber(solid, pose, chamberX, CH_SOLID, chamberLight);
+        if (chamber) {
+            chamber(solid, pose, chamberX, CH_SOLID, chamberLight);
+            coreSolid(be, solid, pose, chamberX, partialTick);
+        }
 
         // 2) The dark inside lining, visible from both sides (behind the shell only).
         VertexConsumer lining = buffers.getBuffer(RenderType.entityCutoutNoCull(WHITE));
@@ -124,8 +132,12 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         }
         if (chamber) chamber(lining, pose, chamberX, CH_LINING, chamberLight);
 
-        // 3) A run in progress (glowing, additive): drawn before the windows so it shows through them.
-        if (be.isRunning()) drawRun(be, buffers.getBuffer(RenderType.lightning()), pose, partialTick, false);
+        // 3) Glowing, additive: the energy core and a run in progress. Drawn before the windows so they show through.
+        if (chamber || be.isRunning()) {
+            VertexConsumer glowAdd = buffers.getBuffer(RenderType.lightning());
+            if (chamber) coreGlow(be, glowAdd, pose, partialTick);
+            if (be.isRunning()) drawRun(be, glowAdd, pose, partialTick, false);
+        }
 
         // 4) Everything glowing or frosted: the channel, the window strips, the port discs, the portholes.
         VertexConsumer glow = buffers.getBuffer(RenderType.entityTranslucent(WHITE));
@@ -150,7 +162,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
     private static final int CH_SOLID = 0, CH_LINING = 1, CH_WINDOWS = 2;
     private static final float SPHERE_R = 2.42f;
     private static final int SPH_LAT = 24, SPH_LON = 48;
-    private static final float HOLE_COS = Mth.cos(19 * Mth.DEG_TO_RAD), WINDOW_COS = Mth.cos(24 * Mth.DEG_TO_RAD),
+    private static final float HOLE_COS = Mth.cos(15 * Mth.DEG_TO_RAD), WINDOW_COS = Mth.cos(28 * Mth.DEG_TO_RAD),
             TRIM_COS = Mth.cos(29 * Mth.DEG_TO_RAD);
     private static final int SEAM = 0x3A404E;
 
@@ -165,26 +177,19 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
             float t0 = (float) (Math.PI * i / SPH_LAT - Math.PI / 2), t1 = (float) (Math.PI * (i + 1) / SPH_LAT - Math.PI / 2);
             for (int k = 0; k < SPH_LON; k++) {
                 float p0 = (float) (Math.PI * 2 * k / SPH_LON), p1 = (float) (Math.PI * 2 * (k + 1) / SPH_LON);
-                float[][] n = {sph(t0, p0), sph(t0, p1), sph(t1, p1), sph(t1, p0)};
+                // The sphere's poles point along the beam axis, so the port holes are cut on a ring: perfectly round.
+                float[][] n = {pole(sph(t0, p0), axisX), pole(sph(t0, p1), axisX), pole(sph(t1, p1), axisX), pole(sph(t1, p0), axisX)};
                 float[] mid = norm(new float[]{n[0][0] + n[2][0], n[0][1] + n[2][1], n[0][2] + n[2][2]});
                 float along = Math.abs(dot(mid, axis));
                 if (along > HOLE_COS) continue; // the beam ports
                 float best = 0;
                 for (float[] w : windows) best = Math.max(best, dot(mid, w));
-                boolean window = best > WINDOW_COS;
+                if (best > WINDOW_COS || pass == CH_WINDOWS) continue; // portholes are drawn as round bezels below
                 int colour, alpha = 255, l = light;
-                if (pass == CH_WINDOWS) {
-                    if (!window) continue;
-                    colour = GLASS;
-                    alpha = 110;
-                    l = LightTexture.FULL_BRIGHT;
-                } else if (pass == CH_LINING) {
-                    if (window) continue;
+                if (pass == CH_LINING) {
                     colour = LINING;
                 } else {
-                    if (window) continue;
-                    boolean trim = best > TRIM_COS || along > Mth.cos(23 * Mth.DEG_TO_RAD);
-                    colour = trim ? TRIM : (i % 4 == 0 || k % 8 == 0) ? SEAM : SHELL;
+                    colour = (i % 4 == 0 || k % 8 == 0) ? SEAM : SHELL;
                 }
                 int red = (colour >> 16) & 255, g = (colour >> 8) & 255, b = colour & 255;
                 float[][] pts = new float[4][];
@@ -202,19 +207,228 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                 for (int q : order) raw(vc, pose, pts[q], n[q], red, g, b, alpha, l);
             }
         }
-        if (pass == CH_SOLID) {
-            // Port collars where the inner ring's beams come in.
-            for (int sgn = -1; sgn <= 1; sgn += 2) {
-                float fx = axis[0] * sgn, fz = axis[2] * sgn;
-                float[] f = {fx, 0, fz}, sd = {fz, 0, -fx}, u = {0, 1, 0};
-                cylinder(vc, pose, c, f, sd, u, 1.9f, 2.8f, 0.86f, HOUSING, light, true);
-                cylinder(vc, pose, c, f, sd, u, 2.5f, 2.65f, 0.92f, TRIM, light, true);
+        // Portholes: a round armoured bezel with a cyan ring, and frosted glass set into it.
+        for (float[] w : windows) {
+            float[] sd = Math.abs(w[1]) > 0.5f ? new float[]{1, 0, 0} : new float[]{0, 1, 0};
+            float[] u = cross(w, sd);
+            if (pass == CH_SOLID) {
+                cylinder(vc, pose, c, w, sd, u, 1.95f, 2.32f, 1.38f, HOUSING, light, true);
+                annulus(vc, pose, along(c, w, 2.32f, w, 0), w, sd, u, 0.95f, 1.38f, HOUSING, light);
+                annulus(vc, pose, along(c, w, 2.335f, w, 0), w, sd, u, 1.06f, 1.24f, TRIM, light);
+            } else if (pass == CH_LINING) {
+                cylinder(vc, pose, c, w, sd, u, 2.2f, 2.32f, 0.95f, LINING, light, false);
+                // Inside: a round inner frame over the cut-out edge, and a short sleeve out to the glass,
+                // so from inside the chamber each porthole is a clean circle too.
+                annulus(vc, pose, along(c, w, 1.85f, w, 0), w, sd, u, 0.94f, 1.42f, LINING, light);
+                cylinder(vc, pose, c, w, sd, u, 1.85f, 2.32f, 0.94f, LINING, light, false);
+            } else if (pass == CH_WINDOWS) {
+                disc(vc, pose, along(c, w, 2.25f, w, 0), w, sd, u, 0.95f, GLASS, 110, LightTexture.FULL_BRIGHT);
             }
+        }
+
+        // Port collars where the inner ring's beams come in: a round housing that hides the hole's edge,
+        // a flat face with a cyan ring, and a dark bore leading inside.
+        for (int sgn = -1; sgn <= 1; sgn += 2) {
+            float fx = axis[0] * sgn, fz = axis[2] * sgn;
+            float[] f = {fx, 0, fz}, sd = {fz, 0, -fx}, u = {0, 1, 0};
+            if (pass == CH_SOLID) {
+                cylinder(vc, pose, c, f, sd, u, 2.2f, 2.55f, 0.7f, HOUSING, light, true);
+                annulus(vc, pose, along(c, f, 2.55f, f, 0), f, sd, u, 0.48f, 0.7f, HOUSING, light);
+                annulus(vc, pose, along(c, f, 2.565f, f, 0), f, sd, u, 0.56f, 0.65f, TRIM, light);
+            } else if (pass == CH_LINING) {
+                cylinder(vc, pose, c, f, sd, u, 1.8f, 2.55f, 0.48f, LINING, light, false);
+            }
+        }
+    }
+
+    // Turns a unit vector from y-up sphere coordinates so the poles lie along the beam axis.
+    private static float[] pole(float[] v, boolean axisX) {
+        return axisX ? new float[]{v[1], v[0], v[2]} : new float[]{v[0], v[2], v[1]};
+    }
+
+    // A flat ring between radii r0 and r1, facing along f.
+    private static void annulus(VertexConsumer vc, PoseStack.Pose pose, float[] c, float[] f, float[] s, float[] u,
+                                float r0, float r1, int colour, int light) {
+        int segs = 24;
+        int red = (colour >> 16) & 255, g = (colour >> 8) & 255, b = colour & 255;
+        for (int i = 0; i < segs; i++) {
+            float a0 = (float) (Math.PI * 2 * i / segs), a1 = (float) (Math.PI * 2 * (i + 1) / segs);
+            float[] d0 = radial(s, u, a0), d1 = radial(s, u, a1);
+            raw(vc, pose, along(c, f, 0, d0, r0), f, red, g, b, 255, light);
+            raw(vc, pose, along(c, f, 0, d0, r1), f, red, g, b, 255, light);
+            raw(vc, pose, along(c, f, 0, d1, r1), f, red, g, b, 255, light);
+            raw(vc, pose, along(c, f, 0, d1, r0), f, red, g, b, 255, light);
         }
     }
 
     private static float dot(float[] a, float[] b) {
         return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
+    // ---------- The energy core (the formed Fusion Collider) ----------
+    // A floating plasma orb held in a cage of three containment rings that turn on different axes, with two
+    // target prongs pointing at the beam ports. Idle it pulses and turns slowly; during a run the rings spin up
+    // and the orb brightens until the collision, then they wind back down.
+
+    private static final int RING_METAL = 0x3A4150;
+
+    // 0 idle .. 1 just before impact, easing back down after it.
+    private static float charge(FusionColliderBlockEntity be, float partialTick) {
+        if (!be.isRunning()) return 0;
+        float t = be.getLevel().getGameTime() - be.renderStart() + partialTick;
+        if (t < ReactorPath.T_IMPACT) return Math.min(1f, t / ReactorPath.T_IMPACT);
+        return Math.max(0f, 1f - (t - ReactorPath.T_IMPACT) / (ReactorPath.T_END - ReactorPath.T_IMPACT));
+    }
+
+    // Ring angle: integrates speed so spinning up never jumps.
+    private static float spin(FusionColliderBlockEntity be, float partialTick) {
+        float time = be.getLevel().getGameTime() + partialTick;
+        float base = time * 0.02f;
+        if (!be.isRunning()) return base;
+        float t = be.getLevel().getGameTime() - be.renderStart() + partialTick;
+        float up = Math.min(t, ReactorPath.T_IMPACT);
+        float extra = 0.25f * up * up / (2f * ReactorPath.T_IMPACT);           // speed ramps from 0 to +0.25 rad/tick
+        if (t > ReactorPath.T_IMPACT) {
+            float d = Math.min(t - ReactorPath.T_IMPACT, ReactorPath.T_END - ReactorPath.T_IMPACT);
+            float len = ReactorPath.T_END - ReactorPath.T_IMPACT;
+            extra += 0.25f * (d - d * d / (2f * len));                           // and back down
+        }
+        return base + extra;
+    }
+
+    private static float[][] ringAxes(float a) {
+        return new float[][]{
+                norm(new float[]{Mth.cos(a), 0.35f, Mth.sin(a)}),
+                norm(new float[]{0.35f, Mth.cos(a * 1.3f), Mth.sin(a * 1.3f)}),
+                norm(new float[]{Mth.sin(a * 0.8f), Mth.cos(a * 0.8f), 0.35f})};
+    }
+
+    private static final float[] RING_R = {0.62f, 0.54f, 0.46f};
+
+    private static void coreSolid(FusionColliderBlockEntity be, VertexConsumer vc, PoseStack.Pose pose, boolean axisX, float pt) {
+        float[] c = {0.5f, 0.5f, 0.5f};
+        float[][] axes = ringAxes(spin(be, pt));
+        for (int i = 0; i < 3; i++) torus(vc, pose, c, axes[i], RING_R[i], 0.035f, RING_METAL, LightTexture.FULL_BRIGHT);
+        // Target prongs facing the two beam ports.
+        float[] axis = axisX ? new float[]{1, 0, 0} : new float[]{0, 0, 1};
+        for (int sgn = -1; sgn <= 1; sgn += 2) {
+            float[] f = {axis[0] * sgn, 0, axis[2] * sgn}, sd = {f[2], 0, -f[0]}, u = {0, 1, 0};
+            cylinder(vc, pose, c, f, sd, u, 0.78f, 1.45f, 0.07f, HOUSING, LightTexture.FULL_BRIGHT, true);
+            cylinder(vc, pose, c, f, sd, u, 0.95f, 1.08f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT, true);
+            annulus(vc, pose, along(c, f, 1.08f, f, 0), f, sd, u, 0.07f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT);
+            annulus(vc, pose, along(c, f, 0.95f, f, 0), new float[]{-f[0], 0, -f[2]}, u, sd, 0.07f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT);
+        }
+    }
+
+    private static void coreGlow(FusionColliderBlockEntity be, VertexConsumer vc, PoseStack.Pose pose, float pt) {
+        float[] c = {0.5f, 0.5f, 0.5f};
+        float time = be.getLevel().getGameTime() + pt;
+        float ch = charge(be, pt);
+        float pulse = 0.5f + 0.5f * Mth.sin(time * (0.08f + ch * 0.5f));
+        // Plasma orb: white-hot centre, cyan body, soft haze. Bigger and brighter as a run charges up.
+        sphere(vc, pose, c, 0.16f + 0.08f * ch + 0.02f * pulse, 0xFFFFFF, 255);
+        sphere(vc, pose, c, 0.28f + 0.1f * ch + 0.03f * pulse, CORE, (int) (150 + 90 * ch));
+        sphere(vc, pose, c, 0.42f + 0.12f * ch + 0.04f * pulse, TRIM, (int) (40 + 60 * ch));
+        // A thin glowing line on each ring.
+        float[][] axes = ringAxes(spin(be, pt));
+        for (int i = 0; i < 3; i++) glowRing(vc, pose, c, axes[i], RING_R[i] - 0.03f, TRIM, (int) (120 + 135 * ch));
+        // Prong tips glow.
+        boolean axisX = be.chamberAxisX();
+        for (int sgn = -1; sgn <= 1; sgn += 2) {
+            float d = 0.78f * sgn;
+            float[] tip = axisX ? new float[]{0.5f + d, 0.5f, 0.5f} : new float[]{0.5f, 0.5f, 0.5f + d};
+            sphere(vc, pose, tip, 0.09f + 0.04f * pulse, CORE, (int) (140 + 100 * ch));
+        }
+        // Lightning arcing from the orb: now and then when idle, constantly while a run charges.
+        long tick = be.getLevel().getGameTime();
+        java.util.Random r = new java.util.Random(tick / 2 * 341873128712L + be.getBlockPos().asLong());
+        int arcs = ch > 0 ? 2 + (int) (ch * 5) : (r.nextInt(5) == 0 ? 1 : 0);
+        for (int k = 0; k < arcs; k++) {
+            float[] from = {0.5f, 0.5f, 0.5f};
+            float[] to;
+            if (r.nextInt(3) == 0) {
+                // To a prong tip.
+                float d = 0.78f * (r.nextBoolean() ? 1 : -1);
+                to = axisX ? new float[]{0.5f + d, 0.5f, 0.5f} : new float[]{0.5f, 0.5f, 0.5f + d};
+            } else {
+                // To a point on one of the rings.
+                int i = r.nextInt(3);
+                float[] n = axes[i];
+                float[] e1 = norm(cross(n, Math.abs(n[1]) < 0.9f ? new float[]{0, 1, 0} : new float[]{1, 0, 0}));
+                float[] e2 = cross(n, e1);
+                float a = r.nextFloat() * Mth.TWO_PI;
+                float rr = RING_R[i];
+                to = new float[]{0.5f + (e1[0] * Mth.cos(a) + e2[0] * Mth.sin(a)) * rr,
+                        0.5f + (e1[1] * Mth.cos(a) + e2[1] * Mth.sin(a)) * rr,
+                        0.5f + (e1[2] * Mth.cos(a) + e2[2] * Mth.sin(a)) * rr};
+            }
+            float[] prev = from;
+            int steps = 6;
+            for (int st = 1; st <= steps; st++) {
+                float f = (float) st / steps;
+                float jit = st == steps ? 0 : 0.07f;
+                float[] p = {from[0] + (to[0] - from[0]) * f + (r.nextFloat() - 0.5f) * 2 * jit,
+                        from[1] + (to[1] - from[1]) * f + (r.nextFloat() - 0.5f) * 2 * jit,
+                        from[2] + (to[2] - from[2]) * f + (r.nextFloat() - 0.5f) * 2 * jit};
+                seg(vc, pose, prev, p, 0.012f, 0.012f, 0xFFFFFF, 255, 255);
+                seg(vc, pose, prev, p, 0.035f, 0.035f, TRIM, 110, 110);
+                prev = p;
+            }
+        }
+    }
+
+    // A ring (torus) of radius rr round axis n; tube radius tr. Faces wound outward for the culled solid type.
+    private static void torus(VertexConsumer vc, PoseStack.Pose pose, float[] c, float[] n, float rr, float tr, int colour, int light) {
+        float[] e1 = norm(cross(n, Math.abs(n[1]) < 0.9f ? new float[]{0, 1, 0} : new float[]{1, 0, 0}));
+        float[] e2 = cross(n, e1);
+        int seg = 32, side = 8;
+        int red = (colour >> 16) & 255, g = (colour >> 8) & 255, b = colour & 255;
+        for (int i = 0; i < seg; i++) {
+            float a0 = Mth.TWO_PI * i / seg, a1 = Mth.TWO_PI * (i + 1) / seg;
+            for (int j = 0; j < side; j++) {
+                float b0 = Mth.TWO_PI * j / side, b1 = Mth.TWO_PI * (j + 1) / side;
+                float[][] pts = new float[4][], nrm = new float[4][];
+                float[][] ab = {{a0, b0}, {a1, b0}, {a1, b1}, {a0, b1}};
+                for (int q = 0; q < 4; q++) {
+                    float ca = Mth.cos(ab[q][0]), sa = Mth.sin(ab[q][0]), cb = Mth.cos(ab[q][1]), sb = Mth.sin(ab[q][1]);
+                    float[] radial = {e1[0] * ca + e2[0] * sa, e1[1] * ca + e2[1] * sa, e1[2] * ca + e2[2] * sa};
+                    nrm[q] = new float[]{radial[0] * cb + n[0] * sb, radial[1] * cb + n[1] * sb, radial[2] * cb + n[2] * sb};
+                    pts[q] = new float[]{c[0] + radial[0] * rr + nrm[q][0] * tr, c[1] + radial[1] * rr + nrm[q][1] * tr,
+                            c[2] + radial[2] * rr + nrm[q][2] * tr};
+                }
+                quadOut(vc, pose, pts, nrm, red, g, b, light);
+            }
+        }
+    }
+
+    // A flat glowing band round axis n (seen from both sides: additive type, no culling).
+    private static void glowRing(VertexConsumer vc, PoseStack.Pose pose, float[] c, float[] n, float rr, int colour, int alpha) {
+        float[] e1 = norm(cross(n, Math.abs(n[1]) < 0.9f ? new float[]{0, 1, 0} : new float[]{1, 0, 0}));
+        float[] e2 = cross(n, e1);
+        int seg = 32;
+        int red = (colour >> 16) & 255, g = (colour >> 8) & 255, b = colour & 255;
+        float w = 0.012f;
+        for (int i = 0; i < seg; i++) {
+            float a0 = Mth.TWO_PI * i / seg, a1 = Mth.TWO_PI * (i + 1) / seg;
+            float[] d0 = {e1[0] * Mth.cos(a0) + e2[0] * Mth.sin(a0), e1[1] * Mth.cos(a0) + e2[1] * Mth.sin(a0), e1[2] * Mth.cos(a0) + e2[2] * Mth.sin(a0)};
+            float[] d1 = {e1[0] * Mth.cos(a1) + e2[0] * Mth.sin(a1), e1[1] * Mth.cos(a1) + e2[1] * Mth.sin(a1), e1[2] * Mth.cos(a1) + e2[2] * Mth.sin(a1)};
+            float[][] q = {
+                    {c[0] + d0[0] * rr + n[0] * w, c[1] + d0[1] * rr + n[1] * w, c[2] + d0[2] * rr + n[2] * w},
+                    {c[0] + d1[0] * rr + n[0] * w, c[1] + d1[1] * rr + n[1] * w, c[2] + d1[2] * rr + n[2] * w},
+                    {c[0] + d1[0] * rr - n[0] * w, c[1] + d1[1] * rr - n[1] * w, c[2] + d1[2] * rr - n[2] * w},
+                    {c[0] + d0[0] * rr - n[0] * w, c[1] + d0[1] * rr - n[1] * w, c[2] + d0[2] * rr - n[2] * w}};
+            for (float[] p : q) raw(vc, pose, p, d0, red, g, b, alpha, LightTexture.FULL_BRIGHT);
+        }
+    }
+
+    // One quad, put in the order that makes it face the way its normals point.
+    private static void quadOut(VertexConsumer vc, PoseStack.Pose pose, float[][] p, float[][] n, int r, int g, int b, int light) {
+        float[] e1 = {p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]};
+        float[] e2 = {p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]};
+        float[] fn = cross(e1, e2);
+        float[] avg = {n[0][0] + n[1][0] + n[2][0] + n[3][0], n[0][1] + n[1][1] + n[2][1] + n[3][1], n[0][2] + n[1][2] + n[2][2] + n[3][2]};
+        int[] order = dot(fn, avg) >= 0 ? new int[]{0, 1, 2, 3} : new int[]{3, 2, 1, 0};
+        for (int q : order) raw(vc, pose, p[q], n[q], r, g, b, 255, light);
     }
 
     // ---------- Runs ----------

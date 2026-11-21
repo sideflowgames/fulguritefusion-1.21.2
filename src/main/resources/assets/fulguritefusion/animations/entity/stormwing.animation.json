@@ -162,29 +162,29 @@
         "left_wing": {
           "rotation": [
             0,
-            -80,
-            -8
+            -90,
+            -84
           ]
         },
         "left_wing_tip": {
           "rotation": [
             0,
-            -90,
-            0
+            0,
+            174
           ]
         },
         "right_wing": {
           "rotation": [
             0,
-            80,
-            8
+            90,
+            84
           ]
         },
         "right_wing_tip": {
           "rotation": [
             0,
-            90,
-            0
+            0,
+            -174
           ]
         },
         "body": {

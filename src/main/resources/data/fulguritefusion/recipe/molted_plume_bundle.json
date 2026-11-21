@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:molted_plume"
+    },
+    {
+      "item": "fulguritefusion:molted_plume"
+    },
+    {
+      "item": "fulguritefusion:molted_plume"
+    },
+    {
+      "item": "fulguritefusion:molted_plume"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:molted_plume_bundle",
+    "count": 1
+  }
+}

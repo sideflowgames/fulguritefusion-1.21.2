@@ -3,8 +3,8 @@
   "category": "misc",
   "pattern": [
     "FAF",
-    "FMF",
-    "FFF"
+    "KMK",
+    "FXF"
   ],
   "key": {
     "F": {
@@ -13,8 +13,14 @@
     "A": {
       "item": "fulguritefusion:arc_core"
     },
+    "K": {
+      "item": "fulguritefusion:coil_segment"
+    },
     "M": {
       "item": "fulguritefusion:mini_collider"
+    },
+    "X": {
+      "item": "fulguritefusion:charged_spark_cell"
     }
   },
   "result": {

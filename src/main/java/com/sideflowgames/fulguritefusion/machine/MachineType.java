@@ -1,5 +1,6 @@
 package com.sideflowgames.fulguritefusion.machine;
 
+import com.sideflowgames.fulguritefusion.ModBlocks;
 import com.sideflowgames.fulguritefusion.ModItems;
 
 import net.minecraft.util.RandomSource;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-// The five processing machines: their shape, base speed and (placeholder) recipes.
+// The five processing machines: their shape, base speed and recipes.
 // baseTicks = time per item at tier 1. Tiers 2/3/4 run 2x/4x/8x faster (see MachineTier).
 public enum MachineType {
     PRESS("press", MachineShape.SMALL, 120),
@@ -42,17 +43,44 @@ public enum MachineType {
     @Nullable
     public Result findRecipe(Level level, ItemStack in0, ItemStack in1, RandomSource random) {
         return switch (this) {
-            case PRESS -> simple(in0, Map.of(
-                    Items.COPPER_INGOT, () -> new ItemStack(ModItems.COPPER_SHEET.get()),
-                    Items.IRON_INGOT, () -> new ItemStack(ModItems.IRON_SHEET.get()),
-                    Items.GOLD_INGOT, () -> new ItemStack(ModItems.GOLD_SHEET.get())), 1);
+            case PRESS -> press(in0);
             case WIRE_EXTRUDER -> in0.is(ModItems.COPPER_SHEET.get())
                     ? new Result(1, 0, new ItemStack(ModItems.RAW_WIRE.get(), 2), ItemStack.EMPTY) : null;
-            case KILN -> in0.is(ModItems.FULGURITE.get()) && in0.getCount() >= 2
-                    ? new Result(2, 0, new ItemStack(ModItems.COIL_SEGMENT.get()), ItemStack.EMPTY) : null;
+            case KILN -> kiln(in0, in1);
             case FURNACE -> smelt(level, in0);
             case CRUSHER -> crush(in0, random);
         };
+    }
+
+    // Ingots -> sheets; 4 Fulgurite Shards -> 1 Fulgurite.
+    @Nullable
+    private static Result press(ItemStack in) {
+        if (in.is(ModItems.FULGURITE_SHARD.get())) {
+            return in.getCount() >= 4 ? new Result(4, 0, new ItemStack(ModItems.FULGURITE.get()), ItemStack.EMPTY) : null;
+        }
+        return simple(in, Map.of(
+                Items.COPPER_INGOT, () -> new ItemStack(ModItems.COPPER_SHEET.get()),
+                Items.IRON_INGOT, () -> new ItemStack(ModItems.IRON_SHEET.get()),
+                Items.GOLD_INGOT, () -> new ItemStack(ModItems.GOLD_SHEET.get())), 1);
+    }
+
+    // 2 Fulgurite -> Coil Segment (either input slot).
+    // Sand + Fulgurite Shard -> 4 Fulgurite Blast Glass; Cobbled Deepslate + Fulgurite Shard -> 4 Reinforced Fulgurite.
+    @Nullable
+    private static Result kiln(ItemStack a, ItemStack b) {
+        if (a.is(ModItems.FULGURITE.get()) && a.getCount() >= 2) return new Result(2, 0, new ItemStack(ModItems.COIL_SEGMENT.get()), ItemStack.EMPTY);
+        if (b.is(ModItems.FULGURITE.get()) && b.getCount() >= 2) return new Result(0, 2, new ItemStack(ModItems.COIL_SEGMENT.get()), ItemStack.EMPTY);
+        Result r = pair(a, b, Items.SAND, ModItems.FULGURITE_SHARD.get(), new ItemStack(ModBlocks.FULGURITE_BLAST_GLASS_ITEM.get(), 4));
+        if (r != null) return r;
+        return pair(a, b, Items.COBBLED_DEEPSLATE, ModItems.FULGURITE_SHARD.get(), new ItemStack(ModBlocks.REINFORCED_FULGURITE_ITEM.get(), 4));
+    }
+
+    // One of x and one of y, in either slot.
+    @Nullable
+    private static Result pair(ItemStack a, ItemStack b, Item x, Item y, ItemStack out) {
+        if (a.is(x) && b.is(y)) return new Result(1, 1, out, ItemStack.EMPTY);
+        if (a.is(y) && b.is(x)) return new Result(1, 1, out, ItemStack.EMPTY);
+        return null;
     }
 
     private static Result simple(ItemStack in, Map<Item, Supplier<ItemStack>> table, int take) {
@@ -73,6 +101,8 @@ public enum MachineType {
     private static Result crush(ItemStack in, RandomSource random) {
         if (in.isEmpty()) return null;
         Item i = in.getItem();
+        // A Raw Fulgurite block -> 10 Fulgurite Shards (mining gives 4-8).
+        if (i == ModBlocks.RAW_FULGURITE_ITEM.get()) return one(ModItems.FULGURITE_SHARD.get(), 10);
         // Raw ore -> 2 crushed ore (smelts into ingots).
         if (i == Items.RAW_IRON) return one(ModItems.CRUSHED_IRON.get(), 2);
         if (i == Items.RAW_COPPER) return one(ModItems.CRUSHED_COPPER.get(), 2);

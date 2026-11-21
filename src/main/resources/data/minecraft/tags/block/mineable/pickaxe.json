@@ -37,6 +37,8 @@
     "fulguritefusion:console_data_port",
     "fulguritefusion:console_fuel_input",
     "fulguritefusion:ring_injection_port",
-    "fulguritefusion:data_cable"
+    "fulguritefusion:data_cable",
+    "fulguritefusion:sky_collector",
+    "fulguritefusion:abyssal_nacre_cluster"
   ]
 }

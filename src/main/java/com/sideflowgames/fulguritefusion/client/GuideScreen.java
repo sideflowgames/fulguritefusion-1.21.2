@@ -37,7 +37,8 @@ import org.lwjgl.glfw.GLFW;
 //                  "pages": [{"title": "...", "items": ["mod:item", ...], "recipe": "mod:recipe_id", "text": "..."}]}]}
 //
 // Text wraps to the page and runs on to as many pages as it needs; "\n" starts a new line, a blank line a gap.
-// Every chapter starts on a fresh spread. Contents are on the first spread; click a chapter to jump to it.
+// Every chapter starts on a fresh spread. Contents are on the first spread; click a chapter to jump to it,
+// and the Chapters button under the book (or the Home key) to come back.
 public class GuideScreen extends Screen {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/guide_book.png");
     private static final ResourceLocation CONTENT = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "guide/guide.json");
@@ -75,11 +76,23 @@ public class GuideScreen extends Screen {
     @Override
     protected void init() {
         left = (width - BOOK_W) / 2;
-        top = Math.max(2, (height - BOOK_H) / 2 - 8);
+        top = Math.max(2, (height - BOOK_H - 20) / 2);
         if (pages.isEmpty()) build();
         spread = Math.min(lastSpread, spreads() - 1);
         addRenderableWidget(new PageButton(left + BOOK_W - 44, top + BOOK_H - 22, true, b -> turn(1), true));
         addRenderableWidget(new PageButton(left + 20, top + BOOK_H - 22, false, b -> turn(-1), true));
+        // Back to the chapter list (just under the book).
+        chaptersButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
+                        Component.literal("\u00AB Chapters"), b -> jumpToPage(0))
+                .bounds(left + BOOK_W / 2 - 40, top + BOOK_H + 2, 80, 16).build());
+    }
+
+    private net.minecraft.client.gui.components.Button chaptersButton;
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (chaptersButton != null) chaptersButton.active = spread != 0;
     }
 
     private void build() {
@@ -229,11 +242,6 @@ public class GuideScreen extends Screen {
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
-            // "Contents" link under the book.
-            if (spread != 0 && overContentsLink(mx, my)) {
-                jumpToPage(0);
-                return true;
-            }
             // Chapter links on the contents page.
             for (int side = 0; side < 2; side++) {
                 int index = spread * 2 + side;
@@ -249,12 +257,6 @@ public class GuideScreen extends Screen {
             }
         }
         return super.mouseClicked(mx, my, button);
-    }
-
-    private boolean overContentsLink(double mx, double my) {
-        int w = font.width("Contents");
-        int x = left + BOOK_W / 2 - w / 2, y = top + BOOK_H - 14;
-        return mx >= x - 2 && mx <= x + w + 2 && my >= y - 2 && my <= y + 10;
     }
 
     @Override
@@ -281,11 +283,6 @@ public class GuideScreen extends Screen {
             drawPage(g, pages.get(index), x, y, mouseX, mouseY, hovered);
             String num = String.valueOf(index + 1);
             g.drawString(font, num, x + PAGE_W / 2 - font.width(num) / 2, top + BOOK_H - 24, FAINT, false);
-        }
-        if (spread != 0) {
-            int w = font.width("Contents");
-            boolean over = overContentsLink(mouseX, mouseY);
-            g.drawString(font, "Contents", left + BOOK_W / 2 - w / 2, top + BOOK_H - 14, over ? LINK : FAINT, false);
         }
         if (!hovered[0].isEmpty()) g.renderTooltip(font, hovered[0], mouseX, mouseY);
     }

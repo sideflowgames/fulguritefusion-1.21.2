@@ -64,9 +64,20 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.UUID;
+import java.util.function.IntSupplier;
 
 // Stormwing: a storm eagle (3 blocks long, 2 tall, 6-block wingspan) that lives around its nest on the mountains.
 //   - Clear or rainy weather: passive; it flies home and sits on its nest.
@@ -80,12 +91,44 @@ import java.util.UUID;
 // Birds raised from eggs are not wild:
 //   - LOYAL: follows its owner, sits/follows on the owner's right-click, defends the owner. Never despawns.
 //   - FERAL: a strong hostile bird that roams and attacks everything.
+// Bonding (Thunderbond Talisman, see tryBond): a wild bird in a thunderstorm, or your own loyal bird, becomes BONDED.
+//   - Right-click a bonded bird (empty hand) to ride it; sneak + right-click to make it stay/follow.
+//   - Riding: it faces where you look, W/S/A/D to fly, Space climbs, Shift descends.
+//     Shift only lets you off once the bird is down near the ground (StormwingRiding stops mid-air dismounts).
+//   - R (rebindable): lightning dive. The bird lunges where you look and calls lightning onto what you aimed at.
+//   - Bonded birds get +50% health, and in a thunderstorm they fill Empty Spark Cells in the rider's inventory.
 public class StormwingEntity extends PathfinderMob implements GeoEntity, StormwingVariant.Holder {
     public enum Mode { WILD, LOYAL, FERAL }
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(StormwingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> NESTING = SynchedEntityData.defineId(StormwingEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DIVING = SynchedEntityData.defineId(StormwingEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> BONDED = SynchedEntityData.defineId(StormwingEntity.class, EntityDataSerializers.BOOLEAN);
+
+    // ---------- Riding tuning ----------
+    private static final double RIDE_SPEED = 1.15;        // blocks per tick at full speed (about 23 blocks a second)
+    private static final double CLIMB_SPEED = 0.55;       // blocks per tick up (Space) or down (Shift)
+    private static final double DIVE_SPEED = 2.0;         // lunge speed during a lightning dive
+    private static final int DIVE_LUNGE_TICKS = 10;       // how long the lunge lasts
+    private static final int DIVE_COOLDOWN = 100;         // 5 seconds between dives
+    private static final int DIVE_STRIKE_DELAY = 8;       // the lightning lands this many ticks after R
+    private static final double DIVE_RANGE = 48;          // how far you can aim a dive
+    private static final double DIVE_RADIUS = 3.5;        // the strike hurts everything this close to where it lands
+    private static final float RIDER_DIVE_DAMAGE = 12.0f;
+    private static final double SEAT_HEIGHT = 1.15;       // where the rider sits (raise or lower to fit the model)
+    private static final double SEAT_BACK = -0.15;        // + moves the rider toward the head
+    private static final int RECHARGE_TICKS = 200;        // in a storm: one Empty Spark Cell filled every 10 seconds
+
+    // Set by the client: +1 while Space is held, -1 while Shift is held, 0 otherwise.
+    public static IntSupplier riderVertical = () -> 0;
+
+    private long nextRiderDive;          // server: game time the next dive is allowed
+    private int strikeDelay;             // server: ticks until a pending dive strike lands (0 = none)
+    @Nullable private Vec3 strikePoint;  // server: where it lands if no creature was aimed at
+    @Nullable private UUID strikeTarget; // server: the creature that was aimed at
+    @Nullable private UUID strikeRider;
+    private int clientLungeTicks;        // client: lunge in progress
+    private long clientNextDive;         // client: game time the next dive is allowed
 
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.stormwing.fly");
     private static final RawAnimation NEST = RawAnimation.begin().thenLoop("animation.stormwing.nest");
@@ -143,6 +186,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         builder.define(NESTING, false);
         builder.define(DIVING, false);
         builder.define(VARIANT, 0);
+        builder.define(BONDED, false);
     }
 
     @Override
@@ -236,11 +280,22 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         setPersistenceRequired();
     }
 
-    // The owner right-clicks with an empty hand: sit / follow.
+    // The owner right-clicks with an empty hand: ride (bonded birds), or sit / follow (sneaking, or not bonded).
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         // Main hand only: right-click fires once per hand, and two toggles would cancel out.
         if (isLoyal() && player.getUUID().equals(owner) && hand == InteractionHand.MAIN_HAND && player.getItemInHand(hand).isEmpty()) {
+            if (isBonded() && !player.isSecondaryUseActive()) {
+                if (!level().isClientSide && !isVehicle()) {
+                    sitting = false;
+                    setNesting(false);
+                    setTarget(null);
+                    getNavigation().stop();
+                    player.setYRot(getYRot());
+                    player.startRiding(this);
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide);
+            }
             if (!level().isClientSide) {
                 sitting = !sitting;
                 setTarget(null);
@@ -251,6 +306,203 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
         return super.mobInteract(player, hand);
+    }
+
+    // ---------- Bonding (Thunderbond Talisman) ----------
+
+    public boolean isBonded() {
+        return entityData.get(BONDED);
+    }
+
+    // Try to bond this bird to the player. Returns null when it worked, or why it didn't.
+    @Nullable
+    public String tryBond(Player player) {
+        if (isBonded()) return player.getUUID().equals(owner) ? "This Stormwing is already bonded to you." : "This Stormwing is bonded to someone else.";
+        if (isFeral()) return "This Stormwing is feral. It will never bond.";
+        if (isLoyal() && !player.getUUID().equals(owner)) return "This Stormwing is loyal to someone else.";
+        if (isWild()) {
+            if (!level().isThundering()) return "The bond only takes during a thunderstorm.";
+            if (getTarget() != null || getLastHurtByMob() != null) return "It's too angry to bond. Let it calm down.";
+            // It leaves its nest behind for good.
+            dismissSerpent();
+            exploreTicksLeft = 0;
+            nestPos = null;
+            mode = Mode.LOYAL;
+            owner = player.getUUID();
+            setPersistenceRequired();
+        }
+        entityData.set(BONDED, true);
+        sitting = false;
+        setTarget(null);
+        modify(Attributes.MAX_HEALTH, "bonded_health", 0.5);
+        setHealth(getMaxHealth());
+        if (level() instanceof ServerLevel server) {
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1, getZ(), 80, 1.5, 1.0, 1.5, 0.4);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1, getZ(), 30, 1.0, 1.0, 1.0, 0.05);
+            server.playSound(null, blockPosition(), ModSounds.STORMWING_CALL.get(), SoundSource.NEUTRAL, 1.2f, 1.1f);
+            server.playSound(null, blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.NEUTRAL, 1.0f, 1.3f);
+        }
+        return null;
+    }
+
+    // ---------- Riding ----------
+
+    // The rider steers a bonded bird. (Only its owner can climb on; the owner isn't known on the client,
+    // so this doesn't check it.)
+    @Nullable
+    @Override
+    public LivingEntity getControllingPassenger() {
+        if (isBonded() && getFirstPassenger() instanceof Player rider) return rider;
+        return null;
+    }
+
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return getPassengers().isEmpty();
+    }
+
+    // The rider sits on its back.
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float partialTick) {
+        return new Vec3(0, SEAT_HEIGHT, SEAT_BACK).yRot(-getYRot() * Mth.DEG_TO_RAD);
+    }
+
+    // While ridden, the bird's own goals (wandering, attacking, following) are switched off.
+    @Override
+    protected void updateControlFlags() {
+        super.updateControlFlags();
+        if (getControllingPassenger() instanceof Player) {
+            goalSelector.setControlFlag(Goal.Flag.MOVE, false);
+            goalSelector.setControlFlag(Goal.Flag.JUMP, false);
+            goalSelector.setControlFlag(Goal.Flag.LOOK, false);
+            targetSelector.setControlFlag(Goal.Flag.TARGET, false);
+        }
+    }
+
+    // Is the bird down at (or almost at) the ground? The rider can only hop off then.
+    public boolean nearGround() {
+        return onGround() || !level().noCollision(this, getBoundingBox().move(0, -0.3, 0));
+    }
+
+    // Flight while ridden. This runs on the rider's own game, which sends the bird's position to the server.
+    @Override
+    public void travel(Vec3 input) {
+        if (isAlive() && getControllingPassenger() instanceof Player rider) {
+            float yaw = rider.getYRot();
+            setYRot(yaw);
+            yRotO = yaw;
+            yBodyRot = yaw;
+            yHeadRot = yaw;
+            setXRot(rider.getXRot() * 0.5f);
+
+            Vec3 v;
+            if (clientLungeTicks > 0) {
+                // Lightning dive: lunge where the rider is looking.
+                clientLungeTicks--;
+                v = rider.getLookAngle().scale(DIVE_SPEED * stormwingVariant().speed);
+            } else {
+                float strafe = rider.xxa * 0.6f;
+                float forward = rider.zza;
+                if (forward < 0) forward *= 0.4f; // backing up is slow
+                double rad = Math.toRadians(yaw), sin = Math.sin(rad), cos = Math.cos(rad);
+                double speed = RIDE_SPEED * stormwingVariant().speed;
+                Vec3 want = new Vec3((strafe * cos - forward * sin) * speed, riderVertical.getAsInt() * CLIMB_SPEED,
+                        (forward * cos + strafe * sin) * speed);
+                Vec3 now = getDeltaMovement();
+                // Speeds up smoothly, slows a little faster.
+                double ease = want.lengthSqr() > now.lengthSqr() ? 0.08 : 0.15;
+                v = now.add(want.subtract(now).scale(ease));
+            }
+            setDeltaMovement(v);
+            move(MoverType.SELF, v);
+            calculateEntityAnimation(false);
+            return;
+        }
+        super.travel(input);
+    }
+
+    // Client: R was pressed. Returns true if a dive starts (then the client tells the server).
+    public boolean clientStartDive() {
+        long now = level().getGameTime();
+        if (now < clientNextDive) return false;
+        clientNextDive = now + DIVE_COOLDOWN;
+        clientLungeTicks = DIVE_LUNGE_TICKS;
+        return true;
+    }
+
+    // Server: the rider pressed R. Aim where they look, and call lightning down a moment later.
+    public void riderDive(ServerPlayer rider) {
+        if (rider != getControllingPassenger()) return;
+        long now = level().getGameTime();
+        if (now < nextRiderDive) return;
+        nextRiderDive = now + DIVE_COOLDOWN - 5; // a little slack for lag
+        Vec3 eye = rider.getEyePosition();
+        Vec3 end = eye.add(rider.getLookAngle().scale(DIVE_RANGE));
+        BlockHitResult block = level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, rider));
+        Vec3 reach = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(level(), rider, eye, reach, new AABB(eye, reach).inflate(2.0),
+                e -> e instanceof LivingEntity && e.isAlive() && e != this && e != rider);
+        strikeTarget = hit != null ? hit.getEntity().getUUID() : null;
+        strikePoint = reach;
+        strikeRider = rider.getUUID();
+        strikeDelay = DIVE_STRIKE_DELAY;
+        setDiving(true);
+        level().playSound(null, blockPosition(), ModSounds.STORMWING_CALL.get(), SoundSource.NEUTRAL, 1.0f, 1.2f);
+    }
+
+    private void tickRiderStrike() {
+        if (strikeDelay <= 0 || !(level() instanceof ServerLevel server)) return;
+        if (--strikeDelay > 0) return;
+        setDiving(false);
+        Vec3 at = strikePoint;
+        if (strikeTarget != null && server.getEntity(strikeTarget) instanceof LivingEntity target && target.isAlive()) {
+            at = target.position();
+        }
+        if (at == null) return;
+        Player rider = strikeRider != null ? server.getPlayerByUUID(strikeRider) : null;
+        // Everything near the strike is hit, except the bird and its rider.
+        for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(DIVE_RADIUS),
+                t -> t != this && t != rider && t.isAlive() && !(t instanceof StormwingEntity b && b.owner != null && b.owner.equals(strikeRider)))) {
+            DamageSource source = rider != null ? damageSources().playerAttack(rider) : damageSources().mobAttack(this);
+            e.hurt(source, RIDER_DIVE_DAMAGE * (float) stormwingVariant().attack);
+        }
+        // A jagged bolt from the sky, and an arc from the bird to the spot. No fire, no block damage.
+        double x = at.x, z = at.z;
+        for (double y = at.y + 18; y > at.y; y -= 0.4) {
+            x += (random.nextDouble() - 0.5) * 0.5;
+            z += (random.nextDouble() - 0.5) * 0.5;
+            server.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0, 0, 0, 0);
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 1, 0.05, 0.05, 0.05, 0.02);
+        }
+        Vec3 from = position().add(0, 0.8, 0);
+        int steps = (int) Math.max(4, from.distanceTo(at) * 2);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 p = from.lerp(at, i / (double) steps);
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08, 0.01);
+        }
+        server.sendParticles(ParticleTypes.FLASH, at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
+        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.5, at.z, 80, 1.5, 0.4, 1.5, 0.5);
+        server.playSound(null, BlockPos.containing(at), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.NEUTRAL, 2.0f, 1.0f);
+        server.playSound(null, BlockPos.containing(at), ModSounds.STORMWING_ARC.get(), SoundSource.NEUTRAL, 1.6f, 0.8f);
+        strikeTarget = null;
+        strikePoint = null;
+        strikeRider = null;
+    }
+
+    // In a thunderstorm, a ridden bird fills one Empty Spark Cell in the rider's inventory every 10 seconds.
+    private void tickRecharge() {
+        if (!(getControllingPassenger() instanceof ServerPlayer rider) || !level().isThundering() || tickCount % RECHARGE_TICKS != 0) return;
+        var inventory = rider.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.is(ModItems.EMPTY_SPARK_CELL.get())) continue;
+            stack.shrink(1);
+            ItemStack full = new ItemStack(ModItems.SPARK_CELL.get());
+            if (!inventory.add(full)) rider.drop(full, false);
+            ((ServerLevel) level()).sendParticles(ParticleTypes.ELECTRIC_SPARK, rider.getX(), rider.getY() + 1, rider.getZ(), 12, 0.4, 0.5, 0.4, 0.1);
+            level().playSound(null, rider.blockPosition(), ModSounds.STORMWING_ARC.get(), SoundSource.NEUTRAL, 0.5f, 1.6f);
+            return;
+        }
     }
 
     // Someone took an egg or plumes from a nest: its Stormwing (and the Arc Serpent on guard) go after them.
@@ -417,6 +669,9 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     public void aiStep() {
         super.aiStep();
         if (!level().isClientSide) {
+            tickRiderStrike();
+            tickRecharge();
+            if (isVehicle() && isNesting()) setNesting(false); // gravity off while ridden
             if (isWild()) {
                 if (nestPos == null) findOrBuildNest();
                 if (exploreCooldown < 0) rollExploreCooldown();
@@ -484,6 +739,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putBoolean("Sitting", sitting);
         tag.putInt("ShedTimer", shedTimer);
+        tag.putBoolean("Bonded", isBonded());
     }
 
     @Override
@@ -503,6 +759,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         sitting = tag.getBoolean("Sitting");
         if (tag.contains("ShedTimer")) shedTimer = tag.getInt("ShedTimer");
+        entityData.set(BONDED, tag.getBoolean("Bonded"));
     }
 
     // ---------- Animation ----------

@@ -4,7 +4,7 @@
   "pattern": [
     "IFI",
     "FHF",
-    "IFI"
+    "IRI"
   ],
   "key": {
     "I": {
@@ -15,6 +15,9 @@
     },
     "H": {
       "item": "minecraft:hopper"
+    },
+    "R": {
+      "item": "minecraft:redstone"
     }
   },
   "result": {

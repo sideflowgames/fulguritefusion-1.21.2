@@ -172,7 +172,7 @@
             "fulguritefusion:coil_segment",
             "fulguritefusion:crushed_iron"
           ],
-          "text": "Press: ingots into Copper, Iron and Gold Sheets.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire.\n\nKiln: 2 Fulgurite into a Coil Segment.\n\nArc Furnace: anything a furnace smelts.\n\nCrusher: raw ore into 2 crushed ore (smelt it into ingots)."
+          "text": "Press: ingots into Copper, Iron and Gold Sheets; 4 Fulgurite Shards into a Fulgurite.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire.\n\nKiln: 2 Fulgurite into a Coil Segment. Sand + a Fulgurite Shard makes 4 Fulgurite Blast Glass; Cobbled Deepslate + a shard makes 4 Reinforced Fulgurite.\n\nArc Furnace: anything a furnace smelts.\n\nCrusher: a Raw Fulgurite block into 10 shards; raw ore into 2 crushed ore (smelt it into ingots)."
         },
         {
           "recipe": "fulguritefusion:press",
@@ -259,7 +259,96 @@
             "fulguritefusion:wither_ash",
             "fulguritefusion:struck_spore"
           ],
-          "text": "Twelve rare materials, each with its own energy. Any two can be paired, 78 pairings in all, and each has its own result.\n\nThe Stormwing Plume comes from Stormwings."
+          "text": "Twelve rare materials, each with its own energy. Any two can be paired, 78 pairings in all, and each has its own result.\n\nThe next pages say where each one comes from."
+        },
+        {
+          "title": "Sky Collector",
+          "items": [
+            "fulguritefusion:sky_collector",
+            "fulguritefusion:aurora_dust",
+            "fulguritefusion:sunmote"
+          ],
+          "text": "Aurora Dust and Sunmote fall from the sky. Place a Sky Collector under open sky:\n\nClear nights, at Y 200 or higher: Aurora Dust (about one every 25 seconds).\n\nClear middays in a desert or badlands: Sunmote (about one every 15 seconds).\n\nHoppers can empty it, or right-click it with an empty hand. Right-click when it's empty to see what it's waiting for.",
+          "recipe": "fulguritefusion:sky_collector"
+        },
+        {
+          "title": "Abyssal Nacre",
+          "items": [
+            "fulguritefusion:abyssal_nacre",
+            "fulguritefusion:abyssal_nacre_cluster",
+            "minecraft:conduit",
+            "minecraft:prismarine"
+          ],
+          "text": "Build an active Conduit in a deep ocean. Abyssal Nacre Clusters slowly grow on prismarine (plain, bricks or dark) touching water near it, up to 16 at a time.\n\nMine a cluster for 1-3 Abyssal Nacre."
+        },
+        {
+          "title": "Soul Frost",
+          "items": [
+            "fulguritefusion:soul_frost",
+            "fulguritefusion:frozen_soul_fire",
+            "minecraft:powder_snow_bucket"
+          ],
+          "text": "Empty a bucket of powder snow onto soul fire. It freezes into Frozen Soul Fire.\n\nBreak it for 2-4 Soul Frost."
+        },
+        {
+          "title": "Echo Resin",
+          "items": [
+            "fulguritefusion:echo_resin",
+            "minecraft:sculk",
+            "minecraft:iron_axe"
+          ],
+          "text": "Right-click sculk with an axe in the Deep Dark to scrape off Echo Resin (most scrapes give one).\n\nCareful: scraping is loud, and the sculk can hear it."
+        },
+        {
+          "title": "Gale Core",
+          "items": [
+            "fulguritefusion:gale_core"
+          ],
+          "text": "Breezes in Trial Chambers often drop a Gale Core."
+        },
+        {
+          "title": "Stormwing Plume",
+          "items": [
+            "fulguritefusion:stormwing_plume"
+          ],
+          "text": "Shake one loose by hitting a Stormwing. See the Stormwings chapter."
+        },
+        {
+          "title": "Null Scale",
+          "items": [
+            "fulguritefusion:null_scale"
+          ],
+          "text": "Dropped by Voidmoths, which flutter round the outer End islands and are drawn to End Rods. Hitting one drains your experience."
+        },
+        {
+          "title": "Lumen Gel",
+          "items": [
+            "fulguritefusion:lumen_gel",
+            "minecraft:glass_bottle"
+          ],
+          "text": "Lumen Slugs crawl through the Lush Caves leaving a glowing trail. Scoop the trail with a glass bottle: no need to hurt the slug."
+        },
+        {
+          "title": "Cinder Heart",
+          "items": [
+            "fulguritefusion:cinder_heart"
+          ],
+          "text": "Large Magma Cubes in the Basalt Deltas sometimes drop a Cinder Heart."
+        },
+        {
+          "title": "Wither Ash",
+          "items": [
+            "fulguritefusion:wither_ash"
+          ],
+          "text": "Wither Skeletons killed by lightning, or within a minute of being struck, drop 2-4 Wither Ash. Lure them out of the Nether into a storm, or near a lightning rod."
+        },
+        {
+          "title": "Struck Spore",
+          "items": [
+            "fulguritefusion:struck_spore",
+            "minecraft:shears"
+          ],
+          "text": "When lightning strikes a Mooshroom, shear it within a minute for 2-3 Struck Spores."
         },
         {
           "title": "Pairing results",
@@ -306,6 +395,19 @@
         {
           "title": "Hatchlings",
           "text": "A hatchling can't fly yet: it walks, leaps and glides. It grows up after one Minecraft day.\n\nA loyal hatchling follows the player who placed the egg. Right-click it with an empty hand to make it stay or follow; it keeps that when it grows up. A grown loyal bird follows you, sits on command and defends you.\n\nA feral one runs from everyone and grows into a dangerous bird."
+        },
+        {
+          "title": "Thunderbond Talisman",
+          "items": [
+            "fulguritefusion:thunderbond_talisman",
+            "fulguritefusion:molted_plume_bundle"
+          ],
+          "recipe": "fulguritefusion:thunderbond_talisman",
+          "text": "Bonds a Stormwing to you so you can ride it. Tie 4 Molted Plumes with string to make a Molted Plume Bundle first.\n\nA wild Stormwing only bonds during a thunderstorm, and only while it's calm. Your own hatched bird bonds any time.\n\nThe talisman is used up when the bond takes."
+        },
+        {
+          "title": "Riding",
+          "text": "Right-click your bonded Stormwing with an empty hand to ride. Sneak + right-click to make it stay or follow.\n\nIt flies where you face: W/A/S/D to move, Space to climb, Shift to descend. Shift lets you off once you're down near the ground.\n\nPress R for a lightning dive: it lunges and calls lightning onto what you aim at (every 5 seconds).\n\nIn a thunderstorm it fills Empty Spark Cells in your inventory as you fly."
         }
       ]
     },
@@ -322,6 +424,13 @@
             "fulguritefusion:blast_chamber_frame"
           ],
           "text": "The Fusion Reactor fires two fuels round two huge rings and smashes them together in a blast chamber, for enormous amounts of Fm.\n\nIt has four parts: the blast chamber with the Fusion Collider in its middle, the inner ring, the outer ring and the control console.\n\nEvery part is explosion-proof. Right-click the Fusion Collider to see what's missing."
+        },
+        {
+          "title": "Ghost outline",
+          "items": [
+            "fulguritefusion:fusion_collider"
+          ],
+          "text": "Not sure where a block goes? Give the Fusion Collider a redstone signal (a lever on it works) and every block still missing shows as a faint glowing ghost. Red boxes mark spots that must be left empty.\n\nWhere you have a choice (which way the chamber opens, which corners hold the portals), the ghost follows what you've already placed.\n\nThe Reactor Control Console, the Storm Collider and the Mini Collider show ghosts the same way."
         },
         {
           "title": "Blast chamber",
@@ -407,11 +516,11 @@
         },
         {
           "title": "Power out",
-          "text": "The collision's Fm fills the console's store (2,000,000 Fm). The power ports push it out of their backs, 2,048 Fm/t each, into a battery or machine behind them.\n\nThe menu shows the store, the run's progress and the last result."
+          "text": "The collision's Fm fills the console's store (2,000,000 Fm). The power ports push it out of their backs, 2,048 Fm/t each, into a battery or machine behind them.\n\nByproducts come out at twice the Storm Collider's rate, into the console's byproduct slot. Take them in the menu, or put a hopper under a Fuel Input.\n\nThe menu shows the store, the run's progress and the last result."
         },
         {
           "title": "When it goes wrong",
-          "text": "A cut data cable: that injector gets no fuel. The other charge fires anyway, finds nothing to hit, and is lost.\n\nSomething in a portal beam's path: that charge fizzles out.\n\nUnstable, Bad and Catastrophic fuels unleash shocks, smoke, withering or an explosion. A Catastrophic run also blasts several ring and chamber blocks out, and the reactor stays down until you replace them.\n\nA lost run turns Auto off."
+          "text": "A cut data cable: that injector gets no fuel. The other charge fires anyway, finds nothing to hit, and is lost.\n\nSomething in a portal beam's path: that charge fizzles out.\n\nEvery pairing has its own reaction: crops ripen, water freezes, coral grows, Drowned rise, lightning storms strike, the area stays charged with static... Some fuels overheat the reactor, and it must cool down before the next run.\n\nThe worst can tear blocks out of the chamber (Chamber Breach) or melt part of the ring back into Raw Fulgurite (Ring Melt). The reactor stays down until you replace them.\n\nWatching a fuel burn teaches you what it does. A lost run turns Auto off."
         }
       ]
     }

@@ -69,7 +69,7 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     // Menu data (big numbers split into two 16-bit halves).
     public static final int D_FM = 0, D_MAX = 2, D_STARTUP = 4, D_RUN = 6, D_STATE = 7, D_AUTO = 8, D_CABLES = 9,
             D_LAST = 10, DATA_COUNT = 12;
-    public static final int S_READY = 0, S_RUNNING = 1, S_CONSOLE = 2, S_REACTOR = 3, S_FUEL = 4, S_POWER = 5;
+    public static final int S_READY = 0, S_RUNNING = 1, S_CONSOLE = 2, S_REACTOR = 3, S_FUEL = 4, S_POWER = 5, S_HEAT = 6;
     public static final int B_START = 0, B_STOP = 1, B_AUTO = 2;
 
     private long fm;
@@ -89,6 +89,34 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
             setChanged();
         }
     };
+
+    // Byproducts of the runs (twice what the Storm Collider gives). Taken out in the menu, or by a hopper or pipe
+    // on a Fuel Input.
+    private final ItemStackHandler byproducts = new ItemStackHandler(1) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+    };
+
+    public ItemStackHandler getByproducts() {
+        return byproducts;
+    }
+
+    public void addByproduct(ItemStack stack) {
+        ItemStack left = byproducts.insertItem(0, stack, false);
+        if (!left.isEmpty() && level != null) {
+            // Slot full of something else: drop the rest at the console.
+            Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.2, worldPosition.getZ() + 0.5, left);
+        }
+    }
+
+    // Void Collapse: the console's store, and anything giving Fm behind its power ports, is drained dry.
+    public void voidCollapse() {
+        fm = 0;
+        for (BlockPos p : powerBacks()) ReactorReactions.drain(level, p);
+        setChanged();
+    }
 
     public static boolean isFuel(ItemStack stack) {
         if (stack.getItem() instanceof FusionFuelItem) return FusionFuelItem.result(stack) != null;
@@ -173,6 +201,7 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         FusionColliderBlockEntity r = reactor();
         if (r != null && r.isRunning()) return S_RUNNING;
         if (r == null || !r.isFormed()) return S_REACTOR;
+        if (r.isHot()) return S_HEAT;
         if (fuel.getStackInSlot(0).isEmpty() || fuel.getStackInSlot(1).isEmpty()) return S_FUEL;
         if (fm < Config.REACTOR_STARTUP_FM.get()) return S_POWER;
         return S_READY;
@@ -292,6 +321,9 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
                     fuel.getStackInSlot(i));
             fuel.setStackInSlot(i, ItemStack.EMPTY);
         }
+        Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5,
+                byproducts.getStackInSlot(0));
+        byproducts.setStackInSlot(0, ItemStack.EMPTY);
     }
 
     // Hoppers and pipes: each Console Fuel Input feeds its fuel slot (front or back), insert only.
@@ -299,42 +331,43 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockPos c = pos.relative(d, 2).above();
             if (level.getBlockEntity(c) instanceof ReactorConsoleBlockEntity console && console.formed) {
-                if (console.spot(-2, 0).equals(pos)) return new InsertOnly(console.fuel, 0);
-                if (console.spot(2, 0).equals(pos)) return new InsertOnly(console.fuel, 1);
+                if (console.spot(-2, 0).equals(pos)) return new InputPort(console.fuel, 0, console.byproducts);
+                if (console.spot(2, 0).equals(pos)) return new InputPort(console.fuel, 1, console.byproducts);
             }
         }
         return null;
     }
 
-    private record InsertOnly(ItemStackHandler handler, int slot) implements IItemHandler {
+    // A Fuel Input as hoppers see it: slot 0 = its fuel slot (insert only), slot 1 = the byproduct slot (take only).
+    private record InputPort(ItemStackHandler fuel, int slot, ItemStackHandler byproducts) implements IItemHandler {
         @Override
         public int getSlots() {
-            return 1;
+            return 2;
         }
 
         @Override
         public ItemStack getStackInSlot(int s) {
-            return handler.getStackInSlot(slot);
+            return s == 0 ? fuel.getStackInSlot(slot) : byproducts.getStackInSlot(0);
         }
 
         @Override
         public ItemStack insertItem(int s, ItemStack stack, boolean simulate) {
-            return handler.insertItem(slot, stack, simulate);
+            return s == 0 ? fuel.insertItem(slot, stack, simulate) : stack;
         }
 
         @Override
         public ItemStack extractItem(int s, int amount, boolean simulate) {
-            return ItemStack.EMPTY;
+            return s == 1 ? byproducts.extractItem(0, amount, simulate) : ItemStack.EMPTY;
         }
 
         @Override
         public int getSlotLimit(int s) {
-            return handler.getSlotLimit(slot);
+            return 64;
         }
 
         @Override
         public boolean isItemValid(int s, ItemStack stack) {
-            return handler.isItemValid(slot, stack);
+            return s == 0 && fuel.isItemValid(slot, stack);
         }
     }
 
@@ -584,6 +617,7 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         tag.putString("LastResult", lastResult);
         tag.putLong("LastYield", lastYield);
         tag.put("Fuel", fuel.serializeNBT(registries));
+        tag.put("Byproducts", byproducts.serializeNBT(registries));
     }
 
     @Override
@@ -613,5 +647,6 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         if (tag.contains("LastResult")) lastResult = tag.getString("LastResult");
         lastYield = tag.getLong("LastYield");
         if (tag.contains("Fuel")) fuel.deserializeNBT(registries, tag.getCompound("Fuel"));
+        if (tag.contains("Byproducts")) byproducts.deserializeNBT(registries, tag.getCompound("Byproducts"));
     }
 }

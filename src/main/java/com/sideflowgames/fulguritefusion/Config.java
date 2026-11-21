@@ -77,10 +77,10 @@ public class Config {
         BUILDER.comment("Server safety: what reactor failures are allowed to do").push("safety");
         BLOCK_DAMAGE = BUILDER.comment("Bad and Catastrophic reactor results can destroy blocks. Turn off for block-protected servers.")
                 .define("blockDamage", true);
-        RING_MELT = BUILDER.comment("Failures can melt upgraded coils back into raw fulgurite.")
+        RING_MELT = BUILDER.comment("Ring Melt (Solar Flare, Meltdown) can melt a stretch of the reactor's ring tube back into Raw Fulgurite.")
                 .define("ringMelt", true);
-        BOSS_SPAWNS = BUILDER.comment("Failures can summon boss mobs (e.g. the Hellfire pairing spawning a Wither).")
-                .define("bossSpawns", true);
+        BOSS_SPAWNS = BUILDER.comment("Failures can summon boss mobs: Warden Call spawns a Warden, Hellfire a Wither. Off by default.")
+                .define("bossSpawns", false);
         BUILDER.pop();
 
         BUILDER.comment("Static discharge from ungrounded Storm Furnaces").push("static");

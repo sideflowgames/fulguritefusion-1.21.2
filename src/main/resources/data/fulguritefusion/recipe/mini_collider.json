@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "FIF",
-    "SCS",
+    "SLS",
     "FIF"
   ],
   "key": {
@@ -11,13 +11,13 @@
       "item": "fulguritefusion:fulgurite"
     },
     "I": {
-      "item": "minecraft:iron_block"
+      "item": "minecraft:iron_ingot"
     },
     "S": {
       "item": "fulguritefusion:spark_cell"
     },
-    "C": {
-      "item": "minecraft:copper_block"
+    "L": {
+      "item": "minecraft:lightning_rod"
     }
   },
   "result": {

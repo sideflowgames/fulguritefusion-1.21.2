@@ -83,6 +83,8 @@ public class FusionColliderBlockEntity extends BlockEntity {
     private int runMask;                 // bit i: particle i was fired; bit 2 + i: particle i was lost at the portal jump
     private int runSeverity = -1;        // at impact: -1 nothing hit, 0 clean, 1 unstable, 2 bad, 3 catastrophic (flash colour)
     private final ItemStack[] carried = {ItemStack.EMPTY, ItemStack.EMPTY};
+    private long heatUntil = -1;         // game time the reactor has cooled down (Twin Suns, Flare, Torn Sky)
+    private long staticBloomUntil = -1;  // Overcharge: the area stays charged until then
     private BlockPos consolePos;
 
     public FusionColliderBlockEntity(BlockPos pos, BlockState state) {
@@ -147,12 +149,69 @@ public class FusionColliderBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state, FusionColliderBlockEntity be) {
         if ((level.getGameTime() + pos.asLong()) % CHECK_EVERY == 0) be.check();
         if (be.runStart >= 0) be.tickRun((ServerLevel) level);
+        if (be.staticBloomUntil > 0) be.tickStaticBloom((ServerLevel) level);
     }
 
     // ---------- Runs ----------
 
     public boolean isRunning() {
         return runStart >= 0;
+    }
+
+    // ---------- Heat and Static Bloom (set by some pairings' reactions) ----------
+
+    public boolean isHot() {
+        return level != null && level.getGameTime() < heatUntil;
+    }
+
+    public int coolSeconds() {
+        return level == null ? 0 : (int) Math.max(0, (heatUntil - level.getGameTime()) / 20);
+    }
+
+    public void overheat(int ticks) {
+        heatUntil = Math.max(heatUntil, level.getGameTime() + ReactorPath.T_END - ReactorPath.T_IMPACT + ticks);
+        setChanged();
+    }
+
+    public void coolDown() {
+        heatUntil = -1;
+        setChanged();
+    }
+
+    public void staticBloom(int ticks) {
+        staticBloomUntil = level.getGameTime() + ticks;
+        setChanged();
+    }
+
+    // Static Bloom: anyone within 24 blocks touching metal gets zapped.
+    private void tickStaticBloom(ServerLevel level) {
+        if (level.getGameTime() >= staticBloomUntil || level.getGameTime() % 40 != 0) return;
+        for (net.minecraft.world.entity.player.Player p : level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
+                new AABB(worldPosition).inflate(24))) {
+            BlockPos feet = p.blockPosition();
+            boolean metal = false;
+            for (BlockPos q : new BlockPos[]{feet.below(), feet.north(), feet.south(), feet.east(), feet.west(), feet.above().north(),
+                    feet.above().south(), feet.above().east(), feet.above().west()}) {
+                String id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(q).getBlock()).getPath();
+                if (id.contains("iron") || id.contains("gold") || id.contains("copper") || id.contains("netherite")
+                        || id.contains("chain") || id.contains("rail") || id.contains("anvil") || id.contains("lightning_rod")) {
+                    metal = true;
+                    break;
+                }
+            }
+            if (metal) {
+                p.hurt(level.damageSources().lightningBolt(), 2f);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.5, 0.3, 0.1);
+            }
+        }
+        if (level.random.nextInt(4) == 0) {
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, worldPosition.getX() + 0.5, worldPosition.getY() + 3, worldPosition.getZ() + 0.5,
+                    30, 12, 2, 12, 0.05);
+        }
+    }
+
+    public ReactorConsoleBlockEntity consoleEntity() {
+        return console();
     }
 
     // Ticks into the current run (-1 = none). Works on the client too (for the renderer).
@@ -192,7 +251,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
 
     // Start a run: fuel[i] goes to particle i (empty = that port gets nothing, e.g. its cable is cut).
     public boolean beginRun(BlockPos console, ItemStack fuel0, ItemStack fuel1) {
-        if (!(level instanceof ServerLevel server) || !formed || runStart >= 0 || injCorner < 0) return false;
+        if (!(level instanceof ServerLevel server) || !formed || runStart >= 0 || injCorner < 0 || isHot()) return false;
         if (fuel0.isEmpty() && fuel1.isEmpty()) return false;
         consolePos = console;
         carried[0] = fuel0.copy();
@@ -296,22 +355,24 @@ public class FusionColliderBlockEntity extends BlockEntity {
             return;
         }
 
-        // Fusion!
+        // Fusion! Work out the result(s) burned, the yield and any byproducts.
         Fuel a = Fuel.of(carried[0]), b = Fuel.of(carried[1]);
-        List<Tier> tiers = new ArrayList<>();
+        List<Pairing> results = new ArrayList<>();
+        List<ItemStack> byproducts = new ArrayList<>();
         double yield;
         String text;
         if (a.capsule() != null && b.capsule() != null) {
             yield = (a.capsule().fuelFm() + (double) b.capsule().fuelFm()) * 2;
-            tiers.add(a.capsule().tier());
-            tiers.add(b.capsule().tier());
+            results.add(a.capsule());
+            results.add(b.capsule());
             text = a.name() + " + " + b.name();
         } else if (a.capsule() == null && b.capsule() == null && a.raw() >= 0 && b.raw() >= 0) {
             Pairing pairing = Pairings.of(a.raw(), b.raw());
             Pairing result = StormColliderBlockEntity.resolve(pairing, level.random);
             yield = result.fuelFm();
-            tiers.add(result.tier());
-            text = result.name() + " (" + result.tier().display() + ")";
+            results.add(result);
+            byproducts.add(StormColliderBlockEntity.byproduct(pairing, result, level.random));
+            text = result.name();
         } else {
             Fuel cap = a.capsule() != null ? a : b, raw = a.capsule() != null ? b : a;
             if (cap.capsule() == null || raw.raw() < 0) {
@@ -320,20 +381,49 @@ public class FusionColliderBlockEntity extends BlockEntity {
             }
             yield = cap.capsule().fuelFm() * 1.5
                     + Pairings.ENERGY[raw.raw()] * Pairings.FM_PER_ENERGY * cap.capsule().tier().fuelMultiplier;
-            tiers.add(cap.capsule().tier());
+            results.add(cap.capsule());
             text = cap.name() + " + " + raw.name();
+        }
+        for (Pairing r : results) {
+            if (results.size() > 1 || byproducts.isEmpty()) byproducts.add(StormColliderBlockEntity.byproduct(r, r, level.random));
         }
         long fm = Math.round(yield * Config.REACTOR_FM_MULTIPLIER.get());
         int worst = 0;
-        for (Tier tier : tiers) worst = Math.max(worst, severity(tier));
+        for (Pairing r : results) worst = Math.max(worst, severity(r.tier()));
         runSeverity = fm <= 0 ? -1 : worst;
 
-        // The flash: a burst of particles ejected outward, held in by the blast chamber.
-        level.playSound(null, worldPosition, ModSounds.REACTOR_IMPACT.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
+        // The flash.
+        if (results.stream().noneMatch(r -> r.id() == 46)) { // Silence: no sound at all
+            level.playSound(null, worldPosition, ModSounds.REACTOR_IMPACT.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
+        }
         level.sendParticles(ParticleTypes.FLASH, x, y, z, 2, 0, 0, 0, 0);
 
-        for (Tier tier : tiers) sideEffect(level, tier, x, y, z);
-        String tierText = tiers.size() == 2 ? " (" + tiers.get(0).display() + " / " + tiers.get(1).display() + ")" : "";
+        // Each result's tier effect, then its own reaction; byproducts doubled into the console.
+        for (Pairing r : results) {
+            sideEffect(level, r.tier(), x, y, z);
+            ReactorReactions.react(level, this, r);
+        }
+        ReactorConsoleBlockEntity console = console();
+        for (ItemStack bp : byproducts) {
+            if (bp.isEmpty()) continue;
+            ItemStack twice = bp.copyWithCount(bp.getCount() * 2);
+            if (console != null) console.addByproduct(twice);
+            else Block.popResource(level, worldPosition.above(3), twice);
+        }
+
+        // Everyone watching learns what these fuels do.
+        java.util.Set<net.minecraft.server.level.ServerPlayer> watchers = new java.util.HashSet<>();
+        for (net.minecraft.server.level.ServerPlayer p : level.players()) {
+            if (p.blockPosition().closerThan(worldPosition, 64)
+                    || (consolePos != null && p.blockPosition().closerThan(consolePos, 32))) watchers.add(p);
+        }
+        for (net.minecraft.server.level.ServerPlayer p : watchers) {
+            for (Pairing r : results) com.sideflowgames.fulguritefusion.pairing.PairingDiscoveries.discover(p, r.id());
+        }
+
+        StringBuilder tierText = new StringBuilder(" (");
+        for (int i = 0; i < results.size(); i++) tierText.append(i > 0 ? " / " : "").append(results.get(i).tier().display());
+        tierText.append(")");
         finish(text + tierText + (fm > 0 ? ": " + String.format("%,d", fm) + " Fm" : ": no reaction"), fm);
     }
 
@@ -350,7 +440,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
         sync();
     }
 
-    // The reactor-sized versions of each tier's side effect.
+    // The general effect of each tier, reactor-sized (each pairing's own reaction comes on top: ReactorReactions).
     private void sideEffect(ServerLevel level, Tier tier, double x, double y, double z) {
         switch (tier) {
             case UNSTABLE -> {
@@ -360,17 +450,12 @@ public class FusionColliderBlockEntity extends BlockEntity {
             case BAD -> {
                 level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 1, z, 120, 5, 2, 5, 0.03);
                 shock(level, 12, 5f);
-                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(worldPosition).inflate(12))) {
-                    e.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 0));
-                }
             }
             case CATASTROPHIC -> {
-                level.explode(null, x, y, z, 5.0f, Level.ExplosionInteraction.NONE);
+                level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 1, 0, 0, 0, 0);
                 shock(level, 16, 8f);
-                if (Config.BLOCK_DAMAGE.get()) blastRingBlocks(level, 3 + level.random.nextInt(6));
             }
             case JACKPOT -> level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, x, y + 3, z, 150, 4, 2, 4, 0.4);
-            case FIZZLE -> level.sendParticles(ParticleTypes.SMOKE, x, y, z, 40, 0.6, 0.6, 0.6, 0.02);
             default -> {}
         }
     }
@@ -381,9 +466,36 @@ public class FusionColliderBlockEntity extends BlockEntity {
         }
     }
 
+    // Ring Melt (Solar Flare, Meltdown): a stretch of the inner ring's tube melts back into Raw Fulgurite.
+    public void meltRing(ServerLevel level, int count) {
+        Block glass = ModBlocks.FULGURITE_BLAST_GLASS.get(), solid = ModBlocks.REINFORCED_FULGURITE.get();
+        // Pick a spot on the inner channel line and melt the tube blocks round it.
+        float[] at = ReactorPath.point(RING, level.random.nextFloat() * ReactorPath.perimeter(RING));
+        int cx = Math.round(at[0]), cz = Math.round(at[1]);
+        int melted = 0;
+        for (int r = 0; r <= 4 && melted < count; r++) {
+            for (int dx = -r; dx <= r && melted < count; dx++) {
+                for (int dz = -r; dz <= r && melted < count; dz++) {
+                    for (int dy = -TUBE; dy <= TUBE && melted < count; dy++) {
+                        BlockPos p = at(cx + dx, dy, cz + dz);
+                        BlockState s = level.getBlockState(p);
+                        if (!s.is(glass) && !s.is(solid)) continue;
+                        level.setBlock(p, ModBlocks.RAW_FULGURITE.get().defaultBlockState(), Block.UPDATE_ALL);
+                        level.sendParticles(ParticleTypes.LAVA, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0);
+                        melted++;
+                    }
+                }
+            }
+        }
+        if (melted > 0) {
+            level.playSound(null, at((int) at[0], 0, (int) at[1]), SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 3f, 0.6f);
+            check();
+        }
+    }
+
     // A Catastrophic result blasts a handful of the rings' and chamber's blocks out (half of them drop as items).
     // The reactor un-forms until they're replaced.
-    private void blastRingBlocks(ServerLevel level, int count) {
+    public void blastRingBlocks(ServerLevel level, int count) {
         Block glass = ModBlocks.FULGURITE_BLAST_GLASS.get(), solid = ModBlocks.REINFORCED_FULGURITE.get(),
                 frame = ModBlocks.BLAST_CHAMBER_FRAME.get();
         int removed = 0;
@@ -524,6 +636,10 @@ public class FusionColliderBlockEntity extends BlockEntity {
     }
 
     private void setChamberFormed(boolean value) {
+        BlockState self = level.getBlockState(worldPosition);
+        if (self.hasProperty(FormableBlock.FORMED) && self.getValue(FormableBlock.FORMED) != value) {
+            level.setBlock(worldPosition, self.setValue(FormableBlock.FORMED, value), Block.UPDATE_CLIENTS);
+        }
         for (int dx = -CHAMBER; dx <= CHAMBER; dx++) {
             for (int dy = -CHAMBER; dy <= CHAMBER; dy++) {
                 for (int dz = -CHAMBER; dz <= CHAMBER; dz++) {
@@ -663,6 +779,8 @@ public class FusionColliderBlockEntity extends BlockEntity {
         tag.putLong("RunStart", runStart);
         tag.putInt("RunMask", runMask);
         tag.putInt("RunSeverity", runSeverity);
+        tag.putLong("HeatUntil", heatUntil);
+        tag.putLong("StaticBloom", staticBloomUntil);
         if (consolePos != null) tag.putLong("Console", consolePos.asLong());
         if (!carried[0].isEmpty()) tag.put("Carried0", carried[0].save(registries));
         if (!carried[1].isEmpty()) tag.put("Carried1", carried[1].save(registries));
@@ -682,6 +800,8 @@ public class FusionColliderBlockEntity extends BlockEntity {
             clientRunStart = runStart < 0 ? -1 : level.getGameTime() - (tag.getLong("Now") - runStart);
         }
         runMask = tag.getInt("RunMask");
+        if (tag.contains("HeatUntil")) heatUntil = tag.getLong("HeatUntil");
+        if (tag.contains("StaticBloom")) staticBloomUntil = tag.getLong("StaticBloom");
         runSeverity = tag.contains("RunSeverity") ? tag.getInt("RunSeverity") : -1;
         if (tag.contains("Console")) consolePos = BlockPos.of(tag.getLong("Console"));
         carried[0] = ItemStack.parseOptional(registries, tag.getCompound("Carried0"));
