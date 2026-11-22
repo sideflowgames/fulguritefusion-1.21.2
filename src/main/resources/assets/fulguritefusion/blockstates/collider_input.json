@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "formed=false": {
       "model": "fulguritefusion:block/collider_input"
+    },
+    "formed=true": {
+      "model": "fulguritefusion:block/collider_input_formed"
     }
   }
 }

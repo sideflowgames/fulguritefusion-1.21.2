@@ -17,7 +17,7 @@ public class GuideBookItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (level.isClientSide && FMLEnvironment.dist.isClient()) {
-            com.sideflowgames.fulguritefusion.client.GuideScreen.open();
+            com.sideflowgames.fulguritefusion.client.GuideMapScreen.openFresh();
         }
         return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide);
     }

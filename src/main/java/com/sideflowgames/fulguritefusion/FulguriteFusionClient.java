@@ -154,10 +154,9 @@ public class FulguriteFusionClient {
         // Ghost build outlines (shown while the block is powered by redstone).
         event.registerBlockEntityRenderer(ModBlocks.REACTOR_CONSOLE_BE.get(),
                 ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::console, 6));
-        event.registerBlockEntityRenderer(ModBlocks.STORM_COLLIDER_BE.get(),
-                ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::colliderRing, 5));
-        event.registerBlockEntityRenderer(ModBlocks.MINI_COLLIDER_BE.get(),
-                ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::colliderRing, 5));
+        // Collider rings: ghost outline while incomplete, one big model once formed.
+        event.registerBlockEntityRenderer(ModBlocks.STORM_COLLIDER_BE.get(), com.sideflowgames.fulguritefusion.client.ColliderRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.MINI_COLLIDER_BE.get(), com.sideflowgames.fulguritefusion.client.ColliderRenderer::new);
         event.registerEntityRenderer(ModEntities.LUMEN_SLUG.get(), LumenSlugRenderer::new);
         event.registerEntityRenderer(ModEntities.VOIDMOTH.get(), VoidmothRenderer::new);
         event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);

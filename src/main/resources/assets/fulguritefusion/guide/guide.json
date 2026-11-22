@@ -1,12 +1,22 @@
 {
   "intro": {
     "title": "Fulgurite Fusion",
-    "text": "Harness the storm.\n\nThis guide follows the mod from your first lightning strike to the Fusion Reactor.\n\nPower in this mod is Fulmen (Fm). You make it from fuel, store it in batteries, send it down wires and use it to run machines, colliders and finally a fusion reactor.\n\nPick a chapter on the right, or turn the pages with the arrows, the arrow keys or the mouse wheel."
+    "text": "Harness the storm.\n\nThis map follows the mod from your first lightning strike to the Fusion Reactor. Topics light up as you find their items.\n\nPower in this mod is Fulmen (Fm): make it from fuel, store it, move it, and spend it.\n\nDrag to move, scroll to zoom. Click a topic to spread its cards, click a card to read it. Right-click goes back.",
+    "pos": [
+      0,
+      0
+    ]
   },
   "chapters": [
     {
+      "id": "fulgurite",
       "title": "Fulgurite",
       "icon": "fulguritefusion:raw_fulgurite",
+      "pos": [
+        150,
+        0
+      ],
+      "parent": "start",
       "pages": [
         {
           "title": "Glass made by lightning",
@@ -33,8 +43,14 @@
       ]
     },
     {
+      "id": "fulgurite_tools",
       "title": "Fulgurite Tools",
       "icon": "fulguritefusion:fulgurite_pickaxe",
+      "pos": [
+        300,
+        -130
+      ],
+      "parent": "fulgurite",
       "pages": [
         {
           "title": "Fulgurite tools",
@@ -67,8 +83,14 @@
       ]
     },
     {
+      "id": "backpacks",
       "title": "Backpacks",
       "icon": "fulguritefusion:copper_backpack",
+      "pos": [
+        450,
+        -190
+      ],
+      "parent": "fulgurite_tools",
       "pages": [
         {
           "title": "Backpacks",
@@ -127,8 +149,14 @@
       ]
     },
     {
+      "id": "storm_furnaces",
       "title": "Storm Furnaces",
       "icon": "fulguritefusion:storm_furnace",
+      "pos": [
+        300,
+        0
+      ],
+      "parent": "fulgurite",
       "pages": [
         {
           "title": "Your first generator",
@@ -154,8 +182,14 @@
       ]
     },
     {
+      "id": "spark_cells",
       "title": "Spark Cells",
       "icon": "fulguritefusion:spark_cell",
+      "pos": [
+        450,
+        0
+      ],
+      "parent": "storm_furnaces",
       "pages": [
         {
           "title": "Bottled power",
@@ -183,8 +217,14 @@
       ]
     },
     {
+      "id": "power",
       "title": "Storing & Moving Power",
       "icon": "fulguritefusion:storm_battery",
+      "pos": [
+        600,
+        0
+      ],
+      "parent": "spark_cells",
       "pages": [
         {
           "title": "Storm Battery",
@@ -228,8 +268,22 @@
       ]
     },
     {
+      "id": "processing",
       "title": "Processing Machines",
       "icon": "fulguritefusion:press",
+      "pos": [
+        750,
+        130
+      ],
+      "parent": "power",
+      "unlock": [
+        "fulguritefusion:press",
+        "fulguritefusion:arc_furnace",
+        "fulguritefusion:wire_extruder",
+        "fulguritefusion:kiln",
+        "fulguritefusion:crusher",
+        "fulguritefusion:crude_arc_casing"
+      ],
       "pages": [
         {
           "title": "Multiblock machines",
@@ -241,6 +295,16 @@
             "fulguritefusion:crusher"
           ],
           "text": "Each machine is a cube of Arc Casings with a controller on the front face, bottom row.\n\nSmall (2x2x2): Press, Arc Furnace, Wire Extruder. The controller is at the front-left bottom.\n\nLarge (3x3x3): Kiln, Crusher. The controller is at the front-centre bottom."
+        },
+        {
+          "title": "Build: small machine",
+          "build": "press",
+          "text": "Small machines (Press, Arc Furnace, Wire Extruder) are a 2x2x2 cube.\n\nThe controller goes at the front-left of the bottom layer, facing you. The other 7 blocks are Arc Casings. The lowest casing tier sets the machine's speed.\n\nRight-click the controller to check the build: missing casings are outlined for a few seconds."
+        },
+        {
+          "title": "Build: large machine",
+          "build": "kiln",
+          "text": "Large machines (Kiln, Crusher) are a 3x3x3 cube.\n\nThe controller goes in the middle of the bottom front row, facing you. The other 26 blocks are Arc Casings. The lowest casing tier sets the machine's speed."
         },
         {
           "title": "Arc Casings",
@@ -275,8 +339,14 @@
       ]
     },
     {
+      "id": "mini_collider",
       "title": "Mini Collider",
       "icon": "fulguritefusion:mini_collider",
+      "pos": [
+        750,
+        0
+      ],
+      "parent": "power",
       "pages": [
         {
           "title": "The collider ring",
@@ -287,6 +357,11 @@
             "fulguritefusion:mini_collider"
           ],
           "text": "A 7x7 ring, one layer, with the collider block in the middle:\n\n 21 Fulgurite Ring blocks round the edge\n 1 Collider Input in the middle of one side\n 2 Collider Injectors in the middle of the two sides next to it\n the fourth side's middle is a ring block"
+        },
+        {
+          "title": "Build: collider ring",
+          "build": "mini_collider",
+          "text": "The Mini Collider sits in the middle of a 7x7 ring, all on one level.\n\nA Collider Input goes in the middle of the side you'll load from. A Collider Injector goes in the middle of each of the two sides next to it. The other 21 spots are Fulgurite Ring blocks.\n\nTip: a lever on the Mini Collider shows a ghost outline of whatever is still missing."
         },
         {
           "title": "A shot",
@@ -303,8 +378,20 @@
       ]
     },
     {
+      "id": "storm_collider",
       "title": "Storm Collider",
       "icon": "fulguritefusion:storm_collider",
+      "pos": [
+        900,
+        0
+      ],
+      "parent": "mini_collider",
+      "unlock": [
+        "fulguritefusion:storm_collider",
+        "fulguritefusion:refined_fulgurite",
+        "fulguritefusion:prime_spark",
+        "fulguritefusion:fusion_fuel"
+      ],
       "pages": [
         {
           "title": "Pairing machine",
@@ -313,6 +400,11 @@
           ],
           "recipe": "fulguritefusion:storm_collider",
           "text": "Swap the Storm Collider in for the Mini Collider and the ring becomes a pairing machine.\n\nEach injector holds one material; every shot carries one from each into the middle and the pair decides the result. It costs 4,096 Fm a shot, fed from any side or a connector on top.\n\nProducts come out of the bottom into a hopper or pipe, or sneak + right-click to take them."
+        },
+        {
+          "title": "Build: Storm Collider",
+          "build": "storm_collider",
+          "text": "The Storm Collider uses the same 7x7 ring as the Mini Collider: a Collider Input in the middle of one side, a Collider Injector in the middle of each side next to it, and Fulgurite Ring blocks everywhere else.\n\nA lever on the Storm Collider shows the ghost outline."
         },
         {
           "title": "Crafting pairs",
@@ -334,8 +426,14 @@
       ]
     },
     {
+      "id": "exotics",
       "title": "Exotic Materials",
       "icon": "fulguritefusion:aurora_dust",
+      "pos": [
+        1050,
+        140
+      ],
+      "parent": "storm_collider",
       "pages": [
         {
           "title": "The twelve",
@@ -455,8 +553,14 @@
       ]
     },
     {
+      "id": "stormwings",
       "title": "Stormwings",
       "icon": "fulguritefusion:stormwing_plume",
+      "pos": [
+        300,
+        150
+      ],
+      "parent": "fulgurite",
       "pages": [
         {
           "title": "Storm eagles",
@@ -506,8 +610,18 @@
       ]
     },
     {
+      "id": "storm_forge",
       "title": "Storm Forge",
       "icon": "fulguritefusion:storm_forge",
+      "pos": [
+        1050,
+        -140
+      ],
+      "parent": "storm_collider",
+      "unlock": [
+        "fulguritefusion:storm_forge",
+        "fulguritefusion:forge_power_port"
+      ],
       "pages": [
         {
           "title": "Storm Forge",
@@ -517,6 +631,11 @@
           ],
           "recipe": "fulguritefusion:storm_forge",
           "text": "The Storm Forge pours huge amounts of Fm into gear. Build it:\n\n- the Storm Forge (anvil) on top of a 5x5 floor of Tempered Arc Casing\n- a pylon on each floor corner: 2 Reinforced Fulgurite with a Lightning Rod on top\n\nPower it with a redstone signal to see a ghost of the build."
+        },
+        {
+          "title": "Build: Storm Forge",
+          "build": "storm_forge",
+          "text": "The Storm Forge stands on a 5x5 floor of Tempered Arc Casing, one block below it.\n\nAt each corner of the floor, a pillar of 2 Reinforced Fulgurite topped with a Lightning Rod.\n\nForge Power Ports can replace any floor casing on the edges (not the corners).\n\nA lever on the forge shows the ghost outline."
         },
         {
           "title": "Powering the forge",
@@ -565,8 +684,23 @@
       ]
     },
     {
+      "id": "reactor_build",
       "title": "Fusion Reactor: Build",
       "icon": "fulguritefusion:fusion_collider",
+      "pos": [
+        1050,
+        0
+      ],
+      "parent": "storm_collider",
+      "unlock": [
+        "fulguritefusion:fusion_collider",
+        "fulguritefusion:blast_chamber_frame",
+        "fulguritefusion:fusion_injector",
+        "fulguritefusion:receiver_portal",
+        "fulguritefusion:transfer_portal",
+        "fulguritefusion:ring_injection_port",
+        "fulguritefusion:reactor_console"
+      ],
       "pages": [
         {
           "title": "Overview",
@@ -577,6 +711,11 @@
             "fulguritefusion:blast_chamber_frame"
           ],
           "text": "The Fusion Reactor fires two fuels round two huge rings and smashes them together in a blast chamber, for enormous amounts of Fm.\n\nIt has four parts: the blast chamber with the Fusion Collider in its middle, the inner ring, the outer ring and the control console.\n\nEvery part is explosion-proof. Right-click the Fusion Collider to see what's missing."
+        },
+        {
+          "title": "Build: Fusion Reactor",
+          "build": "fusion_reactor",
+          "text": "Everything is built around the Fusion Collider.\n\nBlast chamber: a 5x5x5 shell around it. Blast Chamber Frame on the edges, Fulgurite Blast Glass on the faces, left open on two opposite sides.\n\nInner ring: a tube 9 blocks out, with Fusion Injectors facing the chamber and two Receiver Portals.\n\nOuter ring: a tube 44 blocks out, with two Transfer Portals and the Ring Injection Ports.\n\nIt's big: put a lever on the Fusion Collider and follow the ghost outline."
         },
         {
           "title": "Ghost outline",
@@ -642,6 +781,11 @@
           "text": "7 wide, 3 tall, 1 deep. Place the Reactor Control Console (control panel) first, facing you, in the middle of the middle row. Seen from the front:\n\nTop: casings all along.\nMiddle: Power Port, casing, casing, CONTROL PANEL, casing, casing, Power Port.\nBottom: casing, Fuel Input, Data Port, casing, Data Port, Fuel Input, casing.\n\nOnce formed, the casings turn into the frame, power gauge, displays and fuel screens."
         },
         {
+          "title": "Build: control console",
+          "build": "reactor_console",
+          "text": "The console is a wall 7 blocks wide and 3 tall, with the Reactor Console in the middle of the middle row.\n\nBottom row: Console Fuel Inputs in the 2nd and 6th spots, Console Data Ports in the 3rd and 5th.\nMiddle row: a Console Power Port at each end.\nEverything else: Console Casing.\n\nA lever on the console shows the ghost outline."
+        },
+        {
           "title": "Data cables",
           "items": [
             "fulguritefusion:data_cable"
@@ -652,8 +796,19 @@
       ]
     },
     {
+      "id": "reactor_run",
       "title": "Fusion Reactor: Running",
       "icon": "fulguritefusion:fusion_fuel",
+      "pos": [
+        1200,
+        0
+      ],
+      "parent": "reactor_build",
+      "unlock": [
+        "fulguritefusion:reactor_console",
+        "fulguritefusion:console_fuel_input",
+        "fulguritefusion:data_cable"
+      ],
       "pages": [
         {
           "title": "Fuel",

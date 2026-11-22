@@ -36,9 +36,15 @@ import java.util.List;
 // A shot: two Spark Cells leave the input in opposite directions, each does one full lap of the ring,
 // then carries on to the first injector it reaches, which fires it into the center block where they collide.
 // What the collision does is up to the center block.
-public abstract class ColliderCoreBlockEntity extends BlockEntity {
+public abstract class ColliderCoreBlockEntity extends BlockEntity implements software.bernie.geckolib.animatable.GeoBlockEntity {
     public static final int RADIUS = 3;
     public static final int TICKS_PER_BLOCK = 2;
+
+    // The formed ring is one GeckoLib model, drawn by the center block (see client/ColliderRenderer).
+    private final software.bernie.geckolib.animatable.instance.AnimatableInstanceCache geoCache =
+            software.bernie.geckolib.util.GeckoLibUtil.createInstanceCache(this);
+    // Game time the shot in flight was fired (synced to clients so they can draw it), or -1.
+    protected long shotStart = -1;
 
     // Cell trail colours: one electric blue, one violet.
     private static final DustParticleOptions TRAIL_A = new DustParticleOptions(new Vector3f(0.35f, 0.8f, 1.0f), 1.2f);
@@ -48,7 +54,20 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
 
     // Local ring coordinates (u = sideways, v = toward the input). Built once.
     private static final int[][] PATH = buildPath();
-    private static final int INJECTOR_INDEX = PATH.length - RADIUS - 1;
+    public static final int INJECTOR_INDEX = PATH.length - RADIUS - 1;
+
+    // For drawing a shot: path point i of the "+" cell as {u, v} (the other cell mirrors u).
+    public static int[] pathPoint(int i) {
+        return PATH[Math.max(0, Math.min(PATH.length - 1, i))];
+    }
+
+    public static int pathLength() {
+        return PATH.length;
+    }
+
+    public long shotStart() {
+        return shotStart;
+    }
 
     protected int shotTimer = -1; // -1 = no shot in flight
     private int checkTimer;
@@ -145,6 +164,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
         }
         inputDir = found;
         problem = null;
+        updateFormed();
     }
 
     public boolean isComplete() {
@@ -228,6 +248,91 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
     private void fail(String why) {
         inputDir = null;
         problem = why;
+        updateFormed();
+    }
+
+    // ---------- Forming ----------
+
+    // Keeps the blocks' formed look in step with the ring: formed while complete, back to normal when not.
+    private void updateFormed() {
+        if (level == null || level.isClientSide) return;
+        BlockState s = getBlockState();
+        if (!s.hasProperty(ColliderParts.FORMED)) return;
+        boolean want = inputDir != null, have = s.getValue(ColliderParts.FORMED);
+        Direction haveDir = s.getValue(ColliderParts.INPUT);
+        if (want == have && (!want || haveDir == inputDir)) return;
+        if (have) setRing(level, worldPosition, haveDir, false);
+        if (want) setRing(level, worldPosition, inputDir, true);
+        level.setBlock(worldPosition, s.setValue(ColliderParts.FORMED, want).setValue(ColliderParts.INPUT, want ? inputDir : haveDir), 3);
+    }
+
+    private static void setRing(Level level, BlockPos core, Direction toInput, boolean formed) {
+        for (int u = -RADIUS; u <= RADIUS; u++) {
+            for (int v = -RADIUS; v <= RADIUS; v++) {
+                if (Math.max(Math.abs(u), Math.abs(v)) != RADIUS) continue;
+                BlockPos p = core.relative(toInput, v).relative(toInput.getClockWise(), u);
+                BlockState rs = level.getBlockState(p);
+                if (rs.hasProperty(ColliderParts.FORMED) && rs.getValue(ColliderParts.FORMED) != formed) {
+                    level.setBlock(p, rs.setValue(ColliderParts.FORMED, formed), 3);
+                }
+            }
+        }
+    }
+
+    // The center block is being removed: show its ring blocks again.
+    public static void unformRing(Level level, BlockPos core, BlockState coreState) {
+        if (level.isClientSide || !coreState.hasProperty(ColliderParts.FORMED) || !coreState.getValue(ColliderParts.FORMED)) return;
+        setRing(level, core, coreState.getValue(ColliderParts.INPUT), false);
+    }
+
+    // A ring block was removed: the collider it belonged to re-checks (and un-forms) straight away.
+    public static void partRemoved(Level level, BlockPos pos) {
+        if (level.isClientSide) return;
+        for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+            for (int dz = -RADIUS; dz <= RADIUS; dz++) {
+                if (Math.max(Math.abs(dx), Math.abs(dz)) != RADIUS) continue;
+                if (level.getBlockEntity(pos.offset(dx, 0, dz)) instanceof ColliderCoreBlockEntity core) core.checkStructure();
+            }
+        }
+    }
+
+    // ---------- Syncing the shot to clients ----------
+
+    private void syncShot(long start) {
+        shotStart = start;
+        if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("ShotStart", shotStart);
+        return tag;
+    }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // Clients only take the shot timing from updates (the rest stays on the server).
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        shotStart = tag.contains("ShotStart") ? tag.getLong("ShotStart") : -1;
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt,
+                             HolderLookup.Provider registries) {
+        handleUpdateTag(pkt.getTag(), registries);
+    }
+
+    @Override
+    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {}
+
+    @Override
+    public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
+        return geoCache;
     }
 
     protected int loadedCells() {
@@ -246,6 +351,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
         if (be.shotTimer >= 0) {
             if (be.inputDir == null) {
                 be.shotTimer = -1;
+                be.syncShot(-1);
                 be.onShotLost();
                 be.fizzleEffects((ServerLevel) level);
             } else {
@@ -253,6 +359,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
                 be.drawTrails((ServerLevel) level);
                 if (be.shotTimer >= travelTicks()) {
                     be.shotTimer = -1;
+                    be.syncShot(-1);
                     be.collisionEffects((ServerLevel) level);
                     be.onCollide((ServerLevel) level);
                 }
@@ -261,6 +368,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity {
         } else if (be.inputDir != null && be.loadedCells() >= 2 && be.readyToFire()
                 && level.getBlockEntity(be.inputPos()) instanceof ColliderInputBlockEntity input && input.takePair()) {
             be.shotTimer = 0;
+            be.syncShot(level.getGameTime());
             be.onFire();
             level.playSound(null, be.inputPos(), SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.8f, 1.6f);
             be.setChanged();

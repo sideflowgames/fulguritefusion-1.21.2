@@ -1,7 +1,28 @@
 {
   "variants": {
-    "": {
+    "formed=false,input=north": {
       "model": "fulguritefusion:block/mini_collider"
+    },
+    "formed=false,input=south": {
+      "model": "fulguritefusion:block/mini_collider"
+    },
+    "formed=false,input=east": {
+      "model": "fulguritefusion:block/mini_collider"
+    },
+    "formed=false,input=west": {
+      "model": "fulguritefusion:block/mini_collider"
+    },
+    "formed=true,input=north": {
+      "model": "fulguritefusion:block/mini_collider_formed"
+    },
+    "formed=true,input=south": {
+      "model": "fulguritefusion:block/mini_collider_formed"
+    },
+    "formed=true,input=east": {
+      "model": "fulguritefusion:block/mini_collider_formed"
+    },
+    "formed=true,input=west": {
+      "model": "fulguritefusion:block/mini_collider_formed"
     }
   }
 }

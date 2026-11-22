@@ -23,6 +23,7 @@ public class StormColliderBlock extends BaseEntityBlock {
 
     public StormColliderBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(ColliderParts.FORMED, false).setValue(ColliderParts.INPUT, net.minecraft.core.Direction.NORTH));
     }
 
     @Override
@@ -59,6 +60,18 @@ public class StormColliderBlock extends BaseEntityBlock {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof StormColliderBlockEntity collider) {
             collider.dropContents();
         }
+        if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.unformRing(level, pos, state);
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(ColliderParts.FORMED, ColliderParts.INPUT);
+    }
+
+    // Formed: the ring model draws this spot too, so the block hides and mustn't hide the faces around it.
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state, level, pos);
     }
 }

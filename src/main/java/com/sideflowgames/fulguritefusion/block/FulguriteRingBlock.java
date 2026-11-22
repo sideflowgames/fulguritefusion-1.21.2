@@ -20,6 +20,7 @@ public class FulguriteRingBlock extends TransparentBlock {
 
     public FulguriteRingBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(ColliderParts.FORMED, false));
     }
 
     @Override
@@ -41,5 +42,17 @@ public class FulguriteRingBlock extends TransparentBlock {
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         return stack.isEmpty() ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
                 : ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(ColliderParts.FORMED);
+    }
+
+    // Taking a block out of a formed ring un-forms it straight away.
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        super.onRemove(state, level, pos, newState, movedByPiston);
+        if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.partRemoved(level, pos);
     }
 }

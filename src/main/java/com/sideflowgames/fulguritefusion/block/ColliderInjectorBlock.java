@@ -24,6 +24,7 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
 
     public ColliderInjectorBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(ColliderParts.FORMED, false));
     }
 
     @Override
@@ -75,5 +76,17 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), injector.peek());
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
+        if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.partRemoved(level, pos);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(ColliderParts.FORMED);
+    }
+
+    // Formed: hidden inside the ring model, so it mustn't hide the faces of the blocks around it.
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state, level, pos);
     }
 }

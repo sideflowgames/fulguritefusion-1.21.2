@@ -46,6 +46,8 @@ public class FulguriteFusion {
         com.sideflowgames.fulguritefusion.entity.StormwingRiding.register(modEventBus);
         // Backpacks: the open-backpack key packet
         com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.register(modEventBus);
+        // Guide map: which topics each player has unlocked
+        com.sideflowgames.fulguritefusion.guide.GuideProgress.register(modEventBus);
 
         // Lets this class listen for game events, like onServerStarting below
         NeoForge.EVENT_BUS.register(this);

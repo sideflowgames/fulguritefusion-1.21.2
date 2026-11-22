@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -75,7 +76,7 @@ public final class GhostBuild {
 
     // ---------- Fusion Reactor ----------
 
-    public static List<Ghost> fusionReactor(Level level, BlockPos core) {
+    public static List<Ghost> fusionReactor(BlockGetter level, BlockPos core) {
         List<Ghost> out = new ArrayList<>();
         final int CH = FusionColliderBlockEntity.CHAMBER, RING = FusionColliderBlockEntity.RING,
                 OUTER = FusionColliderBlockEntity.OUTER, INJ = FusionColliderBlockEntity.INJECTOR;
@@ -155,7 +156,7 @@ public final class GhostBuild {
     }
 
     // One diamond ring tube, the same shape FusionColliderBlockEntity.checkRing checks.
-    private static void ring(Level level, List<Ghost> out, BlockPos core, int radius, int[][] specials) {
+    private static void ring(BlockGetter level, List<Ghost> out, BlockPos core, int radius, int[][] specials) {
         final int TUBE = FusionColliderBlockEntity.TUBE;
         BlockState glass = ModBlocks.FULGURITE_BLAST_GLASS.get().defaultBlockState();
         BlockState solid = ModBlocks.REINFORCED_FULGURITE.get().defaultBlockState();
@@ -183,7 +184,7 @@ public final class GhostBuild {
 
     // ---------- Collider ring (Storm Collider, Mini Collider) ----------
 
-    public static List<Ghost> colliderRing(Level level, BlockPos core) {
+    public static List<Ghost> colliderRing(BlockGetter level, BlockPos core) {
         List<Ghost> out = new ArrayList<>();
         final int R = ColliderCoreBlockEntity.RADIUS;
         Direction toInput = Direction.NORTH;
@@ -211,7 +212,7 @@ public final class GhostBuild {
     // Same layout as ReactorConsoleBlockEntity: rows bottom to top, columns left to right facing the front.
     private static final String[] CONSOLE = {"F1dFd2F", "PgDCDsP", "FGDDDSF"};
 
-    public static List<Ghost> console(Level level, BlockPos console) {
+    public static List<Ghost> console(BlockGetter level, BlockPos console) {
         List<Ghost> out = new ArrayList<>();
         BlockState self = level.getBlockState(console);
         Direction front = self.hasProperty(ReactorConsoleBlock.FACING) ? self.getValue(ReactorConsoleBlock.FACING) : Direction.NORTH;
@@ -236,7 +237,7 @@ public final class GhostBuild {
 
     // ---------- Storm Forge ----------
 
-    public static List<Ghost> stormForge(Level level, BlockPos anvil) {
+    public static List<Ghost> stormForge(BlockGetter level, BlockPos anvil) {
         List<Ghost> out = new ArrayList<>();
         BlockState casing = ModBlocks.TEMPERED_ARC_CASING.get().defaultBlockState();
         for (int dx = -2; dx <= 2; dx++) {
@@ -260,19 +261,19 @@ public final class GhostBuild {
 
     // ---------- Helpers ----------
 
-    private static boolean air(Level level, BlockPos p) {
+    private static boolean air(BlockGetter level, BlockPos p) {
         return level.getBlockState(p).isAir();
     }
 
-    private static boolean is(Level level, BlockPos p, Block block) {
+    private static boolean is(BlockGetter level, BlockPos p, Block block) {
         return level.getBlockState(p).is(block);
     }
 
-    private static void need(Level level, List<Ghost> out, BlockPos p, BlockState want) {
+    private static void need(BlockGetter level, List<Ghost> out, BlockPos p, BlockState want) {
         if (!level.getBlockState(p).is(want.getBlock())) out.add(new Ghost(p.immutable(), want));
     }
 
-    private static void clear(Level level, List<Ghost> out, BlockPos p) {
+    private static void clear(BlockGetter level, List<Ghost> out, BlockPos p) {
         if (!level.getBlockState(p).isAir()) out.add(new Ghost(p.immutable(), null));
     }
 
