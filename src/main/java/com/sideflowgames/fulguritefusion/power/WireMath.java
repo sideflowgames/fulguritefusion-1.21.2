@@ -33,14 +33,22 @@ public final class WireMath {
         return attachPoint(connector, facing);
     }
 
-    // How far the middle hangs down, in blocks.
+    // How far the middle hangs down, in blocks (heavier wires are pulled tauter; see WireTier).
     public static double sag(Vec3 a, Vec3 b) {
         return 0.15 + a.distanceTo(b) * 0.07;
     }
 
+    public static double sag(Vec3 a, Vec3 b, WireTier tier) {
+        return sag(a, b) * tier.sag;
+    }
+
     // A point along the wire, t from 0 (start) to 1 (end).
     public static Vec3 point(Vec3 a, Vec3 b, double t) {
-        double drop = sag(a, b) * 4 * t * (1 - t);
+        return point(a, b, t, WireTier.RAW);
+    }
+
+    public static Vec3 point(Vec3 a, Vec3 b, double t, WireTier tier) {
+        double drop = sag(a, b, tier) * 4 * t * (1 - t);
         return new Vec3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t - drop, a.z + (b.z - a.z) * t);
     }
 }

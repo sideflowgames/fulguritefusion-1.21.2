@@ -4,40 +4,12 @@
     "animation.furnace.idle": {
       "loop": true,
       "animation_length": 1.0,
-      "bones": {
-        "flame": {
-          "scale": [
-            0.6,
-            0.2,
-            1
-          ]
-        }
-      }
+      "bones": {}
     },
     "animation.furnace.working": {
       "loop": true,
-      "animation_length": 0.8,
-      "bones": {
-        "flame": {
-          "scale": {
-            "0.0": [
-              1,
-              1,
-              1
-            ],
-            "0.4": [
-              1.05,
-              1.15,
-              1
-            ],
-            "0.8": [
-              1,
-              1,
-              1
-            ]
-          }
-        }
-      }
+      "animation_length": 1.0,
+      "bones": {}
     }
   }
 }

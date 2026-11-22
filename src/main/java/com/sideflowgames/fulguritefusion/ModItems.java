@@ -47,12 +47,40 @@ public final class ModItems {
 
     // Wire Rolls: string hanging wires between Machine Connectors.
     public static final DeferredItem<WireRollItem> RAW_WIRE = ITEMS.registerItem("raw_wire",
-            props -> new WireRollItem(false, props), new Item.Properties());
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.RAW, props), new Item.Properties());
     public static final DeferredItem<WireRollItem> INSULATED_WIRE = ITEMS.registerItem("insulated_wire",
-            props -> new WireRollItem(true, props), new Item.Properties());
-    // Heavy Wire: insulated and thick, spans up to 32 blocks (for long power-pole runs).
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.INSULATED, props), new Item.Properties());
+    // Reinforced gauge: 512 Fm/t, spans 32 blocks. Raw: Wire Extruder, 2 Raw Wire + an Iron Sheet.
+    public static final DeferredItem<WireRollItem> RAW_REINFORCED_WIRE = ITEMS.registerItem("raw_reinforced_wire",
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.RAW_REINFORCED, props), new Item.Properties());
+    public static final DeferredItem<WireRollItem> REINFORCED_WIRE = ITEMS.registerItem("reinforced_wire",
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.REINFORCED, props), new Item.Properties());
+    // Heavy gauge: 1024 Fm/t, spans 64 blocks and hangs taut (for long power-pole runs).
+    public static final DeferredItem<WireRollItem> RAW_HEAVY_WIRE = ITEMS.registerItem("raw_heavy_wire",
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.RAW_HEAVY, props), new Item.Properties());
     public static final DeferredItem<WireRollItem> HEAVY_WIRE = ITEMS.registerItem("heavy_wire",
-            props -> new WireRollItem(true, true, props), new Item.Properties());
+            props -> new WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier.HEAVY, props), new Item.Properties());
+
+    // ---------- Rubber ----------
+    // Latex Bucket: a Tree Tap on a Rubber Log drips into a bucket on the ground below it; break the bucket when full.
+    public static final DeferredItem<net.minecraft.world.item.BucketItem> LATEX_BUCKET = ITEMS.registerItem("latex_bucket",
+            p -> new net.minecraft.world.item.BucketItem(ModFluids.LATEX.get(), p),
+            new Item.Properties().stacksTo(1).craftRemainder(net.minecraft.world.item.Items.BUCKET));
+    // Dried Rubber: Latex Bucket in the Arc Furnace (gives the bucket back).
+    public static final DeferredItem<Item> DRIED_RUBBER = ITEMS.registerSimpleItem("dried_rubber", new Item.Properties());
+    // Malleable Rubber: Dried Rubber kneaded in the Banbury Mixer. Insulates raw wire in the Wire Extruder.
+    public static final DeferredItem<Item> MALLEABLE_RUBBER = ITEMS.registerSimpleItem("malleable_rubber", new Item.Properties());
+
+    public static Item wireItem(com.sideflowgames.fulguritefusion.power.WireTier tier) {
+        return switch (tier) {
+            case RAW -> RAW_WIRE.get();
+            case INSULATED -> INSULATED_WIRE.get();
+            case RAW_REINFORCED -> RAW_REINFORCED_WIRE.get();
+            case REINFORCED -> REINFORCED_WIRE.get();
+            case RAW_HEAVY -> RAW_HEAVY_WIRE.get();
+            case HEAVY -> HEAVY_WIRE.get();
+        };
+    }
 
     // ---------- Storm Collider materials and products ----------
 
@@ -158,6 +186,38 @@ public final class ModItems {
             com.sideflowgames.fulguritefusion.item.StormforgedTools.Hoe::new, stormforged().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
                     com.sideflowgames.fulguritefusion.item.StormforgedTools.TIER, -6.0f, 0.0f)));
 
+    // ---------- Prime gear (end; forged from Stormforged gear + Prime Spark Fragment + netherite ingot) ----------
+    private static Item.Properties prime() {
+        return stormforged().rarity(Rarity.EPIC);
+    }
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeTools.Blade> PRIME_BLADE = ITEMS.registerItem("prime_blade",
+            com.sideflowgames.fulguritefusion.item.PrimeTools.Blade::new, prime().attributes(net.minecraft.world.item.SwordItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.PrimeTools.TIER, 10, -2.4f))); // 1 + 8 (tier) + 10 = 19
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeTools.Pickaxe> PRIME_PICKAXE = ITEMS.registerItem("prime_pickaxe",
+            com.sideflowgames.fulguritefusion.item.PrimeTools.Pickaxe::new, prime().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.PrimeTools.TIER, 1.0f, -2.8f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeTools.Axe> PRIME_AXE = ITEMS.registerItem("prime_axe",
+            com.sideflowgames.fulguritefusion.item.PrimeTools.Axe::new, prime().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.PrimeTools.TIER, 5.0f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeTools.Shovel> PRIME_SHOVEL = ITEMS.registerItem("prime_shovel",
+            com.sideflowgames.fulguritefusion.item.PrimeTools.Shovel::new, prime().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.PrimeTools.TIER, 1.5f, -3.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeTools.Hoe> PRIME_HOE = ITEMS.registerItem("prime_hoe",
+            com.sideflowgames.fulguritefusion.item.PrimeTools.Hoe::new, prime().attributes(net.minecraft.world.item.DiggerItem.createAttributes(
+                    com.sideflowgames.fulguritefusion.item.PrimeTools.TIER, -8.0f, 0.0f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeSpearItem> PRIME_SPEAR = ITEMS.registerItem("prime_spear",
+            com.sideflowgames.fulguritefusion.item.PrimeSpearItem::new, new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC)
+                    .attributes(com.sideflowgames.fulguritefusion.item.SpearItem.attributes(com.sideflowgames.fulguritefusion.item.PrimeSpearItem.MELEE, -2.9f)));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_HELMET = primeArmor("prime_helmet", net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_CHESTPLATE = primeArmor("prime_chestplate", net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_LEGGINGS = primeArmor("prime_leggings", net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_BOOTS = primeArmor("prime_boots", net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    private static DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> primeArmor(String name, net.minecraft.world.item.ArmorItem.Type type) {
+        return ITEMS.registerItem(name, p -> new com.sideflowgames.fulguritefusion.item.PrimeArmorItem(type, p),
+                new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC));
+    }
+
     // Arc Magnet (early): toggled, no power.
     public static final DeferredItem<com.sideflowgames.fulguritefusion.item.ArcMagnetItem> ARC_MAGNET =
             ITEMS.registerItem("arc_magnet", com.sideflowgames.fulguritefusion.item.ArcMagnetItem::new,
@@ -255,7 +315,23 @@ public final class ModItems {
                         output.accept(COPPER_SHEET.get());
                         output.accept(RAW_WIRE.get());
                         output.accept(INSULATED_WIRE.get());
+                        output.accept(RAW_REINFORCED_WIRE.get());
+                        output.accept(REINFORCED_WIRE.get());
+                        output.accept(RAW_HEAVY_WIRE.get());
                         output.accept(HEAVY_WIRE.get());
+                        output.accept(ModBlocks.RUBBER_SAPLING_ITEM.get());
+                        output.accept(ModBlocks.RUBBER_LOG_ITEM.get());
+                        output.accept(ModBlocks.RUBBER_WOOD_ITEM.get());
+                        output.accept(ModBlocks.RUBBER_PLANKS_ITEM.get());
+                        output.accept(ModBlocks.RUBBER_LEAVES_ITEM.get());
+                        output.accept(ModBlocks.TREE_TAP_ITEM.get());
+                        output.accept(LATEX_BUCKET.get());
+                        output.accept(DRIED_RUBBER.get());
+                        output.accept(MALLEABLE_RUBBER.get());
+                        output.accept(ModBlocks.DRIED_RUBBER_LOG_ITEM.get());
+                        output.accept(ModBlocks.LATEX_HARVESTER_ITEM.get());
+                        output.accept(ModBlocks.HARVESTER_TANK_ITEM.get());
+                        output.accept(ModBlocks.HARVESTER_POWER_PORT_ITEM.get());
                         output.accept(ModBlocks.MACHINE_CONNECTOR_ITEM.get());
                         output.accept(ModBlocks.FE_CONVERTER_ITEM.get());
                         output.accept(ModBlocks.EU_CONVERTER_ITEM.get());
@@ -300,6 +376,7 @@ public final class ModItems {
                         output.accept(ModBlocks.IRON_BACKPACK_ITEM.get());
                         output.accept(ModBlocks.FULGURITE_BACKPACK_ITEM.get());
                         output.accept(ModBlocks.STORMFORGED_BACKPACK_ITEM.get());
+                        output.accept(ModBlocks.PRIME_BACKPACK_ITEM.get());
                         output.accept(PICKUP_UPGRADE.get());
                         output.accept(MAGNET_UPGRADE.get());
                         output.accept(VOID_UPGRADE.get());
@@ -325,6 +402,12 @@ public final class ModItems {
                         }
                         output.accept(ModBlocks.STORM_FORGE_ITEM.get());
                         output.accept(ModBlocks.FORGE_POWER_PORT_ITEM.get());
+                        for (var gear : java.util.List.of(PRIME_BLADE, PRIME_SPEAR, PRIME_PICKAXE, PRIME_AXE, PRIME_SHOVEL, PRIME_HOE,
+                                PRIME_HELMET, PRIME_CHESTPLATE, PRIME_LEGGINGS, PRIME_BOOTS)) {
+                            ItemStack full = new ItemStack(gear.get());
+                            com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.FmChargeable.max(full));
+                            output.accept(full);
+                        }
                         for (var armor : java.util.List.of(STORMFORGED_HELMET, STORMFORGED_CHESTPLATE, STORMFORGED_LEGGINGS, STORMFORGED_BOOTS)) {
                             ItemStack full = new ItemStack(armor.get());
                             com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.StormforgedArmorItem.MAX_FM);
@@ -345,6 +428,9 @@ public final class ModItems {
                         output.accept(ModBlocks.WIRE_EXTRUDER_ITEM.get());
                         output.accept(ModBlocks.KILN_ITEM.get());
                         output.accept(ModBlocks.CRUSHER_ITEM.get());
+                        output.accept(ModBlocks.BANBURY_MIXER_ITEM.get());
+                        output.accept(ModBlocks.LATEX_VULCANIZER_ITEM.get());
+                        output.accept(ModBlocks.FLUID_PIPE_ITEM.get());
                         output.accept(IRON_SHEET.get());
                         output.accept(GOLD_SHEET.get());
                         output.accept(COIL_SEGMENT.get());

@@ -8,47 +8,8 @@
     },
     "animation.crusher.working": {
       "loop": true,
-      "animation_length": 0.6,
-      "bones": {
-        "jaw_left": {
-          "position": {
-            "0.0": [
-              0,
-              0,
-              0
-            ],
-            "0.3": [
-              4,
-              0,
-              0
-            ],
-            "0.6": [
-              0,
-              0,
-              0
-            ]
-          }
-        },
-        "jaw_right": {
-          "position": {
-            "0.0": [
-              0,
-              0,
-              0
-            ],
-            "0.3": [
-              -4,
-              0,
-              0
-            ],
-            "0.6": [
-              0,
-              0,
-              0
-            ]
-          }
-        }
-      }
+      "animation_length": 1.0,
+      "bones": {}
     }
   }
 }

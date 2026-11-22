@@ -214,6 +214,11 @@ public final class ModBlocks {
             DataCableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5f, 6.0f)
                     .sound(SoundType.COPPER).noOcclusion().dynamicShape());
 
+    // Fluid Pipe: copper with a glass window; carries latex from a Latex Harvester to a Latex Vulcanizer.
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.pipe.FluidPipeBlock> FLUID_PIPE = BLOCKS.registerBlock("fluid_pipe",
+            com.sideflowgames.fulguritefusion.pipe.FluidPipeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+                    .strength(1.0f, 4.0f).sound(SoundType.COPPER).noOcclusion().dynamicShape());
+
     // ---------- Exotic material sources ----------
     // Sky Collector: Aurora Dust on clear high nights, Sunmote at clear desert/badlands middays.
     public static final DeferredBlock<SkyCollectorBlock> SKY_COLLECTOR = BLOCKS.registerBlock("sky_collector",
@@ -237,6 +242,7 @@ public final class ModBlocks {
     public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> IRON_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.IRON);
     public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> FULGURITE_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.FULGURITE);
     public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> STORMFORGED_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.STORMFORGED);
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.backpack.BackpackBlock> PRIME_BACKPACK = backpack(com.sideflowgames.fulguritefusion.backpack.BackpackTier.PRIME);
 
     // Storm Forge: the Forge Anvil core and its power port (see StormForgeBlockEntity).
     public static final DeferredBlock<StormForgeBlock> STORM_FORGE = BLOCKS.registerBlock("storm_forge",
@@ -282,6 +288,46 @@ public final class ModBlocks {
     public static final DeferredBlock<MachineControllerBlock> WIRE_EXTRUDER = controller("wire_extruder", MachineType.WIRE_EXTRUDER);
     public static final DeferredBlock<MachineControllerBlock> KILN = controller("kiln", MachineType.KILN);
     public static final DeferredBlock<MachineControllerBlock> CRUSHER = controller("crusher", MachineType.CRUSHER);
+    public static final DeferredBlock<MachineControllerBlock> BANBURY_MIXER = controller("banbury_mixer", MachineType.BANBURY_MIXER);
+    public static final DeferredBlock<MachineControllerBlock> LATEX_VULCANIZER = controller("latex_vulcanizer", MachineType.LATEX_VULCANIZER);
+
+    // ---------- Rubber trees ----------
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> RUBBER_LOG = BLOCKS.registerBlock("rubber_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_LOG).mapColor(MapColor.TERRACOTTA_BROWN));
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> RUBBER_WOOD = BLOCKS.registerBlock("rubber_wood",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_WOOD).mapColor(MapColor.TERRACOTTA_BROWN));
+    public static final DeferredBlock<Block> RUBBER_PLANKS = BLOCKS.registerSimpleBlock("rubber_planks",
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_PLANKS).mapColor(MapColor.TERRACOTTA_WHITE));
+    public static final DeferredBlock<net.minecraft.world.level.block.LeavesBlock> RUBBER_LEAVES = BLOCKS.registerBlock("rubber_leaves",
+            net.minecraft.world.level.block.LeavesBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_LEAVES));
+    public static final DeferredBlock<net.minecraft.world.level.block.SaplingBlock> RUBBER_SAPLING = BLOCKS.registerBlock("rubber_sapling",
+            props -> new net.minecraft.world.level.block.SaplingBlock(com.sideflowgames.fulguritefusion.block.rubber.RubberTree.GROWER, props),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_SAPLING));
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.block.rubber.TreeTapBlock> TREE_TAP = BLOCKS.registerBlock("tree_tap",
+            com.sideflowgames.fulguritefusion.block.rubber.TreeTapBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0f).sound(SoundType.LANTERN).noOcclusion());
+    // Latex as a placed fluid (from a Latex Bucket).
+    public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> LATEX = BLOCKS.register("latex",
+            () -> new net.minecraft.world.level.block.LiquidBlock(ModFluids.LATEX.get(),
+                    BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.WATER).mapColor(MapColor.SNOW)));
+    // A rubber log a Latex Harvester has drained dry: still wood, gives no latex.
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> DRIED_RUBBER_LOG = BLOCKS.registerBlock("dried_rubber_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.JUNGLE_LOG).mapColor(MapColor.TERRACOTTA_GRAY));
+    // ---------- Latex Harvester: a ring of 8 blocks around the base of a rubber tree ----------
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlock> LATEX_HARVESTER = BLOCKS.registerBlock("latex_harvester",
+            com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlock::new, machineProperties());
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.harvester.HarvesterTankBlock> HARVESTER_TANK = BLOCKS.registerBlock("harvester_tank",
+            com.sideflowgames.fulguritefusion.harvester.HarvesterTankBlock::new, machineProperties());
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.harvester.HarvesterPowerPortBlock> HARVESTER_POWER_PORT = BLOCKS.registerBlock("harvester_power_port",
+            com.sideflowgames.fulguritefusion.harvester.HarvesterPowerPortBlock::new, machineProperties());
+    // A bucket set down on the ground to catch latex (no item of its own: it's placed with a vanilla bucket).
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.block.rubber.TapBucketBlock> TAP_BUCKET = BLOCKS.registerBlock("tap_bucket",
+            com.sideflowgames.fulguritefusion.block.rubber.TapBucketBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(0.5f).sound(SoundType.LANTERN).noOcclusion());
 
     private static BlockBehaviour.Properties machineProperties() {
         // noOcclusion: when formed the blocks turn invisible and light must reach the machine model.
@@ -330,6 +376,7 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> CONSOLE_DATA_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("console_data_port", CONSOLE_DATA_PORT);
     public static final DeferredItem<BlockItem> CONSOLE_FUEL_INPUT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("console_fuel_input", CONSOLE_FUEL_INPUT);
     public static final DeferredItem<BlockItem> DATA_CABLE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("data_cable", DATA_CABLE);
+    public static final DeferredItem<BlockItem> FLUID_PIPE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("fluid_pipe", FLUID_PIPE);
     public static final DeferredItem<BlockItem> SKY_COLLECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sky_collector", SKY_COLLECTOR);
     public static final DeferredItem<BlockItem> NACRE_CLUSTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("abyssal_nacre_cluster", NACRE_CLUSTER);
     public static final DeferredItem<BlockItem> FROZEN_SOUL_FIRE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("frozen_soul_fire", FROZEN_SOUL_FIRE);
@@ -341,6 +388,8 @@ public final class ModBlocks {
             () -> new com.sideflowgames.fulguritefusion.backpack.BackpackItem(FULGURITE_BACKPACK.get(), new Item.Properties().stacksTo(1)));
     public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> STORMFORGED_BACKPACK_ITEM = ModItems.ITEMS.register("stormforged_backpack",
             () -> new com.sideflowgames.fulguritefusion.backpack.StormBackpackItem(STORMFORGED_BACKPACK.get(), new Item.Properties().stacksTo(1).fireResistant()));
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> PRIME_BACKPACK_ITEM = ModItems.ITEMS.register("prime_backpack",
+            () -> new com.sideflowgames.fulguritefusion.backpack.StormBackpackItem(PRIME_BACKPACK.get(), new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC)));
     public static final DeferredItem<BlockItem> STORM_FORGE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_forge", STORM_FORGE);
     public static final DeferredItem<BlockItem> FORGE_POWER_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("forge_power_port", FORGE_POWER_PORT);
     public static final DeferredItem<BlockItem> CREATIVE_POWER_SOURCE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("creative_power_source",
@@ -359,19 +408,33 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> WIRE_EXTRUDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("wire_extruder", WIRE_EXTRUDER);
     public static final DeferredItem<BlockItem> KILN_ITEM = ModItems.ITEMS.registerSimpleBlockItem("kiln", KILN);
     public static final DeferredItem<BlockItem> CRUSHER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("crusher", CRUSHER);
+    public static final DeferredItem<BlockItem> BANBURY_MIXER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("banbury_mixer", BANBURY_MIXER);
+    public static final DeferredItem<BlockItem> LATEX_VULCANIZER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("latex_vulcanizer", LATEX_VULCANIZER);
+    public static final DeferredItem<BlockItem> RUBBER_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rubber_log", RUBBER_LOG);
+    public static final DeferredItem<BlockItem> RUBBER_WOOD_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rubber_wood", RUBBER_WOOD);
+    public static final DeferredItem<BlockItem> RUBBER_PLANKS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rubber_planks", RUBBER_PLANKS);
+    public static final DeferredItem<BlockItem> RUBBER_LEAVES_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rubber_leaves", RUBBER_LEAVES);
+    public static final DeferredItem<BlockItem> RUBBER_SAPLING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rubber_sapling", RUBBER_SAPLING);
+    public static final DeferredItem<BlockItem> TREE_TAP_ITEM = ModItems.ITEMS.registerSimpleBlockItem("tree_tap", TREE_TAP);
+    public static final DeferredItem<BlockItem> DRIED_RUBBER_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("dried_rubber_log", DRIED_RUBBER_LOG);
+    public static final DeferredItem<BlockItem> LATEX_HARVESTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("latex_harvester", LATEX_HARVESTER);
+    public static final DeferredItem<BlockItem> HARVESTER_TANK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("harvester_tank", HARVESTER_TANK);
+    public static final DeferredItem<BlockItem> HARVESTER_POWER_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("harvester_power_port", HARVESTER_POWER_PORT);
     public static final DeferredItem<BlockItem> STORM_COLLIDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_collider", STORM_COLLIDER);
 
     public static final Supplier<BlockEntityType<FusionColliderBlockEntity>> FUSION_COLLIDER_BE = BLOCK_ENTITIES.register("fusion_collider",
             () -> BlockEntityType.Builder.of(FusionColliderBlockEntity::new, FUSION_COLLIDER.get()).build(null));
     public static final Supplier<BlockEntityType<ReactorConsoleBlockEntity>> REACTOR_CONSOLE_BE = BLOCK_ENTITIES.register("reactor_console",
             () -> BlockEntityType.Builder.of(ReactorConsoleBlockEntity::new, REACTOR_CONSOLE.get()).build(null));
+    public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.pipe.FluidPipeBlockEntity>> FLUID_PIPE_BE = BLOCK_ENTITIES.register("fluid_pipe",
+            () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.pipe.FluidPipeBlockEntity::new, FLUID_PIPE.get()).build(null));
     public static final Supplier<BlockEntityType<DataCableBlockEntity>> DATA_CABLE_BE = BLOCK_ENTITIES.register("data_cable",
             () -> BlockEntityType.Builder.of(DataCableBlockEntity::new, DATA_CABLE.get()).build(null));
     public static final Supplier<BlockEntityType<SkyCollectorBlockEntity>> SKY_COLLECTOR_BE = BLOCK_ENTITIES.register("sky_collector",
             () -> BlockEntityType.Builder.of(SkyCollectorBlockEntity::new, SKY_COLLECTOR.get()).build(null));
     public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.backpack.BackpackBlockEntity>> BACKPACK_BE = BLOCK_ENTITIES.register("backpack",
             () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.backpack.BackpackBlockEntity::new, COPPER_BACKPACK.get(), IRON_BACKPACK.get(),
-                    FULGURITE_BACKPACK.get(), STORMFORGED_BACKPACK.get()).build(null));
+                    FULGURITE_BACKPACK.get(), STORMFORGED_BACKPACK.get(), PRIME_BACKPACK.get()).build(null));
 
     // Recipe serializers.
     public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
@@ -422,7 +485,13 @@ public final class ModBlocks {
 
     public static final Supplier<BlockEntityType<MachineControllerBlockEntity>> MACHINE_CONTROLLER_BE = BLOCK_ENTITIES.register("machine_controller",
             () -> BlockEntityType.Builder.of(MachineControllerBlockEntity::new, PRESS.get(), ARC_FURNACE.get(),
-                    WIRE_EXTRUDER.get(), KILN.get(), CRUSHER.get()).build(null));
+                    WIRE_EXTRUDER.get(), KILN.get(), CRUSHER.get(), BANBURY_MIXER.get(), LATEX_VULCANIZER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlockEntity>> LATEX_HARVESTER_BE = BLOCK_ENTITIES.register("latex_harvester",
+            () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlockEntity::new, LATEX_HARVESTER.get()).build(null));
+    public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.harvester.HarvesterPartBlockEntity>> HARVESTER_PART_BE = BLOCK_ENTITIES.register("harvester_part",
+            () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.harvester.HarvesterPartBlockEntity::new,
+                    HARVESTER_TANK.get(), HARVESTER_POWER_PORT.get()).build(null));
 
     public static final Supplier<BlockEntityType<StormwingEggBlockEntity>> STORMWING_EGG_BE = BLOCK_ENTITIES.register("stormwing_egg",
             () -> BlockEntityType.Builder.of(StormwingEggBlockEntity::new, STORMWING_EGG.get()).build(null));

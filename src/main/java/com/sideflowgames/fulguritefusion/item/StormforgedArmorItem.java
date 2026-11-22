@@ -24,6 +24,10 @@ public class StormforgedArmorItem extends ArmorItem implements FmChargeable {
         super(ModArmorMaterials.STORMFORGED, type, properties);
     }
 
+    protected StormforgedArmorItem(net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> material, Type type, Properties properties) {
+        super(material, type, properties);
+    }
+
     @Override
     public int maxFm() {
         return MAX_FM;

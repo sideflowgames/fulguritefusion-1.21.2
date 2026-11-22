@@ -27,6 +27,8 @@ public class FulguriteFusion {
         modEventBus.addListener(this::commonSetup);
 
         // Register our blocks (ModBlocks.java), then items and the creative tab (ModItems.java)
+        ModFluids.register(modEventBus);
+        ModParticles.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModDataComponents.register(modEventBus);
@@ -46,6 +48,8 @@ public class FulguriteFusion {
         com.sideflowgames.fulguritefusion.entity.StormwingRiding.register(modEventBus);
         // Backpacks: the open-backpack key packet
         com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.register(modEventBus);
+        com.sideflowgames.fulguritefusion.prime.PrimeNetwork.register(modEventBus);
+        com.sideflowgames.fulguritefusion.item.ChainBolt.register(modEventBus);
         // Guide map: which topics each player has unlocked
         com.sideflowgames.fulguritefusion.guide.GuideProgress.register(modEventBus);
 
@@ -58,6 +62,15 @@ public class FulguriteFusion {
 
     private void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info("Fulgurite Fusion: common setup");
+        event.enqueueWork(() -> {
+            // Rubber wood burns like any other wood.
+            var fire = (net.minecraft.world.level.block.FireBlock) net.minecraft.world.level.block.Blocks.FIRE;
+            fire.setFlammable(ModBlocks.RUBBER_LOG.get(), 5, 5);
+            fire.setFlammable(ModBlocks.RUBBER_WOOD.get(), 5, 5);
+            fire.setFlammable(ModBlocks.RUBBER_PLANKS.get(), 5, 20);
+            fire.setFlammable(ModBlocks.RUBBER_LEAVES.get(), 30, 60);
+            fire.setFlammable(ModBlocks.DRIED_RUBBER_LOG.get(), 5, 5);
+        });
     }
 
     @SubscribeEvent

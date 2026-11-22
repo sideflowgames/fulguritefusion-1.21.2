@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "fulguritefusion:stormforged_helmet"
+    "fulguritefusion:stormforged_helmet",
+    "fulguritefusion:prime_helmet"
   ]
 }

@@ -4,40 +4,12 @@
     "animation.kiln.idle": {
       "loop": true,
       "animation_length": 1.0,
-      "bones": {
-        "glow": {
-          "scale": [
-            0.8,
-            0.3,
-            1
-          ]
-        }
-      }
+      "bones": {}
     },
     "animation.kiln.working": {
       "loop": true,
-      "animation_length": 1.6,
-      "bones": {
-        "glow": {
-          "scale": {
-            "0.0": [
-              1,
-              1,
-              1
-            ],
-            "0.8": [
-              1.05,
-              1.08,
-              1
-            ],
-            "1.6": [
-              1,
-              1,
-              1
-            ]
-          }
-        }
-      }
+      "animation_length": 1.0,
+      "bones": {}
     }
   }
 }

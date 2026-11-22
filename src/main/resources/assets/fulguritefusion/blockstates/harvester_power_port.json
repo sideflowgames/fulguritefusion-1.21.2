@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "fulguritefusion:block/harvester_power_port"
+    },
+    "formed=true": {
+      "model": "fulguritefusion:block/machine_part_formed"
+    }
+  }
+}

@@ -3,23 +3,111 @@
     "facing=up,slim=false": {
       "model": "fulguritefusion:block/machine_connector"
     },
-    "facing=up,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim"
+    "facing=up,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0"
+    },
+    "facing=up,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1"
+    },
+    "facing=up,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2"
+    },
+    "facing=up,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3"
+    },
+    "facing=up,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4"
+    },
+    "facing=up,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5"
+    },
+    "facing=up,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6"
+    },
+    "facing=up,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7"
+    },
+    "facing=up,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8"
     },
     "facing=down,slim=false": {
       "model": "fulguritefusion:block/machine_connector",
       "x": 180
     },
-    "facing=down,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim",
+    "facing=down,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0",
+      "x": 180
+    },
+    "facing=down,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1",
+      "x": 180
+    },
+    "facing=down,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2",
+      "x": 180
+    },
+    "facing=down,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3",
+      "x": 180
+    },
+    "facing=down,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4",
+      "x": 180
+    },
+    "facing=down,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5",
+      "x": 180
+    },
+    "facing=down,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6",
+      "x": 180
+    },
+    "facing=down,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7",
+      "x": 180
+    },
+    "facing=down,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8",
       "x": 180
     },
     "facing=north,slim=false": {
       "model": "fulguritefusion:block/machine_connector",
       "x": 90
     },
-    "facing=north,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim",
+    "facing=north,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0",
+      "x": 90
+    },
+    "facing=north,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1",
+      "x": 90
+    },
+    "facing=north,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2",
+      "x": 90
+    },
+    "facing=north,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3",
+      "x": 90
+    },
+    "facing=north,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4",
+      "x": 90
+    },
+    "facing=north,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5",
+      "x": 90
+    },
+    "facing=north,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6",
+      "x": 90
+    },
+    "facing=north,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7",
+      "x": 90
+    },
+    "facing=north,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8",
       "x": 90
     },
     "facing=south,slim=false": {
@@ -27,8 +115,48 @@
       "x": 90,
       "y": 180
     },
-    "facing=south,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim",
+    "facing=south,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8",
       "x": 90,
       "y": 180
     },
@@ -37,8 +165,48 @@
       "x": 90,
       "y": 270
     },
-    "facing=west,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim",
+    "facing=west,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8",
       "x": 90,
       "y": 270
     },
@@ -47,8 +215,48 @@
       "x": 90,
       "y": 90
     },
-    "facing=east,slim=true": {
-      "model": "fulguritefusion:block/machine_connector_slim",
+    "facing=east,gap=0,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=1,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=2,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g2",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=3,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g3",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=4,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g4",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=5,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g5",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=6,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g6",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=7,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g7",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,gap=8,slim=true": {
+      "model": "fulguritefusion:block/machine_connector_slim_g8",
       "x": 90,
       "y": 90
     }

@@ -27,11 +27,10 @@ import net.minecraft.world.phys.Vec3;
 // A Machine Connector. It remembers the hanging wires strung from it to other connectors.
 // Each connector re-reads its network once a second; only the network's master connector moves power.
 public class MachineConnectorBlockEntity extends BlockEntity {
-    // One hanging wire from this connector to another one.
-    // heavy = Heavy Wire: insulated, thicker, and can span twice as far.
-    public record Link(BlockPos other, boolean insulated, boolean heavy) {
-        public Link(BlockPos other, boolean insulated) {
-            this(other, insulated, false);
+    // One hanging wire from this connector to another one, and what kind of wire it is.
+    public record Link(BlockPos other, com.sideflowgames.fulguritefusion.power.WireTier tier) {
+        public boolean insulated() {
+            return tier.insulated;
         }
     }
 
@@ -77,8 +76,8 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         return false;
     }
 
-    public void addLink(BlockPos other, boolean insulated, boolean heavy) {
-        links.add(new Link(other, insulated, heavy));
+    public void addLink(BlockPos other, com.sideflowgames.fulguritefusion.power.WireTier tier) {
+        links.add(new Link(other, tier));
         changedAndSync();
     }
 
@@ -112,7 +111,7 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         Vec3 a = WireMath.attachPoint(level, worldPosition);
         for (Link link : links) {
             Vec3 b = WireMath.attachPoint(level, link.other());
-            box = box.minmax(new AABB(a, b).inflate(0.5).expandTowards(0, -WireMath.sag(a, b) - 0.5, 0));
+            box = box.minmax(new AABB(a, b).inflate(0.5).expandTowards(0, -WireMath.sag(a, b, link.tier()) - 0.5, 0));
         }
         return box;
     }
@@ -121,7 +120,6 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         if (network == null || level == null) return "Machine Connector: starting up";
         if (links.isEmpty()) return "Machine Connector: no wires attached (right-click it with a Wire Roll)";
         int linked = network.linkedMachines().size();
-        int max = Config.NETWORK_MAX_MACHINES.get();
         BlockPos machine = MachineConnectorBlock.attachedPos(getBlockState(), worldPosition);
         String self;
         if (level.getBlockState(machine).is(com.sideflowgames.fulguritefusion.ModBlocks.CONSOLE_POWER_PORT.get())) {
@@ -129,8 +127,6 @@ public class MachineConnectorBlockEntity extends BlockEntity {
                     ? "reactor power port: supplies power" : "reactor power port (console not formed)";
         } else if (!MachineConnectorBlock.isMachine(level, machine)) {
             self = "relay (not on a machine)";
-        } else if (network.unlinkedMachines().contains(machine)) {
-            self = "this machine is NOT linked (network full)";
         } else if (network.generators().contains(machine)) {
             self = "this machine supplies power";
         } else if (network.batteries().contains(machine)) {
@@ -140,8 +136,8 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         }
         int flow = 0;
         if (level.getBlockEntity(network.master()) instanceof MachineConnectorBlockEntity master) flow = master.lastFlow;
-        return "Network: " + linked + " / " + max + " machines | " + network.batteries().size() + " batteries | "
-                + flow + " Fm/t | " + links.size() + " wires | " + self;
+        return "Network: " + linked + " machine" + (linked == 1 ? "" : "s") + " | " + network.batteries().size() + " batteries | "
+                + flow + " / " + network.rate() + " Fm/t | " + links.size() + " wires | " + self;
     }
 
     // --- saving and syncing to clients (so the wires can be drawn) ---
@@ -153,8 +149,7 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         for (Link link : links) {
             CompoundTag l = new CompoundTag();
             l.putLong("Pos", link.other().asLong());
-            l.putBoolean("Insulated", link.insulated());
-            l.putBoolean("Heavy", link.heavy());
+            l.putString("Tier", link.tier().id);
             list.add(l);
         }
         tag.put("Links", list);
@@ -168,7 +163,12 @@ public class MachineConnectorBlockEntity extends BlockEntity {
         ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag l = list.getCompound(i);
-            links.add(new Link(BlockPos.of(l.getLong("Pos")), l.getBoolean("Insulated"), l.getBoolean("Heavy")));
+            com.sideflowgames.fulguritefusion.power.WireTier tier;
+            if (l.contains("Tier")) tier = com.sideflowgames.fulguritefusion.power.WireTier.byId(l.getString("Tier"));
+            else tier = l.getBoolean("Heavy") ? com.sideflowgames.fulguritefusion.power.WireTier.HEAVY   // older saves
+                    : l.getBoolean("Insulated") ? com.sideflowgames.fulguritefusion.power.WireTier.INSULATED
+                    : com.sideflowgames.fulguritefusion.power.WireTier.RAW;
+            links.add(new Link(BlockPos.of(l.getLong("Pos")), tier));
         }
         powered = tag.getBoolean("Powered");
     }

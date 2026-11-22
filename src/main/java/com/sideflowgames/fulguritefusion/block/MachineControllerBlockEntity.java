@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.joml.Vector3f;
@@ -46,7 +47,10 @@ import java.util.List;
 public class MachineControllerBlockEntity extends BlockEntity implements FmHandler, MenuProvider, GeoBlockEntity {
     public static final int MAX_FM = 16000;
     public static final int SLOTS = 4;
-    public static final int DATA_COUNT = 6; // fm, progress, ticks needed, tier, Fm/t, formed
+    public static final int DATA_COUNT = 7; // fm, progress, ticks needed, tier, Fm/t, formed, latex (mB + 1; 0 = no tank)
+    public static final int LATEX_CAPACITY = 16_000; // Latex Vulcanizer: 16 buckets
+    public static final int LATEX_PER_RUN = 1000;
+    public static final int RUBBER_PER_RUN = 3;
     private static final DustParticleOptions OUTLINE = new DustParticleOptions(new Vector3f(0.4f, 0.85f, 1.0f), 0.8f);
 
     private final MachineType type;
@@ -61,6 +65,22 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
     private int checkTimer;
     private int previewTicks;
     private final List<BlockPos> missing = new ArrayList<>();
+
+    // What clients draw inside the formed machine (synced when it changes; see syncDisplay).
+    private ItemStack shownInput = ItemStack.EMPTY, shownOutput = ItemStack.EMPTY;
+    private int shownTier;
+    private int displayHash;
+    private int shownLatex; // 0-16
+
+    // Latex Vulcanizer only: liquid latex piped (or poured) in.
+    private final net.neoforged.neoforge.fluids.capability.templates.FluidTank latex =
+            new net.neoforged.neoforge.fluids.capability.templates.FluidTank(LATEX_CAPACITY,
+                    s -> s.is(com.sideflowgames.fulguritefusion.ModFluids.LATEX.get())) {
+        @Override
+        protected void onContentsChanged() {
+            setChanged();
+        }
+    };
 
     private final ItemStackHandler items = new ItemStackHandler(SLOTS) {
         @Override
@@ -84,6 +104,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
                 case 3 -> tier;
                 case 4 -> MachineTier.fmPerTick(tier);
                 case 5 -> tier > 0 ? 1 : 0;
+                case 6 -> type.usesLatex() ? latex.getFluidAmount() + 1 : 0;
                 default -> 0;
             };
         }
@@ -114,6 +135,10 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
     public void requestCheck() {
         checkRequested = true;
+    }
+
+    public Direction facingDir() {
+        return facing();
     }
 
     private Direction facing() {
@@ -234,7 +259,8 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
         boolean working = false;
         if (be.tier > 0) {
-            MachineType.Result recipe = be.type.findRecipe(level, be.items.getStackInSlot(0), be.items.getStackInSlot(1), level.random);
+            if (be.type.usesLatex()) be.pourBuckets();
+            MachineType.Result recipe = be.recipe(level);
             if (recipe != null && be.fits(recipe)) {
                 int cost = MachineTier.fmPerTick(be.tier);
                 if (be.fm >= cost) {
@@ -243,7 +269,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
                     working = true;
                     if (be.progress >= MachineTier.ticksPerItem(be.type, be.tier)) {
                         // Roll the final result now (the crusher's flint is a chance).
-                        MachineType.Result done = be.type.findRecipe(level, be.items.getStackInSlot(0), be.items.getStackInSlot(1), level.random);
+                        MachineType.Result done = be.recipe(level);
                         if (done != null && be.fits(done)) {
                             be.finish(done);
                             be.progress = 0;
@@ -259,11 +285,35 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         int shared = be.chain.share(level, pos, be, be.fm, null);
         if (shared > 0) be.fm -= shared;
 
+        if (level.getGameTime() % 10 == 0) be.syncDisplay();
+
         BlockState current = level.getBlockState(pos);
         if (current.getBlock() instanceof MachineControllerBlock && current.getValue(MachineControllerBlock.WORKING) != working) {
             level.setBlock(pos, current.setValue(MachineControllerBlock.WORKING, working), 3);
         }
         be.setChanged();
+    }
+
+    private MachineType.Result recipe(Level level) {
+        if (type.usesLatex()) {
+            return latex.getFluidAmount() >= LATEX_PER_RUN
+                    ? new MachineType.Result(0, 0, new ItemStack(com.sideflowgames.fulguritefusion.ModItems.DRIED_RUBBER.get(), RUBBER_PER_RUN), ItemStack.EMPTY)
+                    : null;
+        }
+        return type.findRecipe(level, items.getStackInSlot(0), items.getStackInSlot(1), level.random);
+    }
+
+    // Latex Buckets put in the input slots are poured into the tank; the empty bucket goes to the second output.
+    private void pourBuckets() {
+        for (int slot = 0; slot < 2; slot++) {
+            ItemStack s = items.getStackInSlot(slot);
+            if (!s.is(com.sideflowgames.fulguritefusion.ModItems.LATEX_BUCKET.get())) continue;
+            if (latex.getSpace() < LATEX_PER_RUN || !fitsIn(3, new ItemStack(net.minecraft.world.item.Items.BUCKET))) return;
+            latex.fill(new net.neoforged.neoforge.fluids.FluidStack(com.sideflowgames.fulguritefusion.ModFluids.LATEX.get(), LATEX_PER_RUN),
+                    net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+            items.extractItem(slot, 1, false);
+            put(3, new ItemStack(net.minecraft.world.item.Items.BUCKET));
+        }
     }
 
     private boolean fits(MachineType.Result r) {
@@ -278,6 +328,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
     }
 
     private void finish(MachineType.Result r) {
+        if (type.usesLatex()) latex.drain(LATEX_PER_RUN, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
         items.extractItem(0, r.take0(), false);
         if (r.take1() > 0) items.extractItem(1, r.take1(), false);
         put(2, r.out0());
@@ -311,6 +362,22 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         @Override public int getSlotLimit(int slot) { return items.getSlotLimit(slot + 2); }
         @Override public boolean isItemValid(int slot, ItemStack stack) { return false; }
     };
+
+    // Latex in only (pipes and buckets).
+    private final net.neoforged.neoforge.fluids.capability.IFluidHandler latexInlet = new net.neoforged.neoforge.fluids.capability.IFluidHandler() {
+        @Override public int getTanks() { return 1; }
+        @Override public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int tank) { return latex.getFluid(); }
+        @Override public int getTankCapacity(int tank) { return LATEX_CAPACITY; }
+        @Override public boolean isFluidValid(int tank, net.neoforged.neoforge.fluids.FluidStack stack) { return latex.isFluidValid(stack); }
+        @Override public int fill(net.neoforged.neoforge.fluids.FluidStack resource, FluidAction action) { return tier > 0 ? latex.fill(resource, action) : 0; }
+        @Override public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack resource, FluidAction action) { return net.neoforged.neoforge.fluids.FluidStack.EMPTY; }
+        @Override public net.neoforged.neoforge.fluids.FluidStack drain(int maxDrain, FluidAction action) { return net.neoforged.neoforge.fluids.FluidStack.EMPTY; }
+    };
+
+    @javax.annotation.Nullable
+    public net.neoforged.neoforge.fluids.capability.IFluidHandler latexInlet() {
+        return type.usesLatex() ? latexInlet : null;
+    }
 
     public IItemHandler inputPort() {
         return inputPort;
@@ -399,6 +466,80 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         return cache;
     }
 
+    // ---------- What clients see ----------
+
+    private ItemStack displayIn() {
+        ItemStack s = items.getStackInSlot(0);
+        return s.isEmpty() ? items.getStackInSlot(1) : s;
+    }
+
+    private ItemStack displayOut() {
+        ItemStack s = items.getStackInSlot(2);
+        return s.isEmpty() ? items.getStackInSlot(3) : s;
+    }
+
+    // Sends the shown input/output items and tier to nearby clients when they change.
+    private void syncDisplay() {
+        if (level == null || level.isClientSide) return;
+        ItemStack in = displayIn(), out = displayOut();
+        int h = java.util.Objects.hash(tier, latexSixteenths(), ItemStack.hashItemAndComponents(in), in.isEmpty(), ItemStack.hashItemAndComponents(out), out.isEmpty());
+        if (h == displayHash) return;
+        displayHash = h;
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
+    public ItemStack shownInput() {
+        return shownInput;
+    }
+
+    public ItemStack shownOutput() {
+        return shownOutput;
+    }
+
+    public int shownTier() {
+        return shownTier;
+    }
+
+    // Latex Vulcanizer: how full its vat is, 0-1.
+    public float shownLatex() {
+        return shownLatex / 16f;
+    }
+
+    private int latexSixteenths() {
+        return latex.isEmpty() ? 0 : Math.max(1, Math.round(latex.getFluidAmount() * 16f / LATEX_CAPACITY));
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("Tier", tier);
+        tag.putInt("Latex", latexSixteenths());
+        ItemStack in = displayIn(), out = displayOut();
+        if (!in.isEmpty()) tag.put("In", in.copyWithCount(1).save(registries));
+        if (!out.isEmpty()) tag.put("Out", out.copyWithCount(1).save(registries));
+        return tag;
+    }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // Clients only take the display data (the machine's real contents stay on the server).
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        shownTier = tag.getInt("Tier");
+        shownLatex = tag.getInt("Latex");
+        shownInput = tag.contains("In") ? ItemStack.parseOptional(registries, tag.getCompound("In")) : ItemStack.EMPTY;
+        shownOutput = tag.contains("Out") ? ItemStack.parseOptional(registries, tag.getCompound("Out")) : ItemStack.EMPTY;
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt,
+                             HolderLookup.Provider registries) {
+        handleUpdateTag(pkt.getTag(), registries);
+    }
+
     // ---------- Save ----------
 
     @Override
@@ -408,6 +549,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         tag.putInt("Fm", fm);
         tag.putInt("Progress", progress);
         tag.putInt("Tier", tier);
+        if (type.usesLatex()) tag.put("Latex", latex.writeToNBT(registries, new CompoundTag()));
     }
 
     @Override
@@ -417,5 +559,6 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         fm = tag.getInt("Fm");
         progress = tag.getInt("Progress");
         tier = tag.getInt("Tier");
+        if (tag.contains("Latex")) latex.readFromNBT(registries, tag.getCompound("Latex"));
     }
 }

@@ -15,6 +15,7 @@ public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/processing_machine.png");
     private static final int ARROW_X = 70, ARROW_Y = 35, ARROW_W = 24, ARROW_H = 16;
     private static final int TEXT_COLOR = 0xFF26262C;
+    private static final int LATEX_X = 24, LATEX_Y = 20, LATEX_W = 8, LATEX_H = 40;
 
     public ProcessingMachineScreen(ProcessingMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, TEXTURE);
@@ -31,6 +32,15 @@ public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu
         int needed = menu.getNeeded();
         int w = needed > 0 ? Math.min(ARROW_W, menu.getProgress() * ARROW_W / needed) : 0;
         if (w > 0) g.blit(texture, leftPos + ARROW_X, topPos + ARROW_Y, 176, 52, w, ARROW_H);
+        // Latex Vulcanizer: a gauge of the latex in its vat, left of the inputs.
+        int latex = menu.getLatex();
+        if (latex >= 0) {
+            int x = leftPos + LATEX_X, y = topPos + LATEX_Y;
+            g.fill(x - 1, y - 1, x + LATEX_W + 1, y + LATEX_H + 1, 0xFF26262C);
+            g.fill(x, y, x + LATEX_W, y + LATEX_H, 0xFF101014);
+            int h = latex * LATEX_H / menu.getLatexCapacity();
+            if (h > 0) g.fill(x, y + LATEX_H - h, x + LATEX_W, y + LATEX_H, 0xFFEEEADC);
+        }
     }
 
     @Override
@@ -49,5 +59,10 @@ public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu
     @Override
     protected void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {
         powerTooltip(g, mouseX, mouseY, menu.getFm(), menu.getMaxFm());
+        int latex = menu.getLatex();
+        if (latex >= 0 && isHovering(LATEX_X - 1, LATEX_Y - 1, LATEX_W + 2, LATEX_H + 2, mouseX, mouseY)) {
+            g.renderTooltip(font, Component.literal(String.format("Latex: %.1f / %d buckets", latex / 1000f, menu.getLatexCapacity() / 1000)),
+                    mouseX, mouseY);
+        }
     }
 }

@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fulguritefusion:latex_bucket",
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "fulguritefusion:tap_bucket",
+                  "properties": {
+                    "latex": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "minecraft:bucket"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "fulguritefusion:blocks/tap_bucket"
+}

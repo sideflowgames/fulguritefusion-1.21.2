@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fulguritefusion:block/tree_tap"
+    },
+    "facing=east": {
+      "model": "fulguritefusion:block/tree_tap",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fulguritefusion:block/tree_tap",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fulguritefusion:block/tree_tap",
+      "y": 270
+    }
+  }
+}

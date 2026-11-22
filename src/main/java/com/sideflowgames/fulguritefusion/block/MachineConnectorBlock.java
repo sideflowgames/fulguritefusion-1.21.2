@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -61,15 +62,45 @@ public class MachineConnectorBlock extends BaseEntityBlock {
     private static final double[][] BOXES = {{2, 0, 2, 14, 2, 14}, {6, 2, 6, 10, 9, 10}, {5, 9, 5, 11, 11, 11}};
     // On thin blocks (fences, walls, posts...) the wide base is swapped for a small collar that hugs the post.
     public static final BooleanProperty SLIM = BooleanProperty.create("slim");
-    private static final double[][] SLIM_BOXES = {{5, 0, 5, 11, 2, 11}, BOXES[1], BOXES[2]};
+    // How far (in pixels) the post it's on sits back from the edge of its block, e.g. 6 for a fence post, 4 for a
+    // wall post. The collar and stem reach back that far, so the connector actually touches the post.
+    public static final IntegerProperty GAP = IntegerProperty.create("gap", 0, 8);
     private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
-    private static final Map<Direction, VoxelShape> SLIM_SHAPES = new EnumMap<>(Direction.class);
+    private static final Map<Direction, VoxelShape[]> SLIM_SHAPES = new EnumMap<>(Direction.class);
 
     static {
         for (Direction d : Direction.values()) {
             SHAPES.put(d, build(BOXES, d));
-            SLIM_SHAPES.put(d, build(SLIM_BOXES, d));
+            VoxelShape[] byGap = new VoxelShape[9];
+            for (int g = 0; g <= 8; g++) {
+                byGap[g] = build(new double[][]{{5, -g, 5, 11, 2 - g, 11}, {6, 2 - g, 6, 10, 9, 10}, BOXES[2]}, d);
+            }
+            SLIM_SHAPES.put(d, byGap);
         }
+    }
+
+    // The gap between this block's edge and the nearest part of the block it's stuck to, measured across the
+    // middle of the face (where the collar sits).
+    private static int gapFor(BlockGetter level, BlockPos pos, Direction facing) {
+        BlockPos attached = pos.relative(facing.getOpposite());
+        VoxelShape shape = level.getBlockState(attached).getShape(level, attached);
+        if (shape.isEmpty()) return 0;
+        Direction.Axis axis = facing.getAxis();
+        double best = Double.MAX_VALUE;
+        for (net.minecraft.world.phys.AABB box : shape.toAabbs()) {
+            // Only boxes under the collar (5..11 px across both other axes).
+            boolean under = true;
+            for (Direction.Axis other : Direction.Axis.values()) {
+                if (other == axis) continue;
+                if (box.max(other) <= 5 / 16.0 || box.min(other) >= 11 / 16.0) under = false;
+            }
+            if (!under) continue;
+            // Distance from the face the connector is on to this box.
+            double gap = facing.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 - box.max(axis) : box.min(axis);
+            best = Math.min(best, gap);
+        }
+        if (best == Double.MAX_VALUE) return 0;
+        return (int) Math.max(0, Math.min(8, Math.ceil(best * 16 - 1e-6)));
     }
 
     private static VoxelShape build(double[][] boxes, Direction d) {
@@ -100,12 +131,12 @@ public class MachineConnectorBlock extends BaseEntityBlock {
 
     public MachineConnectorBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP).setValue(SLIM, false));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP).setValue(SLIM, false).setValue(GAP, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, SLIM);
+        builder.add(FACING, SLIM, GAP);
     }
 
     // The block this connector is stuck to.
@@ -126,7 +157,7 @@ public class MachineConnectorBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return (state.getValue(SLIM) ? SLIM_SHAPES : SHAPES).get(state.getValue(FACING));
+        return state.getValue(SLIM) ? SLIM_SHAPES.get(state.getValue(FACING))[state.getValue(GAP)] : SHAPES.get(state.getValue(FACING));
     }
 
     // A machine = anything that stores, makes or uses Fm (and, for multiblocks, accepts a connector there).
@@ -151,8 +182,9 @@ public class MachineConnectorBlock extends BaseEntityBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getClickedFace();
-        BlockState state = defaultBlockState().setValue(FACING, facing)
-                .setValue(SLIM, slimFor(context.getLevel(), context.getClickedPos(), facing));
+        boolean slim = slimFor(context.getLevel(), context.getClickedPos(), facing);
+        BlockState state = defaultBlockState().setValue(FACING, facing).setValue(SLIM, slim)
+                .setValue(GAP, slim ? gapFor(context.getLevel(), context.getClickedPos(), facing) : 0);
         return state.canSurvive(context.getLevel(), context.getClickedPos()) ? state : null;
     }
 
@@ -171,7 +203,8 @@ public class MachineConnectorBlock extends BaseEntityBlock {
                                      LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
         if (direction == state.getValue(FACING).getOpposite()) {
             if (!state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
-            return state.setValue(SLIM, slimFor(level, pos, state.getValue(FACING)));
+            boolean slim = slimFor(level, pos, state.getValue(FACING));
+            return state.setValue(SLIM, slim).setValue(GAP, slim ? gapFor(level, pos, state.getValue(FACING)) : 0);
         }
         return super.updateShape(state, direction, neighbourState, level, pos, neighbourPos);
     }
@@ -201,8 +234,7 @@ public class MachineConnectorBlock extends BaseEntityBlock {
                 && level.getBlockEntity(pos) instanceof MachineConnectorBlockEntity connector) {
             for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
                 if (level.getBlockEntity(link.other()) instanceof MachineConnectorBlockEntity other) other.removeLink(pos);
-                ItemStack roll = new ItemStack(link.heavy() ? ModItems.HEAVY_WIRE.get()
-                        : link.insulated() ? ModItems.INSULATED_WIRE.get() : ModItems.RAW_WIRE.get());
+                ItemStack roll = new ItemStack(ModItems.wireItem(link.tier()));
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), roll);
             }
         }
@@ -216,9 +248,14 @@ public class MachineConnectorBlock extends BaseEntityBlock {
         Vec3 a = WireMath.attachPoint(pos, state.getValue(FACING));
         for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
             if (link.insulated() || pos.asLong() > link.other().asLong()) continue; // draw each wire once
-            if (random.nextFloat() < 0.35f) {
-                Vec3 p = WireMath.point(a, WireMath.attachPoint(level, link.other()), random.nextDouble());
-                level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 0, -0.02, 0);
+            // Thicker raw wire carries more and spits more sparks; raw heavy wire throws the odd ember too.
+            int gauge = link.tier().gauge;
+            for (int n = 0; n <= gauge; n++) {
+                if (random.nextFloat() < 0.35f) {
+                    Vec3 p = WireMath.point(a, WireMath.attachPoint(level, link.other()), random.nextDouble(), link.tier());
+                    level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 0, -0.02, 0);
+                    if (gauge == 2 && random.nextFloat() < 0.15f) level.addParticle(ParticleTypes.SMALL_FLAME, p.x, p.y, p.z, 0, -0.01, 0);
+                }
             }
         }
     }

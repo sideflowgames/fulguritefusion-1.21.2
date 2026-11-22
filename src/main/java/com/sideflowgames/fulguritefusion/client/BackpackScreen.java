@@ -73,6 +73,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
             case IRON -> 0xFFB8B8C0;
             case FULGURITE -> 0xFF8A6FD8;
             case STORMFORGED -> 0xFF5AB4FF;
+            case PRIME -> 0xFFB46CFF;
         };
     }
 
@@ -85,12 +86,12 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         GuiStyle.panel(g, tx, ty, x + 4 - tx, ups * BackpackMenu.SLOT + 8);
         GuiStyle.panel(g, x, y, w, h);
         g.fill(x + 3, y + 3, x + w - 3, y + 4, accent());
-        if (menu.tier == BackpackTier.STORMFORGED) {
+        if (menu.tier.powered()) {
             // Fm gauge under the upgrade tab.
             int gy = ty + ups * BackpackMenu.SLOT + 12, gh = 40;
             g.fill(tx + 6, gy, tx + 18, gy + gh, GuiStyle.DARK);
             int fill = Math.round((gh - 2) * menu.charge());
-            g.fill(tx + 7, gy + gh - 1 - fill, tx + 17, gy + gh - 1, 0xFF5AB4FF);
+            g.fill(tx + 7, gy + gh - 1 - fill, tx + 17, gy + gh - 1, accent());
         }
         for (Slot s : menu.slots) GuiStyle.slot(g, x + s.x, y + s.y);
     }
@@ -105,7 +106,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top, int button) {
         int tx = left + BackpackMenu.UPGRADE_X - 5, ty = top + BackpackMenu.TOP - 5;
-        int bottom = ty + menu.tier.upgradeSlots * BackpackMenu.SLOT + (menu.tier == BackpackTier.STORMFORGED ? 56 : 8);
+        int bottom = ty + menu.tier.upgradeSlots * BackpackMenu.SLOT + (menu.tier.powered() ? 56 : 8);
         if (mouseX >= tx && mouseX < left && mouseY >= ty && mouseY < bottom) return false;
         return super.hasClickedOutside(mouseX, mouseY, left, top, button);
     }
@@ -114,7 +115,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         renderTooltip(g, mouseX, mouseY);
-        if (menu.tier == BackpackTier.STORMFORGED && menu.getCarried().isEmpty()) {
+        if (menu.tier.powered() && menu.getCarried().isEmpty()) {
             int tx = leftPos + BackpackMenu.UPGRADE_X - 5;
             int gy = topPos + BackpackMenu.TOP - 5 + menu.tier.upgradeSlots * BackpackMenu.SLOT + 12;
             if (mouseX >= tx + 6 && mouseX < tx + 18 && mouseY >= gy && mouseY < gy + 40) {

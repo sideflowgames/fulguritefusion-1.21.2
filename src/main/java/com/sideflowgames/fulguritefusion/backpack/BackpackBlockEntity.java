@@ -96,8 +96,8 @@ public class BackpackBlockEntity extends BaseContainerBlockEntity {
 
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory inventory) {
-        java.util.function.IntSupplier charge = tier() == BackpackTier.STORMFORGED
-                ? () -> (int) (fm * 1000L / StormBackpackItem.MAX_FM) : null;
+        java.util.function.IntSupplier charge = tier().powered()
+                ? () -> (int) (fm * 1000L / tier().maxFm) : null;
         return new BackpackMenu(id, inventory, tier(), this, upgradeContainer, -1, charge);
     }
 

@@ -35,6 +35,22 @@ public final class ModArmorMaterials {
                     3.0f,
                     0.0f));
 
+    // Prime: above netherite. Textures: textures/models/armor/prime_layer_1.png and _layer_2.png.
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> PRIME = MATERIALS.register("prime",
+            () -> new ArmorMaterial(
+                    new EnumMap<>(java.util.Map.of(
+                            ArmorItem.Type.BOOTS, 4,
+                            ArmorItem.Type.LEGGINGS, 7,
+                            ArmorItem.Type.CHESTPLATE, 9,
+                            ArmorItem.Type.HELMET, 4,
+                            ArmorItem.Type.BODY, 13)),
+                    22,
+                    SoundEvents.ARMOR_EQUIP_NETHERITE,
+                    () -> Ingredient.EMPTY,
+                    List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "prime"))),
+                    4.0f,
+                    0.15f));
+
     public static void register(IEventBus modEventBus) {
         MATERIALS.register(modEventBus);
     }

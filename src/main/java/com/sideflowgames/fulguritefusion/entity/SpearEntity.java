@@ -35,6 +35,9 @@ import javax.annotation.Nullable;
 // 3 blocks except whoever threw it.
 public class SpearEntity extends AbstractArrow {
     private static final EntityDataAccessor<Boolean> STORM = SynchedEntityData.defineId(SpearEntity.class, EntityDataSerializers.BOOLEAN);
+    // Prime Spear: stronger, and flies back to its thrower once it has hit something (like Loyalty).
+    private static final EntityDataAccessor<Boolean> PRIME = SynchedEntityData.defineId(SpearEntity.class, EntityDataSerializers.BOOLEAN);
+    private int returnTicks;
     private static final float STRIKE_DAMAGE = 8.0f;
     private static final double STRIKE_RADIUS = 3.0;
 
@@ -49,6 +52,7 @@ public class SpearEntity extends AbstractArrow {
     public SpearEntity(Level level, LivingEntity owner, ItemStack stack, boolean storm, boolean charged) {
         super(ModEntities.SPEAR.get(), owner, level, stack, null);
         this.entityData.set(STORM, storm);
+        this.entityData.set(PRIME, stack.getItem() instanceof com.sideflowgames.fulguritefusion.item.PrimeSpearItem);
         this.charged = charged;
     }
 
@@ -56,10 +60,15 @@ public class SpearEntity extends AbstractArrow {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(STORM, false);
+        builder.define(PRIME, false);
     }
 
     public boolean isStorm() {
         return entityData.get(STORM);
+    }
+
+    public boolean isPrime() {
+        return entityData.get(PRIME);
     }
 
     @Override
@@ -70,7 +79,26 @@ public class SpearEntity extends AbstractArrow {
     @Override
     public void tick() {
         if (inGroundTime > 4) dealtDamage = true;
+        Entity owner = getOwner();
+        if (isPrime() && (dealtDamage || isNoPhysics() || getY() < level().getMinBuildHeight()) && owner != null) {
+            if (!owner.isAlive() || owner.isSpectator() || owner.level() != level()) {
+                if (!level().isClientSide && pickup == Pickup.ALLOWED) spawnAtLocation(getPickupItem(), 0.1f);
+                discard();
+                return;
+            }
+            // Fly back to the thrower, through blocks, like a Loyalty trident.
+            setNoPhysics(true);
+            Vec3 to = owner.getEyePosition().subtract(position());
+            setPosRaw(getX(), getY() + to.y * 0.045, getZ());
+            if (level().isClientSide) yOld = getY();
+            setDeltaMovement(getDeltaMovement().scale(0.95).add(to.normalize().scale(0.15)));
+            if (returnTicks++ == 0) playSound(SoundEvents.TRIDENT_RETURN, 10.0f, 1.2f);
+        }
         super.tick();
+        if (level().isClientSide && isPrime() && tickCount % 2 == 0) {
+            level().addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.75f, 0.45f, 1.0f), 1.0f),
+                    getX(), getY(), getZ(), 0, 0, 0);
+        }
         if (level().isClientSide && isStorm() && !inGround && tickCount % 2 == 0) {
             level().addParticle(ParticleTypes.ELECTRIC_SPARK, getX(), getY(), getZ(), 0, 0, 0);
         }
@@ -85,7 +113,9 @@ public class SpearEntity extends AbstractArrow {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         Entity target = result.getEntity();
-        float damage = isStorm() ? StormSpearItem.THROWN + (charged ? StormSpearItem.LIGHTNING : 0)
+        float damage = isPrime() ? com.sideflowgames.fulguritefusion.item.PrimeSpearItem.THROWN
+                + (charged ? com.sideflowgames.fulguritefusion.item.PrimeSpearItem.LIGHTNING : 0)
+                : isStorm() ? StormSpearItem.THROWN + (charged ? StormSpearItem.LIGHTNING : 0)
                 : SpearItem.FULGURITE_THROWN + SpearItem.FULGURITE_LIGHTNING;
         Entity owner = getOwner();
         DamageSource source = damageSources().trident(this, owner == null ? this : owner);
@@ -124,6 +154,17 @@ public class SpearEntity extends AbstractArrow {
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3, at.z, 50, 1.2, 0.3, 1.2, 0.4);
     }
 
+    // A returning Prime Spear can be caught by its thrower.
+    @Override
+    protected boolean tryPickup(net.minecraft.world.entity.player.Player player) {
+        return super.tryPickup(player) || (isPrime() && isNoPhysics() && ownedBy(player) && player.getInventory().add(getPickupItem()));
+    }
+
+    @Override
+    public void playerTouch(net.minecraft.world.entity.player.Player player) {
+        if (!isPrime() || ownedBy(player) || getOwner() == null) super.playerTouch(player);
+    }
+
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         return SoundEvents.TRIDENT_HIT_GROUND;
@@ -141,6 +182,7 @@ public class SpearEntity extends AbstractArrow {
         tag.putBoolean("Charged", charged);
         tag.putBoolean("Struck", struck);
         tag.putBoolean("Storm", isStorm());
+        tag.putBoolean("Prime", isPrime());
     }
 
     @Override
@@ -150,5 +192,6 @@ public class SpearEntity extends AbstractArrow {
         charged = tag.getBoolean("Charged");
         struck = tag.getBoolean("Struck");
         entityData.set(STORM, tag.getBoolean("Storm"));
+        entityData.set(PRIME, tag.getBoolean("Prime"));
     }
 }

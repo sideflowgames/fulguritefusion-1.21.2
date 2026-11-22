@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS",
+    "GKG",
+    "SBS"
+  ],
+  "key": {
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "K": {
+      "item": "fulguritefusion:crude_arc_casing"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:harvester_tank",
+    "count": 1
+  }
+}

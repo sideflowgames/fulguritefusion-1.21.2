@@ -15,7 +15,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
-// Shared menu for all five multiblock machines: 2 inputs, 2 outputs, power, progress and tier.
+// Shared menu for all the multiblock processing machines: 2 inputs, 2 outputs, power, progress and tier.
 public class ProcessingMachineMenu extends MachineMenu {
     // Client side.
     public ProcessingMachineMenu(int containerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
@@ -52,6 +52,9 @@ public class ProcessingMachineMenu extends MachineMenu {
     public int getTier() { return data.get(3); }
     public int getRate() { return data.get(4); }
     public boolean isFormed() { return data.get(5) == 1; }
+    // Latex Vulcanizer: latex in its vat (mB), or -1 for machines without one.
+    public int getLatex() { return data.get(6) - 1; }
+    public int getLatexCapacity() { return MachineControllerBlockEntity.LATEX_CAPACITY; }
 
     // Players can take from output slots but not put items in.
     private static class OutputSlot extends SlotItemHandler {

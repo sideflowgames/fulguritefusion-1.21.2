@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SWS",
+    "W W",
+    "SWS"
+  ],
+  "key": {
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "W": {
+      "item": "fulguritefusion:raw_wire"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:raw_heavy_wire",
+    "count": 2
+  }
+}

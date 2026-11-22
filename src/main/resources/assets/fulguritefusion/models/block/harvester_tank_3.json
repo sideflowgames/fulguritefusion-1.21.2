@@ -1,0 +1,113 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "fulguritefusion:block/crude_arc_casing",
+    "side": "fulguritefusion:block/harvester_tank_side",
+    "top": "fulguritefusion:block/harvester_tank_top",
+    "bottom": "fulguritefusion:block/crude_arc_casing",
+    "latex": "fulguritefusion:block/latex_still"
+  },
+  "elements": [
+    {
+      "from": [
+        2.5,
+        1,
+        2.5
+      ],
+      "to": [
+        13.5,
+        6.25,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#latex",
+          "uv": [
+            2.5,
+            9.75,
+            13.5,
+            15
+          ]
+        },
+        "south": {
+          "texture": "#latex",
+          "uv": [
+            2.5,
+            9.75,
+            13.5,
+            15
+          ]
+        },
+        "east": {
+          "texture": "#latex",
+          "uv": [
+            2.5,
+            9.75,
+            13.5,
+            15
+          ]
+        },
+        "west": {
+          "texture": "#latex",
+          "uv": [
+            2.5,
+            9.75,
+            13.5,
+            15
+          ]
+        },
+        "up": {
+          "texture": "#latex",
+          "uv": [
+            2.5,
+            2.5,
+            13.5,
+            13.5
+          ]
+        },
+        "down": {
+          "texture": "#latex"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#bottom",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

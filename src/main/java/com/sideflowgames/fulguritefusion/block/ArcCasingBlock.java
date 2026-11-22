@@ -63,17 +63,26 @@ public class ArcCasingBlock extends BaseEntityBlock {
         if (!state.getValue(FORMED)) return InteractionResult.PASS;
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing && casing.controllerPos() != null) {
             BlockPos c = casing.controllerPos();
-            MachineControllerBlock.interact(level, c, level.getBlockState(c), player);
+            if (level.getBlockEntity(c) instanceof com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlockEntity h) h.interact(player);
+            else MachineControllerBlock.interact(level, c, level.getBlockState(c), player);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    // Holding something (a Machine Connector for the power port, a block to build with): use the item as normal.
+    // Holding something: a formed casing still opens the machine's menu, like the controller does, except that a
+    // Machine Connector goes onto the casing (so you can put one on the power port). Sneak to place other blocks.
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
-        return stack.isEmpty() ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
-                : ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        if (!state.getValue(FORMED) || stack.is(com.sideflowgames.fulguritefusion.ModBlocks.MACHINE_CONNECTOR_ITEM.get())) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
+        // A Latex Vulcanizer's casings take a Latex Bucket (or any latex container) poured in.
+        if (level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing && casing.getFluidHandler(null) != null
+                && net.neoforged.neoforge.fluids.FluidUtil.interactWithFluidHandler(player, hand, level, pos, null)) {
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     // Breaking a casing un-forms its machine.

@@ -163,7 +163,7 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
     }
 
     // A jagged lightning bolt from a to b: a soft glow around a thin bright core, with a short side branch.
-    private static void bolt(VertexConsumer c, Matrix4f m, float[] a, float[] b, Random r, float jag, float strength) {
+    static void bolt(VertexConsumer c, Matrix4f m, float[] a, float[] b, Random r, float jag, float strength) {
         int n = 8;
         float[][] pts = new float[n + 1][];
         for (int i = 0; i <= n; i++) {
@@ -190,7 +190,7 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
     }
 
     // A flat strip from p to q, drawn twice crossed so it looks like a line from any angle.
-    private static void ribbon(VertexConsumer c, Matrix4f m, float[] p, float[] q, float w, int r, int g, int b, int a) {
+    static void ribbon(VertexConsumer c, Matrix4f m, float[] p, float[] q, float w, int r, int g, int b, int a) {
         float dx = q[0] - p[0], dy = q[1] - p[1], dz = q[2] - p[2];
         float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 1e-4f) return;
@@ -217,7 +217,7 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
         }
     }
 
-    private static void box(VertexConsumer c, Matrix4f m, float x, float y, float z, float h, int r, int g, int b, int a) {
+    static void box(VertexConsumer c, Matrix4f m, float x, float y, float z, float h, int r, int g, int b, int a) {
         float x0 = x - h, x1 = x + h, y0 = y - h, y1 = y + h, z0 = z - h, z1 = z + h;
         quad(c, m, x0, y0, z0, x1, y0, z0, x1, y1, z0, x0, y1, z0, r, g, b, a);
         quad(c, m, x0, y0, z1, x0, y1, z1, x1, y1, z1, x1, y0, z1, r, g, b, a);

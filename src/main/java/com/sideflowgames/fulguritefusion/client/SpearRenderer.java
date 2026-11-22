@@ -26,7 +26,7 @@ public class SpearRenderer extends EntityRenderer<SpearEntity> {
 
     @Override
     public void render(SpearEntity spear, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
-        ItemStack stack = new ItemStack(spear.isStorm() ? ModItems.STORM_SPEAR.get() : ModItems.FULGURITE_SPEAR.get());
+        ItemStack stack = new ItemStack(spear.isPrime() ? ModItems.PRIME_SPEAR.get() : spear.isStorm() ? ModItems.STORM_SPEAR.get() : ModItems.FULGURITE_SPEAR.get());
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTick, spear.yRotO, spear.getYRot()) - 90.0f));
         pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partialTick, spear.xRotO, spear.getXRot())));

@@ -140,6 +140,8 @@ public final class GuideBuilds {
                     case "wire_extruder" -> MachineType.WIRE_EXTRUDER;
                     case "kiln" -> MachineType.KILN;
                     case "crusher" -> MachineType.CRUSHER;
+                    case "banbury_mixer" -> MachineType.BANBURY_MIXER;
+                    case "latex_vulcanizer" -> MachineType.LATEX_VULCANIZER;
                     default -> null;
                 };
                 if (type != null) {
@@ -149,6 +151,8 @@ public final class GuideBuilds {
                         case WIRE_EXTRUDER -> ModBlocks.WIRE_EXTRUDER.get();
                         case KILN -> ModBlocks.KILN.get();
                         case CRUSHER -> ModBlocks.CRUSHER.get();
+                        case BANBURY_MIXER -> ModBlocks.BANBURY_MIXER.get();
+                        case LATEX_VULCANIZER -> ModBlocks.LATEX_VULCANIZER.get();
                     };
                     BlockState casing = ModBlocks.CRUDE_ARC_CASING.get().defaultBlockState();
                     for (MachineShape.Part part : type.shape.parts(zero, Direction.NORTH)) out.add(new Placed(part.pos(), casing));

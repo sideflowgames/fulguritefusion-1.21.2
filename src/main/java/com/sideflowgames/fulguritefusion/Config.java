@@ -34,8 +34,13 @@ public class Config {
     public static final ModConfigSpec.IntValue WIRE_RATE;
     public static final ModConfigSpec.IntValue WIRE_MAX_LENGTH;
     public static final ModConfigSpec.IntValue HEAVY_WIRE_MAX_LENGTH;
+    public static final ModConfigSpec.IntValue REINFORCED_WIRE_MAX_LENGTH;
+    public static final ModConfigSpec.IntValue REINFORCED_WIRE_RATE;
+    public static final ModConfigSpec.IntValue HEAVY_WIRE_RATE;
+    public static final ModConfigSpec.DoubleValue WIRE_SHOCK_DAMAGE;
+    public static final ModConfigSpec.DoubleValue WIRE_SHOCK_RANGE;
+    public static final ModConfigSpec.IntValue TREE_TAP_SECONDS;
     public static final ModConfigSpec.IntValue DATA_CABLE_MAX_LENGTH;
-    public static final ModConfigSpec.IntValue NETWORK_MAX_MACHINES;
     public static final ModConfigSpec.IntValue CHAIN_MAX_MACHINES;
     public static final ModConfigSpec.BooleanValue WATER_ELECTRIFY;
     public static final ModConfigSpec.DoubleValue WATER_RANGE;
@@ -115,18 +120,28 @@ public class Config {
                 .defineInRange("batteryMaxBank", 6, 1, 64);
         BATTERY_OUTPUT = BUILDER.comment("Fm per tick each Storm Battery block can send to each touching machine.")
                 .defineInRange("batteryOutput", 512, 1, 1000000);
-        WIRE_RATE = BUILDER.comment("Fm per tick a wire network can carry.")
+        WIRE_RATE = BUILDER.comment("Fm per tick a network of basic (Raw or Insulated) wire can carry (a network carries what its weakest wire can).")
                 .defineInRange("wireRate", 256, 1, 1000000);
         WIRE_MAX_LENGTH = BUILDER.comment("Longest hanging wire between two Machine Connectors, in blocks.")
                 .defineInRange("wireMaxLength", 16, 2, 64);
+        REINFORCED_WIRE_MAX_LENGTH = BUILDER.comment("Longest Reinforced Wire between two Machine Connectors, in blocks.")
+                .defineInRange("reinforcedWireMaxLength", 32, 2, 128);
         HEAVY_WIRE_MAX_LENGTH = BUILDER.comment("Longest Heavy Wire between two Machine Connectors, in blocks.")
-                .defineInRange("heavyWireMaxLength", 32, 2, 128);
+                .defineInRange("heavyWireSpan", 64, 2, 128);
+        REINFORCED_WIRE_RATE = BUILDER.comment("Fm per tick a network can carry when every wire is (Raw) Reinforced or (Raw) Heavy.")
+                .defineInRange("reinforcedWireRate", 512, 1, 1000000);
+        HEAVY_WIRE_RATE = BUILDER.comment("Fm per tick a network can carry when every wire is (Raw) Heavy.")
+                .defineInRange("heavyWireRate", 1024, 1, 1000000);
+        WIRE_SHOCK_DAMAGE = BUILDER.comment("Damage from live Raw Wire (2 = one heart). Doubles for Raw Reinforced, and again for Raw Heavy (which also sets you alight).")
+                .defineInRange("wireShockDamage", 2.0, 0.0, 40.0);
+        WIRE_SHOCK_RANGE = BUILDER.comment("How far live Raw Wire reaches to shock, in blocks. +1 for Raw Reinforced, +2 for Raw Heavy.")
+                .defineInRange("wireShockRange", 1.5, 0.0, 16.0);
+        TREE_TAP_SECONDS = BUILDER.comment("Seconds for a Tree Tap to add one drip-level of latex to the bucket below it (a bucket holds 4).")
+                .defineInRange("treeTapSeconds", 60, 1, 3600);
         DATA_CABLE_MAX_LENGTH = BUILDER.comment("Longest Data Cable run (in cable blocks) from the Reactor Control Console to a Ring Injection Port.")
                 .defineInRange("dataCableMaxLength", 128, 4, 1024);
         CHAIN_MAX_MACHINES = BUILDER.comment("Most machines in a daisy chain (machines touching each other) that can pass power along.")
                 .defineInRange("chainMaxMachines", 8, 1, 256);
-        NETWORK_MAX_MACHINES = BUILDER.comment("Most machines one wire network can power (batteries and furnaces don't count).")
-                .defineInRange("networkMaxMachines", 8, 1, 256);
         BUILDER.pop();
 
         BUILDER.comment("Mini Collider").push("collider");

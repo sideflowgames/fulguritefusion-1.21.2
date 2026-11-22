@@ -41,6 +41,13 @@
     "fulguritefusion:sky_collector",
     "fulguritefusion:abyssal_nacre_cluster",
     "fulguritefusion:storm_forge",
-    "fulguritefusion:forge_power_port"
+    "fulguritefusion:forge_power_port",
+    "fulguritefusion:banbury_mixer",
+    "fulguritefusion:tap_bucket",
+    "fulguritefusion:latex_harvester",
+    "fulguritefusion:harvester_tank",
+    "fulguritefusion:harvester_power_port",
+    "fulguritefusion:latex_vulcanizer",
+    "fulguritefusion:fluid_pipe"
   ]
 }

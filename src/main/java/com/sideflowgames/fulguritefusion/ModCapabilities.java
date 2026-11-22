@@ -30,6 +30,12 @@ public final class ModCapabilities {
         event.registerBlock(Capabilities.ItemHandler.BLOCK,
                 (level, pos, state, be, side) -> com.sideflowgames.fulguritefusion.block.ReactorConsoleBlockEntity.fuelInputHandler(level, pos),
                 ModBlocks.CONSOLE_FUEL_INPUT.get());
+        // Latex Harvester: pipes (and buckets) drain latex from its tank corner.
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlocks.HARVESTER_PART_BE.get(),
+                (be, side) -> be.fluidHandler());
+        // Latex Vulcanizer: pipes and buckets fill it through any of its casings (not from the front).
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlocks.ARC_CASING_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
         // FE cables can pull Forge Energy from the FE Converter's front face.
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlocks.FE_CONVERTER_BE.get(),
                 (be, side) -> be.getEnergyHandler(side));

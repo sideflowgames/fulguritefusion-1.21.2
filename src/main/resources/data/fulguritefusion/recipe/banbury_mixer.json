@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IPI",
+    "SKS",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "K": {
+      "item": "fulguritefusion:crude_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:banbury_mixer",
+    "count": 1
+  }
+}

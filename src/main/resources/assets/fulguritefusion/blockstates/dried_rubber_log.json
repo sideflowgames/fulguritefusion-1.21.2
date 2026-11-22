@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "fulguritefusion:block/dried_rubber_log"
+    },
+    "axis=z": {
+      "model": "fulguritefusion:block/dried_rubber_log_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "fulguritefusion:block/dried_rubber_log_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

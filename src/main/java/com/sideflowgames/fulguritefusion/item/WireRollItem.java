@@ -2,7 +2,6 @@ package com.sideflowgames.fulguritefusion.item;
 
 import java.util.List;
 
-import com.sideflowgames.fulguritefusion.Config;
 import com.sideflowgames.fulguritefusion.block.MachineConnectorBlockEntity;
 import com.sideflowgames.fulguritefusion.power.WireMath;
 
@@ -24,32 +23,30 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-// Raw / Insulated / Heavy Wire Roll. Right-click one Machine Connector, then another, to string a hanging wire
-// between them (one roll per wire). Raw and Insulated span up to 16 blocks, Heavy up to 32 (both in the config).
+// Raw / Insulated / Reinforced / Heavy Wire. Right-click one Machine Connector, then another, to string a hanging
+// wire between them (one roll per wire). Reach and capacity depend on the kind (see WireTier).
 // Sneak + right-click in the air to cancel.
 public class WireRollItem extends Item {
     private static final String START = "WireStart";
     public static final int MAX_LINKS_PER_CONNECTOR = 8;
 
-    private final boolean insulated;
-    private final boolean heavy;
+    private final com.sideflowgames.fulguritefusion.power.WireTier tier;
 
-    public WireRollItem(boolean insulated, Properties properties) {
-        this(insulated, false, properties);
+    public WireRollItem(com.sideflowgames.fulguritefusion.power.WireTier tier, Properties properties) {
+        super(properties);
+        this.tier = tier;
     }
 
-    public WireRollItem(boolean insulated, boolean heavy, Properties properties) {
-        super(properties);
-        this.insulated = insulated;
-        this.heavy = heavy;
+    public com.sideflowgames.fulguritefusion.power.WireTier tier() {
+        return tier;
     }
 
     public int maxLength() {
-        return heavy ? Config.HEAVY_WIRE_MAX_LENGTH.get() : Config.WIRE_MAX_LENGTH.get();
+        return tier.maxLength();
     }
 
     public boolean isInsulated() {
-        return insulated;
+        return tier.insulated;
     }
 
     private static BlockPos getStart(ItemStack stack) {
@@ -106,8 +103,8 @@ public class WireRollItem extends Item {
             message(player, "A connector can hold at most " + MAX_LINKS_PER_CONNECTOR + " wires.");
             return InteractionResult.CONSUME;
         }
-        here.addLink(start, insulated, heavy);
-        there.addLink(pos, insulated, heavy);
+        here.addLink(start, tier);
+        there.addLink(pos, tier);
         if (player == null || !player.getAbilities().instabuild) stack.shrink(1);
         level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.0f, 1.0f);
         message(player, "Wired (" + (int) Math.ceil(length) + " blocks).");
@@ -137,7 +134,14 @@ public class WireRollItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Right-click two Machine Connectors to wire them").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Spans up to " + maxLength() + " blocks").withStyle(ChatFormatting.GRAY));
-        if (!insulated) tooltip.add(Component.literal("Bare copper: shocks and electrifies water").withStyle(ChatFormatting.GOLD));
+        tooltip.add(Component.literal("Carries up to " + tier.rate() + " Fm/t (a network runs at its weakest wire)").withStyle(ChatFormatting.GRAY));
+        if (!tier.insulated) {
+            String hearts = String.format(java.util.Locale.ROOT, "%.1f", tier.shockDamage() / 2).replace(".0", "");
+            tooltip.add(Component.literal("Bare copper: shocks for " + hearts + " hearts within "
+                    + String.format(java.util.Locale.ROOT, "%.1f", tier.shockRange()) + " blocks, electrifies water"
+                    + (tier.shockBurns() ? ", sets you alight" : "")).withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.literal("Insulate it in the Wire Extruder with Malleable Rubber").withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
     private static void message(Player player, String text) {

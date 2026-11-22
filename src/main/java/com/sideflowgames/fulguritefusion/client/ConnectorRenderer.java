@@ -20,15 +20,19 @@ import net.minecraft.world.phys.Vec3;
 // Draws the hanging wires: a thin, sagging cable from this connector's cap to each linked connector.
 // Each wire is drawn once, by the connector with the lower position.
 public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBlockEntity> {
-    private static final ResourceLocation RAW =
+    private static final ResourceLocation TEX_RAW =
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_wire.png");
-    private static final ResourceLocation INSULATED =
+    private static final ResourceLocation TEX_INSULATED =
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/insulated_wire.png");
-    private static final ResourceLocation HEAVY =
+    private static final ResourceLocation TEX_HEAVY =
             ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/heavy_wire.png");
-    private static final float HEAVY_RADIUS = 0.07f; // twice as thick
+    private static final ResourceLocation TEX_RAW_REINFORCED =
+            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_reinforced_wire.png");
+    private static final ResourceLocation TEX_RAW_HEAVY =
+            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_heavy_wire.png");
+    private static final ResourceLocation TEX_REINFORCED =
+            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/reinforced_wire.png");
     private static final int SEGMENTS = 24;
-    private static final float RADIUS = 0.035f; // about half a pixel each side
 
     public ConnectorRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -42,12 +46,20 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
         for (MachineConnectorBlockEntity.Link link : be.getLinks()) {
             if (pos.asLong() > link.other().asLong()) continue;
             Vec3 b = WireMath.attachPoint(be.getLevel(), link.other());
-            ResourceLocation texture = link.heavy() ? HEAVY : link.insulated() ? INSULATED : RAW;
-            float radius = link.heavy() ? HEAVY_RADIUS : RADIUS;
+            var tier = link.tier();
+            ResourceLocation texture = switch (tier) {
+                case RAW -> TEX_RAW;
+                case INSULATED -> TEX_INSULATED;
+                case RAW_REINFORCED -> TEX_RAW_REINFORCED;
+                case REINFORCED -> TEX_REINFORCED;
+                case RAW_HEAVY -> TEX_RAW_HEAVY;
+                case HEAVY -> TEX_HEAVY;
+            };
+            float radius = tier.radius;
             VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
-            Vec3 prev = WireMath.point(a, b, 0);
+            Vec3 prev = WireMath.point(a, b, 0, tier);
             for (int i = 1; i <= SEGMENTS; i++) {
-                Vec3 cur = WireMath.point(a, b, (double) i / SEGMENTS);
+                Vec3 cur = WireMath.point(a, b, (double) i / SEGMENTS, tier);
                 int light = be.getLevel() != null
                         ? LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(prev.add(cur).scale(0.5)))
                         : packedLight;

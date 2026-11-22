@@ -18,14 +18,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-// The five processing machines: their shape, base speed and recipes.
+// The processing machines: their shape, base speed and recipes.
 // baseTicks = time per item at tier 1. Tiers 2/3/4 run 2x/4x/8x faster (see MachineTier).
 public enum MachineType {
     PRESS("press", MachineShape.SMALL, 120),
     FURNACE("furnace", MachineShape.SMALL, 150),
     WIRE_EXTRUDER("wire_extruder", MachineShape.SMALL, 100),
     KILN("kiln", MachineShape.LARGE, 200),
-    CRUSHER("crusher", MachineShape.LARGE, 160);
+    CRUSHER("crusher", MachineShape.LARGE, 160),
+    BANBURY_MIXER("banbury_mixer", MachineShape.SMALL, 140),
+    // Takes liquid latex (pipes into any casing face but the front, or buckets) and cures it: 1 bucket -> 3 Dried Rubber.
+    LATEX_VULCANIZER("latex_vulcanizer", MachineShape.SMALL, 160);
 
     public final String id;
     public final MachineShape shape;
@@ -37,6 +40,10 @@ public enum MachineType {
         this.baseTicks = baseTicks;
     }
 
+    public boolean usesLatex() {
+        return this == LATEX_VULCANIZER;
+    }
+
     // What one run makes. take0/take1 = items used from input slots 0 and 1. out1 may be empty.
     public record Result(int take0, int take1, ItemStack out0, ItemStack out1) {}
 
@@ -44,12 +51,44 @@ public enum MachineType {
     public Result findRecipe(Level level, ItemStack in0, ItemStack in1, RandomSource random) {
         return switch (this) {
             case PRESS -> press(in0);
-            case WIRE_EXTRUDER -> in0.is(ModItems.COPPER_SHEET.get())
-                    ? new Result(1, 0, new ItemStack(ModItems.RAW_WIRE.get(), 2), ItemStack.EMPTY) : null;
+            case WIRE_EXTRUDER -> extrude(in0, in1);
             case KILN -> kiln(in0, in1);
             case FURNACE -> smelt(level, in0);
             case CRUSHER -> crush(in0, random);
+            case BANBURY_MIXER -> in0.is(ModItems.DRIED_RUBBER.get()) ? one(ModItems.MALLEABLE_RUBBER.get(), 1)
+                    : in1.is(ModItems.DRIED_RUBBER.get()) ? new Result(0, 1, new ItemStack(ModItems.MALLEABLE_RUBBER.get()), ItemStack.EMPTY) : null;
+            case LATEX_VULCANIZER -> null; // runs on its latex tank (MachineControllerBlockEntity)
         };
+    }
+
+    // Copper Sheet -> 2 Raw Wire.
+    // 2 Raw Wire + an Iron Sheet -> 2 Raw Reinforced Wire.
+    // Raw wire + Malleable Rubber -> the insulated wire of the same gauge: up to 4 basic, 2 reinforced or 1 heavy per rubber.
+    // Two-item recipes take their items in either slot.
+    @Nullable
+    private static Result extrude(ItemStack in0, ItemStack in1) {
+        Result r = insulate(in0, in1, false);
+        if (r != null) return r;
+        r = insulate(in1, in0, true);
+        if (r != null) return r;
+        if (in0.is(ModItems.RAW_WIRE.get()) && in1.is(ModItems.IRON_SHEET.get()) && in0.getCount() >= 2) {
+            return new Result(2, 1, new ItemStack(ModItems.RAW_REINFORCED_WIRE.get(), 2), ItemStack.EMPTY);
+        }
+        if (in1.is(ModItems.RAW_WIRE.get()) && in0.is(ModItems.IRON_SHEET.get()) && in1.getCount() >= 2) {
+            return new Result(1, 2, new ItemStack(ModItems.RAW_REINFORCED_WIRE.get(), 2), ItemStack.EMPTY);
+        }
+        if (in0.is(ModItems.COPPER_SHEET.get())) return new Result(1, 0, new ItemStack(ModItems.RAW_WIRE.get(), 2), ItemStack.EMPTY);
+        if (in1.is(ModItems.COPPER_SHEET.get())) return new Result(0, 1, new ItemStack(ModItems.RAW_WIRE.get(), 2), ItemStack.EMPTY);
+        return null;
+    }
+
+    @Nullable
+    private static Result insulate(ItemStack wire, ItemStack rubber, boolean swapped) {
+        if (!rubber.is(ModItems.MALLEABLE_RUBBER.get())) return null;
+        if (!(wire.getItem() instanceof com.sideflowgames.fulguritefusion.item.WireRollItem roll) || roll.tier().insulated) return null;
+        int n = Math.min(wire.getCount(), new int[]{4, 2, 1}[roll.tier().gauge]);
+        ItemStack out = new ItemStack(ModItems.wireItem(roll.tier().insulatedVersion()), n);
+        return swapped ? new Result(1, n, out, ItemStack.EMPTY) : new Result(n, 1, out, ItemStack.EMPTY);
     }
 
     // Ingots -> sheets; 4 Fulgurite Shards -> 1 Fulgurite.
@@ -88,9 +127,12 @@ public enum MachineType {
         return out != null && in.getCount() >= take ? new Result(take, 0, out.get(), ItemStack.EMPTY) : null;
     }
 
-    // Same rules as a vanilla furnace: any smelting recipe.
+    // Same rules as a vanilla furnace: any smelting recipe. Also dries a Latex Bucket into rubber (bucket comes back).
     private static Result smelt(Level level, ItemStack in) {
         if (in.isEmpty()) return null;
+        if (in.is(ModItems.LATEX_BUCKET.get())) {
+            return new Result(1, 0, new ItemStack(ModItems.DRIED_RUBBER.get(), 2), new ItemStack(Items.BUCKET));
+        }
         Optional<RecipeHolder<SmeltingRecipe>> recipe = level.getRecipeManager()
                 .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(in), level);
         return recipe.map(r -> new Result(1, 0, r.value().getResultItem(level.registryAccess()).copy(), ItemStack.EMPTY))

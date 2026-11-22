@@ -64,7 +64,7 @@ public final class StormforgedTools {
     public static final double CHAIN_RANGE = 6.0;
     public static final float EMPTY_SPEED = 1.0f;  // mining speed with no charge left
 
-    public static final int SMELT = 1, VEIN = 2;
+    public static final int SMELT = 1, VEIN = 2, HAMMER = 4; // HAMMER: Prime pickaxe's 3x3 mode (its own key)
     private static final String[] MODE_NAMES = {"Normal", "Arc Smelting", "Vein Mining", "Arc Smelting + Vein Mining"};
 
     public static int mode(ItemStack stack) {
@@ -76,7 +76,11 @@ public final class StormforgedTools {
     }
 
     public static boolean veinMining(ItemStack stack) {
-        return (mode(stack) & VEIN) != 0 && FmChargeable.hasCharge(stack);
+        return (mode(stack) & VEIN) != 0 && !hammering(stack) && FmChargeable.hasCharge(stack);
+    }
+
+    public static boolean hammering(ItemStack stack) {
+        return (mode(stack) & HAMMER) != 0 && FmChargeable.hasCharge(stack);
     }
 
     // Sneak + right-click the air: next mode. Returns null when it isn't a mode change.
@@ -84,8 +88,8 @@ public final class StormforgedTools {
         ItemStack stack = player.getItemInHand(hand);
         if (!player.isSecondaryUseActive()) return null;
         if (!level.isClientSide) {
-            int next = (mode(stack) + 1) % 4;
-            stack.set(ModDataComponents.TOOL_MODE.get(), next);
+            int next = ((mode(stack) & 3) + 1) % 4;
+            stack.set(ModDataComponents.TOOL_MODE.get(), next | (mode(stack) & HAMMER));
             player.displayClientMessage(Component.literal("Mode: " + MODE_NAMES[next]).withStyle(ChatFormatting.AQUA), true);
             level.playSound(null, player.blockPosition(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.6f, 1.3f + next * 0.1f);
         }
@@ -110,10 +114,10 @@ public final class StormforgedTools {
 
     static void tooltip(ItemStack stack, List<Component> tooltip, boolean modes) {
         int fm = FmChargeable.get(stack);
-        tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, MAX_FM))
+        tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, FmChargeable.max(stack)))
                 .withStyle(fm > 0 ? ChatFormatting.AQUA : ChatFormatting.RED));
         if (modes) {
-            tooltip.add(Component.literal("Mode: " + MODE_NAMES[mode(stack)]).withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.literal("Mode: " + MODE_NAMES[mode(stack) & 3]).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.literal("Sneak + right-click the air to change mode").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
@@ -122,7 +126,19 @@ public final class StormforgedTools {
 
     public static class Blade extends SwordItem implements FmChargeable {
         public Blade(Item.Properties p) {
-            super(TIER, p);
+            this(TIER, p);
+        }
+
+        protected Blade(Tier tier, Item.Properties p) {
+            super(tier, p);
+        }
+
+        protected float lightning() {
+            return BLADE_LIGHTNING;
+        }
+
+        protected int chainTargets() {
+            return CHAIN_TARGETS;
         }
 
         @Override public int maxFm() { return MAX_FM; }
@@ -130,14 +146,14 @@ public final class StormforgedTools {
         @Override
         public float getAttackDamageBonus(Entity target, float damage, DamageSource source) {
             return FmChargeable.hasCharge(source.getWeaponItem() != null ? source.getWeaponItem() : ItemStack.EMPTY)
-                    ? BLADE_LIGHTNING : 0;
+                    ? lightning() : 0;
         }
 
         @Override
         public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             if (FmChargeable.hasCharge(stack) && target.level() instanceof ServerLevel level) {
                 FmChargeable.use(stack, HIT_COST);
-                chain(level, target, attacker);
+                chain(level, target, attacker, chainTargets(), this instanceof PrimeTools.Blade);
             }
             return true;
         }
@@ -148,14 +164,14 @@ public final class StormforgedTools {
 
         @Override
         public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-            tooltip.add(Component.literal("+" + (int) BLADE_LIGHTNING + " lightning damage; lightning chains to "
-                    + CHAIN_TARGETS + " nearby enemies").withStyle(ChatFormatting.AQUA));
+            tooltip.add(Component.literal("+" + (int) lightning() + " lightning damage; lightning chains to "
+                    + chainTargets() + " nearby enemies").withStyle(ChatFormatting.AQUA));
             StormforgedTools.tooltip(stack, tooltip, false);
         }
     }
 
     // Lightning jumps from the target to up to 5 other enemies nearby (never the attacker, players or pets).
-    static void chain(ServerLevel level, LivingEntity target, LivingEntity attacker) {
+    static void chain(ServerLevel level, LivingEntity target, LivingEntity attacker, int targets, boolean prime) {
         DamageSource lightning = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                 .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), attacker);
         List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(CHAIN_RANGE),
@@ -163,17 +179,16 @@ public final class StormforgedTools {
                         && !(e instanceof OwnableEntity o && o.getOwnerUUID() != null));
         near.sort((a, b) -> Double.compare(a.distanceToSqr(target), b.distanceToSqr(target)));
         Vec3 from = target.position().add(0, target.getBbHeight() * 0.6, 0);
-        for (int i = 0; i < Math.min(CHAIN_TARGETS, near.size()); i++) {
+        List<Vec3> path = new java.util.ArrayList<>();
+        path.add(from);
+        for (int i = 0; i < Math.min(targets, near.size()); i++) {
             LivingEntity next = near.get(i);
             Vec3 to = next.position().add(0, next.getBbHeight() * 0.6, 0);
-            int steps = (int) Math.max(4, from.distanceTo(to) * 3);
-            for (int s = 0; s <= steps; s++) {
-                Vec3 p = from.lerp(to, s / (double) steps);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.06, 0.06, 0.06, 0.01);
-            }
+            path.add(to);
             next.hurt(lightning, CHAIN_DAMAGE);
-            from = to;
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.15);
         }
+        ChainBolt.send(target, path, prime);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 15, 0.3, 0.3, 0.3, 0.3);
         level.playSound(null, target.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.6f, 1.6f);
     }
@@ -182,6 +197,7 @@ public final class StormforgedTools {
 
     public static class Pickaxe extends PickaxeItem implements FmChargeable {
         public Pickaxe(Item.Properties p) { super(TIER, p); }
+        protected Pickaxe(Tier t, Item.Properties p) { super(t, p); }
         @Override public int maxFm() { return MAX_FM; }
         @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
@@ -196,6 +212,7 @@ public final class StormforgedTools {
 
     public static class Axe extends AxeItem implements FmChargeable {
         public Axe(Item.Properties p) { super(TIER, p); }
+        protected Axe(Tier t, Item.Properties p) { super(t, p); }
         @Override public int maxFm() { return MAX_FM; }
         @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
@@ -210,6 +227,7 @@ public final class StormforgedTools {
 
     public static class Shovel extends ShovelItem implements FmChargeable {
         public Shovel(Item.Properties p) { super(TIER, p); }
+        protected Shovel(Tier t, Item.Properties p) { super(t, p); }
         @Override public int maxFm() { return MAX_FM; }
         @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
@@ -224,6 +242,7 @@ public final class StormforgedTools {
 
     public static class Hoe extends HoeItem implements FmChargeable {
         public Hoe(Item.Properties p) { super(TIER, p); }
+        protected Hoe(Tier t, Item.Properties p) { super(t, p); }
         @Override public int maxFm() { return MAX_FM; }
         @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);

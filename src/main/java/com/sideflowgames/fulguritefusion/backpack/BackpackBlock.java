@@ -87,7 +87,7 @@ public class BackpackBlock extends BaseEntityBlock {
     @Override
     public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state,
             net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
-        if (level.isClientSide || tier != BackpackTier.STORMFORGED) return null;
+        if (level.isClientSide || !tier.powered()) return null;
         return createTickerHelper(type, com.sideflowgames.fulguritefusion.ModBlocks.BACKPACK_BE.get(), BackpackBlockEntity::serverTick);
     }
 

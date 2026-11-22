@@ -57,6 +57,8 @@ public final class ForgeRecipes {
     public static final int STORMFORGED_COST = 500_000;
     public static final int UPGRADE_COST = 100_000;
     public static final int BACKPACK_COST = 250_000;
+    public static final int PRIME_COST = 20_000_000;
+    public static final int PRIME_BACKPACK_COST = 5_000_000;
 
     private static Part item(Item item, int count) {
         return new Part(item.getDescription().getString(), s -> s.is(item), count);
@@ -96,6 +98,18 @@ public final class ForgeRecipes {
             stormforged("Stormforged Axe", ModItems.FULGURITE_AXE.get(), ModItems.STORMFORGED_AXE::get);
             stormforged("Stormforged Shovel", ModItems.FULGURITE_SHOVEL.get(), ModItems.STORMFORGED_SHOVEL::get);
             stormforged("Stormforged Hoe", ModItems.FULGURITE_HOE.get(), ModItems.STORMFORGED_HOE::get);
+            prime("Prime Blade", ModItems.STORM_BLADE.get(), ModItems.PRIME_BLADE::get, PRIME_COST);
+            prime("Prime Spear", ModItems.STORM_SPEAR.get(), ModItems.PRIME_SPEAR::get, PRIME_COST);
+            prime("Prime Pickaxe", ModItems.STORMFORGED_PICKAXE.get(), ModItems.PRIME_PICKAXE::get, PRIME_COST);
+            prime("Prime Axe", ModItems.STORMFORGED_AXE.get(), ModItems.PRIME_AXE::get, PRIME_COST);
+            prime("Prime Shovel", ModItems.STORMFORGED_SHOVEL.get(), ModItems.PRIME_SHOVEL::get, PRIME_COST);
+            prime("Prime Hoe", ModItems.STORMFORGED_HOE.get(), ModItems.PRIME_HOE::get, PRIME_COST);
+            prime("Prime Helmet", ModItems.STORMFORGED_HELMET.get(), ModItems.PRIME_HELMET::get, PRIME_COST);
+            prime("Prime Chestplate", ModItems.STORMFORGED_CHESTPLATE.get(), ModItems.PRIME_CHESTPLATE::get, PRIME_COST);
+            prime("Prime Leggings", ModItems.STORMFORGED_LEGGINGS.get(), ModItems.PRIME_LEGGINGS::get, PRIME_COST);
+            prime("Prime Boots", ModItems.STORMFORGED_BOOTS.get(), ModItems.PRIME_BOOTS::get, PRIME_COST);
+            prime("Prime Backpack", com.sideflowgames.fulguritefusion.ModBlocks.STORMFORGED_BACKPACK_ITEM.get(),
+                    () -> com.sideflowgames.fulguritefusion.ModBlocks.PRIME_BACKPACK_ITEM.get(), PRIME_BACKPACK_COST);
         }
         return all;
     }
@@ -103,6 +117,12 @@ public final class ForgeRecipes {
     private static void stormforged(String name, Item base, Supplier<Item> result) {
         all.add(new Recipe(name, item(base, 1),
                 List.of(item(ModItems.REFINED_FULGURITE.get(), 2), STRONG_FUEL), result, STORMFORGED_COST));
+    }
+
+    // Prime: the Stormforged item (enchantments and name kept) + a Prime Spark Fragment + a netherite ingot.
+    private static void prime(String name, Item base, Supplier<Item> result, int cost) {
+        all.add(new Recipe(name, item(base, 1),
+                List.of(item(ModItems.PRIME_SPARK_FRAGMENT.get(), 1), item(Items.NETHERITE_INGOT, 1)), result, cost));
     }
 
     // Stormforged backpack upgrade: the basic upgrade (its filter is kept) + Refined Fulgurite + an

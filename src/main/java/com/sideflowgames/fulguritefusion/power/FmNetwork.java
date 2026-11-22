@@ -29,10 +29,10 @@ import net.minecraft.world.phys.Vec3;
 // A wire network: Machine Connectors joined by hanging wires.
 //
 // Every network has one "master" connector (the one with the lowest position) that runs it each tick:
-//  1. machines that use power (up to 8 of them) are fed first, from furnaces, then from batteries
+//  1. machines that use power are fed first, from furnaces, then from batteries
 //  2. leftover furnace power charges the batteries
-// The whole network carries at most 256 Fm per tick (wireRate in the config).
-// Batteries and furnaces don't count towards the 8-machine limit; a 9th machine simply isn't linked.
+// The network carries as much as its weakest wire: 256 Fm/t (Raw, Insulated), 512 (Reinforced), 1024 (Heavy).
+// A network powers every machine on it: the 8-machine limit is only for daisy chains (machines touching).
 public final class FmNetwork {
     private static final int SCAN_LIMIT = 1024;
     private static final int HAZARD_INTERVAL = 40; // ticks (2 seconds)
@@ -41,12 +41,12 @@ public final class FmNetwork {
     private static final Map<UUID, Long> LAST_SHOCK = new HashMap<>();
 
     // A raw (uninsulated) wire, from one connector cap to another.
-    public record RawSpan(Vec3 from, Vec3 to) {}
+    public record RawSpan(Vec3 from, Vec3 to, WireTier tier) {}
 
     public record Snapshot(BlockPos master, List<BlockPos> connectors, List<RawSpan> rawSpans,
                            List<BlockPos> generators, List<BlockPos> batteries,
                            List<BlockPos> linkedMachines, Set<BlockPos> unlinkedMachines,
-                           Set<BlockPos> batteryIn, Set<BlockPos> batteryOut) {}
+                           Set<BlockPos> batteryIn, Set<BlockPos> batteryOut, int rate) {}
 
     private FmNetwork() {}
 
@@ -56,6 +56,7 @@ public final class FmNetwork {
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
         List<BlockPos> connectors = new ArrayList<>();
         List<RawSpan> rawSpans = new ArrayList<>();
+        int rate = Integer.MAX_VALUE; // the weakest wire sets what the network can carry
         visited.add(start);
         queue.add(start);
         while (!queue.isEmpty() && visited.size() < SCAN_LIMIT) {
@@ -65,9 +66,10 @@ public final class FmNetwork {
             for (MachineConnectorBlockEntity.Link link : connector.getLinks()) {
                 BlockPos other = link.other();
                 if (!(level.getBlockEntity(other) instanceof MachineConnectorBlockEntity)) continue; // unloaded or gone
+                rate = Math.min(rate, link.tier().rate());
                 // Count each raw wire once (from the end with the lower position).
                 if (!link.insulated() && current.asLong() < other.asLong()) {
-                    rawSpans.add(new RawSpan(WireMath.attachPoint(level, current), WireMath.attachPoint(level, other)));
+                    rawSpans.add(new RawSpan(WireMath.attachPoint(level, current), WireMath.attachPoint(level, other), link.tier()));
                 }
                 if (visited.add(other)) queue.add(other);
             }
@@ -103,19 +105,19 @@ public final class FmNetwork {
         List<BlockPos> generators = new ArrayList<>(generatorSet);
         List<BlockPos> batteries = new ArrayList<>(batterySet);
         List<BlockPos> machines = new ArrayList<>(machineSet);
-        // Same order everywhere, so every connector agrees which 8 machines are linked.
+        // Same order everywhere, so every connector shares power out the same way.
         machines.sort(Comparator.comparingLong(BlockPos::asLong));
-        int max = Config.NETWORK_MAX_MACHINES.get();
-        List<BlockPos> linked = new ArrayList<>(machines.subList(0, Math.min(max, machines.size())));
-        Set<BlockPos> unlinked = new HashSet<>(machines.subList(Math.min(max, machines.size()), machines.size()));
+        List<BlockPos> linked = machines;
+        Set<BlockPos> unlinked = Set.of();
 
         BlockPos master = connectors.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(start);
-        return new Snapshot(master, connectors, rawSpans, generators, batteries, linked, unlinked, batteryIn, batteryOut);
+        if (rate == Integer.MAX_VALUE) rate = Config.WIRE_RATE.get();
+        return new Snapshot(master, connectors, rawSpans, generators, batteries, linked, unlinked, batteryIn, batteryOut, rate);
     }
 
     // Move power around the network for one tick. Returns how much Fm moved.
     public static int tick(Level level, Snapshot net) {
-        int budget = Config.WIRE_RATE.get();
+        int budget = net.rate();
         List<FmSource> generators = new ArrayList<>();
         for (BlockPos p : net.generators()) {
             if (level.getBlockEntity(p) instanceof FmSource s) generators.add(s);
@@ -177,26 +179,27 @@ public final class FmNetwork {
     public static void hazards(ServerLevel level, Snapshot net) {
         if (level.getGameTime() % HAZARD_INTERVAL != 0) return;
         long now = level.getGameTime();
-        float damage = Config.STATIC_DAMAGE.get().floatValue();
-        double range = Config.STATIC_RANGE.get();
         boolean water = Config.WATER_ELECTRIFY.get();
         double waterRange = Config.WATER_RANGE.get();
         int checked = 0;
         for (RawSpan span : net.rawSpans()) {
             if (++checked > 128) break; // keep huge networks cheap
+            WireTier tier = span.tier();
+            float damage = tier.shockDamage();
+            double range = tier.shockRange();
             List<Vec3> points = samples(span);
             if (Config.STATIC_ENABLED.get()) {
-                AABB area = new AABB(span.from(), span.to()).inflate(range).expandTowards(0, -WireMath.sag(span.from(), span.to()), 0);
+                AABB area = new AABB(span.from(), span.to()).inflate(range).expandTowards(0, -WireMath.sag(span.from(), span.to(), tier), 0);
                 for (Player player : level.getEntitiesOfClass(Player.class, area)) {
-                    if (closeTo(points, player.position().add(0, 1, 0), range)) shock(level, player, damage, now);
+                    if (closeTo(points, player.position().add(0, 1, 0), range)) shock(level, player, damage, tier, now);
                 }
             }
             if (water) {
                 for (Vec3 p : points) {
                     if (level.getFluidState(BlockPos.containing(p)).is(FluidTags.WATER)) {
                         for (LivingEntity creature : level.getEntitiesOfClass(LivingEntity.class,
-                                new AABB(p, p).inflate(waterRange), LivingEntity::isInWater)) {
-                            shock(level, creature, damage, now);
+                                new AABB(p, p).inflate(waterRange + tier.gauge), LivingEntity::isInWater)) {
+                            shock(level, creature, damage, tier, now);
                         }
                     }
                 }
@@ -209,7 +212,7 @@ public final class FmNetwork {
     private static List<Vec3> samples(RawSpan span) {
         int n = Math.max(2, (int) Math.ceil(span.from().distanceTo(span.to())) + 1);
         List<Vec3> points = new ArrayList<>(n + 1);
-        for (int i = 0; i <= n; i++) points.add(WireMath.point(span.from(), span.to(), (double) i / n));
+        for (int i = 0; i <= n; i++) points.add(WireMath.point(span.from(), span.to(), (double) i / n, span.tier()));
         return points;
     }
 
@@ -221,11 +224,12 @@ public final class FmNetwork {
         return false;
     }
 
-    private static void shock(ServerLevel level, LivingEntity target, float damage, long now) {
+    private static void shock(ServerLevel level, LivingEntity target, float damage, WireTier tier, long now) {
         Long last = LAST_SHOCK.get(target.getUUID());
         if (last != null && now - last < HAZARD_INTERVAL) return;
         LAST_SHOCK.put(target.getUUID(), now);
         target.hurt(level.damageSources().lightningBolt(), damage);
+        if (tier.shockBurns() && !target.isInWater()) target.igniteForSeconds(3);
     }
 
     // Tell every connector whether power is flowing (raw wires spark while it is).

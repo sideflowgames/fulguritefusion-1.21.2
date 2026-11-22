@@ -35,7 +35,7 @@ public class BackpackUpgradeItem extends Item {
 
     // Whether this upgrade can go in a backpack of this tier.
     public boolean fits(BackpackTier tier) {
-        if (storm) return tier == BackpackTier.STORMFORGED;
+        if (storm) return tier.powered();
         return tier.ordinal() >= kind.minTier.ordinal();
     }
 
@@ -114,11 +114,12 @@ public class BackpackUpgradeItem extends Item {
                     : "Swaps the best tool from the pack into your hand when you mine";
         };
         tooltip.add(Component.literal(what).withStyle(ChatFormatting.GRAY));
-        String fitsIn = storm ? "Stormforged Backpack only" : switch (kind.minTier) {
+        String fitsIn = storm ? "Stormforged or Prime Backpack" : switch (kind.minTier) {
             case COPPER -> "any backpack";
             case IRON -> "Iron Backpack or better";
             case FULGURITE -> "Fulgurite Backpack or better";
-            case STORMFORGED -> "Stormforged Backpack only";
+            case STORMFORGED -> "Stormforged or Prime Backpack";
+            case PRIME -> "Prime Backpack only";
         };
         tooltip.add(Component.literal("Fits: " + fitsIn).withStyle(ChatFormatting.DARK_GRAY));
         if (storm) tooltip.add(Component.literal("Uses the backpack's Fm for its boost").withStyle(ChatFormatting.DARK_AQUA));

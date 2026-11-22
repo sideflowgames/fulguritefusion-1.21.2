@@ -57,6 +57,10 @@ public class ArcCasingBlockEntity extends BlockEntity implements FmHandler {
     public void notifyController() {
         MachineControllerBlockEntity c = controller();
         if (c != null) c.requestCheck();
+        else if (level != null && controllerPos != null
+                && level.getBlockEntity(controllerPos) instanceof com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlockEntity h) {
+            h.requestCheck(); // a Latex Harvester's frame
+        }
     }
 
     // ---------- Power port ----------
@@ -96,6 +100,14 @@ public class ArcCasingBlockEntity extends BlockEntity implements FmHandler {
     }
 
     // ---------- Item ports ----------
+
+    // Latex Vulcanizer: any casing takes latex in, from any face except the machine's front.
+    @Nullable
+    public net.neoforged.neoforge.fluids.capability.IFluidHandler getFluidHandler(@Nullable Direction side) {
+        MachineControllerBlockEntity c = controller();
+        if (c == null || !c.type().usesLatex() || (side != null && side == c.facingDir())) return null;
+        return c.latexInlet();
+    }
 
     @Nullable
     public IItemHandler getItemHandler(@Nullable Direction side) {

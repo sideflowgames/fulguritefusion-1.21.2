@@ -98,14 +98,15 @@
             "fulguritefusion:copper_backpack",
             "fulguritefusion:iron_backpack",
             "fulguritefusion:fulgurite_backpack",
-            "fulguritefusion:stormforged_backpack"
+            "fulguritefusion:stormforged_backpack",
+            "fulguritefusion:prime_backpack"
           ],
           "recipe": "fulguritefusion:copper_backpack",
           "text": "Right-click to open, or press B to open the one you're wearing or carrying.\n\nWear it in your chestplate slot (or Curios' back slot, if installed) to carry it on your back.\n\nSneak + right-click a block to set it down; it opens like a chest and keeps everything when you break it."
         },
         {
           "title": "Bigger backpacks",
-          "text": "Copper: 27 slots.\nIron: 54 slots. Surround a Copper Backpack with 8 iron ingots.\nFulgurite: 81 slots. Surround an Iron Backpack with 8 Fulgurite.\nStormforged: 108 slots. Storm Forge: Fulgurite Backpack + 2 Refined Fulgurite + a Strong or Jackpot fuel (250,000 Fm).\n\nUpgrading keeps everything inside."
+          "text": "Copper: 27 slots.\nIron: 54 slots. Surround a Copper Backpack with 8 iron ingots.\nFulgurite: 81 slots. Surround an Iron Backpack with 8 Fulgurite.\nStormforged: 108 slots. Storm Forge: Fulgurite Backpack + 2 Refined Fulgurite + a Strong or Jackpot fuel (250,000 Fm).\n\nUpgrading keeps everything inside.\n\nPrime Backpack (Storm Forge): a Stormforged Backpack + a Prime Spark Fragment + a netherite ingot, 5,000,000 Fm. 120 slots, 7 upgrade slots, a 2,000,000 Fm store, and it takes Storm upgrades."
         },
         {
           "title": "Upgrades",
@@ -247,10 +248,13 @@
           "items": [
             "fulguritefusion:raw_wire",
             "fulguritefusion:insulated_wire",
+            "fulguritefusion:raw_reinforced_wire",
+            "fulguritefusion:reinforced_wire",
+            "fulguritefusion:raw_heavy_wire",
             "fulguritefusion:heavy_wire"
           ],
-          "recipe": "fulguritefusion:insulated_wire",
-          "text": "Wire Rolls string hanging wires between connectors: use the roll on one connector, then the next.\n\nRaw Wire: 16 blocks. Bare copper: carrying power, it shocks creatures in water nearby.\nInsulated Wire: 16 blocks, safe.\nHeavy Wire: 32 blocks.\n\nA network can feed up to 8 machines."
+          "recipe": "fulguritefusion:raw_heavy_wire",
+          "text": "Wire Rolls string hanging wires between connectors: use the roll on one connector, then the next.\n\nThree gauges, each raw (bare copper) or insulated:\n Basic: 16 blocks, 256 Fm/t.\n Reinforced: 32 blocks, 512 Fm/t.\n Heavy: 64 blocks, 1024 Fm/t, hangs taut.\n\nRaw wire is cheap but, while power flows, shocks anyone near it and electrifies water. Thicker raw wire bites harder: Basic 1 heart, Reinforced 2, Heavy 4 hearts and sets you alight. Insulate it in the Wire Extruder with Malleable Rubber (see Rubber).\n\nA network carries only as much as its weakest wire. Upgrade every span to raise the limit; a connector shows how much is flowing out of the most it can carry."
         },
         {
           "title": "Daisy chains",
@@ -282,7 +286,8 @@
         "fulguritefusion:wire_extruder",
         "fulguritefusion:kiln",
         "fulguritefusion:crusher",
-        "fulguritefusion:crude_arc_casing"
+        "fulguritefusion:crude_arc_casing",
+        "fulguritefusion:banbury_mixer"
       ],
       "pages": [
         {
@@ -292,14 +297,15 @@
             "fulguritefusion:arc_furnace",
             "fulguritefusion:wire_extruder",
             "fulguritefusion:kiln",
-            "fulguritefusion:crusher"
+            "fulguritefusion:crusher",
+            "fulguritefusion:banbury_mixer"
           ],
-          "text": "Each machine is a cube of Arc Casings with a controller on the front face, bottom row.\n\nSmall (2x2x2): Press, Arc Furnace, Wire Extruder. The controller is at the front-left bottom.\n\nLarge (3x3x3): Kiln, Crusher. The controller is at the front-centre bottom."
+          "text": "Each machine is a cube of Arc Casings with a controller on the front face, bottom row.\n\nSmall (2x2x2): Press, Arc Furnace, Wire Extruder, Banbury Mixer. The controller is at the front-left bottom.\n\nLarge (3x3x3): Kiln, Crusher. The controller is at the front-centre bottom."
         },
         {
           "title": "Build: small machine",
           "build": "press",
-          "text": "Small machines (Press, Arc Furnace, Wire Extruder) are a 2x2x2 cube.\n\nThe controller goes at the front-left of the bottom layer, facing you. The other 7 blocks are Arc Casings. The lowest casing tier sets the machine's speed.\n\nRight-click the controller to check the build: missing casings are outlined for a few seconds."
+          "text": "Small machines (Press, Arc Furnace, Wire Extruder, Banbury Mixer) are a 2x2x2 cube.\n\nThe controller goes at the front-left of the bottom layer, facing you. The other 7 blocks are Arc Casings. The lowest casing tier sets the machine's speed.\n\nRight-click the controller to check the build: missing casings are outlined for a few seconds."
         },
         {
           "title": "Build: large machine",
@@ -319,7 +325,7 @@
         },
         {
           "title": "Ports",
-          "text": "Power port: top layer, at the back. A Machine Connector goes on it.\n\nInput port: top layer, at the front. A hopper above fills the machine.\n\nOutput port: bottom layer, at the back. A hopper below (or a pipe beside) empties it.\n\nRight-click any part of the machine to open its menu."
+          "text": "Once a machine is built, glowing markers show its ports.\n\nPower port (yellow, filled square): top layer, at the back. A Machine Connector goes on it.\n\nInput port (green, plus): top layer, at the front. A hopper above fills the machine.\n\nOutput port (orange, minus): bottom layer, at the back. A hopper below (or a pipe beside) empties it.\n\nRight-click any part of the machine to open its menu, even with something in your hand. Sneak to place blocks against it."
         },
         {
           "title": "What they make",
@@ -330,7 +336,7 @@
             "fulguritefusion:coil_segment",
             "fulguritefusion:crushed_iron"
           ],
-          "text": "Press: ingots into Copper, Iron and Gold Sheets; 4 Fulgurite Shards into a Fulgurite.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire.\n\nKiln: 2 Fulgurite into a Coil Segment. Sand + a Fulgurite Shard makes 4 Fulgurite Blast Glass; Cobbled Deepslate + a shard makes 4 Reinforced Fulgurite.\n\nArc Furnace: anything a furnace smelts.\n\nCrusher: a Raw Fulgurite block into 10 shards; raw ore into 2 crushed ore (smelt it into ingots)."
+          "text": "Press: ingots into Copper, Iron and Gold Sheets; 4 Fulgurite Shards into a Fulgurite.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire; 2 Raw Wire + an Iron Sheet into 2 Raw Reinforced Wire; raw wire + Malleable Rubber into insulated wire.\n\nKiln: 2 Fulgurite into a Coil Segment. Sand + a Fulgurite Shard makes 4 Fulgurite Blast Glass; Cobbled Deepslate + a shard makes 4 Reinforced Fulgurite.\n\nArc Furnace: anything a furnace smelts, and a Latex Bucket into 2 Dried Rubber.\n\nBanbury Mixer: Dried Rubber into Malleable Rubber.\n\nCrusher: a Raw Fulgurite block into 10 shards; raw ore into 2 crushed ore (smelt it into ingots)."
         },
         {
           "recipe": "fulguritefusion:press",
@@ -620,7 +626,8 @@
       "parent": "storm_collider",
       "unlock": [
         "fulguritefusion:storm_forge",
-        "fulguritefusion:forge_power_port"
+        "fulguritefusion:forge_power_port",
+        "fulguritefusion:prime_spark_fragment"
       ],
       "pages": [
         {
@@ -680,6 +687,30 @@
             "fulguritefusion:storm_spear"
           ],
           "text": "Storm Blade (from a Fulgurite Sword): 11 damage +4 lightning; every hit chains lightning to up to 5 nearby enemies.\n\nStorm Spear (from a Fulgurite Spear): 11 melee, 13 thrown +4 lightning, and a charged throw calls lightning down where it lands.\n\nBoth lose their lightning when out of Fm."
+        },
+        {
+          "title": "Prime gear",
+          "items": [
+            "fulguritefusion:prime_helmet",
+            "fulguritefusion:prime_chestplate",
+            "fulguritefusion:prime_leggings",
+            "fulguritefusion:prime_boots",
+            "fulguritefusion:prime_blade",
+            "fulguritefusion:prime_spear",
+            "fulguritefusion:prime_pickaxe",
+            "fulguritefusion:prime_axe",
+            "fulguritefusion:prime_shovel",
+            "fulguritefusion:prime_hoe"
+          ],
+          "text": "The last step: forge any Stormforged piece + a Prime Spark Fragment + a netherite ingot, for 20,000,000 Fm. Enchantments and names carry over.\n\nPrime gear holds 8,000,000 Fm (violet bar), protects and hits harder, and keeps every Stormforged ability."
+        },
+        {
+          "title": "Prime armor",
+          "text": "Boots: no fall damage.\n\nFull Prime set:\n- Glide: jump in mid-air to spread out and glide like an elytra (400 Fm a second from the chestplate).\n- Boost: while gliding, hold jump to rocket along the way you look.\n- Static discharge: anything that hits you takes 8 lightning damage and is thrown back (2,000 Fm a time).\n\nIt also counts as a full Stormforged set."
+        },
+        {
+          "title": "Prime tools and weapons",
+          "text": "Prime Pickaxe: press V (rebindable) to toggle the 3x3 hammer. It breaks a 3x3 square facing you, only blocks the pickaxe can mine. Sneak + right-click still cycles Arc Smelting and Vein Mining (vein mining pauses while the hammer is on).\n\nPrime Blade: 19 damage +12 lightning; lightning chains to 8 enemies.\n\nPrime Spear: hits for 14, thrown for 17 +6 lightning, and flies back to you after every throw."
         }
       ]
     },
@@ -829,6 +860,93 @@
         {
           "title": "When it goes wrong",
           "text": "A cut data cable: that injector gets no fuel. The other charge fires anyway, finds nothing to hit, and is lost.\n\nSomething in a portal beam's path: that charge fizzles out.\n\nEvery pairing has its own reaction: crops ripen, water freezes, coral grows, Drowned rise, lightning storms strike, the area stays charged with static... Some fuels overheat the reactor, and it must cool down before the next run.\n\nThe worst can tear blocks out of the chamber (Chamber Breach) or melt part of the ring back into Raw Fulgurite (Ring Melt). The reactor stays down until you replace them.\n\nWatching a fuel burn teaches you what it does. A lost run turns Auto off."
+        }
+      ]
+    },
+    {
+      "id": "rubber",
+      "title": "Rubber",
+      "icon": "fulguritefusion:malleable_rubber",
+      "pos": [
+        900,
+        260
+      ],
+      "parent": "processing",
+      "unlock": [
+        "fulguritefusion:rubber_sapling",
+        "fulguritefusion:rubber_log",
+        "fulguritefusion:tree_tap",
+        "fulguritefusion:latex_bucket",
+        "fulguritefusion:raw_reinforced_wire",
+        "fulguritefusion:raw_heavy_wire",
+        "fulguritefusion:latex_harvester",
+        "fulguritefusion:harvester_tank",
+        "fulguritefusion:harvester_power_port",
+        "fulguritefusion:latex_vulcanizer",
+        "fulguritefusion:fluid_pipe"
+      ],
+      "pages": [
+        {
+          "title": "Rubber trees",
+          "items": [
+            "fulguritefusion:rubber_sapling",
+            "fulguritefusion:rubber_log",
+            "fulguritefusion:rubber_leaves",
+            "fulguritefusion:rubber_planks",
+            "fulguritefusion:rubber_wood"
+          ],
+          "recipe": "fulguritefusion:rubber_planks",
+          "text": "Tall, slim trees with pale bark that grow in jungles and swamps. Their leaves drop saplings, and wandering traders sometimes sell them.\n\nThe wood makes pale planks like any other log."
+        },
+        {
+          "title": "Tapping latex",
+          "items": [
+            "fulguritefusion:tree_tap",
+            "minecraft:bucket",
+            "fulguritefusion:latex_bucket"
+          ],
+          "recipe": "fulguritefusion:tree_tap",
+          "text": "Put a Tree Tap on the side of a Rubber Log, then set an empty bucket on the ground under it: right-click the top of a block with the bucket. It can be up to 6 blocks below the tap.\n\nLatex drips into the bucket. After about 4 minutes it's full: break it (or right-click it) to get a Latex Bucket.\n\nRight-click a bucket that's still filling to see how far along it is."
+        },
+        {
+          "title": "Latex Harvester",
+          "items": [
+            "fulguritefusion:latex_harvester",
+            "fulguritefusion:harvester_tank",
+            "fulguritefusion:harvester_power_port",
+            "fulguritefusion:crude_arc_casing"
+          ],
+          "recipe": "fulguritefusion:latex_harvester",
+          "text": "A 3x3x2 ring around the bottom two blocks of a Rubber Log trunk. On the top layer's front row: the controller in the middle (facing you), a Harvester Tank in one corner with a second Harvester Tank under it, and a Harvester Power Port in the other corner. The other 12 blocks are Arc Casings of one tier. Right-click the controller to see what's missing.\n\nProbes stab into the bark through the windows: it taps 1.5 buckets a minute with Crude casings and uses 32 Fm/t. Each better tier doubles both. The tank holds 128 buckets and the harvester stops when it's full. Drain it with a bucket or a fluid pipe.\n\nEvery tree holds 1,000 to 4,000 buckets, rolled when you finish the build. When it runs out the trunk turns to Dried Rubber Logs. Chop the tree, plant a new sapling in the ring, and the harvester gives it extra growth ticks (500 Fm each)."
+        },
+        {
+          "title": "Build: Latex Vulcanizer",
+          "build": "latex_vulcanizer",
+          "recipe": "fulguritefusion:latex_vulcanizer",
+          "text": "A small (2x2x2) machine: the controller at the front-left of the bottom layer, facing you, and 7 Arc Casings.\n\nPipe latex into any casing from any side except the front (a Latex Harvester's tank works), pour in a Latex Bucket by right-clicking a casing, or put Latex Buckets in its input slots. The vat holds 16 buckets.\n\nEach bucket cures into 3 Dried Rubber on the heated drum, one more than the Arc Furnace gives. The rubber comes out of the output port like any machine."
+        },
+        {
+          "title": "Fluid Pipe",
+          "items": [
+            "fulguritefusion:fluid_pipe"
+          ],
+          "recipe": "fulguritefusion:fluid_pipe",
+          "text": "Copper pipe with a glass window. It joins other Fluid Pipes and anything that holds fluid.\n\nNo setup: a pipe touching a tank that only gives fluid out (a Latex Harvester's tank) pulls from it, up to 1 bucket a second, and delivers along the line to anything that takes fluid in (any side of a Latex Vulcanizer but the front).\n\nThe window shows latex while it's flowing. Pipes hold nothing themselves, so breaking one loses no latex."
+        },
+        {
+          "title": "Dried and kneaded",
+          "items": [
+            "fulguritefusion:latex_bucket",
+            "fulguritefusion:dried_rubber",
+            "fulguritefusion:malleable_rubber"
+          ],
+          "text": "Arc Furnace: a Latex Bucket dries into 2 Dried Rubber, and you get the bucket back.\n\nBanbury Mixer: Dried Rubber is kneaded into Malleable Rubber.\n\nWire Extruder: raw wire + Malleable Rubber makes insulated wire of the same gauge. One rubber covers 4 basic, 2 reinforced or 1 heavy wire."
+        },
+        {
+          "title": "Build: Banbury Mixer",
+          "build": "banbury_mixer",
+          "recipe": "fulguritefusion:banbury_mixer",
+          "text": "A small (2x2x2) machine: the controller at the front-left of the bottom layer, facing you, and 7 Arc Casings.\n\nTwo heavy rotors churn the rubber while a weight presses it down from above."
         }
       ]
     }

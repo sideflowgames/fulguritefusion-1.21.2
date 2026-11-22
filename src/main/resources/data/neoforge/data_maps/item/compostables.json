@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": {
+    "fulguritefusion:rubber_leaves": { "chance": 0.3 },
+    "fulguritefusion:rubber_sapling": { "chance": 0.3 }
+  }
+}

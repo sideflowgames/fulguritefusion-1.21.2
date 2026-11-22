@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CGC"
+  ],
+  "key": {
+    "C": {
+      "item": "fulguritefusion:copper_sheet"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:fluid_pipe",
+    "count": 6
+  }
+}
