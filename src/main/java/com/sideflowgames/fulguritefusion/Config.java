@@ -74,9 +74,9 @@ public class Config {
     // --- Lightning upgrade ritual ---
     public static final ModConfigSpec.BooleanValue RITUAL_ENABLED;
     public static final ModConfigSpec.IntValue ENHANCED_SPARK_CELLS;
-    public static final ModConfigSpec.IntValue ENHANCED_DIAMONDS;
+    public static final ModConfigSpec.IntValue ENHANCED_MAGNETITE;
     public static final ModConfigSpec.IntValue CHARGED_SPARK_CELLS;
-    public static final ModConfigSpec.IntValue CHARGED_NETHERITE;
+    public static final ModConfigSpec.IntValue CHARGED_SILVER;
 
     static {
         BUILDER.comment("Server safety: what reactor failures are allowed to do").push("safety");
@@ -205,12 +205,12 @@ public class Config {
                 .define("ritualEnabled", true);
         ENHANCED_SPARK_CELLS = BUILDER.comment("Charged Spark Cells needed for Weak -> Enhanced.")
                 .defineInRange("enhancedSparkCells", 2, 0, 64);
-        ENHANCED_DIAMONDS = BUILDER.comment("Diamonds needed for Weak -> Enhanced.")
-                .defineInRange("enhancedDiamonds", 1, 0, 64);
+        ENHANCED_MAGNETITE = BUILDER.comment("Magnetite Ingots needed for Weak -> Enhanced.")
+                .defineInRange("enhancedMagnetite", 4, 0, 64);
         CHARGED_SPARK_CELLS = BUILDER.comment("Charged Spark Cells needed for Enhanced -> Charged.")
                 .defineInRange("chargedSparkCells", 6, 0, 64);
-        CHARGED_NETHERITE = BUILDER.comment("Netherite ingots needed for Enhanced -> Charged.")
-                .defineInRange("chargedNetherite", 6, 0, 64);
+        CHARGED_SILVER = BUILDER.comment("Silver Ingots needed for Enhanced -> Charged.")
+                .defineInRange("chargedSilver", 6, 0, 64);
         BUILDER.pop();
     }
 

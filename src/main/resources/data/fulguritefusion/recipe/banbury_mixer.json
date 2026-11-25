@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IPI",
+    "MPM",
     "SKS",
-    "III"
+    "SSS"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "P": {
       "item": "minecraft:piston"

@@ -291,7 +291,8 @@ public class GuideTopicScreen extends Screen {
     // ---------- Tabs ----------
 
     private int tabWidth(int i) {
-        return Math.min(110, font.width(chapter.sections.get(i).title) + 14);
+        // Wide enough for the whole title; the row scrolls (arrows) when the tabs don't all fit.
+        return Math.min(Math.max(110, width - 60), font.width(chapter.sections.get(i).title) + 14);
     }
 
     // Tabs that fit, starting at tabScroll; arrows when there are more.
@@ -597,10 +598,10 @@ public class GuideTopicScreen extends Screen {
         var dispatcher = minecraft.getBlockRenderer();
         var buffers = g.bufferSource();
         boolean finished = sc.step >= b.steps.size();
-        boolean formed = finished && sc.stepTime >= FORM_AT;
+        boolean formed = finished && sc.stepTime >= FORM_AT && b.formLook;
         if (finished) {
             for (GuideBuilds.Placed p : b.blocks) {
-                BlockState state = formed ? formedState(p.state()) : p.state();
+                BlockState state = formed ? formedState(p.state(), b) : p.state();
                 block(ps, dispatcher, buffers, new GuideBuilds.Placed(p.pos(), state), 0);
                 if (formed) blockEntity(ps, buffers, p.pos(), state);
             }
@@ -651,7 +652,11 @@ public class GuideTopicScreen extends Screen {
     }
 
     // A block as it looks once its structure has formed (blocks with a "formed" state).
-    private static BlockState formedState(BlockState state) {
+    private static BlockState formedState(BlockState state, GuideBuilds.Build b) {
+        // The Shock Farm controller draws the merged farm for its size.
+        if (b.farmSize > 0 && state.getBlock() instanceof com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock) {
+            return state.setValue(com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock.SIZE, b.farmSize);
+        }
         for (Property<?> prop : state.getProperties()) {
             if (prop.getName().equals("formed") && prop instanceof BooleanProperty bool) return state.setValue(bool, true);
         }
@@ -665,7 +670,8 @@ public class GuideTopicScreen extends Screen {
     private void blockEntity(PoseStack ps, net.minecraft.client.renderer.MultiBufferSource buffers, BlockPos pos, BlockState state) {
         if (!(state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.MachineControllerBlock
                 || state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.MiniColliderBlock
-                || state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.StormColliderBlock)) return;
+                || state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.StormColliderBlock
+                || state.getBlock() instanceof com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock)) return;
         var block = (net.minecraft.world.level.block.BaseEntityBlock) state.getBlock();
         try {
             BlockEntity be = PICTURE_ENTITIES.computeIfAbsent(state, s -> block.newBlockEntity(BlockPos.ZERO, s));

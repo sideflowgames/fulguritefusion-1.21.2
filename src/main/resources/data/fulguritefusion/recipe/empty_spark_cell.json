@@ -2,19 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "GCG",
+    "GAG",
     "GRG",
-    "GCG"
+    "GSG"
   ],
   "key": {
     "G": {
       "item": "minecraft:glass"
     },
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "A": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "R": {
       "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "fulguritefusion:silver_sheet"
     }
   },
   "result": {

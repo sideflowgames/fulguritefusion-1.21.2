@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "fulguritefusion:rubber_planks"
+    "fulguritefusion:rubber_planks",
+    "fulguritefusion:conductor_planks",
+    "fulguritefusion:thunderoak_planks",
+    "fulguritefusion:sparkbush_planks"
   ]
 }

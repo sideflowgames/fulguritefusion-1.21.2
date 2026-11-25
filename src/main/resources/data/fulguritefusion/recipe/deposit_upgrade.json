@@ -2,22 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "IHI",
-    "SXS",
-    "ISI"
+    "SHS",
+    "TXT",
+    "STS"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
     "S": {
+      "item": "fulguritefusion:silver_ingot"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    },
+    "T": {
       "item": "minecraft:string"
     },
     "X": {
       "item": "minecraft:chest"
-    },
-    "H": {
-      "item": "minecraft:hopper"
     }
   },
   "result": {

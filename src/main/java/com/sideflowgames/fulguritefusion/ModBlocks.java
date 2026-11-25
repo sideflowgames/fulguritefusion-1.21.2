@@ -219,6 +219,236 @@ public final class ModBlocks {
             com.sideflowgames.fulguritefusion.pipe.FluidPipeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(1.0f, 4.0f).sound(SoundType.COPPER).noOcclusion().dynamicShape());
 
+    // ---------- Stormreach ----------
+    // The Stormreach's stone and its variants.
+    public static final DeferredBlock<Block> STORMSTONE = BLOCKS.registerSimpleBlock("stormstone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<Block> COBBLED_STORMSTONE = BLOCKS.registerSimpleBlock("cobbled_stormstone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<Block> POLISHED_STORMSTONE = BLOCKS.registerSimpleBlock("polished_stormstone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.POLISHED_DEEPSLATE));
+    public static final DeferredBlock<Block> STORMSTONE_BRICKS = BLOCKS.registerSimpleBlock("stormstone_bricks",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE_BRICKS));
+    // Fulgurite Ore: veins in Stormstone; drops Fulgurite Shards.
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> FULGURITE_ORE = BLOCKS.registerBlock("fulgurite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(1, 3), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 3));
+    // Tempest Crystal Ore: rare; only found in the Stormreach. Needs a diamond pickaxe.
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> TEMPEST_CRYSTAL_ORE = BLOCKS.registerBlock("tempest_crystal_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(3, 7), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(4.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 6));
+    // Charged Stormsand: glowing sand on the high ground; lightning fuses it into Fulgurite Glass.
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.ChargedStormsandBlock> CHARGED_STORMSAND = BLOCKS.registerBlock("charged_stormsand",
+            com.sideflowgames.fulguritefusion.stormreach.ChargedStormsandBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.6f).sound(SoundType.SAND).lightLevel(s -> 5));
+    public static final DeferredBlock<net.minecraft.world.level.block.TransparentBlock> FULGURITE_GLASS = BLOCKS.registerBlock("fulgurite_glass",
+            net.minecraft.world.level.block.TransparentBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.3f).sound(SoundType.GLASS).noOcclusion()
+                    .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false).isViewBlocking((s, l, p) -> false));
+
+    // ---------- Stormreach lands: underground layers, biome blocks and ores ----------
+    // Biome stones (each biome's subsoil) and Deep Stormstone (everything deep down).
+    public static final DeferredBlock<Block> DEEP_STORMSTONE = BLOCKS.registerSimpleBlock("deep_stormstone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<Block> RIMESTONE = BLOCKS.registerSimpleBlock("rimestone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+    public static final DeferredBlock<Block> STORMSLATE = BLOCKS.registerSimpleBlock("stormslate",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(2.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<Block> MAGNETITE_ROCK = BLOCKS.registerSimpleBlock("magnetite_rock",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.BASALT));
+    public static final DeferredBlock<Block> FULGURITE_CRUST = BLOCKS.registerSimpleBlock("fulgurite_crust",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.TUFF));
+    public static final DeferredBlock<Block> CINDER_ROCK = BLOCKS.registerSimpleBlock("cinder_rock",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(1.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.BASALT).lightLevel(s -> 2));
+    public static final DeferredBlock<Block> STORMSANDSTONE = BLOCKS.registerSimpleBlock("stormsandstone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.8f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+    // Aurora Ice (Aurora Tundra): glowing, slippery ice that never melts.
+    public static final DeferredBlock<Block> AURORA_ICE = BLOCKS.registerSimpleBlock("aurora_ice",
+            BlockBehaviour.Properties.of().mapColor(MapColor.ICE).strength(0.8f).friction(0.98f).sound(SoundType.GLASS).lightLevel(s -> 7));
+    // Petrified Log (Petrified Forest): a tree turned to stone.
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> PETRIFIED_LOG = BLOCKS.registerBlock("petrified_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).strength(2.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DRIPSTONE_BLOCK));
+    // Falling surface blocks.
+    public static final DeferredBlock<net.minecraft.world.level.block.ColoredFallingBlock> ASH_BLOCK = BLOCKS.registerBlock("ash_block",
+            p -> new net.minecraft.world.level.block.ColoredFallingBlock(new net.minecraft.util.ColorRGBA(0x5A5458), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(0.5f).sound(SoundType.SAND));
+    public static final DeferredBlock<net.minecraft.world.level.block.ColoredFallingBlock> SCORCHED_SAND = BLOCKS.registerBlock("scorched_sand",
+            p -> new net.minecraft.world.level.block.ColoredFallingBlock(new net.minecraft.util.ColorRGBA(0xB8643C), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.5f).sound(SoundType.SAND));
+    public static final DeferredBlock<net.minecraft.world.level.block.ColoredFallingBlock> STORMGLASS_SAND = BLOCKS.registerBlock("stormglass_sand",
+            p -> new net.minecraft.world.level.block.ColoredFallingBlock(new net.minecraft.util.ColorRGBA(0x9CC8E0), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.5f).sound(SoundType.SAND));
+    // Ores. Magnetite and Argentite also generate in the Overworld (stone and deepslate versions).
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> STORMSTONE_MAGNETITE_ORE = BLOCKS.registerBlock("stormstone_magnetite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> STORMSTONE_ARGENTITE_ORE = BLOCKS.registerBlock("stormstone_argentite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> CINDERITE_ORE = BLOCKS.registerBlock("cinderite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(2, 5), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 4));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> PRISMITE_ORE = BLOCKS.registerBlock("prismite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(3, 6), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 6));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> STORMQUARTZ_ORE = BLOCKS.registerBlock("stormquartz_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(3, 6), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 3));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> AURORITE_ORE = BLOCKS.registerBlock("aurorite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(2, 5), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 5));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> AMBER_ORE = BLOCKS.registerBlock("amber_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(1, 4), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE).lightLevel(s -> 2));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> MAGNETITE_ORE = BLOCKS.registerBlock("magnetite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> DEEPSLATE_MAGNETITE_ORE = BLOCKS.registerBlock("deepslate_magnetite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(4.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> ARGENTITE_ORE = BLOCKS.registerBlock("argentite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DropExperienceBlock> DEEPSLATE_ARGENTITE_ORE = BLOCKS.registerBlock("deepslate_argentite_ore",
+            p -> new net.minecraft.world.level.block.DropExperienceBlock(net.minecraft.util.valueproviders.UniformInt.of(0, 2), p),
+            BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(4.5f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE));
+    // Storage blocks.
+    public static final DeferredBlock<Block> MAGNETITE_BLOCK = BLOCKS.registerSimpleBlock("magnetite_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.METAL));
+    public static final DeferredBlock<Block> SILVER_BLOCK = BLOCKS.registerSimpleBlock("silver_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.METAL));
+    public static final DeferredBlock<Block> CINDERITE_BLOCK = BLOCKS.registerSimpleBlock("cinderite_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.METAL).lightLevel(s -> 6));
+    public static final DeferredBlock<Block> PRISMITE_BLOCK = BLOCKS.registerSimpleBlock("prismite_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 9));
+    public static final DeferredBlock<Block> STORMQUARTZ_BLOCK = BLOCKS.registerSimpleBlock("stormquartz_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 4));
+    public static final DeferredBlock<Block> AURORITE_BLOCK = BLOCKS.registerSimpleBlock("aurorite_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.METAL).lightLevel(s -> 7));
+    public static final DeferredBlock<Block> AMBER_BLOCK = BLOCKS.registerSimpleBlock("amber_block",
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 5));
+
+    // Stormreach plant life.
+    // Stormreach soil: Charged Loam, with Arcgrass on top. Plants and saplings grow on both.
+    public static final DeferredBlock<Block> CHARGED_LOAM = BLOCKS.registerBlock("charged_loam",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_PURPLE));
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.ArcgrassBlock> ARCGRASS_BLOCK = BLOCKS.registerBlock("arcgrass_block",
+            com.sideflowgames.fulguritefusion.stormreach.ArcgrassBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GRASS_BLOCK).mapColor(MapColor.COLOR_LIGHT_BLUE));
+    // Conductor: tall and thin, copper-tinted bark, glowing pale-blue leaves.
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> CONDUCTOR_LOG = BLOCKS.registerBlock("conductor_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BIRCH_LOG).mapColor(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<Block> CONDUCTOR_PLANKS = BLOCKS.registerBlock("conductor_planks",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BIRCH_PLANKS).mapColor(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<net.minecraft.world.level.block.LeavesBlock> CONDUCTOR_LEAVES = BLOCKS.registerBlock("conductor_leaves",
+            net.minecraft.world.level.block.LeavesBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BIRCH_LEAVES).mapColor(MapColor.COLOR_LIGHT_BLUE).lightLevel(s -> 6));
+    public static final DeferredBlock<net.minecraft.world.level.block.SaplingBlock> CONDUCTOR_SAPLING = BLOCKS.registerBlock("conductor_sapling",
+            p -> new net.minecraft.world.level.block.SaplingBlock(com.sideflowgames.fulguritefusion.stormreach.StormFlora.CONDUCTOR, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BIRCH_SAPLING));
+    // Thunderoak: broad and twisted, dark wood, violet leaves.
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> THUNDEROAK_LOG = BLOCKS.registerBlock("thunderoak_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_LOG).mapColor(MapColor.COLOR_BROWN));
+    public static final DeferredBlock<Block> THUNDEROAK_PLANKS = BLOCKS.registerBlock("thunderoak_planks",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS).mapColor(MapColor.COLOR_BROWN));
+    public static final DeferredBlock<net.minecraft.world.level.block.LeavesBlock> THUNDEROAK_LEAVES = BLOCKS.registerBlock("thunderoak_leaves",
+            net.minecraft.world.level.block.LeavesBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_LEAVES).mapColor(MapColor.COLOR_PURPLE));
+    public static final DeferredBlock<net.minecraft.world.level.block.SaplingBlock> THUNDEROAK_SAPLING = BLOCKS.registerBlock("thunderoak_sapling",
+            p -> new net.minecraft.world.level.block.SaplingBlock(com.sideflowgames.fulguritefusion.stormreach.StormFlora.THUNDEROAK, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_SAPLING));
+    // Sparkbush: a small, bushy tree with brightly glowing leaves.
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> SPARKBUSH_LOG = BLOCKS.registerBlock("sparkbush_log",
+            net.minecraft.world.level.block.RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_YELLOW));
+    public static final DeferredBlock<Block> SPARKBUSH_PLANKS = BLOCKS.registerBlock("sparkbush_planks",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.TERRACOTTA_YELLOW));
+    public static final DeferredBlock<net.minecraft.world.level.block.LeavesBlock> SPARKBUSH_LEAVES = BLOCKS.registerBlock("sparkbush_leaves",
+            net.minecraft.world.level.block.LeavesBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LEAVES).mapColor(MapColor.COLOR_YELLOW).lightLevel(s -> 10));
+    public static final DeferredBlock<net.minecraft.world.level.block.SaplingBlock> SPARKBUSH_SAPLING = BLOCKS.registerBlock("sparkbush_sapling",
+            p -> new net.minecraft.world.level.block.SaplingBlock(com.sideflowgames.fulguritefusion.stormreach.StormFlora.SPARKBUSH, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_SAPLING));
+    // Ground cover, flowers and the marsh's reeds.
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.StormPlantBlock> ARCGRASS = BLOCKS.registerBlock("arcgrass",
+            com.sideflowgames.fulguritefusion.stormreach.StormPlantBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SHORT_GRASS).mapColor(MapColor.COLOR_LIGHT_BLUE));
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.StormPlantBlock> ARC_FERN = BLOCKS.registerBlock("arc_fern",
+            com.sideflowgames.fulguritefusion.stormreach.StormPlantBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.FERN).mapColor(MapColor.COLOR_LIGHT_BLUE));
+    public static final DeferredBlock<net.minecraft.world.level.block.DoublePlantBlock> TALL_ARCGRASS = BLOCKS.registerBlock("tall_arcgrass",
+            net.minecraft.world.level.block.DoublePlantBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.TALL_GRASS).mapColor(MapColor.COLOR_LIGHT_BLUE));
+    public static final DeferredBlock<net.minecraft.world.level.block.FlowerBlock> VOLTBLOOM = BLOCKS.registerBlock("voltbloom",
+            p -> new net.minecraft.world.level.block.FlowerBlock(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED, 5, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.POPPY).lightLevel(s -> 7));
+    public static final DeferredBlock<net.minecraft.world.level.block.FlowerBlock> STORMCAP = BLOCKS.registerBlock("stormcap",
+            p -> new net.minecraft.world.level.block.FlowerBlock(net.minecraft.world.effect.MobEffects.NIGHT_VISION, 5, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.POPPY).lightLevel(s -> 6));
+    public static final DeferredBlock<net.minecraft.world.level.block.FlowerBlock> AURORA_LILY = BLOCKS.registerBlock("aurora_lily",
+            p -> new net.minecraft.world.level.block.FlowerBlock(net.minecraft.world.effect.MobEffects.REGENERATION, 4, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.POPPY).lightLevel(s -> 8));
+    public static final DeferredBlock<net.minecraft.world.level.block.DoublePlantBlock> STATIC_REEDS = BLOCKS.registerBlock("static_reeds",
+            net.minecraft.world.level.block.DoublePlantBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.TALL_GRASS).mapColor(MapColor.COLOR_CYAN));
+    // Crystal Sprouts: decorative crystal growths on Stormstone.
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.CrystalSproutBlock> CRYSTAL_SPROUTS = BLOCKS.registerBlock("crystal_sprouts",
+            com.sideflowgames.fulguritefusion.stormreach.CrystalSproutBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).noCollission().instabreak().sound(SoundType.SMALL_AMETHYST_BUD).lightLevel(s -> 5).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY));
+
+    // Cloudmoss Meadow: soft, pale moss ground with a carpet of it, and Puffblooms.
+    public static final DeferredBlock<Block> CLOUDMOSS_BLOCK = BLOCKS.registerBlock("cloudmoss_block",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.MOSS_BLOCK).mapColor(MapColor.SNOW));
+    public static final DeferredBlock<net.minecraft.world.level.block.CarpetBlock> CLOUDMOSS_CARPET = BLOCKS.registerBlock("cloudmoss_carpet",
+            net.minecraft.world.level.block.CarpetBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.MOSS_CARPET).mapColor(MapColor.SNOW));
+    public static final DeferredBlock<net.minecraft.world.level.block.FlowerBlock> PUFFBLOOM = BLOCKS.registerBlock("puffbloom",
+            p -> new net.minecraft.world.level.block.FlowerBlock(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 6, p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.POPPY).lightLevel(s -> 9));
+    // Voltcap Mushroom Fields: spongy mycelium ground and glowing mushrooms, small and giant.
+    public static final DeferredBlock<Block> VOLTCAP_MYCELIUM = BLOCKS.registerBlock("voltcap_mycelium",
+            net.minecraft.world.level.block.Block::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_CYAN).sound(SoundType.NYLIUM));
+    public static final DeferredBlock<net.minecraft.world.level.block.MushroomBlock> VOLTCAP = BLOCKS.registerBlock("voltcap",
+            p -> new net.minecraft.world.level.block.MushroomBlock(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.CONFIGURED_FEATURE,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "huge_voltcap")), p),
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BROWN_MUSHROOM).mapColor(MapColor.COLOR_CYAN).lightLevel(s -> 8));
+    public static final DeferredBlock<net.minecraft.world.level.block.HugeMushroomBlock> VOLTCAP_BLOCK = BLOCKS.registerBlock("voltcap_block",
+            net.minecraft.world.level.block.HugeMushroomBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BROWN_MUSHROOM_BLOCK).mapColor(MapColor.COLOR_CYAN).lightLevel(s -> 12));
+    public static final DeferredBlock<net.minecraft.world.level.block.HugeMushroomBlock> VOLTCAP_STEM = BLOCKS.registerBlock("voltcap_stem",
+            net.minecraft.world.level.block.HugeMushroomBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.MUSHROOM_STEM).mapColor(MapColor.COLOR_LIGHT_GRAY));
+    // Ion Lakes: glowing bulbs on the lake floor (they only live underwater).
+    // Titan Altar (Stormreach arenas): summons the Storm Titan. Can't be broken.
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.titan.TitanAltarBlock> TITAN_ALTAR = BLOCKS.registerBlock("titan_altar",
+            com.sideflowgames.fulguritefusion.titan.TitanAltarBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0f, 3600000.0f).noLootTable()
+                    .lightLevel(s -> 10).sound(SoundType.DEEPSLATE_BRICKS).noOcclusion());
+    // Stormreach rift: a frame of Rift Frame blocks with a Rift Keystone in its top edge and a Lightning Rod on the
+    // keystone. Lightning striking the rod opens the rift (see rift/RiftPortals).
+    public static final DeferredBlock<Block> RIFT_FRAME = BLOCKS.registerSimpleBlock("rift_frame",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(8.0f, 1200.0f)
+                    .sound(SoundType.DEEPSLATE_BRICKS).lightLevel(s -> 3));
+    public static final DeferredBlock<Block> RIFT_KEYSTONE = BLOCKS.registerSimpleBlock("rift_keystone",
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(8.0f, 1200.0f)
+                    .sound(SoundType.AMETHYST).lightLevel(s -> 9));
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.rift.RiftPortalBlock> RIFT_PORTAL = BLOCKS.registerBlock("rift_portal",
+            com.sideflowgames.fulguritefusion.rift.RiftPortalBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().strength(-1.0f, 3600000.0f).noLootTable()
+                    .lightLevel(s -> 12).sound(SoundType.GLASS).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK));
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.stormreach.IonBulbBlock> ION_BULB = BLOCKS.registerBlock("ion_bulb",
+            com.sideflowgames.fulguritefusion.stormreach.IonBulbBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SEAGRASS).mapColor(MapColor.COLOR_LIGHT_BLUE).lightLevel(s -> 12).sound(SoundType.WET_GRASS));
+
     // ---------- Exotic material sources ----------
     // Sky Collector: Aurora Dust on clear high nights, Sunmote at clear desert/badlands middays.
     public static final DeferredBlock<SkyCollectorBlock> SKY_COLLECTOR = BLOCKS.registerBlock("sky_collector",
@@ -248,6 +478,10 @@ public final class ModBlocks {
     public static final DeferredBlock<StormForgeBlock> STORM_FORGE = BLOCKS.registerBlock("storm_forge",
             StormForgeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     .strength(5.0f, 1200f).requiresCorrectToolForDrops().sound(SoundType.ANVIL).noOcclusion());
+    // Titan Forge: fuses Prime and Titan armor into Titan Prime (block/TitanForgeBlockEntity).
+    public static final DeferredBlock<com.sideflowgames.fulguritefusion.block.TitanForgeBlock> TITAN_FORGE = BLOCKS.registerBlock("titan_forge",
+            com.sideflowgames.fulguritefusion.block.TitanForgeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+                    .strength(8.0f, 1200f).requiresCorrectToolForDrops().sound(SoundType.ANVIL).noOcclusion().lightLevel(s -> 6));
     public static final DeferredBlock<ForgePowerPortBlock> FORGE_POWER_PORT = BLOCKS.registerBlock("forge_power_port",
             ForgePowerPortBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     .strength(5.0f, 6.0f).requiresCorrectToolForDrops().sound(SoundType.NETHERITE_BLOCK));
@@ -377,6 +611,78 @@ public final class ModBlocks {
     public static final DeferredItem<BlockItem> CONSOLE_FUEL_INPUT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("console_fuel_input", CONSOLE_FUEL_INPUT);
     public static final DeferredItem<BlockItem> DATA_CABLE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("data_cable", DATA_CABLE);
     public static final DeferredItem<BlockItem> FLUID_PIPE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("fluid_pipe", FLUID_PIPE);
+    public static final DeferredItem<BlockItem> STORMSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormstone", STORMSTONE);
+    public static final DeferredItem<BlockItem> COBBLED_STORMSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cobbled_stormstone", COBBLED_STORMSTONE);
+    public static final DeferredItem<BlockItem> POLISHED_STORMSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("polished_stormstone", POLISHED_STORMSTONE);
+    public static final DeferredItem<BlockItem> STORMSTONE_BRICKS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormstone_bricks", STORMSTONE_BRICKS);
+    public static final DeferredItem<BlockItem> FULGURITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("fulgurite_ore", FULGURITE_ORE);
+    public static final DeferredItem<BlockItem> TEMPEST_CRYSTAL_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("tempest_crystal_ore", TEMPEST_CRYSTAL_ORE);
+    public static final DeferredItem<BlockItem> CHARGED_STORMSAND_ITEM = ModItems.ITEMS.registerSimpleBlockItem("charged_stormsand", CHARGED_STORMSAND);
+    public static final DeferredItem<BlockItem> FULGURITE_GLASS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("fulgurite_glass", FULGURITE_GLASS);
+    public static final DeferredItem<BlockItem> CHARGED_LOAM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("charged_loam", CHARGED_LOAM);
+    public static final DeferredItem<BlockItem> ARCGRASS_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arcgrass_block", ARCGRASS_BLOCK);
+    public static final DeferredItem<BlockItem> CONDUCTOR_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("conductor_log", CONDUCTOR_LOG);
+    public static final DeferredItem<BlockItem> CONDUCTOR_PLANKS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("conductor_planks", CONDUCTOR_PLANKS);
+    public static final DeferredItem<BlockItem> CONDUCTOR_LEAVES_ITEM = ModItems.ITEMS.registerSimpleBlockItem("conductor_leaves", CONDUCTOR_LEAVES);
+    public static final DeferredItem<BlockItem> CONDUCTOR_SAPLING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("conductor_sapling", CONDUCTOR_SAPLING);
+    public static final DeferredItem<BlockItem> THUNDEROAK_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("thunderoak_log", THUNDEROAK_LOG);
+    public static final DeferredItem<BlockItem> THUNDEROAK_PLANKS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("thunderoak_planks", THUNDEROAK_PLANKS);
+    public static final DeferredItem<BlockItem> THUNDEROAK_LEAVES_ITEM = ModItems.ITEMS.registerSimpleBlockItem("thunderoak_leaves", THUNDEROAK_LEAVES);
+    public static final DeferredItem<BlockItem> THUNDEROAK_SAPLING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("thunderoak_sapling", THUNDEROAK_SAPLING);
+    public static final DeferredItem<BlockItem> SPARKBUSH_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sparkbush_log", SPARKBUSH_LOG);
+    public static final DeferredItem<BlockItem> SPARKBUSH_PLANKS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sparkbush_planks", SPARKBUSH_PLANKS);
+    public static final DeferredItem<BlockItem> SPARKBUSH_LEAVES_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sparkbush_leaves", SPARKBUSH_LEAVES);
+    public static final DeferredItem<BlockItem> SPARKBUSH_SAPLING_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sparkbush_sapling", SPARKBUSH_SAPLING);
+    public static final DeferredItem<BlockItem> ARCGRASS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arcgrass", ARCGRASS);
+    public static final DeferredItem<BlockItem> ARC_FERN_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arc_fern", ARC_FERN);
+    public static final DeferredItem<BlockItem> TALL_ARCGRASS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("tall_arcgrass", TALL_ARCGRASS);
+    public static final DeferredItem<BlockItem> VOLTBLOOM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("voltbloom", VOLTBLOOM);
+    public static final DeferredItem<BlockItem> STORMCAP_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormcap", STORMCAP);
+    public static final DeferredItem<BlockItem> AURORA_LILY_ITEM = ModItems.ITEMS.registerSimpleBlockItem("aurora_lily", AURORA_LILY);
+    public static final DeferredItem<BlockItem> STATIC_REEDS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("static_reeds", STATIC_REEDS);
+    public static final DeferredItem<BlockItem> CRYSTAL_SPROUTS_ITEM = ModItems.ITEMS.registerSimpleBlockItem("crystal_sprouts", CRYSTAL_SPROUTS);
+    public static final DeferredItem<BlockItem> CLOUDMOSS_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cloudmoss_block", CLOUDMOSS_BLOCK);
+    public static final DeferredItem<BlockItem> CLOUDMOSS_CARPET_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cloudmoss_carpet", CLOUDMOSS_CARPET);
+    public static final DeferredItem<BlockItem> PUFFBLOOM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("puffbloom", PUFFBLOOM);
+    public static final DeferredItem<BlockItem> VOLTCAP_MYCELIUM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("voltcap_mycelium", VOLTCAP_MYCELIUM);
+    public static final DeferredItem<BlockItem> VOLTCAP_ITEM = ModItems.ITEMS.registerSimpleBlockItem("voltcap", VOLTCAP);
+    public static final DeferredItem<BlockItem> VOLTCAP_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("voltcap_block", VOLTCAP_BLOCK);
+    public static final DeferredItem<BlockItem> VOLTCAP_STEM_ITEM = ModItems.ITEMS.registerSimpleBlockItem("voltcap_stem", VOLTCAP_STEM);
+    public static final DeferredItem<BlockItem> ION_BULB_ITEM = ModItems.ITEMS.registerSimpleBlockItem("ion_bulb", ION_BULB);
+    public static final DeferredItem<BlockItem> DEEP_STORMSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("deep_stormstone", DEEP_STORMSTONE);
+    public static final DeferredItem<BlockItem> RIMESTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rimestone", RIMESTONE);
+    public static final DeferredItem<BlockItem> STORMSLATE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormslate", STORMSLATE);
+    public static final DeferredItem<BlockItem> MAGNETITE_ROCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("magnetite_rock", MAGNETITE_ROCK);
+    public static final DeferredItem<BlockItem> FULGURITE_CRUST_ITEM = ModItems.ITEMS.registerSimpleBlockItem("fulgurite_crust", FULGURITE_CRUST);
+    public static final DeferredItem<BlockItem> CINDER_ROCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cinder_rock", CINDER_ROCK);
+    public static final DeferredItem<BlockItem> STORMSANDSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormsandstone", STORMSANDSTONE);
+    public static final DeferredItem<BlockItem> AURORA_ICE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("aurora_ice", AURORA_ICE);
+    public static final DeferredItem<BlockItem> PETRIFIED_LOG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("petrified_log", PETRIFIED_LOG);
+    public static final DeferredItem<BlockItem> ASH_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("ash_block", ASH_BLOCK);
+    public static final DeferredItem<BlockItem> SCORCHED_SAND_ITEM = ModItems.ITEMS.registerSimpleBlockItem("scorched_sand", SCORCHED_SAND);
+    public static final DeferredItem<BlockItem> STORMGLASS_SAND_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormglass_sand", STORMGLASS_SAND);
+    public static final DeferredItem<BlockItem> STORMSTONE_MAGNETITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormstone_magnetite_ore", STORMSTONE_MAGNETITE_ORE);
+    public static final DeferredItem<BlockItem> STORMSTONE_ARGENTITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormstone_argentite_ore", STORMSTONE_ARGENTITE_ORE);
+    public static final DeferredItem<BlockItem> CINDERITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cinderite_ore", CINDERITE_ORE);
+    public static final DeferredItem<BlockItem> PRISMITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("prismite_ore", PRISMITE_ORE);
+    public static final DeferredItem<BlockItem> STORMQUARTZ_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormquartz_ore", STORMQUARTZ_ORE);
+    public static final DeferredItem<BlockItem> AURORITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("aurorite_ore", AURORITE_ORE);
+    public static final DeferredItem<BlockItem> AMBER_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("amber_ore", AMBER_ORE);
+    public static final DeferredItem<BlockItem> MAGNETITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("magnetite_ore", MAGNETITE_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_MAGNETITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("deepslate_magnetite_ore", DEEPSLATE_MAGNETITE_ORE);
+    public static final DeferredItem<BlockItem> ARGENTITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("argentite_ore", ARGENTITE_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_ARGENTITE_ORE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("deepslate_argentite_ore", DEEPSLATE_ARGENTITE_ORE);
+    public static final DeferredItem<BlockItem> MAGNETITE_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("magnetite_block", MAGNETITE_BLOCK);
+    public static final DeferredItem<BlockItem> SILVER_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("silver_block", SILVER_BLOCK);
+    public static final DeferredItem<BlockItem> CINDERITE_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("cinderite_block", CINDERITE_BLOCK);
+    public static final DeferredItem<BlockItem> PRISMITE_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("prismite_block", PRISMITE_BLOCK);
+    public static final DeferredItem<BlockItem> STORMQUARTZ_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("stormquartz_block", STORMQUARTZ_BLOCK);
+    public static final DeferredItem<BlockItem> AURORITE_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("aurorite_block", AURORITE_BLOCK);
+    public static final DeferredItem<BlockItem> AMBER_BLOCK_ITEM = ModItems.ITEMS.registerSimpleBlockItem("amber_block", AMBER_BLOCK);
+    public static final DeferredItem<BlockItem> TITAN_ALTAR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("titan_altar", TITAN_ALTAR);
+    public static final DeferredItem<BlockItem> RIFT_FRAME_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rift_frame", RIFT_FRAME);
+    public static final DeferredItem<BlockItem> RIFT_KEYSTONE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("rift_keystone", RIFT_KEYSTONE,
+            new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC));
     public static final DeferredItem<BlockItem> SKY_COLLECTOR_ITEM = ModItems.ITEMS.registerSimpleBlockItem("sky_collector", SKY_COLLECTOR);
     public static final DeferredItem<BlockItem> NACRE_CLUSTER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("abyssal_nacre_cluster", NACRE_CLUSTER);
     public static final DeferredItem<BlockItem> FROZEN_SOUL_FIRE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("frozen_soul_fire", FROZEN_SOUL_FIRE);
@@ -391,6 +697,8 @@ public final class ModBlocks {
     public static final DeferredItem<com.sideflowgames.fulguritefusion.backpack.BackpackItem> PRIME_BACKPACK_ITEM = ModItems.ITEMS.register("prime_backpack",
             () -> new com.sideflowgames.fulguritefusion.backpack.StormBackpackItem(PRIME_BACKPACK.get(), new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC)));
     public static final DeferredItem<BlockItem> STORM_FORGE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("storm_forge", STORM_FORGE);
+    public static final DeferredItem<BlockItem> TITAN_FORGE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("titan_forge", TITAN_FORGE,
+            new Item.Properties().rarity(Rarity.EPIC));
     public static final DeferredItem<BlockItem> FORGE_POWER_PORT_ITEM = ModItems.ITEMS.registerSimpleBlockItem("forge_power_port", FORGE_POWER_PORT);
     public static final DeferredItem<BlockItem> CREATIVE_POWER_SOURCE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("creative_power_source",
             CREATIVE_POWER_SOURCE, new Item.Properties().rarity(Rarity.EPIC));
@@ -444,6 +752,8 @@ public final class ModBlocks {
 
     public static final Supplier<BlockEntityType<StormForgeBlockEntity>> STORM_FORGE_BE = BLOCK_ENTITIES.register("storm_forge",
             () -> BlockEntityType.Builder.of(StormForgeBlockEntity::new, STORM_FORGE.get()).build(null));
+    public static final Supplier<BlockEntityType<com.sideflowgames.fulguritefusion.block.TitanForgeBlockEntity>> TITAN_FORGE_BE = BLOCK_ENTITIES.register("titan_forge",
+            () -> BlockEntityType.Builder.of(com.sideflowgames.fulguritefusion.block.TitanForgeBlockEntity::new, TITAN_FORGE.get()).build(null));
     public static final Supplier<BlockEntityType<ForgePowerPortBlockEntity>> FORGE_POWER_PORT_BE = BLOCK_ENTITIES.register("forge_power_port",
             () -> BlockEntityType.Builder.of(ForgePowerPortBlockEntity::new, FORGE_POWER_PORT.get()).build(null));
     public static final Supplier<BlockEntityType<CreativePowerSourceBlockEntity>> CREATIVE_POWER_SOURCE_BE = BLOCK_ENTITIES.register("creative_power_source",

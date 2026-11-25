@@ -3,18 +3,18 @@
   "category": "misc",
   "pattern": [
     "III",
-    "RCR",
+    "SGS",
     "III"
   ],
   "key": {
     "I": {
-      "item": "minecraft:iron_ingot"
+      "item": "fulguritefusion:iron_sheet"
     },
-    "R": {
-      "item": "minecraft:redstone"
+    "S": {
+      "item": "fulguritefusion:silver_sheet"
     },
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     }
   },
   "result": {

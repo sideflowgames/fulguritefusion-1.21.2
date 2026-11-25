@@ -55,7 +55,47 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
     private boolean recipeDirty = true;
 
     public StormForgeBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.STORM_FORGE_BE.get(), pos, state);
+        this(ModBlocks.STORM_FORGE_BE.get(), pos, state);
+    }
+
+    // For larger forges built on the same anvil logic (see TitanForgeBlockEntity).
+    protected StormForgeBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    // ---------- What a particular forge overrides ----------
+
+    protected String title() {
+        return "Storm Forge";
+    }
+
+    protected int drawRate() {
+        return DRAW_RATE;
+    }
+
+    protected int buffer() {
+        return BUFFER;
+    }
+
+    @Nullable
+    protected ForgeRecipes.Recipe matchRecipe(List<ItemStack> items) {
+        return ForgeRecipes.match(items);
+    }
+
+    protected ItemStack craft(ForgeRecipes.Recipe recipe, List<ItemStack> items) {
+        return recipe.make(items);
+    }
+
+    // Where the arcs start from.
+    protected List<Vec3> pylonTips() {
+        List<Vec3> out = new ArrayList<>();
+        for (int[] c : CORNERS) out.add(Vec3.atCenterOf(worldPosition.offset(c[0], 2, c[1])).add(0, 0.4, 0));
+        return out;
+    }
+
+    // Whether a Forge Power Port at (dx, -1, dz) from the anvil feeds this forge.
+    public boolean acceptsPort(int dx, int dz) {
+        return isEdge(dx, dz);
     }
 
     // ---------- Structure ----------
@@ -68,7 +108,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
     }
 
     @Nullable
-    private String checkStructure() {
+    protected String checkStructure() {
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
                 BlockState s = level.getBlockState(worldPosition.offset(dx, -1, dz));
@@ -112,13 +152,13 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
             be.problem = p;
         }
         if (be.recipeDirty) {
-            be.recipe = ForgeRecipes.match(be.contents);
+            be.recipe = be.matchRecipe(be.contents);
             be.recipeDirty = false;
             be.progress = 0;
         }
         boolean nowWorking = false;
         if (be.formed && be.recipe != null && be.result.isEmpty() && be.fm > 0) {
-            int draw = Math.min(DRAW_RATE, Math.min(be.fm, be.recipe.fmCost() - be.progress));
+            int draw = Math.min(be.drawRate(), Math.min(be.fm, be.recipe.fmCost() - be.progress));
             be.fm -= draw;
             be.progress += draw;
             nowWorking = draw > 0;
@@ -137,8 +177,8 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
         long t = level.getGameTime();
         Vec3 top = Vec3.atCenterOf(worldPosition).add(0, 0.6, 0);
         if (t % 3 == 0) {
-            int[] c = CORNERS[(int) ((t / 3) % 4)];
-            Vec3 tip = Vec3.atCenterOf(worldPosition.offset(c[0], 2, c[1])).add(0, 0.4, 0);
+            List<Vec3> tips = pylonTips();
+            Vec3 tip = tips.get((int) ((t / 3) % tips.size()));
             int steps = 14;
             for (int i = 0; i <= steps; i++) {
                 double f = i / (double) steps;
@@ -155,7 +195,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
     }
 
     private void finish(ServerLevel level) {
-        result = recipe.make(contents);
+        result = craft(recipe, contents);
         contents.clear();
         progress = 0;
         recipeDirty = true;
@@ -208,7 +248,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
 
     public void showStatus(Player player) {
         List<Component> lines = new ArrayList<>();
-        lines.add(Component.literal("Storm Forge: " + (formed ? "formed" : "not formed (" + problem + ")"))
+        lines.add(Component.literal(title() + ": " + (formed ? "formed" : "not formed (" + problem + ")"))
                 .withStyle(formed ? ChatFormatting.AQUA : ChatFormatting.RED));
         if (recipe != null) {
             lines.add(Component.literal(String.format("Forging %s: %,d / %,d Fm (%d%%)", recipe.name(), progress, recipe.fmCost(),
@@ -243,7 +283,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
 
     @Override
     public int receiveFm(int amount, boolean simulate) {
-        int accepted = Math.max(0, Math.min(amount, BUFFER - fm));
+        int accepted = Math.max(0, Math.min(amount, buffer() - fm));
         if (!simulate && accepted > 0) {
             fm += accepted;
             setChanged();
@@ -258,7 +298,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
 
     @Override
     public int getMaxFm() {
-        return BUFFER;
+        return buffer();
     }
 
     @Override
@@ -301,7 +341,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
         recipeDirty = true;
         int keep = progress;
         // Keep progress across a reload: match now so the dirty check doesn't wipe it.
-        recipe = ForgeRecipes.match(contents);
+        recipe = matchRecipe(contents);
         recipeDirty = false;
         progress = recipe != null ? keep : 0;
     }

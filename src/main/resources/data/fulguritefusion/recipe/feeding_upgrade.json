@@ -2,18 +2,18 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "CSC",
-    "GHG",
-    "CSC"
+    "GTG",
+    "CHC",
+    "GTG"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "G": {
+      "item": "minecraft:gold_ingot"
     },
-    "S": {
+    "T": {
       "item": "minecraft:string"
     },
-    "G": {
+    "C": {
       "item": "minecraft:golden_carrot"
     },
     "H": {

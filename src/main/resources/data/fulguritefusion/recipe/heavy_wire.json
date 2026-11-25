@@ -1,9 +1,4 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:false"
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
@@ -13,7 +8,7 @@
   ],
   "key": {
     "S": {
-      "item": "fulguritefusion:iron_sheet"
+      "item": "fulguritefusion:silver_sheet"
     },
     "W": {
       "item": "fulguritefusion:insulated_wire"

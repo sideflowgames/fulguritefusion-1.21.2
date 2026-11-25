@@ -23,7 +23,7 @@ import java.util.TreeSet;
 // The multiblocks the guide can show in 3D, layer by layer. Built from the same layouts as the ghost outlines
 // (GhostBuild) and the machines' own shape checks, so the guide always matches what the game expects.
 // Ids for guide.json "build": fusion_reactor, reactor_console, mini_collider, storm_collider, storm_forge,
-// press, arc_furnace, wire_extruder, kiln, crusher.
+// press, arc_furnace, wire_extruder, kiln, crusher, shock_farm, shock_farm_large.
 public final class GuideBuilds {
     private GuideBuilds() {}
 
@@ -37,6 +37,11 @@ public final class GuideBuilds {
         public final int[] layers; // the y levels, bottom to top
         public final int minX, minY, minZ, maxX, maxY, maxZ;
         public final List<Step> steps = new ArrayList<>();
+        // Whether the finished build switches to its formed look in the guide. Off for builds whose formed look
+        // the guide can't draw (the Fusion Reactor's rings) or that have none (the Storm Forge), so the
+        // finished build stays fully visible.
+        public boolean formLook = true;
+        public int farmSize;    // Shock Farm: 1 = 5x5, 2 = 7x7 (the controller draws the merged farm)
 
         Build(List<Placed> blocks) {
             this.blocks = blocks;
@@ -116,6 +121,9 @@ public final class GuideBuilds {
             case "fusion_reactor" -> {
                 add(out, GhostBuild.fusionReactor(empty, zero));
                 out.add(new Placed(zero, ModBlocks.FUSION_COLLIDER.get().defaultBlockState()));
+                Build b = new Build(out);
+                b.formLook = false;
+                return b;
             }
             case "reactor_console" -> {
                 add(out, GhostBuild.console(empty, zero));
@@ -129,9 +137,31 @@ public final class GuideBuilds {
                 add(out, GhostBuild.colliderRing(empty, zero));
                 out.add(new Placed(zero, ModBlocks.STORM_COLLIDER.get().defaultBlockState()));
             }
+            case "shock_farm", "shock_farm_large" -> {
+                boolean big = id.equals("shock_farm_large");
+                add(out, GhostBuild.shockFarm(empty, zero, Direction.NORTH, big ? 2 : 1));
+                // Show the usual front row: Farm Collector right of the controller, Farm Power Port to its left,
+                // casing everywhere else on the ring.
+                BlockState casing = (big ? ModBlocks.CHARGED_ARC_CASING.get() : ModBlocks.TEMPERED_ARC_CASING.get()).defaultBlockState();
+                BlockPos collectorAt = zero.east(), portAt = zero.west(big ? 2 : 1);
+                for (int i = 0; i < out.size(); i++) {
+                    Placed pl = out.get(i);
+                    if (pl.state().is(com.sideflowgames.fulguritefusion.farm.FarmBlocks.COLLECTOR.get())) out.set(i, new Placed(pl.pos(), casing));
+                    else if (pl.pos().equals(collectorAt)) out.set(i, new Placed(pl.pos(), com.sideflowgames.fulguritefusion.farm.FarmBlocks.COLLECTOR.get().defaultBlockState()));
+                    else if (pl.pos().equals(portAt)) out.set(i, new Placed(pl.pos(), com.sideflowgames.fulguritefusion.farm.FarmBlocks.POWER_PORT.get().defaultBlockState()));
+                }
+                out.add(new Placed(zero, com.sideflowgames.fulguritefusion.farm.FarmBlocks.CONTROLLER.get().defaultBlockState()
+                        .setValue(com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock.FACING, Direction.NORTH)));
+                Build b = new Build(out);
+                b.farmSize = big ? 2 : 1;
+                return b;
+            }
             case "storm_forge" -> {
                 add(out, GhostBuild.stormForge(empty, zero));
                 out.add(new Placed(zero, ModBlocks.STORM_FORGE.get().defaultBlockState()));
+                Build b = new Build(out);
+                b.formLook = false;
+                return b;
             }
             default -> {
                 MachineType type = switch (id) {

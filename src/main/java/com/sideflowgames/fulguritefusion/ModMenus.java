@@ -37,6 +37,9 @@ public final class ModMenus {
     public static final Supplier<MenuType<com.sideflowgames.fulguritefusion.backpack.BackpackMenu>> BACKPACK =
             MENUS.register("backpack", () -> IMenuTypeExtension.create(com.sideflowgames.fulguritefusion.backpack.BackpackMenu::new));
 
+    public static final Supplier<MenuType<com.sideflowgames.fulguritefusion.trinket.EquipmentMenu>> EQUIPMENT =
+            MENUS.register("equipment", () -> IMenuTypeExtension.create(com.sideflowgames.fulguritefusion.trinket.EquipmentMenu::new));
+
     public static final Supplier<MenuType<StormBatteryMenu>> STORM_BATTERY =
             MENUS.register("storm_battery", () -> IMenuTypeExtension.create(StormBatteryMenu::new));
 

@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "#fulguritefusion:rubber_logs",
-    "fulguritefusion:dried_rubber_log"
+    "fulguritefusion:dried_rubber_log",
+    "fulguritefusion:conductor_log",
+    "fulguritefusion:thunderoak_log",
+    "fulguritefusion:sparkbush_log"
   ]
 }

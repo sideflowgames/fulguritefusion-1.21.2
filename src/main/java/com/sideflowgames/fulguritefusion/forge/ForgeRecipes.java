@@ -98,6 +98,25 @@ public final class ForgeRecipes {
             stormforged("Stormforged Axe", ModItems.FULGURITE_AXE.get(), ModItems.STORMFORGED_AXE::get);
             stormforged("Stormforged Shovel", ModItems.FULGURITE_SHOVEL.get(), ModItems.STORMFORGED_SHOVEL::get);
             stormforged("Stormforged Hoe", ModItems.FULGURITE_HOE.get(), ModItems.STORMFORGED_HOE::get);
+            for (var t : List.of(
+                    new Object[]{"Cloudstep Charm", ModItems.CLOUDSTEP_CHARM, ModItems.EMPOWERED_CLOUDSTEP_CHARM, ModItems.STORM_EYE},
+                    new Object[]{"Conduit Heart", ModItems.CONDUIT_HEART, ModItems.EMPOWERED_CONDUIT_HEART, ModItems.MOLTEN_HEART},
+                    new Object[]{"Void Arc Band", ModItems.VOID_ARC_BAND, ModItems.EMPOWERED_VOID_ARC_BAND, ModItems.VOID_SHARD},
+                    new Object[]{"Grounding Charm", ModItems.GROUNDING_CHARM, ModItems.EMPOWERED_GROUNDING_CHARM, ModItems.CHARGED_SPARK_CELL},
+                    new Object[]{"Cinder Ward", ModItems.CINDER_WARD, ModItems.EMPOWERED_CINDER_WARD, ModItems.CHARGED_SPARK_CELL},
+                    new Object[]{"Seer's Ring", ModItems.SEERS_RING, ModItems.EMPOWERED_SEERS_RING, ModItems.CHARGED_SPARK_CELL})) {
+                @SuppressWarnings("unchecked") var base = (java.util.function.Supplier<? extends Item>) t[1];
+                @SuppressWarnings("unchecked") var result = (java.util.function.Supplier<? extends Item>) t[2];
+                @SuppressWarnings("unchecked") var extra = (java.util.function.Supplier<? extends Item>) t[3];
+                all.add(new Recipe("Empowered " + t[0], item(base.get(), 1),
+                        List.of(item(extra.get(), 1), item(ModItems.REFINED_FULGURITE.get(), 4)), result::get, 2_000_000));
+            }
+            all.add(new Recipe("Storm Sigil", item(ModItems.STORM_EYE.get(), 1),
+                    List.of(item(ModItems.MOLTEN_HEART.get(), 1), item(ModItems.VOID_SHARD.get(), 1), item(ModItems.CHARGED_SPARK_CELL.get(), 1)),
+                    ModItems.STORM_SIGIL::get, 5_000_000));
+            all.add(new Recipe("Tempest Staff", item(ModItems.TEMPEST_CRYSTAL.get(), 1),
+                    List.of(item(ModItems.REFINED_FULGURITE.get(), 2), item(ModItems.STORMQUARTZ.get(), 2), item(ModItems.CHARGED_SPARK_CELL.get(), 1)),
+                    ModItems.TEMPEST_STAFF::get, STORMFORGED_COST));
             prime("Prime Blade", ModItems.STORM_BLADE.get(), ModItems.PRIME_BLADE::get, PRIME_COST);
             prime("Prime Spear", ModItems.STORM_SPEAR.get(), ModItems.PRIME_SPEAR::get, PRIME_COST);
             prime("Prime Pickaxe", ModItems.STORMFORGED_PICKAXE.get(), ModItems.PRIME_PICKAXE::get, PRIME_COST);
@@ -119,10 +138,12 @@ public final class ForgeRecipes {
                 List.of(item(ModItems.REFINED_FULGURITE.get(), 2), STRONG_FUEL), result, STORMFORGED_COST));
     }
 
-    // Prime: the Stormforged item (enchantments and name kept) + a Prime Spark Fragment + a netherite ingot.
+    // Prime: the Stormforged item (enchantments and name kept) + a Prime Spark Fragment + a Block of Gold and a
+    // Block of Silver.
     private static void prime(String name, Item base, Supplier<Item> result, int cost) {
         all.add(new Recipe(name, item(base, 1),
-                List.of(item(ModItems.PRIME_SPARK_FRAGMENT.get(), 1), item(Items.NETHERITE_INGOT, 1)), result, cost));
+                List.of(item(ModItems.PRIME_SPARK_FRAGMENT.get(), 1), item(Items.GOLD_BLOCK, 1),
+                        item(com.sideflowgames.fulguritefusion.ModBlocks.SILVER_BLOCK_ITEM.get(), 1)), result, cost));
     }
 
     // Stormforged backpack upgrade: the basic upgrade (its filter is kept) + Refined Fulgurite + an
@@ -135,9 +156,14 @@ public final class ForgeRecipes {
     // The recipe the anvil's contents make, or null. Every item must be used, in exactly the right amounts.
     @Nullable
     public static Recipe match(List<ItemStack> contents) {
+        return match(contents, all());
+    }
+
+    @Nullable
+    public static Recipe match(List<ItemStack> contents, List<Recipe> recipes) {
         if (contents.isEmpty()) return null;
         outer:
-        for (Recipe r : all()) {
+        for (Recipe r : recipes) {
             int[] have = new int[r.parts().size()];
             for (ItemStack s : contents) {
                 boolean used = false;

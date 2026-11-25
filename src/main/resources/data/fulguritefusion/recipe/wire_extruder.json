@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IHI",
+    "MHM",
     "CKC",
-    "III"
+    "SSS"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "H": {
       "item": "minecraft:shears"
@@ -18,6 +18,9 @@
     },
     "K": {
       "item": "fulguritefusion:crude_arc_casing"
+    },
+    "S": {
+      "item": "fulguritefusion:iron_sheet"
     }
   },
   "result": {

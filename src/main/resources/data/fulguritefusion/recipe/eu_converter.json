@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "LFL",
-    "RIR",
+    "SMS",
     "CCC"
   ],
   "key": {
@@ -13,11 +13,11 @@
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "R": {
-      "item": "minecraft:redstone"
+    "S": {
+      "item": "fulguritefusion:silver_sheet"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "C": {
       "tag": "fulguritefusion:lv_machine_casings"

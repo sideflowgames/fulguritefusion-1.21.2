@@ -29,6 +29,7 @@ public class BackpackLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         ItemStack stack = player.getItemBySlot(EquipmentSlot.CHEST);
+        if (!(stack.getItem() instanceof BackpackItem)) stack = com.sideflowgames.fulguritefusion.trinket.Trinkets.back(player);
         if (!(stack.getItem() instanceof BackpackItem)) stack = CuriosCompat.find(player, s -> s.getItem() instanceof BackpackItem);
         if (!(stack.getItem() instanceof BackpackItem item) || !(item.getBlock() instanceof BackpackBlock block)) return;
         BlockState state = block.defaultBlockState().setValue(BackpackBlock.FACING, Direction.NORTH);

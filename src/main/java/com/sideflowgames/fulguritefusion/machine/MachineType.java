@@ -91,7 +91,7 @@ public enum MachineType {
         return swapped ? new Result(1, n, out, ItemStack.EMPTY) : new Result(n, 1, out, ItemStack.EMPTY);
     }
 
-    // Ingots -> sheets; 4 Fulgurite Shards -> 1 Fulgurite.
+    // Ingots -> sheets (copper, iron, gold, silver; magnetite makes a plate); 4 Fulgurite Shards -> 1 Fulgurite.
     @Nullable
     private static Result press(ItemStack in) {
         if (in.is(ModItems.FULGURITE_SHARD.get())) {
@@ -100,7 +100,9 @@ public enum MachineType {
         return simple(in, Map.of(
                 Items.COPPER_INGOT, () -> new ItemStack(ModItems.COPPER_SHEET.get()),
                 Items.IRON_INGOT, () -> new ItemStack(ModItems.IRON_SHEET.get()),
-                Items.GOLD_INGOT, () -> new ItemStack(ModItems.GOLD_SHEET.get())), 1);
+                Items.GOLD_INGOT, () -> new ItemStack(ModItems.GOLD_SHEET.get()),
+                ModItems.SILVER_INGOT.get(), () -> new ItemStack(ModItems.SILVER_SHEET.get()),
+                ModItems.MAGNETITE_INGOT.get(), () -> new ItemStack(ModItems.MAGNETITE_PLATE.get())), 1);
     }
 
     // 2 Fulgurite -> Coil Segment (either input slot).
@@ -149,6 +151,12 @@ public enum MachineType {
         if (i == Items.RAW_IRON) return one(ModItems.CRUSHED_IRON.get(), 2);
         if (i == Items.RAW_COPPER) return one(ModItems.CRUSHED_COPPER.get(), 2);
         if (i == Items.RAW_GOLD) return one(ModItems.CRUSHED_GOLD.get(), 2);
+        if (i == ModItems.RAW_MAGNETITE.get()) return one(ModItems.CRUSHED_MAGNETITE.get(), 2);
+        if (i == ModItems.RAW_ARGENTITE.get()) return one(ModItems.CRUSHED_ARGENTITE.get(), 2);
+        if (i == ModBlocks.MAGNETITE_ORE_ITEM.get() || i == ModBlocks.DEEPSLATE_MAGNETITE_ORE_ITEM.get()
+                || i == ModBlocks.STORMSTONE_MAGNETITE_ORE_ITEM.get()) return one(ModItems.RAW_MAGNETITE.get(), 2);
+        if (i == ModBlocks.ARGENTITE_ORE_ITEM.get() || i == ModBlocks.DEEPSLATE_ARGENTITE_ORE_ITEM.get()
+                || i == ModBlocks.STORMSTONE_ARGENTITE_ORE_ITEM.get()) return one(ModItems.RAW_ARGENTITE.get(), 2);
         // Ore blocks (silk touch) -> double their normal drop.
         if (i == Items.IRON_ORE || i == Items.DEEPSLATE_IRON_ORE) return one(Items.RAW_IRON, 2);
         if (i == Items.COPPER_ORE || i == Items.DEEPSLATE_COPPER_ORE) return one(Items.RAW_COPPER, 6);

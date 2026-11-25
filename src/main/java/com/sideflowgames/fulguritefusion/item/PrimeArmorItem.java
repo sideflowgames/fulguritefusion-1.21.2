@@ -26,6 +26,10 @@ public class PrimeArmorItem extends StormforgedArmorItem {
         super(ModArmorMaterials.PRIME, type, properties);
     }
 
+    protected PrimeArmorItem(net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> material, Type type, Properties properties) {
+        super(material, type, properties);
+    }
+
     @Override
     public int maxFm() {
         return MAX_FM;

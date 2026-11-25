@@ -36,6 +36,9 @@ public final class ModCapabilities {
         // Latex Vulcanizer: pipes and buckets fill it through any of its casings (not from the front).
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlocks.ARC_CASING_BE.get(),
                 (be, side) -> be.getFluidHandler(side));
+        // Shock Farm: hoppers and pipes pull drops out of a Farm Collector.
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, com.sideflowgames.fulguritefusion.farm.FarmBlocks.COLLECTOR_BE.get(),
+                (be, side) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be));
         // FE cables can pull Forge Energy from the FE Converter's front face.
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlocks.FE_CONVERTER_BE.get(),
                 (be, side) -> be.getEnergyHandler(side));

@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "SGS",
-    "GRG",
+    "GAG",
     "SGS"
   ],
   "key": {
@@ -13,8 +13,8 @@
     "G": {
       "item": "minecraft:glass_pane"
     },
-    "R": {
-      "item": "minecraft:redstone"
+    "A": {
+      "item": "fulguritefusion:silver_sheet"
     }
   },
   "result": {

@@ -64,6 +64,9 @@ public class FulguriteFusionClient {
         };
         NeoForge.EVENT_BUS.addListener(FulguriteFusionClient::onClientTick);
         com.sideflowgames.fulguritefusion.client.ChainBolts.init();
+        com.sideflowgames.fulguritefusion.client.ItemPipeVisuals.init();
+        com.sideflowgames.fulguritefusion.client.StormreachClient.init();
+        com.sideflowgames.fulguritefusion.client.TrinketClient.init();
     }
 
     // R while riding a bonded Stormwing: lightning dive. Rebindable under Controls > Fulgurite Fusion.
@@ -75,6 +78,7 @@ public class FulguriteFusionClient {
     static void onClientExtensions(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
         event.registerItem(new com.sideflowgames.fulguritefusion.client.SpearHandTransform(),
                 ModItems.FULGURITE_SPEAR.get(), ModItems.STORM_SPEAR.get(), ModItems.PRIME_SPEAR.get());
+        event.registerItem(com.sideflowgames.fulguritefusion.client.TempestStaffRenderer.extensions(), ModItems.TEMPEST_STAFF.get());
     }
 
     // Latex: how the fluid looks in the world and in pipes/tanks of other mods.
@@ -114,6 +118,10 @@ public class FulguriteFusionClient {
     public static final KeyMapping PRIME_HAMMER = new KeyMapping("key.fulguritefusion.prime_hammer",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.fulguritefusion");
 
+    // G: Void Arc Band blink. Rebindable under Controls > Fulgurite Fusion.
+    public static final KeyMapping VOID_BLINK = new KeyMapping("key.fulguritefusion.void_blink",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, "key.categories.fulguritefusion");
+
     // Worn backpacks show on the player's back.
     @SubscribeEvent
     static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
@@ -129,6 +137,7 @@ public class FulguriteFusionClient {
         event.register(OPEN_BACKPACK);
         event.register(STORMWING_DIVE);
         event.register(PRIME_HAMMER);
+        event.register(VOID_BLINK);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
@@ -145,7 +154,10 @@ public class FulguriteFusionClient {
             }
         }
         com.sideflowgames.fulguritefusion.client.PrimeClient.tick(mc);
+        com.sideflowgames.fulguritefusion.client.TitanClient.tick(mc);
+        com.sideflowgames.fulguritefusion.client.TrinketClient.tick(mc);
         com.sideflowgames.fulguritefusion.client.ChainBolts.tick();
+        com.sideflowgames.fulguritefusion.client.StormreachClient.tick(mc);
         while (STORMWING_DIVE.consumeClick()) {
             if (mc.player != null && mc.player.getVehicle() instanceof StormwingEntity bird
                     && bird.getControllingPassenger() == mc.player && bird.clientStartDive()) {
@@ -165,7 +177,10 @@ public class FulguriteFusionClient {
     @SubscribeEvent
     static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.STORM_FURNACE.get(), StormFurnaceScreen::new);
+        event.register(com.sideflowgames.fulguritefusion.farm.FarmMenus.SHOCK_FARM.get(), com.sideflowgames.fulguritefusion.client.ShockFarmScreen::new);
+        event.register(com.sideflowgames.fulguritefusion.transport.TransportBlocks.PIPE_FILTER_MENU.get(), com.sideflowgames.fulguritefusion.client.PipeFilterScreen::new);
         event.register(ModMenus.BACKPACK.get(), com.sideflowgames.fulguritefusion.client.BackpackScreen::new);
+        event.register(ModMenus.EQUIPMENT.get(), com.sideflowgames.fulguritefusion.client.EquipmentScreen::new);
         event.register(ModMenus.UPGRADE_FILTER.get(), com.sideflowgames.fulguritefusion.client.UpgradeFilterScreen::new);
         event.register(ModMenus.FULGURITE_CHARGER.get(), FulguriteChargerScreen::new);
         event.register(ModMenus.EU_CONVERTER.get(), EuConverterScreen::new);
@@ -187,9 +202,13 @@ public class FulguriteFusionClient {
         event.registerBlockEntityRenderer(ModBlocks.MACHINE_CONTROLLER_BE.get(), MachineControllerRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.LATEX_HARVESTER_BE.get(), com.sideflowgames.fulguritefusion.client.LatexHarvesterRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.STORM_FORGE_BE.get(), com.sideflowgames.fulguritefusion.client.StormForgeRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.TITAN_FORGE_BE.get(), com.sideflowgames.fulguritefusion.client.StormForgeRenderer::new);
         // Ghost build outlines (shown while the block is powered by redstone).
         event.registerBlockEntityRenderer(ModBlocks.REACTOR_CONSOLE_BE.get(),
                 ctx -> new com.sideflowgames.fulguritefusion.client.GhostRenderer<>(com.sideflowgames.fulguritefusion.client.GhostBuild::console, 6));
+        // Shock Farm: ghost outline while unbuilt, the whole farm as one model once formed.
+        event.registerBlockEntityRenderer(com.sideflowgames.fulguritefusion.farm.FarmBlocks.CONTROLLER_BE.get(),
+                com.sideflowgames.fulguritefusion.client.ShockFarmRenderer::new);
         // Collider rings: ghost outline while incomplete, one big model once formed.
         event.registerBlockEntityRenderer(ModBlocks.STORM_COLLIDER_BE.get(), com.sideflowgames.fulguritefusion.client.ColliderRenderer::new);
         event.registerBlockEntityRenderer(ModBlocks.MINI_COLLIDER_BE.get(), com.sideflowgames.fulguritefusion.client.ColliderRenderer::new);
@@ -198,6 +217,41 @@ public class FulguriteFusionClient {
         event.registerEntityRenderer(ModEntities.STORMWING.get(), StormwingRenderer::new);
         event.registerEntityRenderer(ModEntities.STORMWING_HATCHLING.get(), StormwingHatchlingRenderer::new);
         event.registerEntityRenderer(ModEntities.ARC_SERPENT.get(), ArcSerpentRenderer::new);
+        event.registerEntityRenderer(ModEntities.STORMHOUND.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "stormhound", 0.5f, 1.0f, 10));
+        event.registerEntityRenderer(ModEntities.VOLTCAP_CRAWLER.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "voltcap_crawler", 0.5f, 1.0f, 6));
+        event.registerEntityRenderer(ModEntities.THUNDERHEAD.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "thunderhead", 3.0f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.MAGMA_CONDUIT.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "magma_conduit", 2.2f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.VOID_ARC.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "void_arc", 0.0f, 1.0f, 8));
+        event.registerEntityRenderer(ModEntities.STORM_TITAN.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "storm_titan", 4.0f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.TITAN_CONDUIT.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "titan_conduit", 0.6f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.STORM_CORE.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "storm_core", 0.0f, 1.0f, 14));
+        event.registerEntityRenderer(ModEntities.MAGMA_PYLON.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "magma_pylon", 0.8f, 1.0f, 10));
+        event.registerEntityRenderer(ModEntities.VOID_ECHO.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "void_arc", 0.0f, 1.0f, 8));
+        event.registerEntityRenderer(ModEntities.SPARKHORN.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "sparkhorn", 0.6f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.PUFFLING.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "puffling", 0.3f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.STATIC_JELLY.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "static_jelly", 0.0f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.ION_EEL.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "ion_eel", 0.0f, 1.0f, 10));
+        event.registerEntityRenderer(ModEntities.RUBBERBACK_SLOTH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "rubberback_sloth", 0.6f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.GLIMMERWING.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "glimmerwing", 0.0f, 1.0f, 13));
+        event.registerEntityRenderer(ModEntities.VOLTCAP_SNAIL.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "voltcap_snail", 0.35f, 1.0f, 8));
+        event.registerEntityRenderer(ModEntities.GLASSCRAB.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "glasscrab", 0.45f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.ARCWURM.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "arcwurm", 0.8f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.CRYSTAL_STALKER.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "crystal_stalker", 0.8f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.STATIC_WRAITH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "static_wraith", 0.0f, 1.0f, 6));
+        event.registerEntityRenderer(ModEntities.SHOCKROACH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "shockroach", 0.25f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.ARC_REAVER.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "arc_reaver", 0.5f, 1.0f, 4));
+        event.registerEntityRenderer(ModEntities.THUNDERHULK.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "thunderhulk", 1.1f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.STORMCALLER_SHADE.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "stormcaller_shade", 0.0f, 1.0f, 6));
+        event.registerEntityRenderer(ModEntities.STATIC_LEECH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "static_leech", 0.3f, 1.0f, 6));
+        event.registerEntityRenderer(ModEntities.ION_SWARM.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "ion_swarm", 0.0f, 1.0f, 15));
+        event.registerEntityRenderer(ModEntities.VOLTSPITTER.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "voltspitter", 0.6f, 1.0f, 3));
+        event.registerEntityRenderer(ModEntities.TEMPEST_RAPTOR.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "tempest_raptor", 0.4f, 1.0f, 2));
+        event.registerEntityRenderer(ModEntities.GLOOMARC_SPIDER.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "gloomarc_spider", 0.8f, 1.0f, 3));
+        event.registerEntityRenderer(ModEntities.PEAK_COLOSSUS.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "peak_colossus", 2.0f, 1.0f, 0));
+        event.registerEntityRenderer(ModEntities.CINDER_BEHEMOTH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "cinder_behemoth", 2.0f, 1.0f, 6));
+        event.registerEntityRenderer(ModEntities.AURORA_WRAITH.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "aurora_wraith", 0.0f, 1.0f, 12));
+        event.registerEntityRenderer(ModEntities.PRISM_SENTINEL.get(), ctx -> new com.sideflowgames.fulguritefusion.client.StormreachMobRenderer<>(ctx, "prism_sentinel", 1.6f, 1.0f, 8));
+        event.registerEntityRenderer(ModEntities.CHARGED_ORB.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 1.25f, true));
         event.registerEntityRenderer(ModEntities.SPEAR.get(), com.sideflowgames.fulguritefusion.client.SpearRenderer::new);
     }
 }

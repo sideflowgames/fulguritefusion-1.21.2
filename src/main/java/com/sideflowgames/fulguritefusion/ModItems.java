@@ -33,6 +33,15 @@ public final class ModItems {
     public static final DeferredItem<Item> SPARK_CELL = ITEMS.registerSimpleItem("spark_cell",
             new Item.Properties().stacksTo(16).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
 
+    // Tempest Crystal: a rare gem mined only in the Stormreach, kept for end-game recipes.
+    public static final DeferredItem<Item> TEMPEST_CRYSTAL = ITEMS.registerSimpleItem("tempest_crystal",
+            new Item.Properties().rarity(Rarity.RARE));
+    // Developer-only (the player named Dev, development build): travel to the Stormreach and back. Not in any
+    // creative tab; get one with /stormreach rift.
+    // RELEASE 2.0: taken out for the CurseForge jar. Put it back in the next revision for testing (also the
+    // "/stormreach rift" command in StormreachTravel).
+    // public static final DeferredItem<com.sideflowgames.fulguritefusion.stormreach.StormreachRiftItem> STORMREACH_RIFT = ITEMS.registerItem("stormreach_rift",
+    //         com.sideflowgames.fulguritefusion.stormreach.StormreachRiftItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
     // Dropped when mining Raw Fulgurite (4-8 per block, boosted by Fortune).
     public static final DeferredItem<Item> FULGURITE_SHARD = ITEMS.registerSimpleItem("fulgurite_shard",
             new Item.Properties());
@@ -121,6 +130,9 @@ public final class ModItems {
     // Storm Caller: calls a thunderstorm from clear skies for 1 Charged Spark Cell.
     public static final DeferredItem<StormCallerItem> STORM_CALLER = ITEMS.registerItem("storm_caller",
             StormCallerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    // Tempest Staff: calls lightning where you aim, for stored Fm. Forged at the Storm Forge around a Tempest Crystal.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TempestStaffItem> TEMPEST_STAFF = ITEMS.registerItem("tempest_staff",
+            com.sideflowgames.fulguritefusion.item.TempestStaffItem::new, new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE));
     public static final DeferredItem<Item> MOLTED_PLUME = ITEMS.registerSimpleItem("molted_plume", new Item.Properties());
     // ---------- Fulgurite tools and sword (early; between diamond and netherite) ----------
     public static final DeferredItem<com.sideflowgames.fulguritefusion.item.FulguriteTools.Sword> FULGURITE_SWORD =
@@ -213,6 +225,28 @@ public final class ModItems {
     public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_LEGGINGS = primeArmor("prime_leggings", net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
     public static final DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> PRIME_BOOTS = primeArmor("prime_boots", net.minecraft.world.item.ArmorItem.Type.BOOTS);
 
+    // Titan armor: dropped by the Storm Titan.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanArmorItem> TITAN_HELMET = titanArmor("titan_helmet", net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanArmorItem> TITAN_CHESTPLATE = titanArmor("titan_chestplate", net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanArmorItem> TITAN_LEGGINGS = titanArmor("titan_leggings", net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanArmorItem> TITAN_BOOTS = titanArmor("titan_boots", net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    // Titan Prime: a Prime piece and the same Titan piece fused in the Titan Forge.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem> TITAN_PRIME_HELMET = titanPrimeArmor("titan_prime_helmet", net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem> TITAN_PRIME_CHESTPLATE = titanPrimeArmor("titan_prime_chestplate", net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem> TITAN_PRIME_LEGGINGS = titanPrimeArmor("titan_prime_leggings", net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem> TITAN_PRIME_BOOTS = titanPrimeArmor("titan_prime_boots", net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    private static DeferredItem<com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem> titanPrimeArmor(String name, net.minecraft.world.item.ArmorItem.Type type) {
+        return ITEMS.registerItem(name, p -> new com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem(type, p),
+                new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC));
+    }
+
+    private static DeferredItem<com.sideflowgames.fulguritefusion.item.TitanArmorItem> titanArmor(String name, net.minecraft.world.item.ArmorItem.Type type) {
+        return ITEMS.registerItem(name, p -> new com.sideflowgames.fulguritefusion.item.TitanArmorItem(type, p),
+                new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC));
+    }
+
     private static DeferredItem<com.sideflowgames.fulguritefusion.item.PrimeArmorItem> primeArmor(String name, net.minecraft.world.item.ArmorItem.Type type) {
         return ITEMS.registerItem(name, p -> new com.sideflowgames.fulguritefusion.item.PrimeArmorItem(type, p),
                 new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.EPIC));
@@ -270,13 +304,151 @@ public final class ModItems {
     public static final DeferredItem<DeferredSpawnEggItem> ARC_SERPENT_SPAWN_EGG = ITEMS.registerItem("arc_serpent_spawn_egg",
             props -> new DeferredSpawnEggItem(ModEntities.ARC_SERPENT, 0x1B3A6B, 0xE6F7FF, props), new Item.Properties());
 
+    // Mini-boss key pieces: always dropped. Combined at the Storm Forge into the Storm Sigil.
+    public static final DeferredItem<Item> STORM_EYE = ITEMS.registerSimpleItem("storm_eye", new Item.Properties().stacksTo(16).rarity(Rarity.EPIC));
+    public static final DeferredItem<Item> MOLTEN_HEART = ITEMS.registerSimpleItem("molten_heart", new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<Item> VOID_SHARD = ITEMS.registerSimpleItem("void_shard", new Item.Properties().stacksTo(16).rarity(Rarity.EPIC));
+    // Trinkets (equipment panel): three from the mini-bosses, three crafted, each with an Empowered version.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> CLOUDSTEP_CHARM = ITEMS.registerItem("cloudstep_charm",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CLOUDSTEP_CHARM, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_CLOUDSTEP_CHARM = ITEMS.registerItem("empowered_cloudstep_charm",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CLOUDSTEP_CHARM, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> CONDUIT_HEART = ITEMS.registerItem("conduit_heart",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CONDUIT_HEART, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_CONDUIT_HEART = ITEMS.registerItem("empowered_conduit_heart",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CONDUIT_HEART, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> VOID_ARC_BAND = ITEMS.registerItem("void_arc_band",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.VOID_ARC_BAND, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_VOID_ARC_BAND = ITEMS.registerItem("empowered_void_arc_band",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.VOID_ARC_BAND, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> GROUNDING_CHARM = ITEMS.registerItem("grounding_charm",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.GROUNDING_CHARM, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_GROUNDING_CHARM = ITEMS.registerItem("empowered_grounding_charm",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.GROUNDING_CHARM, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> CINDER_WARD = ITEMS.registerItem("cinder_ward",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CINDER_WARD, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_CINDER_WARD = ITEMS.registerItem("empowered_cinder_ward",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.CINDER_WARD, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> SEERS_RING = ITEMS.registerItem("seers_ring",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.SEERS_RING, false, p), new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant());
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.trinket.TrinketItem> EMPOWERED_SEERS_RING = ITEMS.registerItem("empowered_seers_ring",
+            p -> new com.sideflowgames.fulguritefusion.trinket.TrinketItem(com.sideflowgames.fulguritefusion.trinket.TrinketKind.SEERS_RING, true, p), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    // Stormreach (and Overworld) ore materials.
+    public static final DeferredItem<Item> RAW_MAGNETITE = ITEMS.registerSimpleItem("raw_magnetite", new Item.Properties());
+    public static final DeferredItem<Item> MAGNETITE_INGOT = ITEMS.registerSimpleItem("magnetite_ingot", new Item.Properties());
+    public static final DeferredItem<Item> RAW_ARGENTITE = ITEMS.registerSimpleItem("raw_argentite", new Item.Properties());
+    public static final DeferredItem<Item> SILVER_INGOT = ITEMS.registerSimpleItem("silver_ingot", new Item.Properties());
+    public static final DeferredItem<Item> CINDERITE = ITEMS.registerSimpleItem("cinderite", new Item.Properties());
+    public static final DeferredItem<Item> PRISMITE_SHARD = ITEMS.registerSimpleItem("prismite_shard", new Item.Properties());
+    public static final DeferredItem<Item> STORMQUARTZ = ITEMS.registerSimpleItem("stormquartz", new Item.Properties());
+    public static final DeferredItem<Item> RAW_AURORITE = ITEMS.registerSimpleItem("raw_aurorite", new Item.Properties());
+    public static final DeferredItem<Item> AURORITE_INGOT = ITEMS.registerSimpleItem("aurorite_ingot", new Item.Properties());
+    public static final DeferredItem<Item> FOSSIL_AMBER = ITEMS.registerSimpleItem("fossil_amber", new Item.Properties());
+    // Storm Sigil: forged from the three key pieces, and dropped by the Storm Titan. Opens the Titan Trials and
+    // wakes the Titan at its altar.
+    public static final DeferredItem<com.sideflowgames.fulguritefusion.item.StormSigilItem> STORM_SIGIL = ITEMS.registerItem("storm_sigil",
+            com.sideflowgames.fulguritefusion.item.StormSigilItem::new, new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant());
+    // Rift Core: given by the Storm Titan when it falls; the heart of a Rift Keystone.
+    public static final DeferredItem<Item> RIFT_CORE = ITEMS.registerSimpleItem("rift_core", new Item.Properties().rarity(Rarity.EPIC).fireResistant());
+    public static final DeferredItem<DeferredSpawnEggItem> STORM_TITAN_SPAWN_EGG = ITEMS.registerItem("storm_titan_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STORM_TITAN, 0x2A1E44, 0xB46CFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STORMHOUND_SPAWN_EGG = ITEMS.registerItem("stormhound_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STORMHOUND, 0x1C2440, 0x8CB4FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> VOLTCAP_CRAWLER_SPAWN_EGG = ITEMS.registerItem("voltcap_crawler_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.VOLTCAP_CRAWLER, 0x2C3A44, 0x3CC4E4, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> THUNDERHEAD_SPAWN_EGG = ITEMS.registerItem("thunderhead_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.THUNDERHEAD, 0x5C6478, 0xD8F0FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> MAGMA_CONDUIT_SPAWN_EGG = ITEMS.registerItem("magma_conduit_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.MAGMA_CONDUIT, 0x2A1A14, 0xFF7A1C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> VOID_ARC_SPAWN_EGG = ITEMS.registerItem("void_arc_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.VOID_ARC, 0x140A24, 0xB46CFF, props), new Item.Properties());
+
+    // ---------- Stormreach creature drops ----------
+    public static final DeferredItem<Item> SPARKHORN_SHANK = ITEMS.registerSimpleItem("sparkhorn_shank",
+            new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(3).saturationModifier(0.3f).build()));
+    public static final DeferredItem<Item> COOKED_SPARKHORN_SHANK = ITEMS.registerSimpleItem("cooked_sparkhorn_shank",
+            new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(8).saturationModifier(0.8f).build()));
+    public static final DeferredItem<Item> HORN_SHARD = ITEMS.registerSimpleItem("horn_shard", new Item.Properties());
+    public static final DeferredItem<Item> STATIC_GEL = ITEMS.registerSimpleItem("static_gel", new Item.Properties());
+    public static final DeferredItem<Item> ION_SCALE = ITEMS.registerSimpleItem("ion_scale", new Item.Properties());
+    public static final DeferredItem<Item> VOLTSHELL = ITEMS.registerSimpleItem("voltshell", new Item.Properties());
+    public static final DeferredItem<Item> GLASS_CLAW = ITEMS.registerSimpleItem("glass_claw", new Item.Properties());
+    public static final DeferredItem<Item> ARCWURM_HIDE = ITEMS.registerSimpleItem("arcwurm_hide", new Item.Properties());
+    public static final DeferredItem<Item> WRAITH_ESSENCE = ITEMS.registerSimpleItem("wraith_essence", new Item.Properties().rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<DeferredSpawnEggItem> SPARKHORN_SPAWN_EGG = ITEMS.registerItem("sparkhorn_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.SPARKHORN, 0x4C8CA4, 0xC8F0FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> PUFFLING_SPAWN_EGG = ITEMS.registerItem("puffling_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.PUFFLING, 0xE8E4F4, 0xB4A8D8, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STATIC_JELLY_SPAWN_EGG = ITEMS.registerItem("static_jelly_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STATIC_JELLY, 0x8CE4FF, 0xF0FCFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> ION_EEL_SPAWN_EGG = ITEMS.registerItem("ion_eel_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.ION_EEL, 0x1C6C8C, 0x3CE8FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> RUBBERBACK_SLOTH_SPAWN_EGG = ITEMS.registerItem("rubberback_sloth_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.RUBBERBACK_SLOTH, 0x5C4A3A, 0x2E2A26, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> GLIMMERWING_SPAWN_EGG = ITEMS.registerItem("glimmerwing_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.GLIMMERWING, 0xF4E46C, 0xFFF8C8, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> VOLTCAP_SNAIL_SPAWN_EGG = ITEMS.registerItem("voltcap_snail_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.VOLTCAP_SNAIL, 0x2CA4C4, 0xC8D4D8, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> GLASSCRAB_SPAWN_EGG = ITEMS.registerItem("glasscrab_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.GLASSCRAB, 0xC8A8F0, 0x6E5A8C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> ARCWURM_SPAWN_EGG = ITEMS.registerItem("arcwurm_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.ARCWURM, 0x3A2C34, 0x6CE4F0, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> CRYSTAL_STALKER_SPAWN_EGG = ITEMS.registerItem("crystal_stalker_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_STALKER, 0x2A2438, 0x9C7CFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STATIC_WRAITH_SPAWN_EGG = ITEMS.registerItem("static_wraith_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STATIC_WRAITH, 0x14141C, 0x6C8CFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> SHOCKROACH_SPAWN_EGG = ITEMS.registerItem("shockroach_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.SHOCKROACH, 0x3C2A1C, 0xFFD24C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> ARC_REAVER_SPAWN_EGG = ITEMS.registerItem("arc_reaver_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.ARC_REAVER, 0x1C2440, 0x5CE8FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> THUNDERHULK_SPAWN_EGG = ITEMS.registerItem("thunderhulk_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.THUNDERHULK, 0x3A3E4C, 0x7CC8FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STORMCALLER_SHADE_SPAWN_EGG = ITEMS.registerItem("stormcaller_shade_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STORMCALLER_SHADE, 0x18142A, 0xB49CFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> STATIC_LEECH_SPAWN_EGG = ITEMS.registerItem("static_leech_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.STATIC_LEECH, 0x4C3A5C, 0x9CFFE0, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> ION_SWARM_SPAWN_EGG = ITEMS.registerItem("ion_swarm_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.ION_SWARM, 0x2C6CA8, 0xE8FFFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> VOLTSPITTER_SPAWN_EGG = ITEMS.registerItem("voltspitter_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.VOLTSPITTER, 0x2C3A24, 0xD8FF4C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> TEMPEST_RAPTOR_SPAWN_EGG = ITEMS.registerItem("tempest_raptor_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.TEMPEST_RAPTOR, 0x3C4C6C, 0xFFE87C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> GLOOMARC_SPIDER_SPAWN_EGG = ITEMS.registerItem("gloomarc_spider_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.GLOOMARC_SPIDER, 0x16121E, 0xA86CFF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> PEAK_COLOSSUS_SPAWN_EGG = ITEMS.registerItem("peak_colossus_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.PEAK_COLOSSUS, 0x4C5868, 0x8CE0FF, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> CINDER_BEHEMOTH_SPAWN_EGG = ITEMS.registerItem("cinder_behemoth_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.CINDER_BEHEMOTH, 0x2A1C18, 0xFF7C2C, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> AURORA_WRAITH_SPAWN_EGG = ITEMS.registerItem("aurora_wraith_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.AURORA_WRAITH, 0x1C2C3C, 0x7CFFC0, props), new Item.Properties());
+    public static final DeferredItem<DeferredSpawnEggItem> PRISM_SENTINEL_SPAWN_EGG = ITEMS.registerItem("prism_sentinel_spawn_egg",
+            props -> new DeferredSpawnEggItem(ModEntities.PRISM_SENTINEL, 0x3C2C4C, 0xFF9CF0, props), new Item.Properties());
+    public static final DeferredItem<Item> REAVER_BLADE_SHARD = ITEMS.registerSimpleItem("reaver_blade_shard", new Item.Properties());
+    public static final DeferredItem<Item> THUNDERHULK_CORE = ITEMS.registerSimpleItem("thunderhulk_core", new Item.Properties());
+    public static final DeferredItem<Item> SHADE_VEIL = ITEMS.registerSimpleItem("shade_veil", new Item.Properties());
+    public static final DeferredItem<Item> LEECH_FANG = ITEMS.registerSimpleItem("leech_fang", new Item.Properties());
+    public static final DeferredItem<Item> ION_MOTE = ITEMS.registerSimpleItem("ion_mote", new Item.Properties());
+    public static final DeferredItem<Item> VOLT_GLAND = ITEMS.registerSimpleItem("volt_gland", new Item.Properties());
+    public static final DeferredItem<Item> TEMPEST_FEATHER = ITEMS.registerSimpleItem("tempest_feather", new Item.Properties());
+    public static final DeferredItem<Item> GLOOMARC_SILK = ITEMS.registerSimpleItem("gloomarc_silk", new Item.Properties());
+    public static final DeferredItem<Item> COLOSSUS_HEART = ITEMS.registerSimpleItem("colossus_heart", new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE));
+    public static final DeferredItem<Item> BEHEMOTH_EMBER = ITEMS.registerSimpleItem("behemoth_ember", new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE));
+    public static final DeferredItem<Item> AURORA_SHROUD = ITEMS.registerSimpleItem("aurora_shroud", new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE));
+    public static final DeferredItem<Item> SENTINEL_LENS = ITEMS.registerSimpleItem("sentinel_lens", new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE));
+    public static final DeferredItem<Item> CHARGED_ORB = ITEMS.registerSimpleItem("charged_orb", new Item.Properties());
+
     // Processing machine products.
     public static final DeferredItem<Item> IRON_SHEET = ITEMS.registerSimpleItem("iron_sheet", new Item.Properties());
     public static final DeferredItem<Item> GOLD_SHEET = ITEMS.registerSimpleItem("gold_sheet", new Item.Properties());
+    // Pressed from Silver and Magnetite ingots.
+    public static final DeferredItem<Item> SILVER_SHEET = ITEMS.registerSimpleItem("silver_sheet", new Item.Properties());
+    public static final DeferredItem<Item> MAGNETITE_PLATE = ITEMS.registerSimpleItem("magnetite_plate", new Item.Properties());
     public static final DeferredItem<Item> COIL_SEGMENT = ITEMS.registerSimpleItem("coil_segment", new Item.Properties());
     public static final DeferredItem<Item> CRUSHED_IRON = ITEMS.registerSimpleItem("crushed_iron", new Item.Properties());
     public static final DeferredItem<Item> CRUSHED_COPPER = ITEMS.registerSimpleItem("crushed_copper", new Item.Properties());
     public static final DeferredItem<Item> CRUSHED_GOLD = ITEMS.registerSimpleItem("crushed_gold", new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_MAGNETITE = ITEMS.registerSimpleItem("crushed_magnetite", new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_ARGENTITE = ITEMS.registerSimpleItem("crushed_argentite", new Item.Properties());
 
     // Fulgurite Fusion Guide: the in-game guide book.
     public static final DeferredItem<com.sideflowgames.fulguritefusion.item.GuideBookItem> GUIDE_BOOK = ITEMS.registerItem("guide_book",
@@ -400,6 +572,9 @@ public final class ModItems {
                             com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.StormforgedTools.MAX_FM);
                             output.accept(full);
                         }
+                        ItemStack staff = new ItemStack(TEMPEST_STAFF.get());
+                        com.sideflowgames.fulguritefusion.item.FmChargeable.set(staff, com.sideflowgames.fulguritefusion.item.TempestStaffItem.MAX_FM);
+                        output.accept(staff);
                         output.accept(ModBlocks.STORM_FORGE_ITEM.get());
                         output.accept(ModBlocks.FORGE_POWER_PORT_ITEM.get());
                         for (var gear : java.util.List.of(PRIME_BLADE, PRIME_SPEAR, PRIME_PICKAXE, PRIME_AXE, PRIME_SHOVEL, PRIME_HOE,
@@ -419,6 +594,71 @@ public final class ModItems {
                         output.accept(PRIME_SPARK.get());
                         output.accept(LUMEN_SLUG_SPAWN_EGG.get());
                         output.accept(VOIDMOTH_SPAWN_EGG.get());
+                        output.accept(STORM_EYE.get());
+                        output.accept(MOLTEN_HEART.get());
+                        output.accept(VOID_SHARD.get());
+                        for (var t : java.util.List.of(CLOUDSTEP_CHARM, EMPOWERED_CLOUDSTEP_CHARM, CONDUIT_HEART, EMPOWERED_CONDUIT_HEART,
+                                VOID_ARC_BAND, EMPOWERED_VOID_ARC_BAND, GROUNDING_CHARM, EMPOWERED_GROUNDING_CHARM, CINDER_WARD,
+                                EMPOWERED_CINDER_WARD, SEERS_RING, EMPOWERED_SEERS_RING)) output.accept(t.get());
+                        output.accept(STORM_SIGIL.get());
+                        output.accept(RIFT_CORE.get());
+                        output.accept(ModBlocks.RIFT_FRAME_ITEM.get());
+                        output.accept(ModBlocks.RIFT_KEYSTONE_ITEM.get());
+                        output.accept(STORM_TITAN_SPAWN_EGG.get());
+                        output.accept(ModBlocks.TITAN_ALTAR_ITEM.get());
+                        output.accept(ModBlocks.TITAN_FORGE_ITEM.get());
+                        for (var armor : java.util.List.of(TITAN_PRIME_HELMET, TITAN_PRIME_CHESTPLATE, TITAN_PRIME_LEGGINGS, TITAN_PRIME_BOOTS)) {
+                            ItemStack full = new ItemStack(armor.get());
+                            com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.TitanPrimeArmorItem.MAX_FM);
+                            output.accept(full);
+                        }
+                        for (var armor : java.util.List.of(TITAN_HELMET, TITAN_CHESTPLATE, TITAN_LEGGINGS, TITAN_BOOTS)) {
+                            ItemStack full = new ItemStack(armor.get());
+                            com.sideflowgames.fulguritefusion.item.FmChargeable.set(full, com.sideflowgames.fulguritefusion.item.TitanArmorItem.MAX_FM);
+                            output.accept(full);
+                        }
+                        output.accept(STORMHOUND_SPAWN_EGG.get());
+                        output.accept(VOLTCAP_CRAWLER_SPAWN_EGG.get());
+                        output.accept(THUNDERHEAD_SPAWN_EGG.get());
+                        output.accept(MAGMA_CONDUIT_SPAWN_EGG.get());
+                        output.accept(VOID_ARC_SPAWN_EGG.get());
+                        output.accept(SPARKHORN_SHANK.get());
+                        output.accept(COOKED_SPARKHORN_SHANK.get());
+                        output.accept(HORN_SHARD.get());
+                        output.accept(STATIC_GEL.get());
+                        output.accept(ION_SCALE.get());
+                        output.accept(VOLTSHELL.get());
+                        output.accept(GLASS_CLAW.get());
+                        output.accept(ARCWURM_HIDE.get());
+                        output.accept(WRAITH_ESSENCE.get());
+                        output.accept(SPARKHORN_SPAWN_EGG.get());
+                        output.accept(PUFFLING_SPAWN_EGG.get());
+                        output.accept(STATIC_JELLY_SPAWN_EGG.get());
+                        output.accept(ION_EEL_SPAWN_EGG.get());
+                        output.accept(RUBBERBACK_SLOTH_SPAWN_EGG.get());
+                        output.accept(GLIMMERWING_SPAWN_EGG.get());
+                        output.accept(VOLTCAP_SNAIL_SPAWN_EGG.get());
+                        output.accept(GLASSCRAB_SPAWN_EGG.get());
+                        output.accept(ARCWURM_SPAWN_EGG.get());
+                        output.accept(CRYSTAL_STALKER_SPAWN_EGG.get());
+                        output.accept(STATIC_WRAITH_SPAWN_EGG.get());
+                        output.accept(SHOCKROACH_SPAWN_EGG.get());
+                        output.accept(ARC_REAVER_SPAWN_EGG.get());
+                        output.accept(THUNDERHULK_SPAWN_EGG.get());
+                        output.accept(STORMCALLER_SHADE_SPAWN_EGG.get());
+                        output.accept(STATIC_LEECH_SPAWN_EGG.get());
+                        output.accept(ION_SWARM_SPAWN_EGG.get());
+                        output.accept(VOLTSPITTER_SPAWN_EGG.get());
+                        output.accept(TEMPEST_RAPTOR_SPAWN_EGG.get());
+                        output.accept(GLOOMARC_SPIDER_SPAWN_EGG.get());
+                        output.accept(PEAK_COLOSSUS_SPAWN_EGG.get());
+                        output.accept(CINDER_BEHEMOTH_SPAWN_EGG.get());
+                        output.accept(AURORA_WRAITH_SPAWN_EGG.get());
+                        output.accept(PRISM_SENTINEL_SPAWN_EGG.get());
+                        com.sideflowgames.fulguritefusion.dungeon.DungeonBlocks.addToTab(output);
+                        com.sideflowgames.fulguritefusion.brew.UtilityBlocks.addToTab(output);
+                        com.sideflowgames.fulguritefusion.farm.FarmBlocks.addToTab(output);
+                        com.sideflowgames.fulguritefusion.transport.TransportBlocks.addToTab(output);
                         output.accept(ModBlocks.CRUDE_ARC_CASING_ITEM.get());
                         output.accept(ModBlocks.TEMPERED_ARC_CASING_ITEM.get());
                         output.accept(ModBlocks.CHARGED_ARC_CASING_ITEM.get());
@@ -431,12 +671,107 @@ public final class ModItems {
                         output.accept(ModBlocks.BANBURY_MIXER_ITEM.get());
                         output.accept(ModBlocks.LATEX_VULCANIZER_ITEM.get());
                         output.accept(ModBlocks.FLUID_PIPE_ITEM.get());
+                        output.accept(ModBlocks.STORMSTONE_ITEM.get());
+                        output.accept(ModBlocks.COBBLED_STORMSTONE_ITEM.get());
+                        output.accept(ModBlocks.POLISHED_STORMSTONE_ITEM.get());
+                        output.accept(ModBlocks.STORMSTONE_BRICKS_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.TEMPEST_CRYSTAL_ORE_ITEM.get());
+                        output.accept(ModBlocks.DEEP_STORMSTONE_ITEM.get());
+                        output.accept(ModBlocks.RIMESTONE_ITEM.get());
+                        output.accept(ModBlocks.STORMSLATE_ITEM.get());
+                        output.accept(ModBlocks.MAGNETITE_ROCK_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_CRUST_ITEM.get());
+                        output.accept(ModBlocks.CINDER_ROCK_ITEM.get());
+                        output.accept(ModBlocks.STORMSANDSTONE_ITEM.get());
+                        output.accept(ModBlocks.AURORA_ICE_ITEM.get());
+                        output.accept(ModBlocks.PETRIFIED_LOG_ITEM.get());
+                        output.accept(ModBlocks.ASH_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.SCORCHED_SAND_ITEM.get());
+                        output.accept(ModBlocks.STORMGLASS_SAND_ITEM.get());
+                        output.accept(ModBlocks.STORMSTONE_MAGNETITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.STORMSTONE_ARGENTITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.CINDERITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.PRISMITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.STORMQUARTZ_ORE_ITEM.get());
+                        output.accept(ModBlocks.AURORITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.AMBER_ORE_ITEM.get());
+                        output.accept(ModBlocks.MAGNETITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.DEEPSLATE_MAGNETITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.ARGENTITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.DEEPSLATE_ARGENTITE_ORE_ITEM.get());
+                        output.accept(ModBlocks.MAGNETITE_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.SILVER_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.CINDERITE_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.PRISMITE_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.STORMQUARTZ_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.AURORITE_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.AMBER_BLOCK_ITEM.get());
+                        output.accept(RAW_MAGNETITE.get());
+                        output.accept(MAGNETITE_INGOT.get());
+                        output.accept(RAW_ARGENTITE.get());
+                        output.accept(SILVER_INGOT.get());
+                        output.accept(CINDERITE.get());
+                        output.accept(PRISMITE_SHARD.get());
+                        output.accept(STORMQUARTZ.get());
+                        output.accept(RAW_AURORITE.get());
+                        output.accept(AURORITE_INGOT.get());
+                        output.accept(REAVER_BLADE_SHARD.get());
+                        output.accept(THUNDERHULK_CORE.get());
+                        output.accept(SHADE_VEIL.get());
+                        output.accept(LEECH_FANG.get());
+                        output.accept(ION_MOTE.get());
+                        output.accept(VOLT_GLAND.get());
+                        output.accept(TEMPEST_FEATHER.get());
+                        output.accept(GLOOMARC_SILK.get());
+                        output.accept(COLOSSUS_HEART.get());
+                        output.accept(BEHEMOTH_EMBER.get());
+                        output.accept(AURORA_SHROUD.get());
+                        output.accept(SENTINEL_LENS.get());
+                        output.accept(FOSSIL_AMBER.get());
+                        output.accept(ModBlocks.CHARGED_STORMSAND_ITEM.get());
+                        output.accept(ModBlocks.FULGURITE_GLASS_ITEM.get());
+                        output.accept(ModBlocks.CHARGED_LOAM_ITEM.get());
+                        output.accept(ModBlocks.ARCGRASS_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.CONDUCTOR_LOG_ITEM.get());
+                        output.accept(ModBlocks.CONDUCTOR_PLANKS_ITEM.get());
+                        output.accept(ModBlocks.CONDUCTOR_LEAVES_ITEM.get());
+                        output.accept(ModBlocks.CONDUCTOR_SAPLING_ITEM.get());
+                        output.accept(ModBlocks.THUNDEROAK_LOG_ITEM.get());
+                        output.accept(ModBlocks.THUNDEROAK_PLANKS_ITEM.get());
+                        output.accept(ModBlocks.THUNDEROAK_LEAVES_ITEM.get());
+                        output.accept(ModBlocks.THUNDEROAK_SAPLING_ITEM.get());
+                        output.accept(ModBlocks.SPARKBUSH_LOG_ITEM.get());
+                        output.accept(ModBlocks.SPARKBUSH_PLANKS_ITEM.get());
+                        output.accept(ModBlocks.SPARKBUSH_LEAVES_ITEM.get());
+                        output.accept(ModBlocks.SPARKBUSH_SAPLING_ITEM.get());
+                        output.accept(ModBlocks.ARCGRASS_ITEM.get());
+                        output.accept(ModBlocks.ARC_FERN_ITEM.get());
+                        output.accept(ModBlocks.TALL_ARCGRASS_ITEM.get());
+                        output.accept(ModBlocks.VOLTBLOOM_ITEM.get());
+                        output.accept(ModBlocks.STORMCAP_ITEM.get());
+                        output.accept(ModBlocks.AURORA_LILY_ITEM.get());
+                        output.accept(ModBlocks.STATIC_REEDS_ITEM.get());
+                        output.accept(ModBlocks.CRYSTAL_SPROUTS_ITEM.get());
+                        output.accept(ModBlocks.CLOUDMOSS_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.CLOUDMOSS_CARPET_ITEM.get());
+                        output.accept(ModBlocks.PUFFBLOOM_ITEM.get());
+                        output.accept(ModBlocks.VOLTCAP_MYCELIUM_ITEM.get());
+                        output.accept(ModBlocks.VOLTCAP_ITEM.get());
+                        output.accept(ModBlocks.VOLTCAP_BLOCK_ITEM.get());
+                        output.accept(ModBlocks.VOLTCAP_STEM_ITEM.get());
+                        output.accept(ModBlocks.ION_BULB_ITEM.get());
+                        output.accept(TEMPEST_CRYSTAL.get());
                         output.accept(IRON_SHEET.get());
                         output.accept(GOLD_SHEET.get());
+                        output.accept(SILVER_SHEET.get());
+                        output.accept(MAGNETITE_PLATE.get());
                         output.accept(COIL_SEGMENT.get());
                         output.accept(CRUSHED_IRON.get());
                         output.accept(CRUSHED_COPPER.get());
                         output.accept(CRUSHED_GOLD.get());
+                        output.accept(CRUSHED_MAGNETITE.get());
+                        output.accept(CRUSHED_ARGENTITE.get());
                         output.accept(STORMWING_SPAWN_EGG.get());
                         output.accept(ARC_SERPENT_SPAWN_EGG.get());
                         output.accept(MOLTED_PLUME.get());

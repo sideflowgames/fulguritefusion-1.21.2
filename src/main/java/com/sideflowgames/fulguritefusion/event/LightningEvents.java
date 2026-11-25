@@ -75,13 +75,13 @@ public final class LightningEvents {
             if (Config.RITUAL_ENABLED.get()) {
                 tryUpgrade(level, hit, state, COPPER_BLOCK, ModBlocks.ENHANCED_STORM_FURNACE.get(),
                         List.of(new Offering(ModItems.SPARK_CELL.get(), Config.ENHANCED_SPARK_CELLS.get()),
-                                new Offering(Items.DIAMOND, Config.ENHANCED_DIAMONDS.get())));
+                                new Offering(ModItems.MAGNETITE_INGOT.get(), Config.ENHANCED_MAGNETITE.get())));
             }
         } else if (state.is(ModBlocks.ENHANCED_STORM_FURNACE.get())) {
             if (Config.RITUAL_ENABLED.get()) {
                 tryUpgrade(level, hit, state, GOLD_BLOCK, ModBlocks.CHARGED_STORM_FURNACE.get(),
                         List.of(new Offering(ModItems.SPARK_CELL.get(), Config.CHARGED_SPARK_CELLS.get()),
-                                new Offering(Items.NETHERITE_INGOT, Config.CHARGED_NETHERITE.get())));
+                                new Offering(ModItems.SILVER_INGOT.get(), Config.CHARGED_SILVER.get())));
             }
         } else if (isSand(state)) {
             growVein(level, hit, level.getRandom());

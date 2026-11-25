@@ -70,5 +70,13 @@
         "attenuation_distance": 160
       }
     ]
+  },
+  "arc_buzz": {
+    "subtitle": "subtitles.fulguritefusion.arc_buzz",
+    "sounds": [
+      "fulguritefusion:arc_buzz1",
+      "fulguritefusion:arc_buzz2",
+      "fulguritefusion:arc_buzz3"
+    ]
   }
 }

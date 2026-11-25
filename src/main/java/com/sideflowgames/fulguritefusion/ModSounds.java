@@ -21,6 +21,8 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> STORMWING_CALL = register("stormwing_call");
     public static final Supplier<SoundEvent> STORMWING_HURT = register("stormwing_hurt");
     public static final Supplier<SoundEvent> STORMWING_DEATH = register("stormwing_death");
+    // Arc Sender firing: a short electric buzz.
+    public static final Supplier<SoundEvent> ARC_BUZZ = register("arc_buzz");
 
     // Fusion Reactor: the rumbling hum that builds over the 30 seconds of outer laps, the portal beam, and the impact.
     public static final Supplier<SoundEvent> REACTOR_HUM = registerFar("reactor_hum", 160f);

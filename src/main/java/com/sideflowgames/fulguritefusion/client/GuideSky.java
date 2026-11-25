@@ -7,7 +7,7 @@ import net.minecraft.util.RandomSource;
 import java.util.ArrayList;
 import java.util.List;
 
-// The guide's stormy background: a dark gradient, faint drifting dots and lightning flickering in the distance.
+// The guide's stormy background: a dark gradient, faint drifting dots and dim lightning flickering in the distance.
 public final class GuideSky {
     private record Bolt(List<float[]> segs, float born) {}
 
@@ -27,19 +27,19 @@ public final class GuideSky {
         if (!lightning) return;
         if (time >= nextBolt) {
             bolts.add(makeBolt(width, height));
-            nextBolt = time + 1.5f + rnd.nextFloat() * 3.5f;
+            nextBolt = time + 3f + rnd.nextFloat() * 5f;
             flash = 1;
         }
         flash = Math.max(0, flash - dt * 4);
-        if (flash > 0) g.fill(0, 0, width, height, ((int) (flash * 22) << 24) | 0xBFE6FF);
+        if (flash > 0) g.fill(0, 0, width, height, ((int) (flash * 6) << 24) | 0x8FB6D8); // a faint glow, not a white-out
         bolts.removeIf(b -> time - b.born() > 0.6f);
         for (Bolt b : bolts) {
             float age = time - b.born();
-            float a = (1 - age / 0.6f) * (age < 0.08f || (age > 0.14f && age < 0.2f) ? 1 : 0.55f);
+            float a = (1 - age / 0.6f) * (age < 0.08f || (age > 0.14f && age < 0.2f) ? 1 : 0.75f);
             for (float[] s : b.segs()) {
-                int alpha = (int) (a * (s[4] > 1 ? 220 : 140));
+                int alpha = (int) (a * (s[4] > 1 ? 90 : 55)); // dim, distant bolts
                 line(g, s[0], s[1], s[2], s[3], (int) s[4] + 2, (alpha / 4 << 24) | 0x5AB4FF);
-                line(g, s[0], s[1], s[2], s[3], (int) s[4], (alpha << 24) | 0xE6F6FF);
+                line(g, s[0], s[1], s[2], s[3], (int) s[4], (alpha << 24) | 0xA8CCEA);
             }
         }
     }

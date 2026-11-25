@@ -2,22 +2,25 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IBI",
-    "SKS",
-    "IFI"
+    "GBG",
+    "CKC",
+    "MFM"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "B": {
       "item": "minecraft:bucket"
     },
-    "S": {
+    "C": {
       "item": "fulguritefusion:copper_sheet"
     },
     "K": {
       "item": "fulguritefusion:crude_arc_casing"
+    },
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "F": {
       "item": "minecraft:furnace"

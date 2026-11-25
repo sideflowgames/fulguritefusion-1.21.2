@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "KSK",
-    "SFS",
+    "MFM",
     "KSK"
   ],
   "key": {
@@ -11,7 +11,10 @@
       "item": "fulguritefusion:crude_arc_casing"
     },
     "S": {
-      "item": "fulguritefusion:iron_sheet"
+      "item": "fulguritefusion:silver_sheet"
+    },
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "F": {
       "item": "fulguritefusion:fulgurite"

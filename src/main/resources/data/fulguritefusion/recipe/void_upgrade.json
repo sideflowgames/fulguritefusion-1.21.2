@@ -2,15 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "CSC",
+    "STS",
     "OLO",
-    "CSC"
+    "STS"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
     "S": {
+      "item": "fulguritefusion:silver_ingot"
+    },
+    "T": {
       "item": "minecraft:string"
     },
     "O": {

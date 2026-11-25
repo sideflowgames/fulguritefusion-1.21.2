@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "pattern": [
-    "RIR",
-    "IOI",
-    "RIR"
+    "RMR",
+    "MOM",
+    "RMR"
   ],
   "key": {
     "R": {
       "item": "fulguritefusion:reinforced_fulgurite"
     },
-    "I": {
-      "item": "fulguritefusion:iron_sheet"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "O": {
       "item": "minecraft:obsidian"

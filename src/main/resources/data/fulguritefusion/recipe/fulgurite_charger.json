@@ -2,22 +2,25 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "FCF",
+    "FSF",
     "GCG",
-    "IEI"
+    "MEM"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "S": {
+      "item": "fulguritefusion:silver_sheet"
     },
     "G": {
       "item": "minecraft:glass"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "C": {
+      "item": "fulguritefusion:copper_sheet"
+    },
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "E": {
       "item": "fulguritefusion:empty_spark_cell"

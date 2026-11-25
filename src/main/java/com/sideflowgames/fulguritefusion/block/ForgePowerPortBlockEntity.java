@@ -22,11 +22,10 @@ public class ForgePowerPortBlockEntity extends BlockEntity implements FmHandler 
         if (level == null) return null;
         if (anvil != null && level.getBlockEntity(anvil) instanceof StormForgeBlockEntity f) return f;
         anvil = null;
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                if (!StormForgeBlockEntity.isEdge(dx, dz)) continue;
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
                 BlockPos p = worldPosition.offset(-dx, 1, -dz);
-                if (level.getBlockEntity(p) instanceof StormForgeBlockEntity f) {
+                if (level.getBlockEntity(p) instanceof StormForgeBlockEntity f && f.acceptsPort(dx, dz)) {
                     anvil = p;
                     return f;
                 }

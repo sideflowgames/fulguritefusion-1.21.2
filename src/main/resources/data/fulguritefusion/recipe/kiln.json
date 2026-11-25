@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "BFB",
-    "SXS",
+    "GXG",
     "BKB"
   ],
   "key": {
@@ -13,8 +13,8 @@
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "X": {
       "item": "minecraft:blast_furnace"

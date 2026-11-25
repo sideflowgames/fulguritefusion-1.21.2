@@ -2,18 +2,18 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "ISI",
-    "SMS",
-    "ISI"
+    "MSM",
+    "SAS",
+    "MSM"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "S": {
       "item": "minecraft:string"
     },
-    "M": {
+    "A": {
       "item": "fulguritefusion:arc_magnet"
     }
   },

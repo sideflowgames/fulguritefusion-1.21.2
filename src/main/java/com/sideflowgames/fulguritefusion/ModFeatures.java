@@ -17,6 +17,8 @@ public final class ModFeatures {
 
     public static final Supplier<Feature<NoneFeatureConfiguration>> STORMWING_NEST =
             FEATURES.register("stormwing_nest", StormwingNestFeature::new);
+    public static final Supplier<Feature<NoneFeatureConfiguration>> TITAN_ARENA =
+            FEATURES.register("titan_arena", com.sideflowgames.fulguritefusion.worldgen.TitanArenaFeature::new);
 
     private ModFeatures() {}
 

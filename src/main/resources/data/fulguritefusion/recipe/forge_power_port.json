@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "SHS",
+    "GHG",
     "HTH",
-    "SHS"
+    "GHG"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "H": {
       "item": "fulguritefusion:heavy_wire"

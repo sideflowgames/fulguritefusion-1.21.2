@@ -2,22 +2,25 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "SFS",
+    "SGS",
     "WKW",
-    "SSS"
+    "SFS"
   ],
   "key": {
     "S": {
       "item": "fulguritefusion:iron_sheet"
     },
-    "F": {
-      "item": "minecraft:furnace"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "W": {
       "item": "fulguritefusion:raw_wire"
     },
     "K": {
       "item": "fulguritefusion:crude_arc_casing"
+    },
+    "F": {
+      "item": "minecraft:furnace"
     }
   },
   "result": {

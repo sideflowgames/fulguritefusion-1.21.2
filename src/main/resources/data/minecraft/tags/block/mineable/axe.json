@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "fulguritefusion:tree_tap"
+    "fulguritefusion:tree_tap",
+    "fulguritefusion:voltcap_block",
+    "fulguritefusion:voltcap_stem"
   ]
 }

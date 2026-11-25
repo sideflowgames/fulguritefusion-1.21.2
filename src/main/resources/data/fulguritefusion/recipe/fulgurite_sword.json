@@ -3,15 +3,15 @@
   "category": "equipment",
   "pattern": [
     "F",
-    "D",
+    "M",
     "S"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "D": {
-      "item": "minecraft:diamond"
+    "M": {
+      "item": "fulguritefusion:magnetite_ingot"
     },
     "S": {
       "item": "minecraft:stick"

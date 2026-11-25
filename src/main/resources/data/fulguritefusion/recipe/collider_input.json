@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IFI",
+    "MFM",
     "FHF",
-    "IRI"
+    "MSM"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "F": {
       "item": "fulguritefusion:fulgurite"
@@ -16,8 +16,8 @@
     "H": {
       "item": "minecraft:hopper"
     },
-    "R": {
-      "item": "minecraft:redstone"
+    "S": {
+      "item": "fulguritefusion:silver_sheet"
     }
   },
   "result": {

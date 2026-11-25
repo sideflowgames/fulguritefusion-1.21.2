@@ -1,7 +1,68 @@
 {
   "replace": false,
   "values": {
-    "fulguritefusion:rubber_leaves": { "chance": 0.3 },
-    "fulguritefusion:rubber_sapling": { "chance": 0.3 }
+    "fulguritefusion:rubber_leaves": {
+      "chance": 0.3
+    },
+    "fulguritefusion:rubber_sapling": {
+      "chance": 0.3
+    },
+    "fulguritefusion:conductor_leaves": {
+      "chance": 0.3
+    },
+    "fulguritefusion:thunderoak_leaves": {
+      "chance": 0.3
+    },
+    "fulguritefusion:sparkbush_leaves": {
+      "chance": 0.3
+    },
+    "fulguritefusion:conductor_sapling": {
+      "chance": 0.3
+    },
+    "fulguritefusion:thunderoak_sapling": {
+      "chance": 0.3
+    },
+    "fulguritefusion:sparkbush_sapling": {
+      "chance": 0.3
+    },
+    "fulguritefusion:arcgrass": {
+      "chance": 0.3
+    },
+    "fulguritefusion:arc_fern": {
+      "chance": 0.65
+    },
+    "fulguritefusion:tall_arcgrass": {
+      "chance": 0.5
+    },
+    "fulguritefusion:static_reeds": {
+      "chance": 0.5
+    },
+    "fulguritefusion:voltbloom": {
+      "chance": 0.65
+    },
+    "fulguritefusion:stormcap": {
+      "chance": 0.65
+    },
+    "fulguritefusion:aurora_lily": {
+      "chance": 0.65
+    },
+    "fulguritefusion:puffbloom": {
+      "chance": 0.65
+    },
+    "fulguritefusion:voltcap": {
+      "chance": 0.65
+    },
+    "fulguritefusion:voltcap_block": {
+      "chance": 0.85
+    },
+    "fulguritefusion:cloudmoss_block": {
+      "chance": 0.65
+    },
+    "fulguritefusion:cloudmoss_carpet": {
+      "chance": 0.3
+    },
+    "fulguritefusion:ion_bulb": {
+      "chance": 0.5
+    }
   }
 }

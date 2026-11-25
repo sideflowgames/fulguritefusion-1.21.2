@@ -54,13 +54,14 @@ public class StormForgeRenderer implements BlockEntityRenderer<StormForgeBlockEn
         }
 
         if (GhostBuild.powered(level, be.getBlockPos())) {
-            GhostBuild.render(GhostBuild.get(level, be.getBlockPos(), l -> GhostBuild.stormForge(l, be.getBlockPos())),
+            GhostBuild.render(GhostBuild.get(level, be.getBlockPos(), l -> be instanceof com.sideflowgames.fulguritefusion.block.TitanForgeBlockEntity
+                            ? GhostBuild.titanForge(l, be.getBlockPos()) : GhostBuild.stormForge(l, be.getBlockPos())),
                     be.getBlockPos(), level, partialTick, pose, buffers);
         }
     }
 
     @Override
     public AABB getRenderBoundingBox(StormForgeBlockEntity be) {
-        return new AABB(be.getBlockPos()).inflate(3);
+        return new AABB(be.getBlockPos()).inflate(4);
     }
 }

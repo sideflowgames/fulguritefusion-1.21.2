@@ -3,8 +3,8 @@
   "category": "misc",
   "pattern": [
     "LFL",
-    "IRI",
-    "FIF"
+    "SRS",
+    "FMF"
   ],
   "key": {
     "L": {
@@ -13,11 +13,14 @@
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "S": {
+      "item": "fulguritefusion:silver_ingot"
     },
     "R": {
       "item": "minecraft:redstone"
+    },
+    "M": {
+      "item": "fulguritefusion:magnetite_ingot"
     }
   },
   "result": {

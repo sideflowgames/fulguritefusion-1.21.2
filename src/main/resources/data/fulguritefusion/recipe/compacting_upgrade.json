@@ -2,22 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "FSF",
-    "PXP",
-    "FSF"
+    "FTF",
+    "PGP",
+    "FTF"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "S": {
+    "T": {
       "item": "minecraft:string"
     },
     "P": {
       "item": "minecraft:piston"
     },
-    "X": {
-      "item": "minecraft:crafting_table"
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     }
   },
   "result": {

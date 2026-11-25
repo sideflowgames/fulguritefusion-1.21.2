@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": [
     "SGS",
-    "IKI",
+    "MKM",
     "SOS"
   ],
   "key": {
@@ -13,14 +13,14 @@
     "G": {
       "item": "minecraft:grindstone"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "O": {
-      "item": "minecraft:obsidian"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "K": {
       "item": "fulguritefusion:crude_arc_casing"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
     }
   },
   "result": {

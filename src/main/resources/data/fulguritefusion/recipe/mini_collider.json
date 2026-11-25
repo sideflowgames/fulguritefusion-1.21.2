@@ -2,18 +2,18 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "FIF",
-    "SLS",
-    "FIF"
+    "FMF",
+    "XLX",
+    "FMF"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
-    "S": {
+    "X": {
       "item": "fulguritefusion:spark_cell"
     },
     "L": {

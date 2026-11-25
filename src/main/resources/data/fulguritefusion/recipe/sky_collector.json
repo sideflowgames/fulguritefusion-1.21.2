@@ -4,7 +4,7 @@
   "pattern": [
     "GGG",
     "FDF",
-    "III"
+    "AMA"
   ],
   "key": {
     "G": {
@@ -16,8 +16,11 @@
     "D": {
       "item": "minecraft:daylight_detector"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "A": {
+      "item": "minecraft:gold_ingot"
+    },
+    "M": {
+      "item": "fulguritefusion:magnetite_ingot"
     }
   },
   "result": {

@@ -106,7 +106,7 @@
         },
         {
           "title": "Bigger backpacks",
-          "text": "Copper: 27 slots.\nIron: 54 slots. Surround a Copper Backpack with 8 iron ingots.\nFulgurite: 81 slots. Surround an Iron Backpack with 8 Fulgurite.\nStormforged: 108 slots. Storm Forge: Fulgurite Backpack + 2 Refined Fulgurite + a Strong or Jackpot fuel (250,000 Fm).\n\nUpgrading keeps everything inside.\n\nPrime Backpack (Storm Forge): a Stormforged Backpack + a Prime Spark Fragment + a netherite ingot, 5,000,000 Fm. 120 slots, 7 upgrade slots, a 2,000,000 Fm store, and it takes Storm upgrades."
+          "text": "Copper: 27 slots.\nIron: 54 slots. Craft a Copper Backpack with 4 Iron Sheets and 4 Silver Ingots.\nFulgurite: 81 slots. Craft an Iron Backpack with 4 Fulgurite and 4 Gold Sheets.\nStormforged: 108 slots. Storm Forge: Fulgurite Backpack + 2 Refined Fulgurite + a Strong or Jackpot fuel (250,000 Fm).\n\nUpgrading keeps everything inside.\n\nPrime Backpack (Storm Forge): a Stormforged Backpack + a Prime Spark Fragment + a Block of Gold + a Block of Silver, 5,000,000 Fm. 120 slots, 7 upgrade slots, a 2,000,000 Fm store, and it takes Storm upgrades."
         },
         {
           "title": "Upgrades",
@@ -178,7 +178,7 @@
         },
         {
           "title": "Upgrade ritual",
-          "text": "Lightning upgrades a Storm Furnace one tier if the right offerings are in place. Blocks go against all four side faces; items are dropped on top.\n\nWeak to Enhanced: 4 copper blocks, 2 Charged Spark Cells, 1 diamond.\n\nEnhanced to Charged: 4 gold blocks, 6 Charged Spark Cells, 6 netherite ingots.\n\nIf anything is missing, nothing upgrades, and the lightning will likely burn your offering."
+          "text": "Lightning upgrades a Storm Furnace one tier if the right offerings are in place. Blocks go against all four side faces; items are dropped on top.\n\nWeak to Enhanced: 4 copper blocks, 2 Charged Spark Cells, 4 Magnetite Ingots.\n\nEnhanced to Charged: 4 gold blocks, 6 Charged Spark Cells, 6 Silver Ingots.\n\nIf anything is missing, nothing upgrades, and the lightning will likely burn your offering."
         }
       ]
     },
@@ -336,7 +336,7 @@
             "fulguritefusion:coil_segment",
             "fulguritefusion:crushed_iron"
           ],
-          "text": "Press: ingots into Copper, Iron and Gold Sheets; 4 Fulgurite Shards into a Fulgurite.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire; 2 Raw Wire + an Iron Sheet into 2 Raw Reinforced Wire; raw wire + Malleable Rubber into insulated wire.\n\nKiln: 2 Fulgurite into a Coil Segment. Sand + a Fulgurite Shard makes 4 Fulgurite Blast Glass; Cobbled Deepslate + a shard makes 4 Reinforced Fulgurite.\n\nArc Furnace: anything a furnace smelts, and a Latex Bucket into 2 Dried Rubber.\n\nBanbury Mixer: Dried Rubber into Malleable Rubber.\n\nCrusher: a Raw Fulgurite block into 10 shards; raw ore into 2 crushed ore (smelt it into ingots)."
+          "text": "Press: copper, iron, gold and silver ingots into sheets, and Magnetite Ingots into Magnetite Plates; 4 Fulgurite Shards into a Fulgurite.\n\nWire Extruder: a Copper Sheet into 2 Raw Wire; 2 Raw Wire + an Iron Sheet into 2 Raw Reinforced Wire; raw wire + Malleable Rubber into insulated wire.\n\nKiln: 2 Fulgurite into a Coil Segment. Sand + a Fulgurite Shard makes 4 Fulgurite Blast Glass; Cobbled Deepslate + a shard makes 4 Reinforced Fulgurite.\n\nArc Furnace: anything a furnace smelts, and a Latex Bucket into 2 Dried Rubber.\n\nBanbury Mixer: Dried Rubber into Malleable Rubber.\n\nCrusher: a Raw Fulgurite block into 10 shards; raw ore (iron, copper, gold, Magnetite, Argentite) into 2 crushed ore (smelt it into ingots)."
         },
         {
           "recipe": "fulguritefusion:press",
@@ -689,6 +689,13 @@
           "text": "Storm Blade (from a Fulgurite Sword): 11 damage +4 lightning; every hit chains lightning to up to 5 nearby enemies.\n\nStorm Spear (from a Fulgurite Spear): 11 melee, 13 thrown +4 lightning, and a charged throw calls lightning down where it lands.\n\nBoth lose their lightning when out of Fm."
         },
         {
+          "title": "Tempest Staff",
+          "items": [
+            "fulguritefusion:tempest_staff"
+          ],
+          "text": "Forge it from a Tempest Crystal, 2 Refined Fulgurite, 2 Stormquartz and a Charged Spark Cell (500,000 Fm).\n\nRight-click to call lightning where you aim, up to 32 blocks. Each strike costs 10,000 Fm and deals 8 damage around where it lands, setting mobs on fire. It never burns blocks and never hits you or your pets.\n\nRecharge it in a Fulgurite Charger."
+        },
+        {
           "title": "Prime gear",
           "items": [
             "fulguritefusion:prime_helmet",
@@ -702,7 +709,7 @@
             "fulguritefusion:prime_shovel",
             "fulguritefusion:prime_hoe"
           ],
-          "text": "The last step: forge any Stormforged piece + a Prime Spark Fragment + a netherite ingot, for 20,000,000 Fm. Enchantments and names carry over.\n\nPrime gear holds 8,000,000 Fm (violet bar), protects and hits harder, and keeps every Stormforged ability."
+          "text": "The last step: forge any Stormforged piece + a Prime Spark Fragment + a Block of Gold + a Block of Silver, for 20,000,000 Fm. Enchantments and names carry over.\n\nPrime gear holds 8,000,000 Fm (violet bar), protects and hits harder, and keeps every Stormforged ability."
         },
         {
           "title": "Prime armor",
@@ -947,6 +954,739 @@
           "build": "banbury_mixer",
           "recipe": "fulguritefusion:banbury_mixer",
           "text": "A small (2x2x2) machine: the controller at the front-left of the bottom layer, facing you, and 7 Arc Casings.\n\nTwo heavy rotors churn the rubber while a weight presses it down from above."
+        }
+      ]
+    },
+    {
+      "id": "stormreach",
+      "title": "The Stormreach",
+      "icon": "fulguritefusion:tempest_crystal",
+      "pos": [
+        1200,
+        -140
+      ],
+      "parent": "storm_forge",
+      "pages": [
+        {
+          "title": "The Stormreach",
+          "items": [
+            "fulguritefusion:stormstone",
+            "fulguritefusion:charged_stormsand"
+          ],
+          "text": "A dimension above the clouds: a vast continent of Stormstone split by deep ravines, covered in strange storm-touched life, with winding caves and huge caverns running all the way down to bedrock."
+        },
+        {
+          "title": "The Storm",
+          "items": [],
+          "text": "The Stormreach has its own weather, separate from the Overworld's. Long storms of 10 to 20 minutes are broken by calm spells of 2 to 4 minutes.\n\nDuring a storm, lightning strikes all around you and can hit you. Its thunder is quieter than an Overworld storm's.\n\nWhere a bolt lands on Charged Stormsand, the sand fuses into Fulgurite Glass."
+        },
+        {
+          "title": "Biomes",
+          "items": [
+            "fulguritefusion:arcgrass_block",
+            "fulguritefusion:charged_loam"
+          ],
+          "text": "Stormgrass Plains: open Arcgrass meadows full of flowers, with the odd Conductor and Sparkbush.\n\nConductor Forest: tall, thin Conductor trees with glowing pale-blue leaves.\n\nThunderoak Grove: broad, twisted Thunderoaks under a dark violet canopy.\n\nSparkbush Thicket: dense, glowing Sparkbushes, bright even at night.\n\nStatic Marsh: low ground with pools of water and Static Reeds.\n\nAurora Steppe: high, windy grassland under a shimmering sky.\n\nGlassfields: flats of Charged Stormsand with Crystal Sprouts.\n\nShattered Highlands: bare Stormstone, sand patches and Crystal Sprouts."
+        },
+        {
+          "title": "More biomes",
+          "items": [
+            "fulguritefusion:cloudmoss_block",
+            "fulguritefusion:voltcap_mycelium"
+          ],
+          "text": "Cloudmoss Meadow: soft, pale moss ground under a misty sky, scattered with Puffblooms and drifting spores. The calmest place in the Stormreach.\n\nIon Lakes: wide, shallow lakes of bright blue water with grassy islands. Ion Bulbs glow on the lake floor.\n\nVoltcap Mushroom Fields: spongy Voltcap Mycelium covered in glowing mushrooms, from small caps to giant ones.\n\nRubberwood Jungle: a dense, humid jungle of rubber trees, some of them giants hung with vines."
+        },
+        {
+          "title": "Plants & Trees",
+          "items": [
+            "fulguritefusion:conductor_sapling",
+            "fulguritefusion:thunderoak_sapling",
+            "fulguritefusion:sparkbush_sapling",
+            "fulguritefusion:voltbloom",
+            "fulguritefusion:stormcap",
+            "fulguritefusion:aurora_lily"
+          ],
+          "text": "Charged Loam is the Stormreach's dirt, and Arcgrass grows over it. Arcgrass spreads to nearby Loam in the light and dies back when covered. Bone meal on it grows Arcgrass, Arc Ferns and flowers. Plants and saplings, including ones from the Overworld, grow on both.\n\nThree trees: the Conductor (tall, glowing pale-blue leaves), the Thunderoak (broad, violet leaves) and the Sparkbush (small, brightly glowing leaves). Each gives logs, planks and saplings.\n\nFlowers glow faintly and make dyes: Voltbloom (light blue), Stormcap (purple) and Aurora Lily (magenta). Static Reeds grow in the marsh, and Crystal Sprouts grow on Stormstone in the highlands."
+        },
+        {
+          "title": "Moss, bulbs and caps",
+          "items": [
+            "fulguritefusion:puffbloom",
+            "fulguritefusion:cloudmoss_carpet",
+            "fulguritefusion:ion_bulb",
+            "fulguritefusion:voltcap"
+          ],
+          "text": "Cloudmoss Blocks and Cloudmoss Carpet cover the meadows. Puffblooms glow softly and make white dye.\n\nIon Bulbs only live underwater, on the floor of a lake or pond, and light it up.\n\nVoltcaps glow and grow on Voltcap Mycelium anywhere, or in the dark on other ground. Bone meal on a Voltcap grows a giant one. Breaking a giant cap drops a few Voltcaps.\n\nAll of these soils count as dirt, so saplings and flowers grow on them."
+        },
+        {
+          "title": "Surface life",
+          "items": [
+            "fulguritefusion:sparkhorn_spawn_egg",
+            "fulguritefusion:puffling_spawn_egg",
+            "fulguritefusion:rubberback_sloth_spawn_egg",
+            "fulguritefusion:glasscrab_spawn_egg"
+          ],
+          "text": "Sparkhorns graze the plains, steppe and highlands in herds. Breed them with Arcgrass; they drop Sparkhorn Shanks (cook them) and Horn Shards.\n\nPufflings bounce around the Cloudmoss Meadow. Feed one Puffblooms to tame it; right-click a tame one to sit or stand.\n\nRubberback Sloths live in the Rubberwood Jungle. Use an empty bucket on one for a Latex Bucket (refills in 5 minutes). Breed with Rubber Saplings.\n\nVoltcap Snails crawl the mushroom fields and hide in their shells when hit. Breed with Voltcaps.\n\nGlasscrabs scuttle over the Glassfields. They pinch back if attacked. Breed with Charged Stormsand.\n\nStatic Jellies drift over meadows and lakes (touching one zaps you), Ion Eels swim the Ion Lakes (hitting one shocks the water around it), and Glimmerwings flutter through the forests."
+        },
+        {
+          "title": "Deep caves",
+          "items": [
+            "fulguritefusion:arcwurm_spawn_egg",
+            "fulguritefusion:crystal_stalker_spawn_egg",
+            "fulguritefusion:static_wraith_spawn_egg",
+            "fulguritefusion:shockroach_spawn_egg"
+          ],
+          "text": "Winding tunnels and huge open caverns run deep beneath the land, down to the bedrock floor. The dangerous creatures live down there, never under open sky.\n\nArcwurm: a huge armored worm. Slow, tough, and its bite slows you. Drops Arcwurm Hide.\n\nCrystal Stalker: a crystal-grown spider that climbs walls and leaps. Its bite slows you. Sometimes drops a Tempest Crystal.\n\nStatic Wraith: a floating shadow. Each touch drains 20,000 Fm from your charged gear. Drops Wraith Essence.\n\nShockroach: small, fast cave roaches that come in swarms of 4-8.\n\nLike all monsters, these don't appear on Peaceful."
+        },
+        {
+          "title": "Storm hunters",
+          "items": [
+            "fulguritefusion:stormhound_spawn_egg",
+            "fulguritefusion:voltcap_crawler_spawn_egg",
+            "fulguritefusion:stormwing_spawn_egg"
+          ],
+          "text": "Stormhounds: wolves of crackling static that appear in packs of 3-5 while a storm rages, and fade away when it ends.\n\nVoltcap Crawlers: beetles with a Voltcap on their backs. At night they sit still among the mushrooms; get close and one rushes you, swells, and bursts into a cloud of stinging spores.\n\nStormwings also soar over the highlands, steppe and plains, nesting on the high ground. Storms wake them, just like in the Overworld."
+        },
+        {
+          "title": "Resources",
+          "items": [
+            "fulguritefusion:fulgurite_ore",
+            "fulguritefusion:tempest_crystal_ore",
+            "fulguritefusion:tempest_crystal",
+            "fulguritefusion:fulgurite_glass"
+          ],
+          "text": "Stormstone: the dimension's stone. It drops Cobbled Stormstone, which smelts back into Stormstone. Make Polished Stormstone and Stormstone Bricks by crafting or with a stonecutter.\n\nFulgurite Ore: needs an iron pickaxe and drops 2 to 4 Fulgurite Shards (more with Fortune).\n\nTempest Crystal Ore: rare and glowing, needs a diamond pickaxe and drops a Tempest Crystal. Tempest Crystals are only found here and are kept for end-game gear.\n\nCharged Stormsand: glowing sand on the high ground. Smelt it, or let lightning strike it, to make Fulgurite Glass. Fulgurite Glass only drops with Silk Touch."
+        }
+      ]
+    },
+    {
+      "id": "stormreach_lands",
+      "title": "Lands & Ores",
+      "icon": "fulguritefusion:raw_magnetite",
+      "pos": [
+        1350,
+        -140
+      ],
+      "parent": "stormreach",
+      "unlock": [
+        "fulguritefusion:raw_magnetite",
+        "fulguritefusion:raw_argentite",
+        "fulguritefusion:cinderite",
+        "fulguritefusion:prismite_shard",
+        "fulguritefusion:stormquartz",
+        "fulguritefusion:raw_aurorite",
+        "fulguritefusion:fossil_amber"
+      ],
+      "pages": [
+        {
+          "title": "Lands of the Stormreach",
+          "items": [
+            "fulguritefusion:stormslate",
+            "fulguritefusion:rimestone"
+          ],
+          "text": "The Stormreach holds twenty lands. Every climate has a common land and a rarer, stranger one beside it.\n\nDig down and the stone changes with you. Near the surface each land has its own rock. Below that is Stormstone, and far down is Deep Stormstone, which is slow to mine."
+        },
+        {
+          "title": "Aurora Tundra",
+          "items": [
+            "fulguritefusion:aurora_ice",
+            "fulguritefusion:raw_aurorite"
+          ],
+          "text": "A frozen land of snow and glowing Aurora Ice beyond the Aurora Steppe. The ice is slick underfoot and gives off a faint light.\n\nAurorite ore is common under the Tundra and turns up now and then under the Steppe. Rimestone lies beneath both."
+        },
+        {
+          "title": "Tempest Peaks",
+          "items": [
+            "fulguritefusion:stormslate",
+            "fulguritefusion:stormquartz"
+          ],
+          "text": "Jagged mountains of Stormslate that climb above the clouds, capped with snow.\n\nStormquartz forms high up, in the peaks themselves. It also appears now and then under Cloudmoss Meadows."
+        },
+        {
+          "title": "Petrified Forest",
+          "items": [
+            "fulguritefusion:petrified_log",
+            "fulguritefusion:fossil_amber"
+          ],
+          "text": "Stone tree trunks stand in grey gravel and loam, all that's left of a forest the lightning turned to rock.\n\nAmber ore sits in the tuff below. You'll find a little under Thunderoak Groves and Rubberwood Jungles too."
+        },
+        {
+          "title": "Magnetite Fields",
+          "items": [
+            "fulguritefusion:magnetite_rock",
+            "fulguritefusion:raw_magnetite"
+          ],
+          "text": "Rolling grassland broken by outcrops and boulders of dark Magnetite Rock.\n\nMagnetite is richest here, with some under the Shattered Highlands. It's one of the two Stormreach ores that also forms in the Overworld, deep in stone and deepslate."
+        },
+        {
+          "title": "Crystal Caverns Rim",
+          "items": [
+            "fulguritefusion:prismite_block",
+            "fulguritefusion:prismite_shard"
+          ],
+          "text": "Pale calcite ground studded with spikes of Prismite crystal, where the light turns violet.\n\nPrismite ore lies deep, well below the surface. A little also forms under Conductor Forests and Ion Lakes."
+        },
+        {
+          "title": "Fulgurite Badlands",
+          "items": [
+            "fulguritefusion:scorched_sand",
+            "fulguritefusion:raw_argentite"
+          ],
+          "text": "Scorched sand over Fulgurite Crust, bristling with spikes of raw fulgurite. Lightning has struck here more than anywhere else.\n\nFulgurite ore is plentiful below, and so is Argentite, the ore of silver. Argentite also forms in the Overworld."
+        },
+        {
+          "title": "Ashen Scar",
+          "items": [
+            "fulguritefusion:ash_block",
+            "fulguritefusion:cinderite"
+          ],
+          "text": "A burnt land of ash and Cinder Rock, torn open by deep canyons. Watch your step.\n\nCinderite is common in the canyon walls and turns up now and then under Sparkbush Thickets and the Static Marsh."
+        },
+        {
+          "title": "Stormglass Desert",
+          "items": [
+            "fulguritefusion:stormglass_sand",
+            "fulguritefusion:tempest_crystal_ore"
+          ],
+          "text": "Bright sand dunes past the Glassfields, with towers of fulgurite glass rising from them.\n\nTempest Crystal ore is much more common here than anywhere else. Stormsandstone lies beneath the sand."
+        },
+        {
+          "title": "Smelting the new ores",
+          "items": [
+            "fulguritefusion:magnetite_ingot",
+            "fulguritefusion:silver_ingot",
+            "fulguritefusion:aurorite_ingot"
+          ],
+          "text": "Raw Magnetite, Raw Argentite and Raw Aurorite smelt into ingots. Cinderite, Prismite, Stormquartz and Fossil Amber drop as they are.\n\nRaw Magnetite and Raw Argentite also go through the Crusher for double ingots. Each one packs nine to a storage block. Most need an iron pickaxe. Prismite, Stormquartz and Aurorite need diamond."
+        }
+      ]
+    },
+    {
+      "id": "mini_bosses",
+      "title": "The Storm Guardians",
+      "icon": "fulguritefusion:storm_eye",
+      "pos": [
+        1200,
+        -280
+      ],
+      "parent": "storm_forge",
+      "unlock": [
+        "fulguritefusion:charged_spark_cell",
+        "fulguritefusion:storm_eye",
+        "fulguritefusion:molten_heart",
+        "fulguritefusion:void_shard"
+      ],
+      "pages": [
+        {
+          "title": "Three guardians",
+          "items": [
+            "fulguritefusion:storm_eye",
+            "fulguritefusion:molten_heart",
+            "fulguritefusion:void_shard"
+          ],
+          "text": "Three guardians stand between you and the Stormreach, one in each dimension. None of them is found by chance: you summon them.\n\nEach always drops its key piece: the Storm Eye, the Molten Heart and the Void Shard. Together they make the Storm Sigil in the Storm Forge."
+        },
+        {
+          "title": "Thunderhead",
+          "items": [
+            "fulguritefusion:storm_eye"
+          ],
+          "text": "Overworld. During a thunderstorm, use a Charged Spark Cell on a Lightning Rod with open sky above it."
+        },
+        {
+          "title": "Magma Conduit",
+          "items": [
+            "fulguritefusion:molten_heart"
+          ],
+          "text": "Nether. Throw a Charged Spark Cell into lava."
+        },
+        {
+          "title": "Void Arc",
+          "items": [
+            "fulguritefusion:void_shard"
+          ],
+          "text": "The End. Use an End Crystal on a Lightning Rod."
+        }
+      ]
+    },
+    {
+      "id": "trinkets",
+      "title": "Trinkets",
+      "icon": "fulguritefusion:cloudstep_charm",
+      "pos": [
+        1200,
+        -420
+      ],
+      "parent": "mini_bosses",
+      "unlock": [
+        "fulguritefusion:cloudstep_charm",
+        "fulguritefusion:conduit_heart",
+        "fulguritefusion:void_arc_band",
+        "fulguritefusion:grounding_charm",
+        "fulguritefusion:cinder_ward",
+        "fulguritefusion:seers_ring"
+      ],
+      "pages": [
+        {
+          "title": "The equipment panel",
+          "items": [
+            "fulguritefusion:copper_backpack"
+          ],
+          "text": "Open your inventory and press Gear (top right) to open the equipment panel. It has one slot for each trinket and a Back slot. Every trinket can be worn at once, and their effects stack.\n\nThe Back slot holds a backpack, so you can wear one and a chestplate at the same time. The B key still opens it.\n\nTrinkets and the Back slot drop when you die, like the rest of your inventory. With Curios installed, trinkets go in Curios slots instead and the Gear button is hidden."
+        },
+        {
+          "title": "Guardian trinkets",
+          "items": [
+            "fulguritefusion:cloudstep_charm",
+            "fulguritefusion:conduit_heart",
+            "fulguritefusion:void_arc_band"
+          ],
+          "text": "Each Storm Guardian has a 1 in 4 chance to drop its trinket.\n\nCloudstep Charm (Thunderhead): jump once more in mid-air, fall slower and take less fall damage. With a full Prime set, a mid-air jump opens your glide instead.\n\nConduit Heart (Magma Conduit): immune to fire and lava. After a lightning hit you regenerate for a few seconds.\n\nVoid Arc Band (Void Arc): press Void Blink (G) to blink 6 blocks the way you're moving. 5 second cooldown."
+        },
+        {
+          "title": "Crafted trinkets",
+          "items": [
+            "fulguritefusion:grounding_charm",
+            "fulguritefusion:cinder_ward",
+            "fulguritefusion:seers_ring"
+          ],
+          "text": "Grounding Charm (copper sheets, a Lightning Rod and string): lightning deals 40% less damage and can't set you on fire.\n\nCinder Ward (gold sheets, magma cream and a Fulgurite Shard): immune to fire. Touching lava gives you 3 seconds of lava immunity.\n\nSeer's Ring (gold sheets, an Eye of Ender and a Fulgurite Shard): invisible and teleporting monsters within 16 blocks glow, and you're immune to Blindness and Darkness."
+        },
+        {
+          "title": "Empowered trinkets",
+          "items": [
+            "fulguritefusion:empowered_cloudstep_charm",
+            "fulguritefusion:empowered_conduit_heart",
+            "fulguritefusion:empowered_void_arc_band",
+            "fulguritefusion:empowered_grounding_charm",
+            "fulguritefusion:empowered_cinder_ward",
+            "fulguritefusion:empowered_seers_ring"
+          ],
+          "text": "Forge a trinket with 4 Refined Fulgurite and one more piece in the Storm Forge (2,000,000 Fm) to empower it. A guardian trinket needs that guardian's key piece; a crafted trinket needs a Charged Spark Cell.\n\n- Cloudstep: two extra jumps, much slower falls\n- Conduit Heart: lightning heals you instead of hurting\n- Void Arc Band: 10 blocks, 2.5 second cooldown\n- Grounding Charm: lightning deals 70% less\n- Cinder Ward: 8 seconds of lava immunity\n- Seer's Ring: 32 blocks, and every monster within 12 glows"
+        }
+      ]
+    },
+    {
+      "id": "storm_titan",
+      "title": "The Storm Titan",
+      "icon": "fulguritefusion:storm_sigil",
+      "pos": [
+        1400,
+        -280
+      ],
+      "parent": "mini_bosses",
+      "unlock": [
+        "fulguritefusion:storm_sigil",
+        "fulguritefusion:rift_core",
+        "fulguritefusion:titan_helmet",
+        "fulguritefusion:titan_chestplate",
+        "fulguritefusion:titan_leggings",
+        "fulguritefusion:titan_boots"
+      ],
+      "pages": [
+        {
+          "title": "The Storm Sigil",
+          "items": [
+            "fulguritefusion:storm_sigil"
+          ],
+          "text": "Forge the Storm Eye, Molten Heart and Void Shard with a Charged Spark Cell in the Storm Forge (5,000,000 Fm) to make a Storm Sigil.\n\nUse it and lightning carries you into the Titan Trials, along with anyone standing within 8 blocks of you. Use it again there to come home."
+        },
+        {
+          "title": "The Titan Trials",
+          "items": [
+            "fulguritefusion:titan_altar"
+          ],
+          "text": "The Trials are a dark void with an arena of your own floating in it: a round floor ringed by eight pillars, with the Titan Altar at its heart.\n\nUse the Storm Sigil on the altar to wake the Titan. The sigil is used up, but the Titan drops a new one each time it falls.\n\nIf you die in the Trials you wake at your bed or spawn point with everything you carried.\n\nWords are cut into the altar's base, half worn away: \"The storm-callers drew its power down through copper.\""
+        },
+        {
+          "title": "Fighting together",
+          "items": [
+            "fulguritefusion:storm_sigil"
+          ],
+          "text": "Bring friends by standing close when you use the sigil. The Titan grows stronger for every challenger: more health, more of everything it calls, and faster attacks.\n\nEveryone in the arena when it falls shares in the victory."
+        },
+        {
+          "title": "Choosing your reward",
+          "items": [
+            "fulguritefusion:titan_chestplate"
+          ],
+          "text": "Each time the Titan falls it drops one piece of Titan armor, chosen at random.\n\nBefore waking it you can offer an armor piece of Stormforged quality or better on the altar. The offering is used up, but the Titan then has a 90% chance to drop the Titan piece of that same type."
+        },
+        {
+          "title": "Titan armor",
+          "items": [
+            "fulguritefusion:titan_helmet",
+            "fulguritefusion:titan_chestplate",
+            "fulguritefusion:titan_leggings",
+            "fulguritefusion:titan_boots"
+          ],
+          "text": "Titan armor counts as Prime armor, so a full set keeps every Prime ability. Each piece adds 2.5 hearts.\n\nA full Titan set also gives you:\n- Regeneration while it's storming (always, in the Stormreach)\n- A lightning aura that strikes monsters near you\n- No knockback, and immunity to fire and lava\n- Static dash: double-tap a movement key to dash that way, hurting monsters in your path (3 second cooldown)"
+        },
+        {
+          "title": "The Stormreach Rift",
+          "items": [
+            "fulguritefusion:rift_frame",
+            "fulguritefusion:rift_keystone",
+            "fulguritefusion:rift_core"
+          ],
+          "text": "When the Titan falls, everyone who fought it gets a Rift Core, and the storm will know them from then on.\n\nCraft Rift Frame blocks, and a Rift Keystone from the Rift Core. Build an upright frame like a Nether portal (inside at least 2 wide and 3 tall) with the keystone in its top edge and a Lightning Rod on the keystone. When lightning strikes the rod, the rift opens.\n\nOnly those who have defeated the Titan can pass through. Your first crossing raises a matching rift in the Stormreach to bring you home."
+        }
+      ]
+    },
+    {
+      "id": "titan_prime",
+      "title": "Titan Prime",
+      "icon": "fulguritefusion:titan_prime_chestplate",
+      "pos": [
+        1550,
+        -280
+      ],
+      "parent": "storm_titan",
+      "unlock": [
+        "fulguritefusion:titan_forge",
+        "fulguritefusion:titan_prime_helmet",
+        "fulguritefusion:titan_prime_chestplate",
+        "fulguritefusion:titan_prime_leggings",
+        "fulguritefusion:titan_prime_boots"
+      ],
+      "pages": [
+        {
+          "title": "The Titan Forge",
+          "items": [
+            "fulguritefusion:titan_forge"
+          ],
+          "text": "Titan armor keeps you alive in the Stormreach. Titan Prime armor goes further: a Prime piece and the Titan piece of the same type, fused together with Stormreach ores.\n\nThe fusing happens in the Titan Forge. Craft its anvil from a Storm Forge with Blocks of Aurorite, Stormquartz, Prismite and Cinderite."
+        },
+        {
+          "title": "Building it",
+          "items": [
+            "fulguritefusion:titan_forge",
+            "fulguritefusion:prismite_block"
+          ],
+          "text": "Under the anvil: a 7 x 7 floor. The middle 3 x 3 is Charged Arc Casing, the rest Stormstone Bricks. Forge Power Ports can stand in for outer-edge bricks (not the corners).\n\nOn each floor corner, a Storm Pylon: 2 Stormstone Bricks, a Prismite Block, and a Lightning Rod on top.\n\nPower the anvil with a redstone signal to see a ghost of anything still missing. Sneak and right-click it with an empty hand for its status."
+        },
+        {
+          "title": "Fusing",
+          "items": [
+            "fulguritefusion:titan_prime_chestplate"
+          ],
+          "text": "Set the Prime piece, the matching Titan piece and the ores on the anvil, then feed it 50,000,000 Fm (it draws up to 32,768 Fm/t).\n\nHelmet: 5 Aurorite Ingots, 3 Prismite Shards, 2 Fossil Amber.\nChestplate: 8 Aurorite Ingots, 4 Cinderite, 4 Stormquartz.\nLeggings: 7 Aurorite Ingots, 4 Prismite Shards, 3 Cinderite.\nBoots: 4 Aurorite Ingots, 3 Fossil Amber, 3 Stormquartz.\n\nThe result keeps the Prime piece's name and the best enchantments of both."
+        },
+        {
+          "title": "Titan Prime armor",
+          "items": [
+            "fulguritefusion:titan_prime_helmet",
+            "fulguritefusion:titan_prime_boots"
+          ],
+          "text": "It counts as Titan armor, so every Titan, Prime and Stormforged bonus still works.\n\nMore protection and toughness than Titan, 4 hearts per piece, and 32,000,000 Fm of charge. Recharge it in a Fulgurite Charger."
+        }
+      ]
+    },
+    {
+      "id": "stormreach_hostiles",
+      "title": "Stormreach Hostiles",
+      "icon": "fulguritefusion:reaver_blade_shard",
+      "pos": [
+        1500,
+        -140
+      ],
+      "parent": "stormreach_lands",
+      "pages": [
+        {
+          "title": "The storm bites",
+          "items": [
+            "fulguritefusion:titan_chestplate"
+          ],
+          "text": "The Stormreach is home to beasts far tougher than anything in the Overworld.\n\nTheir hits are storm damage, which goes straight through normal armor. Each piece of Titan armor grounds some of it, and a full charged Titan set grounds most of it.\n\nThey also carry a static field: stand near one without a full Titan set and you take a little damage every second, feel weak, and your gear loses charge."
+        },
+        {
+          "title": "When the storm rages",
+          "items": [
+            "fulguritefusion:tempest_crystal"
+          ],
+          "text": "They hunt day and night, but far more of them come out during a storm.\n\nA beast born in a storm is Storm-charged: half again as much health and harder hits.\n\nLightning heals them instead of hurting them."
+        },
+        {
+          "title": "Roamers",
+          "items": [
+            "fulguritefusion:arc_reaver_spawn_egg",
+            "fulguritefusion:thunderhulk_spawn_egg",
+            "fulguritefusion:stormcaller_shade_spawn_egg",
+            "fulguritefusion:static_leech_spawn_egg"
+          ],
+          "text": "Arc Reaver: a fast blade-armed stalker that dashes at you from a distance.\n\nThunderhulk: a huge, slow golem. Get close and it slams the ground, throwing you into the air.\n\nStormcaller Shade: floats out of reach and marks the ground under you. Move before the lightning falls.\n\nStatic Leech: leaps onto your chest and drinks your health and charge. Look down and hit it off."
+        },
+        {
+          "title": "More roamers",
+          "items": [
+            "fulguritefusion:ion_swarm_spawn_egg",
+            "fulguritefusion:voltspitter_spawn_egg",
+            "fulguritefusion:tempest_raptor_spawn_egg",
+            "fulguritefusion:gloomarc_spider_spawn_egg"
+          ],
+          "text": "Ion Swarm: a cloud of sparks that hurts everything around it. Arrows only half hurt it.\n\nVoltspitter: keeps its distance and lobs bursting Charged Orbs.\n\nTempest Raptor: circles high above you, then dives.\n\nGloomarc Spider: climbs walls and spits slowing strands of static web."
+        },
+        {
+          "title": "Signature beasts",
+          "items": [
+            "fulguritefusion:peak_colossus_spawn_egg",
+            "fulguritefusion:cinder_behemoth_spawn_egg"
+          ],
+          "text": "Four rare elites, each found in only one biome, with a boss bar when you're near. Only one of each roams any area.\n\nPeak Colossus (Tempest Peaks): a walking mountain. It quakes the ground, hurls charged boulders and calls lightning in a storm.\n\nCinder Behemoth (Ashen Scar): breathes burning ash, charges, and makes the ground erupt beneath you."
+        },
+        {
+          "title": "More signature beasts",
+          "items": [
+            "fulguritefusion:aurora_wraith_spawn_egg",
+            "fulguritefusion:prism_sentinel_spawn_egg"
+          ],
+          "text": "Aurora Wraith (Aurora Tundra): a floating spirit with a slowing beam of cold light. It calls Ion Swarms and blinks away when hurt.\n\nPrism Sentinel (Crystal Caverns Rim): fires prism lances and shard volleys, and can refract, shrugging off most damage and turning arrows away for a few seconds."
+        },
+        {
+          "title": "Spoils",
+          "items": [
+            "fulguritefusion:reaver_blade_shard",
+            "fulguritefusion:thunderhulk_core",
+            "fulguritefusion:shade_veil",
+            "fulguritefusion:leech_fang",
+            "fulguritefusion:ion_mote",
+            "fulguritefusion:volt_gland",
+            "fulguritefusion:tempest_feather",
+            "fulguritefusion:gloomarc_silk"
+          ],
+          "text": "Every beast drops its own part. These will be used to craft the gear you'll need for the Stormreach's dungeons.\n\nA signature beast always drops its unique part, a large pile of its biome's ore, Tempest Crystals and Fulgurite Shards."
+        },
+        {
+          "title": "Signature parts",
+          "items": [
+            "fulguritefusion:colossus_heart",
+            "fulguritefusion:behemoth_ember",
+            "fulguritefusion:aurora_shroud",
+            "fulguritefusion:sentinel_lens"
+          ],
+          "text": "Colossus Heart, Behemoth Ember, Aurora Shroud and Sentinel Lens: the rarest parts in the Stormreach."
+        }
+      ]
+    },
+    {
+      "id": "stormreach_dungeons",
+      "title": "Stormreach Dungeons",
+      "icon": "fulguritefusion:dungeon_altar",
+      "pos": [
+        1650,
+        -140
+      ],
+      "parent": "stormreach_hostiles",
+      "pages": [
+        {
+          "title": "Four strongholds",
+          "items": [
+            "fulguritefusion:spire_bricks",
+            "fulguritefusion:foundry_bricks",
+            "fulguritefusion:sanctum_bricks",
+            "fulguritefusion:vault_bricks"
+          ],
+          "text": "Four great dungeons are hidden in the Stormreach, each in one biome, each with more than thirty rooms, and no two alike.\n\nStormspire: a tower on the Tempest Peaks, built around a hollow core of lightning. Its balconies hang open over the drop, and some floors have fallen in.\nAshen Foundry: a ruined forge under the Ashen Scar, its halls flooded with lava and crossed by narrow walkways.\nAurora Sanctum: a frozen cathedral on the Aurora Tundra, with vaulted halls below.\nPrism Vault: natural crystal caverns under the Crystal Caverns Rim, split by chasms."
+        },
+        {
+          "title": "Inside",
+          "items": [
+            "fulguritefusion:storm_cage",
+            "fulguritefusion:arc_trap",
+            "fulguritefusion:tesla_coil"
+          ],
+          "text": "Follow the light. Only the true path to the guardian is lit, with sconces beside its doorways and lanterns along the way. Dark side passages lead to loot vaults, and to danger.\n\nStorm Cages burst open when you come near. Arc Traps jolt you when you step on them. Tesla Coils zap anyone they can see; break them to shut them down."
+        },
+        {
+          "title": "Each has its own danger",
+          "items": [
+            "fulguritefusion:storm_conductor",
+            "fulguritefusion:crusher_block",
+            "fulguritefusion:rime_totem",
+            "fulguritefusion:hanging_prism"
+          ],
+          "text": "Storm Conductors (Stormspire) mark the ground under you; move before the lightning falls.\nCrushers (Ashen Foundry) slam down onto the walkways; dust falls just before they do.\nRime Totems (Aurora Sanctum) freeze anyone who lingers near them.\nHanging Prisms (Prism Vault) break loose when you walk underneath.\n\nAll of them can be broken."
+        },
+        {
+          "title": "The guardian",
+          "items": [
+            "fulguritefusion:dungeon_altar",
+            "fulguritefusion:storm_seal",
+            "fulguritefusion:warded_brick"
+          ],
+          "text": "Deep inside lies the guardian's arena. Step near its altar and the dungeon's signature beast wakes, stronger than any found in the wild.\n\nBeside the arena is the treasure vault, walled with Warded Brick and closed by a Storm Seal. Nothing breaks them until the guardian falls.\n\nEach dungeon can be cleared only once."
+        },
+        {
+          "title": "Spoils",
+          "items": [
+            "fulguritefusion:skyforged_plate",
+            "fulguritefusion:foundry_heartstone",
+            "fulguritefusion:aurora_essence",
+            "fulguritefusion:prism_core"
+          ],
+          "text": "Each dungeon holds its own material, found nowhere else: Skyforged Plate, Foundry Heartstone, Aurora Essence and Prism Core. They will be used for the strongest gear.\n\nThe chests also hold ore, gold, mob parts and enchanted books."
+        },
+        {
+          "title": "Relics",
+          "items": [
+            "fulguritefusion:skyrender_charm",
+            "fulguritefusion:foundry_heart",
+            "fulguritefusion:aurora_loop",
+            "fulguritefusion:prism_eye"
+          ],
+          "text": "Rarely, a dungeon gives up a Relic: a third, stronger tier of a trinket that's worn in the same slot.\n\nSkyrender Charm: three extra jumps, no fall damage.\nFoundry Heart: swim in lava freely.\nAurora Loop: a 14-block blink.\nPrism Eye: every monster within 48 blocks glows; immune to Slowness.\n\nThey're most often found in a treasure vault."
+        }
+      ]
+    },
+    {
+      "id": "stormreach_brews",
+      "title": "Storm Brews & Gadgets",
+      "icon": "fulguritefusion:ion_lamp",
+      "pos": [
+        1650,
+        -20
+      ],
+      "parent": "stormreach_hostiles",
+      "pages": [
+        {
+          "title": "Storm brews",
+          "items": [
+            "fulguritefusion:ion_mote",
+            "fulguritefusion:volt_gland",
+            "fulguritefusion:thunderhulk_core",
+            "fulguritefusion:shade_veil"
+          ],
+          "text": "Stormreach parts brew like nether wart ingredients: put an Awkward Potion in a brewing stand and add the part. Gunpowder and dragon's breath make splash and lingering versions as usual.\n\nIon Mote: Ion Tonic. Storm damage is cut by a quarter for 3 minutes.\nVolt Gland: Volt Draught. Puts 250,000 Fm into the charged gear you wear and hold.\nThunderhulk Core: Hulk's Brew. Resistance II and no knockback for 90 seconds.\nShade Veil: Veil Draught. Invisibility for 3 minutes, and storm beasts lose track of you."
+        },
+        {
+          "title": "More brews",
+          "items": [
+            "fulguritefusion:leech_fang",
+            "fulguritefusion:tempest_feather",
+            "fulguritefusion:foundry_heartstone",
+            "fulguritefusion:aurora_essence",
+            "fulguritefusion:prism_core"
+          ],
+          "text": "Leech Fang: Leech Tonic. Regeneration II for 30 seconds.\nTempest Feather: Skystep Draught. Slow Falling and Jump Boost II for 3 minutes.\nFoundry Heartstone: Ember Elixir. Fire Resistance for 10 minutes.\nAurora Essence: Rime Draught. You can't freeze, and storm damage is cut by a quarter, for 8 minutes.\nPrism Core: Prism Sight. Night Vision, and every monster within 32 blocks glows, for 5 minutes."
+        },
+        {
+          "title": "Gadgets",
+          "items": [
+            "fulguritefusion:ion_lamp",
+            "fulguritefusion:storm_ward",
+            "fulguritefusion:updraft_vent",
+            "fulguritefusion:silk_rope",
+            "fulguritefusion:reaver_spikes"
+          ],
+          "text": "Ion Lamp: the brightest light there is, crackling with sparks.\nStorm Ward: put a Machine Connector on it and feed it Fm. While powered (20 Fm a tick) no storm beast or elite spawns within 32 blocks. Unpowered, it does nothing.\nUpdraft Vent: step on it to be thrown about 12 blocks up, then drift down. Sneak to stand on it safely.\nSilk Rope: hang it from a ceiling, then use more rope on it to lower the line. Climbs twice as fast as a ladder.\nReaver Spikes: a floor trap that slows and cuts mobs. Players and tamed pets cross it safely."
+        }
+      ]
+    },
+    {
+      "id": "shock_farm",
+      "title": "Shock Farm",
+      "icon": "fulguritefusion:shock_farm_controller",
+      "pos": [
+        900,
+        -130
+      ],
+      "parent": "storm_collider",
+      "pages": [
+        {
+          "title": "A farm that hunts for you",
+          "items": [
+            "fulguritefusion:shock_farm_controller",
+            "fulguritefusion:galvanic_soil",
+            "fulguritefusion:tesla_prong",
+            "fulguritefusion:farm_collector",
+            "fulguritefusion:farm_power_port"
+          ],
+          "text": "The Shock Farm draws mobs up out of Galvanic Soil, electrocutes them with Tesla Prongs, and gathers what they drop, and their XP, into a Farm Collector.\n\nIt spawns what the biome it stands in would spawn: monsters and animals, every vanilla mob except bosses and rare ones, and the creatures of this world from Fulgurite Fusion. Build it in a desert for husks, a swamp for slimes, the Nether for its own crowd. Light doesn't matter."
+        },
+        {
+          "title": "Building it: 5x5",
+          "items": [
+            "fulguritefusion:tempered_arc_casing",
+            "fulguritefusion:reinforced_fulgurite",
+            "fulguritefusion:tesla_prong",
+            "minecraft:tinted_glass"
+          ],
+          "text": "All on one floor level:\n- a 3x3 pad of Galvanic Soil in the middle, with open air above it,\n- a ring of Tempered Arc Casing around it,\n- each corner of the ring is a pillar of 2 Reinforced Fulgurite with a Tesla Prong on top,\n- the Shock Farm Controller in the middle of one edge, placed while you look toward the pad,\n- at least one edge casing swapped for a Farm Collector, and one for a Farm Power Port,\n- a glass wall 2 blocks high on top of every edge block, between the pillars, so nothing walks off. Any glass works.\n\nPut a lever on the controller and switch it on: every block still missing shows as a glowing ghost, and anything in the way over the pad gets a red box. Right-click the controller to open its menu; until the farm is complete it says what's missing.\n\nOnce everything is in place the farm forms: the blocks merge into one machine with Tesla coils on its towers."
+        },
+        {
+          "title": "Build: Shock Farm 5x5",
+          "build": "shock_farm",
+          "text": "Step through it layer by layer. The controller faces the pad; the Farm Collector and Farm Power Port can take any edge spot."
+        },
+        {
+          "title": "Upgrading: 7x7",
+          "items": [
+            "fulguritefusion:charged_arc_casing",
+            "fulguritefusion:galvanic_soil"
+          ],
+          "text": "Rebuild it bigger: a 5x5 pad of Galvanic Soil, a ring of Charged Arc Casing, and corner pillars of 3 Reinforced Fulgurite under each Tesla Prong, with the same 2-high glass wall all round. The controller still sits in the middle of an edge.\n\nThe big farm spawns twice as often, two mobs at a time, and holds up to 10 at once (the small one holds 4).\n\nThe ghost switches to the 7x7 layout as soon as you lay Charged Arc Casing on the big ring, or Galvanic Soil past the small pad."
+        },
+        {
+          "title": "Build: Shock Farm 7x7",
+          "build": "shock_farm_large",
+          "text": "Same layout, one ring bigger: Charged Arc Casing, a 5x5 pad and taller corner pillars."
+        },
+        {
+          "title": "Running it",
+          "items": [
+            "fulguritefusion:farm_power_port",
+            "fulguritefusion:farm_collector"
+          ],
+          "text": "Power goes in through a Farm Power Port: put a Storm Battery against it, or run a wire or a Machine Connector to it. Each mob drawn up costs 2,000 Fm and each zap costs 100 Fm. With no power, nothing spawns and nothing is zapped.\n\nThe controller's menu shows its power, what it's doing, how many mobs are on the pad, and which mobs this biome will give you. The On/Off button stops it spawning and zapping without breaking anything; drops still get gathered.\n\nRight-click a Farm Collector to open it. Sneak + right-click to take the stored XP. Hoppers and pipes can empty it. When every collector is full, drops pile up on the pad."
+        },
+        {
+          "title": "Upgrade cards",
+          "items": [
+            "fulguritefusion:farm_upgrade_card",
+            "fulguritefusion:mob_filter_card",
+            "fulguritefusion:speed_card_1",
+            "fulguritefusion:efficiency_card_1",
+            "fulguritefusion:looting_card_1"
+          ],
+          "text": "The controller's menu has upgrade slots: 2 on a 5x5 farm, 4 on a 7x7. Every card in an open slot counts, and the same kind adds up.\n\n- Mob Filter Card: right-click a mob with it to set it. The farm then only spawns the filtered mobs, and only if this biome spawns them. Sneak and use it to clear it.\n- Speed Card: +50% spawn rate per tier, but each spawn costs 25% more Fm per tier.\n- Efficiency Card: 15% less Fm per spawn and zap per tier, up to 75% off.\n- Looting Card: +1 Looting per tier on kills (up to Looting III) and 25% more XP per tier.\n\nCraft blank Farm Upgrade Cards first, then work each card up from Tier I to III."
+        }
+      ]
+    },
+    {
+      "id": "item_transport",
+      "title": "Item Transport",
+      "icon": "fulguritefusion:fulgurite_item_pipe",
+      "pos": [
+        600,
+        -130
+      ],
+      "parent": "storm_collider",
+      "pages": [
+        {
+          "title": "Item Pipes",
+          "items": [
+            "fulguritefusion:copper_item_pipe",
+            "fulguritefusion:fulgurite_item_pipe",
+            "fulguritefusion:stormforged_item_pipe"
+          ],
+          "text": "Item Pipes join each other and any chest, barrel or machine beside them, and run as far as you like.\n\nRight-click a pipe where it meets an inventory to switch that side between Insert (blue ring: items go in), Extract (gold collar: items are pulled out) and Off. Every Extract side shares its items out among all the Insert sides along the line.\n\nCopper pipes move 2 items a tick, Fulgurite 16 and Stormforged 32. The pipe doing the extracting sets the speed. Watch the items slide past the glass."
+        },
+        {
+          "title": "Pipe filters",
+          "items": [
+            "fulguritefusion:fulgurite_item_pipe",
+            "fulguritefusion:stormforged_item_pipe"
+          ],
+          "text": "Fulgurite and Stormforged pipes can filter. Sneak + right-click an Insert or Extract side to set up to 9 items and choose an allow list (only those) or a block list (everything but those).\n\nOn an Extract side the filter chooses what gets pulled out; on an Insert side, what that inventory will take. Copper pipes have no filters."
+        },
+        {
+          "title": "Arc Transfer",
+          "items": [
+            "fulguritefusion:arc_sender",
+            "fulguritefusion:arc_receiver",
+            "fulguritefusion:arc_tuner"
+          ],
+          "text": "For when a pipe is too slow: place an Arc Sender against a chest and an Arc Receiver against another, no more than 5 blocks apart. Use an Arc Tuner on the Sender, then on the Receiver, to link them.\n\nOnce a second the Sender throws its whole chest (up to 27 stacks) across in a single bolt of lightning, for 400 Fm a bolt. Power it like any machine. Sneak + use the Tuner on a Sender to unlink it."
         }
       ]
     }

@@ -2,13 +2,16 @@
   "type": "fulguritefusion:backpack_upgrade",
   "category": "equipment",
   "pattern": [
-    "FFF",
-    "FBF",
-    "FFF"
+    "FGF",
+    "GBG",
+    "FGF"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
+    },
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
     },
     "B": {
       "item": "fulguritefusion:iron_backpack"

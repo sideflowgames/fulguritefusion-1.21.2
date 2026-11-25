@@ -47,6 +47,7 @@ public class BackpackItemContainer extends SimpleContainer {
         for (int i = 0; i < inv.getContainerSize(); i++) {
             if (inv.getItem(i) == backpack) return true;
         }
+        if (com.sideflowgames.fulguritefusion.trinket.Trinkets.back(player) == backpack) return true;
         return CuriosCompat.find(player, s -> s == backpack) == backpack;
     }
 }

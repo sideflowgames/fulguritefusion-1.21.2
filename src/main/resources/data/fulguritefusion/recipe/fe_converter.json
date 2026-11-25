@@ -2,16 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "RIR",
-    "IRI",
+    "SRS",
+    "MRM",
     "FFF"
   ],
   "key": {
+    "S": {
+      "item": "fulguritefusion:silver_ingot"
+    },
     "R": {
       "item": "minecraft:redstone"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_ingot"
     },
     "F": {
       "item": "fulguritefusion:fulgurite"

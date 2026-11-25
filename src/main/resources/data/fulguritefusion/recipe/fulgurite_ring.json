@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " C ",
+    " M ",
     "FGF",
-    " C "
+    " M "
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "F": {
       "item": "fulguritefusion:fulgurite"

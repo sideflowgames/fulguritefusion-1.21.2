@@ -2,13 +2,16 @@
   "type": "fulguritefusion:backpack_upgrade",
   "category": "equipment",
   "pattern": [
-    "III",
-    "IBI",
-    "III"
+    "ISI",
+    "SBS",
+    "ISI"
   ],
   "key": {
     "I": {
-      "item": "minecraft:iron_ingot"
+      "item": "fulguritefusion:iron_sheet"
+    },
+    "S": {
+      "item": "fulguritefusion:silver_ingot"
     },
     "B": {
       "item": "fulguritefusion:copper_backpack"

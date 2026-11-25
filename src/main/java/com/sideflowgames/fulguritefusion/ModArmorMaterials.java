@@ -51,6 +51,38 @@ public final class ModArmorMaterials {
                     4.0f,
                     0.15f));
 
+    // Titan: dropped by the Storm Titan. Above Prime. Textures: textures/models/armor/titan_layer_1.png and _layer_2.png.
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> TITAN = MATERIALS.register("titan",
+            () -> new ArmorMaterial(
+                    new EnumMap<>(java.util.Map.of(
+                            ArmorItem.Type.BOOTS, 5,
+                            ArmorItem.Type.LEGGINGS, 8,
+                            ArmorItem.Type.CHESTPLATE, 10,
+                            ArmorItem.Type.HELMET, 5,
+                            ArmorItem.Type.BODY, 15)),
+                    25,
+                    SoundEvents.ARMOR_EQUIP_NETHERITE,
+                    () -> Ingredient.EMPTY,
+                    List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan"))),
+                    5.0f,
+                    0.2f));
+
+    // Titan Prime: Prime and Titan armor fused in the Titan Forge. Textures: textures/models/armor/titan_prime_layer_*.png.
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> TITAN_PRIME = MATERIALS.register("titan_prime",
+            () -> new ArmorMaterial(
+                    new EnumMap<>(java.util.Map.of(
+                            ArmorItem.Type.BOOTS, 6,
+                            ArmorItem.Type.LEGGINGS, 9,
+                            ArmorItem.Type.CHESTPLATE, 12,
+                            ArmorItem.Type.HELMET, 6,
+                            ArmorItem.Type.BODY, 18)),
+                    30,
+                    SoundEvents.ARMOR_EQUIP_NETHERITE,
+                    () -> Ingredient.EMPTY,
+                    List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_prime"))),
+                    7.0f,
+                    0.25f));
+
     public static void register(IEventBus modEventBus) {
         MATERIALS.register(modEventBus);
     }

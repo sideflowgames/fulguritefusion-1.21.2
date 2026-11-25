@@ -72,6 +72,8 @@ public final class BackpackUpgrades {
             ItemStack s = inv.getItem(i);
             if (s.getItem() instanceof BackpackItem) list.add(s);
         }
+        ItemStack back = com.sideflowgames.fulguritefusion.trinket.Trinkets.back(player);
+        if (!back.isEmpty() && list.stream().noneMatch(s -> s == back)) list.add(back);
         ItemStack curio = CuriosCompat.find(player, s -> s.getItem() instanceof BackpackItem);
         if (!curio.isEmpty() && list.stream().noneMatch(s -> s == curio)) list.add(curio);
         return list;

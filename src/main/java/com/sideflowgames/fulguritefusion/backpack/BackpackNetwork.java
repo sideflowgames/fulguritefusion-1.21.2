@@ -48,6 +48,11 @@ public final class BackpackNetwork {
             BackpackItem.open(player, chest, -1);
             return;
         }
+        ItemStack back = com.sideflowgames.fulguritefusion.trinket.Trinkets.back(player);
+        if (!back.isEmpty()) {
+            BackpackItem.open(player, back, -1);
+            return;
+        }
         ItemStack curio = CuriosCompat.find(player, s -> s.getItem() instanceof BackpackItem);
         if (!curio.isEmpty()) {
             BackpackItem.open(player, curio, -1);

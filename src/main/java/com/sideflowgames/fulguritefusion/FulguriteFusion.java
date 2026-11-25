@@ -37,6 +37,9 @@ public class FulguriteFusion {
         ModEntities.register(modEventBus);
         ModSounds.register(modEventBus);
         ModFeatures.register(modEventBus);
+        com.sideflowgames.fulguritefusion.dungeon.DungeonRegistry.register(modEventBus);
+        com.sideflowgames.fulguritefusion.brew.ModBrews.register(modEventBus);
+        com.sideflowgames.fulguritefusion.transport.TransportBlocks.register(modEventBus);
 
         // Hopper and pipe support for our machines
         modEventBus.addListener(ModCapabilities::register);
@@ -49,7 +52,13 @@ public class FulguriteFusion {
         // Backpacks: the open-backpack key packet
         com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.register(modEventBus);
         com.sideflowgames.fulguritefusion.prime.PrimeNetwork.register(modEventBus);
+        com.sideflowgames.fulguritefusion.titan.TitanNetwork.register(modEventBus);
+        com.sideflowgames.fulguritefusion.trinket.Trinkets.register(modEventBus);
         com.sideflowgames.fulguritefusion.item.ChainBolt.register(modEventBus);
+        com.sideflowgames.fulguritefusion.stormreach.StormreachStorm.register(modEventBus);
+        com.sideflowgames.fulguritefusion.stormreach.Stormreach.register();
+        com.sideflowgames.fulguritefusion.titan.TitanTrials.register(modEventBus);
+        com.sideflowgames.fulguritefusion.rift.RiftPortals.register();
         // Guide map: which topics each player has unlocked
         com.sideflowgames.fulguritefusion.guide.GuideProgress.register(modEventBus);
 
@@ -70,6 +79,7 @@ public class FulguriteFusion {
             fire.setFlammable(ModBlocks.RUBBER_PLANKS.get(), 5, 20);
             fire.setFlammable(ModBlocks.RUBBER_LEAVES.get(), 30, 60);
             fire.setFlammable(ModBlocks.DRIED_RUBBER_LOG.get(), 5, 5);
+            // Stormreach woods and plants are storm-hardened: never added here, so they don't catch or spread fire.
         });
     }
 

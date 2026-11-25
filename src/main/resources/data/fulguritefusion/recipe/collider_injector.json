@@ -2,21 +2,21 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "FRF",
-    "CSC",
-    "FRF"
+    "FMF",
+    "SXS",
+    "FMF"
   ],
   "key": {
     "F": {
       "item": "fulguritefusion:fulgurite"
     },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_plate"
     },
     "S": {
+      "item": "fulguritefusion:silver_sheet"
+    },
+    "X": {
       "item": "fulguritefusion:spark_cell"
     }
   },

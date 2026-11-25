@@ -41,7 +41,7 @@ import java.util.Map;
 //
 // Covered: the Fusion Reactor (from the Fusion Collider: blast chamber, inner and outer rings, injectors,
 // portals and ports), the Reactor Control Console (from the console block) and the 7x7 collider ring
-// (from a Storm Collider or Mini Collider).
+// (from a Storm Collider or Mini Collider), the Storm and Titan Forges, and the Shock Farm (from its controller).
 //
 // Where the build allows a choice (which way the chamber opens, which corners get the portals and ports),
 // the ghost follows what's already placed, and uses a default until then.
@@ -255,6 +255,98 @@ public final class GhostBuild {
             need(level, out, base, pillar);
             need(level, out, base.above(), pillar);
             need(level, out, base.above(2), net.minecraft.world.level.block.Blocks.LIGHTNING_ROD.defaultBlockState());
+        }
+        return out;
+    }
+
+    public static List<Ghost> titanForge(BlockGetter level, BlockPos anvil) {
+        List<Ghost> out = new ArrayList<>();
+        BlockState casing = ModBlocks.CHARGED_ARC_CASING.get().defaultBlockState();
+        BlockState bricks = ModBlocks.STORMSTONE_BRICKS.get().defaultBlockState();
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
+                BlockPos p = anvil.offset(dx, -1, dz);
+                boolean inner = Math.abs(dx) <= 1 && Math.abs(dz) <= 1;
+                boolean port = com.sideflowgames.fulguritefusion.block.TitanForgeBlockEntity.isOuterEdge(dx, dz)
+                        && level.getBlockState(p).is(ModBlocks.FORGE_POWER_PORT.get());
+                if (!port) need(level, out, p, inner ? casing : bricks);
+            }
+        }
+        for (int[] c : com.sideflowgames.fulguritefusion.block.TitanForgeBlockEntity.TITAN_CORNERS) {
+            BlockPos base = anvil.offset(c[0], 0, c[1]);
+            need(level, out, base, bricks);
+            need(level, out, base.above(), bricks);
+            need(level, out, base.above(2), ModBlocks.PRISMITE_BLOCK.get().defaultBlockState());
+            need(level, out, base.above(3), net.minecraft.world.level.block.Blocks.LIGHTNING_ROD.defaultBlockState());
+        }
+        return out;
+    }
+
+    // ---------- Shock Farm ----------
+
+    // From the controller: the 5x5 farm, or the 7x7 once the build shows it's going big (Charged Arc Casing on the
+    // big ring, or Galvanic Soil where only the big pad reaches).
+    public static List<Ghost> shockFarm(BlockGetter level, BlockPos ctrl) {
+        BlockState self = level.getBlockState(ctrl);
+        Direction f = self.hasProperty(com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock.FACING)
+                ? self.getValue(com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock.FACING) : Direction.NORTH;
+        return shockFarm(level, ctrl, f, shockFarmTier(level, ctrl, f));
+    }
+
+    private static int shockFarmTier(BlockGetter level, BlockPos ctrl, Direction f) {
+        Direction side = f.getClockWise();
+        for (int fwd = 0; fwd <= 6; fwd++) {
+            for (int lat = -3; lat <= 3; lat++) {
+                BlockPos p = ctrl.relative(f, fwd).relative(side, lat);
+                boolean ring = fwd == 0 || fwd == 6 || Math.abs(lat) == 3;
+                if (ring && is(level, p, ModBlocks.CHARGED_ARC_CASING.get())) return 2;
+                boolean bigPadOnly = !ring && (fwd >= 4 || Math.abs(lat) == 2);
+                if (bigPadOnly && is(level, p, com.sideflowgames.fulguritefusion.farm.FarmBlocks.GALVANIC_SOIL.get())) return 2;
+            }
+        }
+        return 1;
+    }
+
+    public static List<Ghost> shockFarm(BlockGetter level, BlockPos ctrl, Direction f, int tier) {
+        List<Ghost> out = new ArrayList<>();
+        int r = tier == 2 ? 3 : 2, h = tier == 2 ? 3 : 2;
+        BlockPos c = ctrl.relative(f, r);
+        BlockState soil = com.sideflowgames.fulguritefusion.farm.FarmBlocks.GALVANIC_SOIL.get().defaultBlockState();
+        BlockState prong = com.sideflowgames.fulguritefusion.farm.FarmBlocks.TESLA_PRONG.get().defaultBlockState();
+        Block collector = com.sideflowgames.fulguritefusion.farm.FarmBlocks.COLLECTOR.get();
+        BlockState casing = (tier == 2 ? ModBlocks.CHARGED_ARC_CASING.get() : ModBlocks.TEMPERED_ARC_CASING.get()).defaultBlockState();
+        BlockState pillar = ModBlocks.REINFORCED_FULGURITE.get().defaultBlockState();
+        boolean hasCollector = false;
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                boolean ex = Math.abs(dx) == r, ez = Math.abs(dz) == r;
+                if (ex != ez && is(level, c.offset(dx, 0, dz), collector)) hasCollector = true;
+            }
+        }
+        BlockPos collectorSpot = c.relative(f, r);
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                BlockPos p = c.offset(dx, 0, dz);
+                boolean ex = Math.abs(dx) == r, ez = Math.abs(dz) == r;
+                if (!ex && !ez) {
+                    need(level, out, p, soil);
+                    clear(level, out, p.above());
+                    clear(level, out, p.above(2));
+                } else if (ex && ez) {
+                    for (int y = 0; y < h; y++) need(level, out, p.above(y), pillar);
+                    need(level, out, p.above(h), prong);
+                } else {
+                    for (int y = 1; y <= 2; y++) {
+                        BlockPos g = p.above(y);
+                        if (!com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlockEntity.isGlass(level.getBlockState(g))) {
+                            out.add(new Ghost(g.immutable(), net.minecraft.world.level.block.Blocks.TINTED_GLASS.defaultBlockState()));
+                        }
+                    }
+                    if (p.equals(ctrl) || is(level, p, collector) || is(level, p, com.sideflowgames.fulguritefusion.farm.FarmBlocks.POWER_PORT.get())) continue;
+                    if (!hasCollector && p.equals(collectorSpot)) need(level, out, p, collector.defaultBlockState());
+                    else need(level, out, p, casing);
+                }
+            }
         }
         return out;
     }

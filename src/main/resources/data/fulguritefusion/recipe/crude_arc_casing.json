@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "CIC",
-    "IRI",
-    "CIC"
+    "CMC",
+    "MRM",
+    "CMC"
   ],
   "key": {
     "C": {
       "item": "minecraft:copper_ingot"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "M": {
+      "item": "fulguritefusion:magnetite_ingot"
     },
     "R": {
       "item": "minecraft:redstone"
