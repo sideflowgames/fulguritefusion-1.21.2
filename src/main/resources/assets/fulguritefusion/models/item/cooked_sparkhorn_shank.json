@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fulguritefusion:item/cooked_sparkhorn_shank"
+  }
+}

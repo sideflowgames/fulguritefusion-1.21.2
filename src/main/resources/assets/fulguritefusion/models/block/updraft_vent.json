@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "fulguritefusion:block/updraft_vent_top",
+    "side": "fulguritefusion:block/updraft_vent_side"
+  }
+}

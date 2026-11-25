@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "fulguritefusion:aurorite_ingot"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:aurorite_block",
+    "count": 1
+  }
+}

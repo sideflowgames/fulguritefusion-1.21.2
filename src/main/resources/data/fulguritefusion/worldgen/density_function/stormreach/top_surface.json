@@ -1,0 +1,162 @@
+{
+  "type": "minecraft:add",
+  "argument1": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:add",
+      "argument1": {
+        "type": "minecraft:y_clamped_gradient",
+        "from_y": 100,
+        "to_y": 160,
+        "from_value": 1.0,
+        "to_value": -1.0
+      },
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": 0.8,
+        "argument2": {
+          "type": "minecraft:cache_2d",
+          "argument": {
+            "type": "minecraft:noise",
+            "noise": "fulguritefusion:stormreach_top",
+            "xz_scale": 1.0,
+            "y_scale": 0.0
+          }
+        }
+      }
+    },
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": "fulguritefusion:stormreach/lake_weight",
+      "argument2": {
+        "type": "minecraft:add",
+        "argument1": {
+          "type": "minecraft:min",
+          "argument1": {
+            "type": "minecraft:add",
+            "argument1": {
+              "type": "minecraft:y_clamped_gradient",
+              "from_y": 100,
+              "to_y": 160,
+              "from_value": 1.0,
+              "to_value": -1.0
+            },
+            "argument2": {
+              "type": "minecraft:mul",
+              "argument1": 0.8,
+              "argument2": {
+                "type": "minecraft:cache_2d",
+                "argument": {
+                  "type": "minecraft:noise",
+                  "noise": "fulguritefusion:stormreach_top",
+                  "xz_scale": 1.0,
+                  "y_scale": 0.0
+                }
+              }
+            }
+          },
+          "argument2": {
+            "type": "minecraft:add",
+            "argument1": {
+              "type": "minecraft:y_clamped_gradient",
+              "from_y": 106,
+              "to_y": 126,
+              "from_value": 1.0,
+              "to_value": -1.0
+            },
+            "argument2": {
+              "type": "minecraft:cache_2d",
+              "argument": {
+                "type": "minecraft:mul",
+                "argument1": 0.9,
+                "argument2": {
+                  "type": "minecraft:mul",
+                  "argument1": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:mul",
+                      "argument1": {
+                        "type": "minecraft:add",
+                        "argument1": {
+                          "type": "minecraft:cache_2d",
+                          "argument": {
+                            "type": "minecraft:noise",
+                            "noise": "fulguritefusion:stormreach_top",
+                            "xz_scale": 3.0,
+                            "y_scale": 0.0
+                          }
+                        },
+                        "argument2": -0.25
+                      },
+                      "argument2": 3.0
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "argument2": {
+                    "type": "minecraft:add",
+                    "argument1": 2.0,
+                    "argument2": {
+                      "type": "minecraft:mul",
+                      "argument1": -1.0,
+                      "argument2": {
+                        "type": "minecraft:clamp",
+                        "input": {
+                          "type": "minecraft:mul",
+                          "argument1": {
+                            "type": "minecraft:add",
+                            "argument1": {
+                              "type": "minecraft:cache_2d",
+                              "argument": {
+                                "type": "minecraft:noise",
+                                "noise": "fulguritefusion:stormreach_top",
+                                "xz_scale": 3.0,
+                                "y_scale": 0.0
+                              }
+                            },
+                            "argument2": -0.25
+                          },
+                          "argument2": 3.0
+                        },
+                        "min": 0.0,
+                        "max": 1.0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "argument2": {
+          "type": "minecraft:mul",
+          "argument1": -1.0,
+          "argument2": {
+            "type": "minecraft:add",
+            "argument1": {
+              "type": "minecraft:y_clamped_gradient",
+              "from_y": 100,
+              "to_y": 160,
+              "from_value": 1.0,
+              "to_value": -1.0
+            },
+            "argument2": {
+              "type": "minecraft:mul",
+              "argument1": 0.8,
+              "argument2": {
+                "type": "minecraft:cache_2d",
+                "argument": {
+                  "type": "minecraft:noise",
+                  "noise": "fulguritefusion:stormreach_top",
+                  "xz_scale": 1.0,
+                  "y_scale": 0.0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "argument2": "fulguritefusion:stormreach/terrain_shapes"
+}

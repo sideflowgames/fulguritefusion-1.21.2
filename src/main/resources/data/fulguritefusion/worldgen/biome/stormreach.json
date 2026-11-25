@@ -1,0 +1,47 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.7,
+  "downfall": 0.9,
+  "effects": {
+    "sky_color": 4867176,
+    "fog_color": 3814992,
+    "water_color": 5926556,
+    "water_fog_color": 2764872,
+    "grass_color": 6978188,
+    "foliage_color": 6188160,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "water_creature": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "misc": [],
+    "axolotls": []
+  },
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "fulguritefusion:stormreach_fulgurite_ore",
+      "fulguritefusion:stormreach_tempest_crystal_ore"
+    ],
+    [],
+    [],
+    [],
+    []
+  ]
+}

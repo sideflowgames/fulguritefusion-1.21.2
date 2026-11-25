@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "fulguritefusion:block/sparkbush_log"
+    },
+    "axis=z": {
+      "model": "fulguritefusion:block/sparkbush_log_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "fulguritefusion:block/sparkbush_log_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

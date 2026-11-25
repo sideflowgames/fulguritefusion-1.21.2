@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/carpet",
+  "textures": {
+    "wool": "fulguritefusion:block/cloudmoss_block"
+  }
+}

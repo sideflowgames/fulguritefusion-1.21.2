@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:sparkbush_log"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:sparkbush_planks",
+    "count": 4
+  }
+}

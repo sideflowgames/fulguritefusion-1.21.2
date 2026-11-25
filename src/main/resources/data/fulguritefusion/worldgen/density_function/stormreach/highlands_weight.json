@@ -1,0 +1,80 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:mul",
+    "argument1": {
+      "type": "minecraft:mul",
+      "argument1": {
+        "type": "minecraft:min",
+        "argument1": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "minecraft:add",
+              "argument1": "fulguritefusion:stormreach/temperature",
+              "argument2": 0.39999999999999997
+            },
+            "argument2": 20.0
+          },
+          "min": 0.0,
+          "max": 1.0
+        },
+        "argument2": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "minecraft:add",
+              "argument1": {
+                "type": "minecraft:mul",
+                "argument1": "fulguritefusion:stormreach/temperature",
+                "argument2": -1.0
+              },
+              "argument2": 0.05
+            },
+            "argument2": 20.0
+          },
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "argument2": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:mul",
+          "argument1": {
+            "type": "minecraft:add",
+            "argument1": {
+              "type": "minecraft:mul",
+              "argument1": "fulguritefusion:stormreach/humidity",
+              "argument2": -1.0
+            },
+            "argument2": -0.09999999999999999
+          },
+          "argument2": 20.0
+        },
+        "min": 0.0,
+        "max": 1.0
+      }
+    },
+    "argument2": {
+      "type": "minecraft:clamp",
+      "input": {
+        "type": "minecraft:mul",
+        "argument1": {
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:mul",
+            "argument1": "fulguritefusion:stormreach/variant",
+            "argument2": -1.0
+          },
+          "argument2": 0.2
+        },
+        "argument2": 20.0
+      },
+      "min": 0.0,
+      "max": 1.0
+    }
+  }
+}

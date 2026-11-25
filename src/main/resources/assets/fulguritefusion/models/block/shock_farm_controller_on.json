@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "fulguritefusion:block/tempered_arc_casing",
+    "north": "fulguritefusion:block/tempered_arc_casing",
+    "south": "fulguritefusion:block/shock_farm_controller_front_on",
+    "east": "fulguritefusion:block/tempered_arc_casing",
+    "west": "fulguritefusion:block/tempered_arc_casing",
+    "up": "fulguritefusion:block/shock_farm_controller_top",
+    "down": "fulguritefusion:block/tempered_arc_casing"
+  }
+}

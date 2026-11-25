@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:amber_block"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:fossil_amber",
+    "count": 9
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:conductor_log"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:conductor_planks",
+    "count": 4
+  }
+}

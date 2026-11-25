@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AQA",
+    "PFP",
+    "CCC"
+  ],
+  "key": {
+    "A": {
+      "item": "fulguritefusion:aurorite_block"
+    },
+    "Q": {
+      "item": "fulguritefusion:stormquartz_block"
+    },
+    "P": {
+      "item": "fulguritefusion:prismite_block"
+    },
+    "F": {
+      "item": "fulguritefusion:storm_forge"
+    },
+    "C": {
+      "item": "fulguritefusion:cinderite_block"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:titan_forge",
+    "count": 1
+  }
+}

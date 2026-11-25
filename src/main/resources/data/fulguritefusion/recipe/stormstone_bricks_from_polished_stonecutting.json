@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "fulguritefusion:polished_stormstone"
+  },
+  "result": {
+    "id": "fulguritefusion:stormstone_bricks",
+    "count": 1
+  }
+}

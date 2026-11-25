@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:cloudstep_charm",
+    "fulguritefusion:empowered_cloudstep_charm",
+    "fulguritefusion:skyrender_charm"
+  ]
+}

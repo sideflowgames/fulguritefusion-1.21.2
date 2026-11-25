@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/arc_trap_off",
+    "side": "fulguritefusion:block/tesla_coil_base",
+    "bottom": "fulguritefusion:block/tesla_coil_base"
+  }
+}

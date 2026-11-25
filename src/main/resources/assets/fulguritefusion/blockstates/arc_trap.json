@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "charged=true": {
+      "model": "fulguritefusion:block/arc_trap"
+    },
+    "charged=false": {
+      "model": "fulguritefusion:block/arc_trap_off"
+    }
+  }
+}

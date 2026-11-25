@@ -1,0 +1,25 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "fulguritefusion:block/arc_receiver"
+  },
+  "facing=east": {
+   "model": "fulguritefusion:block/arc_receiver",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "fulguritefusion:block/arc_receiver",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "fulguritefusion:block/arc_receiver",
+   "y": 270
+  },
+  "facing=up": {
+   "model": "fulguritefusion:block/arc_receiver_up"
+  },
+  "facing=down": {
+   "model": "fulguritefusion:block/arc_receiver_down"
+  }
+ }
+}

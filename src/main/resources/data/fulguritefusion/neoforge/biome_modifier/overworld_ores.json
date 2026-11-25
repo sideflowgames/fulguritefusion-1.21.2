@@ -1,0 +1,9 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "fulguritefusion:overworld_magnetite_ore",
+    "fulguritefusion:overworld_argentite_ore"
+  ],
+  "step": "underground_ores"
+}

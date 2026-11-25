@@ -1,0 +1,13 @@
+{
+  "entities": [
+    "player"
+  ],
+  "slots": [
+    "cloudstep_charm",
+    "conduit_heart",
+    "void_arc_band",
+    "grounding_charm",
+    "cinder_ward",
+    "seers_ring"
+  ]
+}

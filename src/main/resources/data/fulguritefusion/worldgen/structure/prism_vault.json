@@ -1,0 +1,8 @@
+{
+  "type": "fulguritefusion:stormreach_dungeon",
+  "dungeon": "prism_vault",
+  "biomes": "#fulguritefusion:has_structure/prism_vault",
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "fulguritefusion:block/storm_ward"
+    },
+    "active=true": {
+      "model": "fulguritefusion:block/storm_ward_on"
+    }
+  }
+}

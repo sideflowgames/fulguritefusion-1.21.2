@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "fulguritefusion:block/thunderoak_log",
+    "end": "fulguritefusion:block/thunderoak_log_top"
+  }
+}

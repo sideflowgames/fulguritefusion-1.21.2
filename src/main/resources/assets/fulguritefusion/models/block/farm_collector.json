@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/farm_collector_top",
+    "bottom": "fulguritefusion:block/tempered_arc_casing",
+    "side": "fulguritefusion:block/farm_collector_side"
+  }
+}

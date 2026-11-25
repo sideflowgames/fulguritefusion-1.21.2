@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AFA",
+    "FRF",
+    "AFA"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "F": {
+      "item": "fulguritefusion:rift_frame"
+    },
+    "R": {
+      "item": "fulguritefusion:rift_core"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:rift_keystone",
+    "count": 1
+  }
+}

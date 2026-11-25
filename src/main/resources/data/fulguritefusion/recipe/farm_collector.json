@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "THT",
+    "TCT",
+    "TTT"
+  ],
+  "key": {
+    "T": {
+      "item": "fulguritefusion:tempered_arc_casing"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:farm_collector",
+    "count": 1
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "variants": {
+    "active=false,facing=north,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller"
+    },
+    "active=false,facing=north,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=north,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=north,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller_on"
+    },
+    "active=true,facing=north,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=north,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=east,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller",
+      "y": 90
+    },
+    "active=false,facing=east,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=east,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=east,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller_on",
+      "y": 90
+    },
+    "active=true,facing=east,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=east,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=south,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller",
+      "y": 180
+    },
+    "active=false,facing=south,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=south,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=south,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller_on",
+      "y": 180
+    },
+    "active=true,facing=south,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=south,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=west,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller",
+      "y": 270
+    },
+    "active=false,facing=west,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=false,facing=west,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=west,size=0": {
+      "model": "fulguritefusion:block/shock_farm_controller_on",
+      "y": 270
+    },
+    "active=true,facing=west,size=1": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    },
+    "active=true,facing=west,size=2": {
+      "model": "fulguritefusion:block/shock_farm_hidden"
+    }
+  }
+}

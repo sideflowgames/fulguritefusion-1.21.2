@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GCG",
+    "TST",
+    "GTG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "T": {
+      "item": "fulguritefusion:tempered_arc_casing"
+    },
+    "S": {
+      "item": "fulguritefusion:spark_cell"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:shock_farm_controller",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "fulguritefusion:block/thunderoak_log"
+    },
+    "axis=z": {
+      "model": "fulguritefusion:block/thunderoak_log_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "fulguritefusion:block/thunderoak_log_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

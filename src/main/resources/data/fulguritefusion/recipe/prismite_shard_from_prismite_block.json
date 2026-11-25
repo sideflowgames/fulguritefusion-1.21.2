@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:prismite_block"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:prismite_shard",
+    "count": 9
+  }
+}

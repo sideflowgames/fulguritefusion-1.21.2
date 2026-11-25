@@ -1,0 +1,41 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "fulguritefusion:block/titan_altar"
+      }
+    },
+    {
+      "when": {
+        "eye": "true"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/titan_altar_eye"
+      }
+    },
+    {
+      "when": {
+        "heart": "true"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/titan_altar_heart"
+      }
+    },
+    {
+      "when": {
+        "shard": "true"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/titan_altar_shard"
+      }
+    },
+    {
+      "when": {
+        "offering": "head|chest|legs|feet"
+      },
+      "apply": {
+        "model": "fulguritefusion:block/titan_altar_offering"
+      }
+    }
+  ]
+}

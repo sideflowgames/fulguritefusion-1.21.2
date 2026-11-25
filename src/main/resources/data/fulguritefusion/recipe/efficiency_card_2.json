@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:efficiency_card_1"
+    },
+    {
+      "item": "fulguritefusion:resonant_shard"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:efficiency_card_2",
+    "count": 1
+  }
+}

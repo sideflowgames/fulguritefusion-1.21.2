@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "S",
+    "S",
+    "S"
+  ],
+  "key": {
+    "S": {
+      "item": "fulguritefusion:gloomarc_silk"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:silk_rope",
+    "count": 8
+  }
+}

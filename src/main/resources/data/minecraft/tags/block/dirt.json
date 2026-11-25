@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:charged_loam",
+    "fulguritefusion:arcgrass_block",
+    "fulguritefusion:cloudmoss_block",
+    "fulguritefusion:voltcap_mycelium"
+  ]
+}

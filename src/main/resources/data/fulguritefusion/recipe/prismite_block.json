@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "fulguritefusion:prismite_shard"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:prismite_block",
+    "count": 1
+  }
+}

@@ -1,0 +1,162 @@
+{
+ "multipart": [
+  {
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_core"
+   }
+  },
+  {
+   "when": {
+    "north": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm"
+   }
+  },
+  {
+   "when": {
+    "north": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in"
+   }
+  },
+  {
+   "when": {
+    "north": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out"
+   }
+  },
+  {
+   "when": {
+    "east": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm",
+    "y": 90
+   }
+  },
+  {
+   "when": {
+    "east": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in",
+    "y": 90
+   }
+  },
+  {
+   "when": {
+    "east": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out",
+    "y": 90
+   }
+  },
+  {
+   "when": {
+    "south": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm",
+    "y": 180
+   }
+  },
+  {
+   "when": {
+    "south": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in",
+    "y": 180
+   }
+  },
+  {
+   "when": {
+    "south": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out",
+    "y": 180
+   }
+  },
+  {
+   "when": {
+    "west": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm",
+    "y": 270
+   }
+  },
+  {
+   "when": {
+    "west": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in",
+    "y": 270
+   }
+  },
+  {
+   "when": {
+    "west": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out",
+    "y": 270
+   }
+  },
+  {
+   "when": {
+    "up": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm_up"
+   }
+  },
+  {
+   "when": {
+    "up": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in_up"
+   }
+  },
+  {
+   "when": {
+    "up": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out_up"
+   }
+  },
+  {
+   "when": {
+    "down": "pipe|in|out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_arm_down"
+   }
+  },
+  {
+   "when": {
+    "down": "in"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_in_down"
+   }
+  },
+  {
+   "when": {
+    "down": "out"
+   },
+   "apply": {
+    "model": "fulguritefusion:block/fulgurite_item_pipe_out_down"
+   }
+  }
+ ]
+}

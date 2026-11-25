@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FIF",
+    "ISI",
+    "III"
+  ],
+  "key": {
+    "F": {
+      "item": "fulguritefusion:tempest_feather"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "fulguritefusion:stormstone_bricks"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:updraft_vent",
+    "count": 1
+  }
+}

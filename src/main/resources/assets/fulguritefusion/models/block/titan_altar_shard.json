@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "fulguritefusion:block/titan_altar_shard",
+    "g": "fulguritefusion:block/titan_altar_shard"
+  },
+  "elements": [
+    {
+      "from": [
+        6.5,
+        16,
+        10
+      ],
+      "to": [
+        9.5,
+        19.5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#g"
+        },
+        "south": {
+          "texture": "#g"
+        },
+        "east": {
+          "texture": "#g"
+        },
+        "west": {
+          "texture": "#g"
+        },
+        "up": {
+          "texture": "#g"
+        },
+        "down": {
+          "texture": "#g"
+        }
+      },
+      "shade": false
+    }
+  ]
+}

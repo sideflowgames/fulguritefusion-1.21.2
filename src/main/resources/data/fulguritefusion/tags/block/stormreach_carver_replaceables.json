@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:stormstone",
+    "fulguritefusion:charged_loam",
+    "fulguritefusion:fulgurite_ore",
+    "fulguritefusion:tempest_crystal_ore",
+    "fulguritefusion:charged_stormsand"
+  ]
+}

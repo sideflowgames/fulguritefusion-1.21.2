@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/arcgrass_block_top",
+    "bottom": "fulguritefusion:block/charged_loam",
+    "side": "fulguritefusion:block/arcgrass_block_side",
+    "particle": "fulguritefusion:block/charged_loam"
+  }
+}

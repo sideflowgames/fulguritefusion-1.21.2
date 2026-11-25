@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:stormstone",
+    "fulguritefusion:deep_stormstone",
+    "fulguritefusion:rimestone",
+    "fulguritefusion:stormslate",
+    "fulguritefusion:magnetite_rock",
+    "fulguritefusion:fulgurite_crust",
+    "fulguritefusion:cinder_rock",
+    "fulguritefusion:stormsandstone",
+    "minecraft:tuff",
+    "minecraft:calcite"
+  ]
+}

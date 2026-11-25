@@ -1,0 +1,13 @@
+{
+  "type": "fulguritefusion:titan_trials",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "fulguritefusion:titan_trials",
+      "layers": [],
+      "lakes": false,
+      "features": false,
+      "structure_overrides": []
+    }
+  }
+}

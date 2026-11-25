@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "fulguritefusion:block/titan_altar_heart",
+    "g": "fulguritefusion:block/titan_altar_heart"
+  },
+  "elements": [
+    {
+      "from": [
+        10,
+        16,
+        3
+      ],
+      "to": [
+        13,
+        18.5,
+        6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#g"
+        },
+        "south": {
+          "texture": "#g"
+        },
+        "east": {
+          "texture": "#g"
+        },
+        "west": {
+          "texture": "#g"
+        },
+        "up": {
+          "texture": "#g"
+        },
+        "down": {
+          "texture": "#g"
+        }
+      },
+      "shade": false
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/dungeon_altar_top",
+    "side": "fulguritefusion:block/dungeon_altar_side",
+    "bottom": "fulguritefusion:block/tesla_coil_base"
+  }
+}

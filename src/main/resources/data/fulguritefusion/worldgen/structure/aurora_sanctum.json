@@ -1,0 +1,8 @@
+{
+  "type": "fulguritefusion:stormreach_dungeon",
+  "dungeon": "aurora_sanctum",
+  "biomes": "#fulguritefusion:has_structure/aurora_sanctum",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

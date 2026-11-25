@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "spent=false": {
+      "model": "fulguritefusion:block/storm_cage"
+    },
+    "spent=true": {
+      "model": "fulguritefusion:block/storm_cage_spent"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "fulguritefusion:stormreach_dungeon",
+  "dungeon": "ashen_foundry",
+  "biomes": "#fulguritefusion:has_structure/ashen_foundry",
+  "step": "underground_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

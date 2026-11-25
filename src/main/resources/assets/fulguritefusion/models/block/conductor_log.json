@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "fulguritefusion:block/conductor_log",
+    "end": "fulguritefusion:block/conductor_log_top"
+  }
+}

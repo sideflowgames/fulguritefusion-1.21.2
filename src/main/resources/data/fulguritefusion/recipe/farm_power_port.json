@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CGC",
+    "GTG",
+    "CGC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "T": {
+      "item": "fulguritefusion:tempered_arc_casing"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:farm_power_port",
+    "count": 1
+  }
+}

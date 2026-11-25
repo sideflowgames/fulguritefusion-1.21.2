@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:tempest_crystal_ore",
+    "fulguritefusion:prismite_ore",
+    "fulguritefusion:stormquartz_ore",
+    "fulguritefusion:aurorite_ore",
+    "fulguritefusion:aurorite_block",
+    "fulguritefusion:titan_forge"
+  ]
+}

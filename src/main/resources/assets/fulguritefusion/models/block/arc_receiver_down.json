@@ -1,0 +1,106 @@
+{
+ "textures": {
+  "base": "fulguritefusion:block/arc_node_base",
+  "coil": "fulguritefusion:block/arc_receiver_coil",
+  "orb": "fulguritefusion:block/arc_receiver_orb",
+  "particle": "fulguritefusion:block/arc_node_base"
+ },
+ "elements": [
+  {
+   "from": [
+    1,
+    0,
+    1
+   ],
+   "to": [
+    15,
+    2,
+    15
+   ],
+   "faces": {
+    "north": {
+     "texture": "#base"
+    },
+    "south": {
+     "texture": "#base"
+    },
+    "east": {
+     "texture": "#base"
+    },
+    "west": {
+     "texture": "#base"
+    },
+    "up": {
+     "texture": "#base"
+    },
+    "down": {
+     "texture": "#base"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    2,
+    4
+   ],
+   "to": [
+    12,
+    10,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#coil"
+    },
+    "south": {
+     "texture": "#coil"
+    },
+    "east": {
+     "texture": "#coil"
+    },
+    "west": {
+     "texture": "#coil"
+    },
+    "up": {
+     "texture": "#coil"
+    },
+    "down": {
+     "texture": "#coil"
+    }
+   }
+  },
+  {
+   "from": [
+    5.5,
+    10,
+    5.5
+   ],
+   "to": [
+    10.5,
+    14,
+    10.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#orb"
+    },
+    "south": {
+     "texture": "#orb"
+    },
+    "east": {
+     "texture": "#orb"
+    },
+    "west": {
+     "texture": "#orb"
+    },
+    "up": {
+     "texture": "#orb"
+    },
+    "down": {
+     "texture": "#orb"
+    }
+   }
+  }
+ ]
+}

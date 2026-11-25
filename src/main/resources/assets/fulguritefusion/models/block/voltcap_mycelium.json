@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/voltcap_mycelium_top",
+    "bottom": "fulguritefusion:block/charged_loam",
+    "side": "fulguritefusion:block/voltcap_mycelium_side",
+    "particle": "fulguritefusion:block/charged_loam"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "ingredient": {
+    "item": "fulguritefusion:sparkhorn_shank"
+  },
+  "result": {
+    "id": "fulguritefusion:cooked_sparkhorn_shank"
+  },
+  "experience": 0.35,
+  "cookingtime": 100
+}

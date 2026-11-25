@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "fulguritefusion:block/storm_ward_top",
+    "side": "fulguritefusion:block/storm_ward_side"
+  }
+}

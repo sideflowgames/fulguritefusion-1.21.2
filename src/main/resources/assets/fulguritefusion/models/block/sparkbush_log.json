@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "fulguritefusion:block/sparkbush_log",
+    "end": "fulguritefusion:block/sparkbush_log_top"
+  }
+}

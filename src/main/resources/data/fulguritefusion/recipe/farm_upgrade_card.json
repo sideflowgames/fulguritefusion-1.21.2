@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " G ",
+    "CFC",
+    " G "
+  ],
+  "key": {
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    "C": {
+      "item": "fulguritefusion:copper_sheet"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite_shard"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:farm_upgrade_card",
+    "count": 2
+  }
+}

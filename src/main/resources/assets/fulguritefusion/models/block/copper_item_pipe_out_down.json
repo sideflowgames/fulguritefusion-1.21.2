@@ -1,0 +1,76 @@
+{
+ "textures": {
+  "flange": "fulguritefusion:block/item_pipe_extractor",
+  "particle": "fulguritefusion:block/item_pipe_extractor"
+ },
+ "elements": [
+  {
+   "from": [
+    4,
+    0,
+    4
+   ],
+   "to": [
+    12,
+    2,
+    12
+   ],
+   "faces": {
+    "up": {
+     "uv": [
+      4,
+      4,
+      12,
+      12
+     ],
+     "texture": "#flange"
+    },
+    "down": {
+     "uv": [
+      4,
+      4,
+      12,
+      12
+     ],
+     "texture": "#flange"
+    },
+    "north": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "south": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "east": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "west": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "fulguritefusion:silver_ingot"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:silver_block",
+    "count": 1
+  }
+}

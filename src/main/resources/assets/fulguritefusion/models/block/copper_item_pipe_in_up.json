@@ -1,0 +1,76 @@
+{
+ "textures": {
+  "flange": "fulguritefusion:block/copper_item_pipe_flange",
+  "particle": "fulguritefusion:block/copper_item_pipe_flange"
+ },
+ "elements": [
+  {
+   "from": [
+    4,
+    14,
+    4
+   ],
+   "to": [
+    12,
+    16,
+    12
+   ],
+   "faces": {
+    "up": {
+     "uv": [
+      4,
+      4,
+      12,
+      12
+     ],
+     "texture": "#flange"
+    },
+    "down": {
+     "uv": [
+      4,
+      4,
+      12,
+      12
+     ],
+     "texture": "#flange"
+    },
+    "north": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "south": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "east": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    },
+    "west": {
+     "uv": [
+      4,
+      0,
+      12,
+      2
+     ],
+     "texture": "#flange"
+    }
+   }
+  }
+ ]
+}

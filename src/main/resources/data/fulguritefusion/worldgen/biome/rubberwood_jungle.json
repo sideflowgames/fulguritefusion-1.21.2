@@ -1,0 +1,152 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.95,
+  "downfall": 1.0,
+  "effects": {
+    "sky_color": 6063224,
+    "fog_color": 3957848,
+    "water_color": 5020812,
+    "water_fog_color": 2764872,
+    "grass_color": 5020796,
+    "foliage_color": 5018728,
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "fulguritefusion:arcwurm",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "fulguritefusion:crystal_stalker",
+        "weight": 40,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "fulguritefusion:static_wraith",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "fulguritefusion:shockroach",
+        "weight": 50,
+        "minCount": 4,
+        "maxCount": 8
+      },
+      {
+        "type": "fulguritefusion:stormhound",
+        "weight": 15,
+        "minCount": 3,
+        "maxCount": 5
+      },
+      {
+        "type": "fulguritefusion:arc_reaver",
+        "weight": 30,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "fulguritefusion:thunderhulk",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "fulguritefusion:stormcaller_shade",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "fulguritefusion:static_leech",
+        "weight": 30,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "fulguritefusion:ion_swarm",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "fulguritefusion:voltspitter",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "fulguritefusion:tempest_raptor",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "fulguritefusion:gloomarc_spider",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "creature": [
+      {
+        "type": "fulguritefusion:rubberback_sloth",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ],
+    "ambient": [
+      {
+        "type": "fulguritefusion:glimmerwing",
+        "weight": 8,
+        "minCount": 3,
+        "maxCount": 6
+      }
+    ],
+    "water_creature": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "misc": [],
+    "axolotls": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": [
+      "fulguritefusion:stormreach_cave",
+      "fulguritefusion:stormreach_cavern"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "fulguritefusion:stormreach_fulgurite_ore",
+      "fulguritefusion:stormreach_tempest_crystal_ore",
+      "fulguritefusion:stormreach_amber_ore_sparse"
+    ],
+    [],
+    [],
+    [
+      "fulguritefusion:great_rubber_trees",
+      "fulguritefusion:rubber_trees_dense",
+      "fulguritefusion:arcgrass_lush",
+      "fulguritefusion:tall_arcgrass_lush",
+      "fulguritefusion:storm_flowers_sparse"
+    ],
+    []
+  ]
+}

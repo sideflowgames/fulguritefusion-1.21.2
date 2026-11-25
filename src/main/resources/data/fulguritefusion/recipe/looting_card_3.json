@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:looting_card_2"
+    },
+    {
+      "item": "fulguritefusion:prime_spark_fragment"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:looting_card_3",
+    "count": 1
+  }
+}

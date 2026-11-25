@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "fulguritefusion:block/galvanic_soil_top",
+    "bottom": "minecraft:block/dirt",
+    "side": "fulguritefusion:block/galvanic_soil_side"
+  }
+}

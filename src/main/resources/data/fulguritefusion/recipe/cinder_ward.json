@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GMG",
+    "MFM",
+    "GMG"
+  ],
+  "key": {
+    "G": {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    "M": {
+      "item": "minecraft:magma_cream"
+    },
+    "F": {
+      "item": "fulguritefusion:fulgurite"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:cinder_ward",
+    "count": 1
+  }
+}

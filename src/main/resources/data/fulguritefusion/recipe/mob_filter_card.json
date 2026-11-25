@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:farm_upgrade_card"
+    },
+    {
+      "item": "fulguritefusion:lumen_gel"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:mob_filter_card",
+    "count": 1
+  }
+}

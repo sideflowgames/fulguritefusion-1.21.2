@@ -1,0 +1,432 @@
+{
+  "type": "fulguritefusion:stormreach",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "fulguritefusion:stormreach",
+    "biome_source": {
+      "type": "minecraft:multi_noise",
+      "biomes": [
+        {
+          "biome": "fulguritefusion:aurora_steppe",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:aurora_tundra",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:cloudmoss_meadow",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:tempest_peaks",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:thunderoak_grove",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:petrified_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.35
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:shattered_highlands",
+          "parameters": {
+            "temperature": [
+              -0.35,
+              0.0
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:magnetite_fields",
+          "parameters": {
+            "temperature": [
+              -0.35,
+              0.0
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:voltcap_mushroom_fields",
+          "parameters": {
+            "temperature": [
+              -0.35,
+              0.0
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:conductor_forest",
+          "parameters": {
+            "temperature": [
+              -0.35,
+              0.0
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:crystal_caverns_rim",
+          "parameters": {
+            "temperature": [
+              -0.35,
+              0.0
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:stormgrass_plains",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.35
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:fulgurite_badlands",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.35
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:sparkbush_thicket",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.35
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:ashen_scar",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.35
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:rubberwood_jungle",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.35
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:glassfields",
+          "parameters": {
+            "temperature": [
+              0.35,
+              1.0
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              0.15
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:stormglass_desert",
+          "parameters": {
+            "temperature": [
+              0.35,
+              1.0
+            ],
+            "humidity": [
+              -1.0,
+              -0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              0.15,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:ion_lakes",
+          "parameters": {
+            "temperature": [
+              0.35,
+              1.0
+            ],
+            "humidity": [
+              -0.15,
+              0.15
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "fulguritefusion:static_marsh",
+          "parameters": {
+            "temperature": [
+              0.35,
+              1.0
+            ],
+            "humidity": [
+              0.15,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": [
+              -1.0,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:clamp",
+    "input": {
+      "type": "minecraft:mul",
+      "argument1": {
+        "type": "minecraft:min",
+        "argument1": {
+          "type": "minecraft:add",
+          "argument1": "fulguritefusion:stormreach/temperature",
+          "argument2": -0.35
+        },
+        "argument2": {
+          "type": "minecraft:add",
+          "argument1": 0.15,
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": -1.0,
+            "argument2": {
+              "type": "minecraft:abs",
+              "argument": "fulguritefusion:stormreach/humidity"
+            }
+          }
+        }
+      },
+      "argument2": 15.0
+    },
+    "min": 0.0,
+    "max": 1.0
+  }
+}

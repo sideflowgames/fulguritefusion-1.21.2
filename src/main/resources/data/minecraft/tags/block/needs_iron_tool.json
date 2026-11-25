@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "fulguritefusion:fulgurite_ore",
+    "fulguritefusion:stormstone_argentite_ore",
+    "fulguritefusion:cinderite_ore",
+    "fulguritefusion:amber_ore",
+    "fulguritefusion:argentite_ore",
+    "fulguritefusion:deepslate_argentite_ore",
+    "fulguritefusion:magnetite_block",
+    "fulguritefusion:silver_block",
+    "fulguritefusion:cinderite_block",
+    "fulguritefusion:prismite_block",
+    "fulguritefusion:stormquartz_block",
+    "fulguritefusion:rift_frame",
+    "fulguritefusion:rift_keystone",
+    "fulguritefusion:storm_cage"
+  ]
+}

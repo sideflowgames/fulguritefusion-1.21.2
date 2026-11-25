@@ -1,0 +1,109 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:wither",
+      "required": false
+    },
+    {
+      "id": "minecraft:ender_dragon",
+      "required": false
+    },
+    {
+      "id": "minecraft:warden",
+      "required": false
+    },
+    {
+      "id": "minecraft:elder_guardian",
+      "required": false
+    },
+    {
+      "id": "minecraft:giant",
+      "required": false
+    },
+    {
+      "id": "minecraft:illusioner",
+      "required": false
+    },
+    {
+      "id": "minecraft:iron_golem",
+      "required": false
+    },
+    {
+      "id": "minecraft:snow_golem",
+      "required": false
+    },
+    {
+      "id": "minecraft:villager",
+      "required": false
+    },
+    {
+      "id": "minecraft:wandering_trader",
+      "required": false
+    },
+    {
+      "id": "minecraft:zombie_horse",
+      "required": false
+    },
+    {
+      "id": "minecraft:skeleton_horse",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:storm_titan",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:stormhound",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:voltcap_crawler",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:thunderhead",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:magma_conduit",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:void_arc",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:peak_colossus",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:cinder_behemoth",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:aurora_wraith",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:prism_sentinel",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:titan_conduit",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:storm_core",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:magma_pylon",
+      "required": false
+    },
+    {
+      "id": "fulguritefusion:void_echo",
+      "required": false
+    }
+  ]
+}

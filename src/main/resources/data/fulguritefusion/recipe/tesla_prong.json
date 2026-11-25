@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " L ",
+    " C ",
+    "GSG"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:lightning_rod"
+    },
+    "C": {
+      "item": "fulguritefusion:coil_segment"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "S": {
+      "item": "fulguritefusion:fulgurite_shard"
+    }
+  },
+  "result": {
+    "id": "fulguritefusion:tesla_prong",
+    "count": 1
+  }
+}

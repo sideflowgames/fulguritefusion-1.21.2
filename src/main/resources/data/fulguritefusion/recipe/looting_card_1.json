@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fulguritefusion:farm_upgrade_card"
+    },
+    {
+      "item": "fulguritefusion:sunmote"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    },
+    {
+      "item": "fulguritefusion:gold_sheet"
+    }
+  ],
+  "result": {
+    "id": "fulguritefusion:looting_card_1",
+    "count": 1
+  }
+}

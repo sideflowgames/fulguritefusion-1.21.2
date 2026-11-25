@@ -1,0 +1,69 @@
+{
+ "render_type": "minecraft:translucent",
+ "textures": {
+  "pipe": "fulguritefusion:block/fulgurite_item_pipe",
+  "core": "fulguritefusion:block/fulgurite_item_pipe_core",
+  "particle": "fulguritefusion:block/fulgurite_item_pipe_core"
+ },
+ "elements": [
+  {
+   "from": [
+    5,
+    0,
+    5
+   ],
+   "to": [
+    11,
+    5,
+    11
+   ],
+   "faces": {
+    "down": {
+     "uv": [
+      5,
+      5,
+      11,
+      11
+     ],
+     "texture": "#core"
+    },
+    "north": {
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ],
+     "texture": "#pipe"
+    },
+    "south": {
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ],
+     "texture": "#pipe"
+    },
+    "east": {
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ],
+     "texture": "#pipe"
+    },
+    "west": {
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ],
+     "texture": "#pipe"
+    }
+   }
+  }
+ ]
+}
