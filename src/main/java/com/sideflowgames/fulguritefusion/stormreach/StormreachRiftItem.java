@@ -1,10 +1,11 @@
 package com.sideflowgames.fulguritefusion.stormreach;
 
+import net.minecraft.world.InteractionResult;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -23,26 +24,27 @@ public class StormreachRiftItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!Stormreach.developer(player)) {
-            if (!level.isClientSide) {
-                player.displayClientMessage(Component.literal("The Stormreach is still in development. It's coming in Fulgurite Fusion 2.0.")
-                        .withStyle(ChatFormatting.GRAY), true);
+            if (!level.isClientSide()) {
+                player.sendOverlayMessage(Component.literal("The Stormreach is still in development. It's coming in Fulgurite Fusion 2.0.")
+                        .withStyle(ChatFormatting.GRAY));
             }
-            return InteractionResultHolder.fail(stack);
+            return InteractionResult.FAIL;
         }
         if (player instanceof ServerPlayer sp) StormreachTravel.travel(sp);
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        if (!level.isClientSide && entity instanceof Player && !Stormreach.developer(entity)) stack.setCount(0);
+    public void inventoryTick(ItemStack stack, net.minecraft.server.level.ServerLevel level, Entity entity, net.minecraft.world.entity.EquipmentSlot slot) {
+        if (!level.isClientSide() && entity instanceof Player && !Stormreach.developer(entity)) stack.setCount(0);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Developer only: takes you to the Stormreach and back.").withStyle(ChatFormatting.GRAY));
     }
 }

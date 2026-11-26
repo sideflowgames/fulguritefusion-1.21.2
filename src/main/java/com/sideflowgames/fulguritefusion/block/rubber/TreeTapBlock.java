@@ -83,12 +83,11 @@ public class TreeTapBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         if (direction == state.getValue(FACING).getOpposite() && !state.canSurvive(level, pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, scheduledTicks, pos, direction, neighborPos, neighbor, shapeRandom);
     }
 
     @Override

@@ -61,8 +61,8 @@ public class PeakColossusEntity extends StormElite {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         ServerLevel server = (ServerLevel) level();
         if (quakeCooldown > 0) quakeCooldown--;
         if (boulderCooldown > 0) boulderCooldown--;

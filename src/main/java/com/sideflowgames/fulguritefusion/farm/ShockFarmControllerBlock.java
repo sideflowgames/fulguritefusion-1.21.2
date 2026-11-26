@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -27,7 +27,7 @@ import net.minecraft.world.phys.BlockHitResult;
 // while looking at the farm). Right-click opens its menu (power, status, what the biome spawns, On/Off).
 public class ShockFarmControllerBlock extends BaseEntityBlock {
     public static final MapCodec<ShockFarmControllerBlock> CODEC = simpleCodec(ShockFarmControllerBlock::new);
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     // 0 = not formed, 1 = 5x5, 2 = 7x7. Once formed the block hides and its renderer draws the whole farm.
     public static final IntegerProperty SIZE = IntegerProperty.create("size", 0, 2);
@@ -74,12 +74,12 @@ public class ShockFarmControllerBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, FarmBlocks.CONTROLLER_BE.get(), ShockFarmControllerBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, FarmBlocks.CONTROLLER_BE.get(), ShockFarmControllerBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (level.getBlockEntity(pos) instanceof ShockFarmControllerBlockEntity be
                 && player instanceof net.minecraft.server.level.ServerPlayer sp) {
             sp.openMenu(be, buf -> be.writeMenuData(buf));
@@ -87,12 +87,12 @@ public class ShockFarmControllerBlock extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ShockFarmControllerBlockEntity be) {
             be.unform();
             net.minecraft.world.Containers.dropContents(level, pos, be.upgrades);
         }
-        super.onRemove(state, level, pos, newState, moved);
     }
 }

@@ -22,12 +22,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -47,7 +47,7 @@ public class VoltcapSnailEntity extends Animal implements GeoEntity {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Animal.createMobAttributes().add(Attributes.MAX_HEALTH, 12.0).add(Attributes.MOVEMENT_SPEED, 0.08)
+        return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 12.0).add(Attributes.MOVEMENT_SPEED, 0.08)
                 .add(Attributes.ARMOR, 4.0);
     }
 
@@ -67,10 +67,10 @@ public class VoltcapSnailEntity extends Animal implements GeoEntity {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (hiding > 0) amount *= 0.25f;
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !level().isClientSide) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
+        if (hurt && !level().isClientSide()) {
             hiding = HIDE_TICKS;
             level().broadcastEntityEvent(this, (byte) 64);
         }
@@ -91,7 +91,7 @@ public class VoltcapSnailEntity extends Animal implements GeoEntity {
             navigation.stop();
             setDeltaMovement(getDeltaMovement().multiply(0, 1, 0));
         }
-        if (level().isClientSide && random.nextInt(30) == 0) {
+        if (level().isClientSide() && random.nextInt(30) == 0) {
             level().addParticle(ParticleTypes.GLOW, getRandomX(0.4), getY(0.8), getRandomZ(0.4), 0, 0.02, 0);
         }
     }
@@ -99,7 +99,7 @@ public class VoltcapSnailEntity extends Animal implements GeoEntity {
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return ModEntities.VOLTCAP_SNAIL.get().create(level);
+        return ModEntities.VOLTCAP_SNAIL.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
     }
 
     @Nullable
@@ -120,7 +120,7 @@ public class VoltcapSnailEntity extends Animal implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(
                 hiding > 0 ? HIDE : s.isMoving() ? WALK : IDLE)));
     }
 

@@ -26,7 +26,7 @@ public final class Compactor {
     private static final Map<Item, Optional<Item>> TWO = new HashMap<>(), THREE = new HashMap<>();
 
     private static Optional<Item> result(Level level, Item item, int size) {
-        RecipeManager rm = level.getRecipeManager();
+        RecipeManager rm = ((net.minecraft.server.level.ServerLevel) level).recipeAccess();
         if (rm != cachedFor) {
             cachedFor = rm;
             TWO.clear();
@@ -39,14 +39,14 @@ public final class Compactor {
         List<ItemStack> grid = new ArrayList<>();
         for (int i = 0; i < size * size; i++) grid.add(new ItemStack(item));
         CraftingInput in = CraftingInput.of(size, size, grid);
-        var recipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, in, level);
+        var recipe = ((net.minecraft.server.level.ServerLevel) level).recipeAccess().getRecipeFor(RecipeType.CRAFTING, in, level);
         if (recipe.isEmpty()) return Optional.empty();
-        ItemStack out = recipe.get().value().assemble(in, level.registryAccess());
+        ItemStack out = recipe.get().value().assemble(in);
         if (out.isEmpty() || out.getCount() != 1 || !out.isComponentsPatchEmpty()) return Optional.empty();
         CraftingInput back = CraftingInput.of(1, 1, List.of(out.copy()));
-        var reverse = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, back, level);
+        var reverse = ((net.minecraft.server.level.ServerLevel) level).recipeAccess().getRecipeFor(RecipeType.CRAFTING, back, level);
         if (reverse.isEmpty()) return Optional.empty();
-        ItemStack undo = reverse.get().value().assemble(back, level.registryAccess());
+        ItemStack undo = reverse.get().value().assemble(back);
         if (!undo.is(item) || undo.getCount() != size * size || !undo.isComponentsPatchEmpty()) return Optional.empty();
         return Optional.of(out.getItem());
     }

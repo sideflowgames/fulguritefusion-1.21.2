@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 // Reactor Control Console: the control panel in the middle of the console. Place it first, facing you;
@@ -26,7 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 // (sneak-click or unformed: what's missing, or the reactor's status).
 public class ReactorConsoleBlock extends BaseEntityBlock {
     public static final MapCodec<ReactorConsoleBlock> CODEC = simpleCodec(ReactorConsoleBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public ReactorConsoleBlock(Properties properties) {
         super(properties);
@@ -60,22 +60,22 @@ public class ReactorConsoleBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.REACTOR_CONSOLE_BE.get(), ReactorConsoleBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.REACTOR_CONSOLE_BE.get(), ReactorConsoleBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof ReactorConsoleBlockEntity console) console.interact(player);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Taking the control panel out un-forms the console.
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ReactorConsoleBlockEntity console) {
             console.unform();
             console.dropContents();
         }
-        super.onRemove(state, level, pos, newState, moved);
     }
 }

@@ -9,18 +9,19 @@ import com.sideflowgames.fulguritefusion.block.ColliderParts;
 import com.sideflowgames.fulguritefusion.block.StormColliderBlockEntity;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoBlockRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoBlockRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 
 import java.util.Random;
 
@@ -29,36 +30,46 @@ import java.util.Random;
 // mini_collider / storm_collider in textures/block/machine/), turned to face its Collider Input.
 // During a shot, two glowing particles race along the groove on top of the ring, the injectors flash as they
 // fire, and the core lights up when they collide. The Storm Collider's corner crystals throw small arcs.
-public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBlockRenderer<T> {
+public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends LegacyGeoBlockRenderer<T> {
     private static final float GROOVE_Y = 9.5f / 16f;
 
     public ColliderRenderer(BlockEntityRendererProvider.Context context) {
-        super(new Model<>());
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        super(context, new Model<>());
+        withRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
     private static boolean formed(BlockState s) {
         return s.hasProperty(ColliderParts.FORMED) && s.getValue(ColliderParts.FORMED);
     }
 
+    // Not formed: only the ghost of the build (when powered), no model.
     @Override
-    public void render(T be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        Level level = be.getLevel();
-        BlockPos pos = be.getBlockPos();
-        BlockState state = be.getBlockState();
-        if (!formed(state)) {
+    public void submit(State<T> rs, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+                       net.minecraft.client.renderer.state.level.CameraRenderState camera) {
+        T be = rs.blockEntity;
+        if (be == null) return;
+        if (!formed(be.getBlockState())) {
+            Level level = be.getLevel();
+            BlockPos pos = be.getBlockPos();
             if (level != null && GhostBuild.powered(level, pos)) {
-                GhostBuild.render(GhostBuild.get(level, pos, l -> GhostBuild.colliderRing(l, pos)), pos, level, partialTick, poseStack, buffers);
+                LegacyRender.draw(poseStack, collector, buffers ->
+                        GhostBuild.render(GhostBuild.get(level, pos, l -> GhostBuild.colliderRing(l, pos)), pos, level, rs.partialTick, poseStack, buffers));
             }
             return;
         }
-        super.render(be, partialTick, poseStack, buffers, packedLight, packedOverlay);
+        super.submit(rs, poseStack, collector, camera);
+    }
+
+    @Override
+    protected void renderExtras(T be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
+        Level level = be.getLevel();
+        BlockState state = be.getBlockState();
         if (level == null) return;
 
         poseStack.pushPose();
         poseStack.translate(0.5, 0, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(degrees(state.getValue(ColliderParts.INPUT))));
-        VertexConsumer glow = buffers.getBuffer(RenderType.lightning());
+        VertexConsumer glow = buffers.getBuffer(RenderTypes.lightning());
         Matrix4f m = poseStack.last().pose();
         float time = level.getGameTime() + partialTick;
         boolean storm = be instanceof StormColliderBlockEntity;
@@ -150,8 +161,8 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
 
     // The model faces its input to -Z; turn it toward this collider's Collider Input.
     @Override
-    protected void rotateBlock(Direction facing, PoseStack poseStack) {
-        BlockState s = animatable.getBlockState();
+    protected void tryRotateByBlockstate(com.geckolib.renderer.base.RenderPassInfo<State<T>> info, PoseStack poseStack) {
+        BlockState s = info.renderState().blockEntity.getBlockState();
         Direction d = s.hasProperty(ColliderParts.INPUT) ? s.getValue(ColliderParts.INPUT) : Direction.NORTH;
         poseStack.mulPose(Axis.YP.rotationDegrees(degrees(d)));
     }
@@ -236,7 +247,7 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
     }
 
     @Override
-    public boolean shouldRenderOffScreen(T be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 
@@ -251,28 +262,29 @@ public class ColliderRenderer<T extends ColliderCoreBlockEntity> extends GeoBloc
     }
 
     private static class Model<T extends ColliderCoreBlockEntity> extends GeoModel<T> {
-        private static final ResourceLocation GEO = rl("geo/block/collider_ring.geo.json");
-        private static final ResourceLocation ANIM = rl("animations/block/collider_ring.animation.json");
-        private static final ResourceLocation MINI = rl("textures/block/machine/mini_collider.png");
-        private static final ResourceLocation STORM = rl("textures/block/machine/storm_collider.png");
+        private static final Identifier GEO = rl("block/collider_ring");
+        private static final Identifier ANIM = rl("block/collider_ring");
+        private static final Identifier MINI = rl("textures/block/machine/mini_collider.png");
+        private static final Identifier STORM = rl("textures/block/machine/storm_collider.png");
 
         @Override
-        public ResourceLocation getModelResource(T be) {
+        public Identifier getModelResource(com.geckolib.renderer.base.GeoRenderState renderState) {
             return GEO;
         }
 
         @Override
-        public ResourceLocation getTextureResource(T be) {
+        public Identifier getTextureResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            T be = LegacyGeoBlockRenderer.be(renderState);
             return be instanceof StormColliderBlockEntity ? STORM : MINI;
         }
 
         @Override
-        public ResourceLocation getAnimationResource(T be) {
+        public Identifier getAnimationResource(T be) {
             return ANIM;
         }
 
-        private static ResourceLocation rl(String path) {
-            return ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, path);
+        private static Identifier rl(String path) {
+            return Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, path);
         }
     }
 }

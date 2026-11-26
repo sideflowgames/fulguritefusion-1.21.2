@@ -22,7 +22,7 @@ public final class TitanForgeRecipes {
     private static List<ForgeRecipes.Recipe> all;
 
     private static ForgeRecipes.Part item(Item item, int count) {
-        return new ForgeRecipes.Part(item.getDescription().getString(), s -> s.is(item), count);
+        return new ForgeRecipes.Part(item.getName(new ItemStack(item)).getString(), s -> s.is(item), count);
     }
 
     public static List<ForgeRecipes.Recipe> all() {

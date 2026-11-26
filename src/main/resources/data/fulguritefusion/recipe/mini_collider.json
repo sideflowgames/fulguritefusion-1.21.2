@@ -7,18 +7,10 @@
     "FMF"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "X": {
-      "item": "fulguritefusion:spark_cell"
-    },
-    "L": {
-      "item": "minecraft:lightning_rod"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "M": "fulguritefusion:magnetite_plate",
+    "X": "fulguritefusion:spark_cell",
+    "L": "minecraft:lightning_rod"
   },
   "result": {
     "id": "fulguritefusion:mini_collider",

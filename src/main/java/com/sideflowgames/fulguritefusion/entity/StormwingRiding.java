@@ -5,7 +5,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
@@ -22,7 +22,7 @@ public final class StormwingRiding {
 
     public record DivePayload() implements CustomPacketPayload {
         public static final Type<DivePayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormwing_dive"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormwing_dive"));
         public static final StreamCodec<ByteBuf, DivePayload> STREAM_CODEC = StreamCodec.unit(new DivePayload());
 
         @Override

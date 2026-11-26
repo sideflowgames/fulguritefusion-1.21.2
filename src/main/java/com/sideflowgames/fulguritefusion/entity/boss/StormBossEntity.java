@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity.boss;
 
+import net.minecraft.core.HolderLookup;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,9 +31,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.util.GeckoLibUtil;
 
 // Shared parts of the three mini-bosses (Thunderhead, Magma Conduit, Void Arc):
 //   - a boss health bar for players nearby
@@ -55,7 +57,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
 
     protected StormBossEntity(EntityType<? extends Monster> type, Level level, BossEvent.BossBarColor color) {
         super(type, level);
-        bossBar = new ServerBossEvent(getDisplayName(), color, BossEvent.BossBarOverlay.NOTCHED_10);
+        bossBar = new ServerBossEvent(getUUID(), getDisplayName(), color, BossEvent.BossBarOverlay.NOTCHED_10);
         xpReward = 100;
         setPersistenceRequired();
     }
@@ -127,8 +129,8 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (shieldPending && !isShielded()) {
             shieldPending = false;
@@ -182,15 +184,15 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
 
     protected void tellNearby(ServerLevel server, String text) {
         for (ServerPlayer p : server.players()) {
-            if (p.distanceToSqr(this) < 64 * 64) p.displayClientMessage(Component.literal(text), true);
+            if (p.distanceToSqr(this) < 64 * 64) p.sendOverlayMessage(Component.literal(text));
         }
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (isShielded() && shieldBlocksDamage() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             if (level() instanceof ServerLevel server && invulnerableTime <= 10) {
-                server.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.6f);
+                server.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.HOSTILE, 1.5f, 0.6f);
                 server.sendParticles(shieldParticle(), getX(), getY(0.5), getZ(), 20, getBbWidth() * 0.4, getBbHeight() * 0.3, getBbWidth() * 0.4, 0.1);
                 invulnerableTime = 20;
             }
@@ -198,7 +200,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
         }
         inHurt = true;
         try {
-            return super.hurt(source, amount);
+            return super.hurtServer(serverLevel, source, amount);
         } finally {
             inHurt = false;
         }
@@ -208,7 +210,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     @Override
     public void setHealth(float health) {
         float[] at = shieldThresholds();
-        if (inHurt && !level().isClientSide && shieldsUsed < at.length) {
+        if (inHurt && !level().isClientSide() && shieldsUsed < at.length) {
             float floor = getMaxHealth() * at[shieldsUsed];
             if (getHealth() >= floor && health <= floor) {
                 health = floor;
@@ -232,7 +234,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && isShielded() && shieldBlocksDamage()) {
+        if (level().isClientSide() && isShielded() && shieldBlocksDamage()) {
             for (int i = 0; i < 3; i++) {
                 double a = random.nextDouble() * Math.PI * 2, b = random.nextDouble() * Math.PI - Math.PI / 2;
                 double r = Math.max(getBbWidth(), getBbHeight()) * 0.6;
@@ -243,30 +245,42 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormBossEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormBossEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
         tag.putInt("ShieldsUsed", shieldsUsed);
         tag.putBoolean("Shielded", isShielded());
         tag.putInt("Anchors", anchors.size());
-        for (int i = 0; i < anchors.size(); i++) tag.putUUID("Anchor" + i, anchors.get(i));
+        for (int i = 0; i < anchors.size(); i++) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Anchor" + i, anchors.get(i));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        shieldsUsed = tag.getInt("ShieldsUsed");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadStormBossEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormBossEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        shieldsUsed = tag.getIntOr("ShieldsUsed", 0);
         anchors.clear();
-        for (int i = 0; i < tag.getInt("Anchors"); i++) {
-            if (tag.hasUUID("Anchor" + i)) anchors.add(tag.getUUID("Anchor" + i));
+        for (int i = 0; i < tag.getIntOr("Anchors", 0); i++) {
+            if (com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Anchor" + i)) anchors.add(com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Anchor" + i));
         }
-        entityData.set(SHIELDED, tag.getBoolean("Shielded") && !anchors.isEmpty());
+        entityData.set(SHIELDED, tag.getBooleanOr("Shielded", false) && !anchors.isEmpty());
         if (hasCustomName()) bossBar.setName(getDisplayName());
     }
 
     // The models are bigger than their hitboxes (hanging tendrils, orbiting shards), so don't cull them early.
-    @Override
-    public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(2.5);
+    // 26.1: culling is decided by the renderer, which calls this (see StormreachMobRenderer / boss renderers).
+    public AABB cullingBox() {
+        return getBoundingBox().inflate(2.5);
     }
 
     // Anchors keep their own feet on solid ground near a spot: search a little up and down for a floor.
@@ -290,17 +304,17 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     // A lightning strike at a spot: the bolt is for show, the damage is ours (bosses don't hurt themselves).
     protected void stormBolt(Vec3 at, float damage, double radius) {
         if (!(level() instanceof ServerLevel server)) return;
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(at.x, at.y, at.z);
+            bolt.snapTo(at.x, at.y, at.z);
             bolt.setVisualOnly(true);
             server.addFreshEntity(bolt);
         }
-        DamageSource lightning = new DamageSource(server.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), this, this);
+        DamageSource lightning = new DamageSource(server.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.LIGHTNING_BOLT), this, this);
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius, 3.0, radius),
                 e -> e != this && e.isAlive() && !(e instanceof StormBossEntity))) {
-            e.hurt(lightning, damage);
+            e.hurtOrSimulate(lightning, damage);
         }
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3, at.z, 40, 1.0, 0.3, 1.0, 0.4);
     }
@@ -309,7 +323,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     public void thunderHit(ServerLevel level, LightningBolt bolt) {}
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -319,7 +333,7 @@ public abstract class StormBossEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean canChangeDimensions(Level from, Level to) {
+    public boolean canTeleport(Level from, Level to) {
         return false;
     }
 

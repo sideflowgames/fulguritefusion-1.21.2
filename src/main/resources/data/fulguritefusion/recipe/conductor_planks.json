@@ -3,9 +3,7 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    {
-      "item": "fulguritefusion:conductor_log"
-    }
+    "fulguritefusion:conductor_log"
   ],
   "result": {
     "id": "fulguritefusion:conductor_planks",

@@ -7,18 +7,10 @@
     "CBC"
   ],
   "key": {
-    "C": {
-      "item": "fulguritefusion:overcharged_spark_cell"
-    },
-    "B": {
-      "item": "fulguritefusion:molted_plume_bundle"
-    },
-    "R": {
-      "item": "fulguritefusion:refined_fulgurite"
-    },
-    "P": {
-      "item": "fulguritefusion:prime_spark_fragment"
-    }
+    "C": "fulguritefusion:overcharged_spark_cell",
+    "B": "fulguritefusion:molted_plume_bundle",
+    "R": "fulguritefusion:refined_fulgurite",
+    "P": "fulguritefusion:prime_spark_fragment"
   },
   "result": {
     "id": "fulguritefusion:thunderbond_talisman",

@@ -184,14 +184,14 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
                 double f = i / (double) steps;
                 Vec3 p = tip.lerp(top, f);
                 double jitter = Math.sin(f * Math.PI) * 0.35;
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (level.random.nextDouble() - 0.5) * jitter,
-                        p.y + (level.random.nextDouble() - 0.5) * jitter, p.z + (level.random.nextDouble() - 0.5) * jitter,
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (level.getRandom().nextDouble() - 0.5) * jitter,
+                        p.y + (level.getRandom().nextDouble() - 0.5) * jitter, p.z + (level.getRandom().nextDouble() - 0.5) * jitter,
                         1, 0, 0, 0, 0);
             }
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y, top.z, 6, 0.15, 0.1, 0.15, 0.2);
         }
         if (t % 30 == 0) level.playSound(null, worldPosition, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.8f);
-        if (t % 9 == 0) level.playSound(null, worldPosition, SoundEvents.COPPER_BULB_TURN_ON, SoundSource.BLOCKS, 0.5f, 1.2f + level.random.nextFloat() * 0.6f);
+        if (t % 9 == 0) level.playSound(null, worldPosition, SoundEvents.COPPER_BULB_TURN_ON, SoundSource.BLOCKS, 0.5f, 1.2f + level.getRandom().nextFloat() * 0.6f);
     }
 
     private void finish(ServerLevel level) {
@@ -200,7 +200,7 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
         progress = 0;
         recipeDirty = true;
         double x = worldPosition.getX() + 0.5, y = worldPosition.getY() + 1.1, z = worldPosition.getZ() + 0.5;
-        level.sendParticles(ParticleTypes.FLASH, x, y, z, 1, 0, 0, 0, 0);
+        level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), x, y, z, 1, 0, 0, 0, 0);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 60, 0.4, 0.3, 0.4, 0.5);
         level.playSound(null, worldPosition, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 1.2f, 1.4f);
         level.playSound(null, worldPosition, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 0.8f);
@@ -310,34 +310,49 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
 
     private void writeItems(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag list = new ListTag();
-        for (ItemStack s : contents) list.add(s.save(registries));
+        for (ItemStack s : contents) list.add(com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(s, registries));
         tag.put("Contents", list);
-        if (!result.isEmpty()) tag.put("Result", result.save(registries));
+        if (!result.isEmpty()) tag.put("Result", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(result, registries));
         tag.putBoolean("Working", working);
     }
 
     private void readItems(CompoundTag tag, HolderLookup.Provider registries) {
         contents.clear();
-        ListTag list = tag.getList("Contents", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) ItemStack.parse(registries, list.getCompound(i)).ifPresent(contents::add);
-        result = tag.contains("Result") ? ItemStack.parse(registries, tag.getCompound("Result")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
-        working = tag.getBoolean("Working");
+        ListTag list = tag.getListOrEmpty("Contents");
+        for (int i = 0; i < list.size(); i++) {
+            ItemStack st = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, list.getCompound(i));
+            if (!st.isEmpty()) contents.add(st);
+        }
+        result = tag.contains("Result") ? com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, (net.minecraft.nbt.Tag) tag.getCompoundOrEmpty("Result")) : ItemStack.EMPTY;
+        working = tag.getBooleanOr("Working", false);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormForgeBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormForgeBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         writeItems(tag, registries);
         tag.putInt("Fm", fm);
         tag.putInt("Progress", progress);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadStormForgeBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormForgeBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         readItems(tag, registries);
-        fm = tag.getInt("Fm");
-        progress = tag.getInt("Progress");
+        fm = tag.getIntOr("Fm", 0);
+        progress = tag.getIntOr("Progress", 0);
         recipeDirty = true;
         int keep = progress;
         // Keep progress across a reload: match now so the dirty check doesn't wipe it.
@@ -356,5 +371,12 @@ public class StormForgeBlockEntity extends BlockEntity implements FmHandler {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof StormForgeBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

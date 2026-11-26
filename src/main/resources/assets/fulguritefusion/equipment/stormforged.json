@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "fulguritefusion:stormforged"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "fulguritefusion:stormforged"
+      }
+    ]
+  }
+}

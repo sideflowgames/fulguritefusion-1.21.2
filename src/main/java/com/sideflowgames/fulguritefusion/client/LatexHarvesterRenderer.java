@@ -10,32 +10,33 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoBlockRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import com.geckolib.animation.state.AnimationTest;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoBlockRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 
 // Draws a built Latex Harvester (geo/block/latex_harvester.geo.json): the whole 3x3x2 ring around the trunk, with the
 // trim in the casing tier's colour. Every block of the ring hides once it's built, so this model draws them all,
 // including the controller's screen, the power port's coil and the tank column, whose window shows the latex level.
 // The tank and port can be in either front corner: the model has both and shows the matching pair.
-public class LatexHarvesterRenderer extends GeoBlockRenderer<LatexHarvesterBlockEntity> {
+public class LatexHarvesterRenderer extends LegacyGeoBlockRenderer<LatexHarvesterBlockEntity> {
     public LatexHarvesterRenderer(BlockEntityRendererProvider.Context context) {
-        super(new Model());
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        super(context, new Model());
+        withRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
     @Override
-    public void render(LatexHarvesterBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
-                       int packedLight, int packedOverlay) {
-        if (!be.getBlockState().getValue(LatexHarvesterBlock.FORMED)) return;
-        // Light from the open space in front of the controller (the ring's own blocks and the trunk are solid).
+    protected boolean visible(LatexHarvesterBlockEntity be) {
+        return be.getBlockState().getValue(LatexHarvesterBlock.FORMED);
+    }
+
+    // Light from the open space in front of the controller (the ring's own blocks and the trunk are solid).
+    @Override
+    protected int light(LatexHarvesterBlockEntity be, int packedLight) {
         Direction facing = be.getBlockState().getValue(LatexHarvesterBlock.FACING);
-        int light = be.getLevel() == null ? packedLight : LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().relative(facing));
-        super.render(be, partialTick, poseStack, buffers, light, packedOverlay);
+        return be.getLevel() == null ? packedLight : LevelRenderer.getLightCoords(be.getLevel(), be.getBlockPos().relative(facing));
     }
 
     static float degrees(Direction facing) {
@@ -49,13 +50,14 @@ public class LatexHarvesterRenderer extends GeoBlockRenderer<LatexHarvesterBlock
 
     // Turn to the controller's facing, then move to the trunk's base (one block behind the controller and one down).
     @Override
-    protected void rotateBlock(Direction facing, PoseStack poseStack) {
+    protected void tryRotateByBlockstate(com.geckolib.renderer.base.RenderPassInfo<State<LatexHarvesterBlockEntity>> info, PoseStack poseStack) {
+        Direction facing = getBlockStateDirection(info.renderState().blockEntity);
         poseStack.mulPose(Axis.YP.rotationDegrees(degrees(facing)));
         poseStack.translate(0, -1, 1);
     }
 
     @Override
-    public boolean shouldRenderOffScreen(LatexHarvesterBlockEntity be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 
@@ -64,24 +66,28 @@ public class LatexHarvesterRenderer extends GeoBlockRenderer<LatexHarvesterBlock
         return new AABB(be.getBlockPos()).inflate(3);
     }
 
-    private static class Model extends GeoModel<LatexHarvesterBlockEntity> {
+    private static class Model extends GeoModel<LatexHarvesterBlockEntity> implements LegacyGeoBlockRenderer.Animated<LatexHarvesterBlockEntity> {
+        private java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bones = n -> null;
         @Override
-        public ResourceLocation getModelResource(LatexHarvesterBlockEntity be) {
-            return rl("geo/block/latex_harvester.geo.json");
+        public Identifier getModelResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            LatexHarvesterBlockEntity be = LegacyGeoBlockRenderer.be(renderState);
+            return rl("block/latex_harvester");
         }
 
         @Override
-        public ResourceLocation getTextureResource(LatexHarvesterBlockEntity be) {
+        public Identifier getTextureResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            LatexHarvesterBlockEntity be = LegacyGeoBlockRenderer.be(renderState);
             return rl("textures/block/machine/latex_harvester_t" + be.shownTier() + ".png");
         }
 
         @Override
-        public ResourceLocation getAnimationResource(LatexHarvesterBlockEntity be) {
-            return rl("animations/block/latex_harvester.animation.json");
+        public Identifier getAnimationResource(LatexHarvesterBlockEntity be) {
+            return rl("block/latex_harvester");
         }
 
         @Override
-        public void setCustomAnimations(LatexHarvesterBlockEntity be, long instanceId, AnimationState<LatexHarvesterBlockEntity> state) {
+        public void animate(LatexHarvesterBlockEntity be, float partialTick, java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bonesIn) {
+            this.bones = bonesIn;
             // Tank on the controller's clockwise side = the model's -x side (GeckoLib mirrors x).
             boolean cw = be.shownTankClockwise();
             hide("tank_n", !cw);
@@ -90,33 +96,33 @@ public class LatexHarvesterRenderer extends GeoBlockRenderer<LatexHarvesterBlock
             hide("port_n", cw);
             float fill = be.shownFill();
             for (String name : new String[]{"latex_n", "latex_p"}) {
-                GeoBone b = getAnimationProcessor().getBone(name);
+                com.geckolib.animation.state.BoneSnapshot b = bones.apply(name);
                 if (b == null) continue;
-                b.setHidden(fill <= 0);
+                b.skipRender(fill <= 0);
                 b.setScaleY(Math.max(0.01f, fill));
             }
             // The status lamp blinks while it's tapping the tree.
             boolean working = be.getBlockState().getValue(LatexHarvesterBlock.WORKING);
-            float time = be.getLevel() == null ? 0 : be.getLevel().getGameTime() + state.getPartialTick();
+            float time = be.getLevel() == null ? 0 : be.getLevel().getGameTime() + partialTick;
             hide("lamp", working && ((long) time / 10) % 2 == 1);
             // Probes: each stabs into the bark, holds while it draws latex, then pulls back out (offset from each
             // other so they don't move together). Idle, they rest pulled back.
             String[] sides = {"n", "p", "b"};
             for (int i = 0; i < sides.length; i++) {
                 for (int k = 0; k < 2; k++) {
-                    GeoBone b = getAnimationProcessor().getBone("probe_" + sides[i] + (k == 0 ? "lo" : "hi"));
+                    com.geckolib.animation.state.BoneSnapshot b = bones.apply("probe_" + sides[i] + (k == 0 ? "lo" : "hi"));
                     if (b == null) continue;
                     float out = working ? retract(((time + i * 13 + k * 20) % 40f) / 40f) : 3f;
-                    if (i == 0) b.setPosX(-out);
-                    else if (i == 1) b.setPosX(out);
-                    else b.setPosZ(out);
+                    if (i == 0) b.setTranslateX(-out);
+                    else if (i == 1) b.setTranslateX(out);
+                    else b.setTranslateZ(out);
                 }
                 // Latex drips from the lower probe into its cup.
-                GeoBone drip = getAnimationProcessor().getBone("drip_" + sides[i]);
+                com.geckolib.animation.state.BoneSnapshot drip = bones.apply("drip_" + sides[i]);
                 if (drip != null) {
-                    drip.setHidden(!working);
+                    drip.skipRender(!working);
                     float p = ((time + i * 9) % 16f) / 16f;
-                    drip.setPosY(-2.5f * p * p);
+                    drip.setTranslateY(-2.5f * p * p);
                 }
             }
         }
@@ -129,12 +135,12 @@ public class LatexHarvesterRenderer extends GeoBlockRenderer<LatexHarvesterBlock
         }
 
         private void hide(String bone, boolean hidden) {
-            GeoBone b = getAnimationProcessor().getBone(bone);
-            if (b != null) b.setHidden(hidden);
+            com.geckolib.animation.state.BoneSnapshot b = bones.apply(bone);
+            if (b != null) b.skipRender(hidden);
         }
 
-        private static ResourceLocation rl(String path) {
-            return ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, path);
+        private static Identifier rl(String path) {
+            return Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, path);
         }
     }
 }

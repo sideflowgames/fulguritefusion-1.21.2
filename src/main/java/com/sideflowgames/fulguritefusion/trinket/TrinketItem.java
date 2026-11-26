@@ -41,7 +41,8 @@ public class TrinketItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Trinket: wear it in the equipment panel").withStyle(ChatFormatting.DARK_GRAY));
         for (String line : relic ? describeRelic(kind) : describe(kind, empowered)) tooltip.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
         if (relic) tooltip.add(Component.literal("Relic of the Stormreach").withStyle(ChatFormatting.LIGHT_PURPLE));

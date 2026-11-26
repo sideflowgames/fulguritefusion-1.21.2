@@ -58,7 +58,7 @@ public class DungeonHazardBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, DungeonBlocks.HAZARD_BE.get(), DungeonHazardBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, DungeonBlocks.HAZARD_BE.get(), DungeonHazardBlockEntity::serverTick);
     }
 
     @Override

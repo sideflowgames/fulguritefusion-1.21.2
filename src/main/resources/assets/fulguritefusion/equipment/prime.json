@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "fulguritefusion:prime"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "fulguritefusion:prime"
+      }
+    ]
+  }
+}

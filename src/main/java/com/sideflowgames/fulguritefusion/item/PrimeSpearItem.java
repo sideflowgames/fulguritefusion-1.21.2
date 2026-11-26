@@ -26,15 +26,12 @@ public class PrimeSpearItem extends StormSpearItem {
         return FmChargeable.hasCharge(stack) ? LIGHTNING : 0;
     }
 
-    @Override
-    public int getEnchantmentValue() {
-        return 22;
-    }
 
     @Override public int getBarColor(ItemStack s) { return PrimeTools.barColor(s); }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         PrimeTools.primeLine(tooltip);
         tooltip.add(Component.literal("+" + (int) LIGHTNING + " lightning damage; thrown, it calls lightning and flies back to you")
                 .withStyle(ChatFormatting.LIGHT_PURPLE));

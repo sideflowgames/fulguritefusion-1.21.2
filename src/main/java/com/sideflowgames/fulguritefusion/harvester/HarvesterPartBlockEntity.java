@@ -123,14 +123,33 @@ public class HarvesterPartBlockEntity extends BlockEntity implements FmHandler {
     };
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        if (controllerPos != null) tag.put("Controller", NbtUtils.writeBlockPos(controllerPos));
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveHarvesterPartBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveHarvesterPartBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        if (controllerPos != null) tag.put("Controller", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(controllerPos));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        controllerPos = NbtUtils.readBlockPos(tag, "Controller").orElse(null);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadHarvesterPartBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
     }
+
+    protected void legacyLoadHarvesterPartBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        controllerPos = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Controller").orElse(null);
+    }
+
+    public net.neoforged.neoforge.fluids.capability.templates.FluidTank[] fluidStorage() {
+        LatexHarvesterBlockEntity h = controller();
+        return h == null ? new net.neoforged.neoforge.fluids.capability.templates.FluidTank[0]
+                : new net.neoforged.neoforge.fluids.capability.templates.FluidTank[] {h.tank()};
+    }
+
 }

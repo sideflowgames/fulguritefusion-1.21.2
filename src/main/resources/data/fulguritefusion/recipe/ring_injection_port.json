@@ -7,18 +7,10 @@
     " H "
   ],
   "key": {
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "R": {
-      "item": "fulguritefusion:reinforced_fulgurite"
-    },
-    "I": {
-      "item": "fulguritefusion:collider_injector"
-    },
-    "H": {
-      "item": "fulguritefusion:heavy_wire"
-    }
+    "C": "fulguritefusion:coil_segment",
+    "R": "fulguritefusion:reinforced_fulgurite",
+    "I": "fulguritefusion:collider_injector",
+    "H": "fulguritefusion:heavy_wire"
   },
   "result": {
     "id": "fulguritefusion:ring_injection_port",

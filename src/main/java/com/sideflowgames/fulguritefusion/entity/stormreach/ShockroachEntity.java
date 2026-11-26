@@ -17,12 +17,12 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Shockroach: a small, fast cave roach that comes in swarms of 4-8. Weak alone (6 health, 2 damage), but its bites
 // spark, and hitting one alerts the rest of the swarm. Drops a little Redstone.
@@ -52,8 +52,8 @@ public class ShockroachEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit && level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.3), target.getZ(), 6, 0.2, 0.2, 0.2, 0.2);
         }
@@ -77,7 +77,7 @@ public class ShockroachEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 3, s -> s.setAndContinue(s.isMoving() ? WALK : IDLE)));
+        controllers.add(new AnimationController<>("main", 3, s -> s.setAndContinue(s.isMoving() ? WALK : IDLE)));
     }
 
     @Override

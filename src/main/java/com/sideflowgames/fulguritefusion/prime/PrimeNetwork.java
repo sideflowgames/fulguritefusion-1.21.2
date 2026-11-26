@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -17,7 +17,7 @@ public final class PrimeNetwork {
 
     public record HammerPayload() implements CustomPacketPayload {
         public static final Type<HammerPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "prime_hammer"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "prime_hammer"));
         public static final StreamCodec<ByteBuf, HammerPayload> STREAM_CODEC = StreamCodec.unit(new HammerPayload());
 
         @Override
@@ -28,7 +28,7 @@ public final class PrimeNetwork {
 
     public record BoostPayload(int ticks) implements CustomPacketPayload {
         public static final Type<BoostPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "prime_boost"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "prime_boost"));
         public static final StreamCodec<ByteBuf, BoostPayload> STREAM_CODEC =
                 ByteBufCodecs.VAR_INT.map(BoostPayload::new, BoostPayload::ticks);
 

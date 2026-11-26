@@ -7,18 +7,10 @@
     "STS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:silver_ingot"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "T": {
-      "item": "minecraft:string"
-    },
-    "X": {
-      "item": "minecraft:chest"
-    }
+    "S": "fulguritefusion:silver_ingot",
+    "H": "minecraft:hopper",
+    "T": "minecraft:string",
+    "X": "minecraft:chest"
   },
   "result": {
     "id": "fulguritefusion:deposit_upgrade",

@@ -27,12 +27,12 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -50,7 +50,7 @@ public class PufflingEntity extends TamableAnimal implements GeoEntity {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return TamableAnimal.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.28);
+        return TamableAnimal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.28);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class PufflingEntity extends TamableAnimal implements GeoEntity {
         ItemStack stack = player.getItemInHand(hand);
         if (!isTame() && isFood(stack)) {
             if (!player.getAbilities().instabuild) stack.shrink(1);
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 if (random.nextInt(3) == 0) {
                     tame(player);
                     navigation.stop();
@@ -86,14 +86,14 @@ public class PufflingEntity extends TamableAnimal implements GeoEntity {
                     level().broadcastEntityEvent(this, (byte) 6);
                 }
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (isTame() && isOwnedBy(player) && !isFood(stack)) {
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 setOrderedToSit(!isOrderedToSit());
                 navigation.stop();
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
     }
@@ -101,22 +101,22 @@ public class PufflingEntity extends TamableAnimal implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(40) == 0) {
+        if (level().isClientSide() && random.nextInt(40) == 0) {
             level().addParticle(ParticleTypes.WHITE_ASH, getRandomX(0.4), getY() + 0.4, getRandomZ(0.4), 0, 0.01, 0);
         }
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        PufflingEntity baby = ModEntities.PUFFLING.get().create(level);
-        if (baby != null && isTame() && getOwnerUUID() != null) {
-            baby.setOwnerUUID(getOwnerUUID());
+        PufflingEntity baby = ModEntities.PUFFLING.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        if (baby != null && isTame() && getOwnerReference() != null) {
+            baby.setOwnerReference(getOwnerReference());
             baby.setTame(true, true);
         }
         return baby;
@@ -144,7 +144,7 @@ public class PufflingEntity extends TamableAnimal implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(
                 isInSittingPose() ? SIT : s.isMoving() ? WALK : IDLE)));
     }
 

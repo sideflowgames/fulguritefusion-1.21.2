@@ -22,7 +22,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,11 +33,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
@@ -64,7 +64,7 @@ public final class TitanTrials {
     private TitanTrials() {}
 
     public static final ResourceKey<Level> LEVEL =
-            ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_trials"));
+            ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_trials"));
 
     public static final int ARENA_Y = 100;
     public static final int ARENA_RADIUS = 24;
@@ -77,13 +77,13 @@ public final class TitanTrials {
 
     // Has this player ever defeated the Storm Titan? Only they can pass through a Stormreach rift.
     public static final Supplier<AttachmentType<Boolean>> DEFEATED = ATTACHMENTS.register("titan_defeated",
-            () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).copyOnDeath().build());
+            () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("value")).copyOnDeath().build());
     // Where to send this player when they leave the Trials.
     public static final Supplier<AttachmentType<CompoundTag>> RETURN = ATTACHMENTS.register("trials_return",
-            () -> AttachmentType.builder(() -> new CompoundTag()).serialize(CompoundTag.CODEC).copyOnDeath().build());
+            () -> AttachmentType.builder(() -> new CompoundTag()).serialize(CompoundTag.CODEC.fieldOf("value")).copyOnDeath().build());
     // Inventory and experience held over from a death in the Trials, given back on respawn.
     public static final Supplier<AttachmentType<CompoundTag>> STASH = ATTACHMENTS.register("trials_stash",
-            () -> AttachmentType.builder(() -> new CompoundTag()).serialize(CompoundTag.CODEC).copyOnDeath().build());
+            () -> AttachmentType.builder(() -> new CompoundTag()).serialize(CompoundTag.CODEC.fieldOf("value")).copyOnDeath().build());
 
     // Players due to be sent home after a victory, with the game time to do it at.
     private static final Map<UUID, Long> pendingReturn = new HashMap<>();
@@ -100,7 +100,7 @@ public final class TitanTrials {
 
     // The Storm Sigil: take this player and everyone standing near them to the player's own arena.
     public static void enter(ServerPlayer leader) {
-        ServerLevel trials = leader.server.getLevel(LEVEL);
+        ServerLevel trials = leader.level().getServer().getLevel(LEVEL);
         if (trials == null) {
             leader.sendSystemMessage(Component.literal("The Titan Trials aren't loaded in this world."));
             return;
@@ -120,10 +120,10 @@ public final class TitanTrials {
             double a = Math.PI * 2 * i / Math.max(1, party.size()) + Math.PI / 2;
             Vec3 at = new Vec3(center.getX() + 0.5 + Math.cos(a) * 14, center.getY() + 1, center.getZ() + 0.5 + Math.sin(a) * 14);
             float yaw = (float) (Math.atan2(center.getZ() + 0.5 - at.z, center.getX() + 0.5 - at.x) * 180 / Math.PI) - 90f;
-            p.changeDimension(new DimensionTransition(trials, at, Vec3.ZERO, yaw, 0, DimensionTransition.DO_NOTHING));
+            p.teleport(new TeleportTransition(trials, at, Vec3.ZERO, yaw, 0, TeleportTransition.DO_NOTHING));
             if (p != leader) {
-                p.displayClientMessage(Component.literal(leader.getName().getString() + "'s sigil carries you into the Titan Trials.")
-                        .withStyle(ChatFormatting.LIGHT_PURPLE), true);
+                p.sendOverlayMessage(Component.literal(leader.getName().getString() + "'s sigil carries you into the Titan Trials.")
+                        .withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         }
         trials.playSound(null, center, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 2.0f, 0.7f);
@@ -135,20 +135,20 @@ public final class TitanTrials {
         player.setData(RETURN, new CompoundTag());
         ServerLevel level = null;
         if (back.contains("Dim")) {
-            ResourceLocation id = ResourceLocation.tryParse(back.getString("Dim"));
-            if (id != null) level = player.server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
+            Identifier id = Identifier.tryParse(back.getStringOr("Dim", ""));
+            if (id != null) level = player.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, id));
         }
         if (level != null && !is(level)) {
-            player.changeDimension(new DimensionTransition(level, new Vec3(back.getDouble("X"), back.getDouble("Y"), back.getDouble("Z")),
-                    Vec3.ZERO, back.getFloat("YRot"), 0, DimensionTransition.DO_NOTHING));
+            player.teleport(new TeleportTransition(level, new Vec3(back.getDoubleOr("X", 0d), back.getDoubleOr("Y", 0d), back.getDoubleOr("Z", 0d)),
+                    Vec3.ZERO, back.getFloatOr("YRot", 0f), 0, TeleportTransition.DO_NOTHING));
         } else {
-            player.changeDimension(player.findRespawnPositionAndUseSpawnBlock(true, DimensionTransition.DO_NOTHING));
+            player.teleport(player.findRespawnPositionAndUseSpawnBlock(true, TeleportTransition.DO_NOTHING));
         }
     }
 
     private static void rememberReturn(ServerPlayer p) {
         CompoundTag tag = new CompoundTag();
-        tag.putString("Dim", p.level().dimension().location().toString());
+        tag.putString("Dim", p.level().dimension().identifier().toString());
         tag.putDouble("X", p.getX());
         tag.putDouble("Y", p.getY());
         tag.putDouble("Z", p.getZ());
@@ -158,9 +158,9 @@ public final class TitanTrials {
 
     private static void strike(ServerPlayer p) {
         if (!(p.level() instanceof ServerLevel level)) return;
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt == null) return;
-        bolt.moveTo(p.getX(), p.getY(), p.getZ());
+        bolt.snapTo(p.getX(), p.getY(), p.getZ());
         bolt.setVisualOnly(true);
         level.addFreshEntity(bolt);
     }
@@ -169,7 +169,7 @@ public final class TitanTrials {
 
     // The centre of this player's arena (the floor block under the altar's dais), built on first use.
     private static BlockPos arenaFor(ServerLevel trials, UUID owner) {
-        Slots slots = trials.getServer().overworld().getDataStorage().computeIfAbsent(Slots.FACTORY, "fulguritefusion_titan_trials");
+        Slots slots = trials.getServer().overworld().getDataStorage().computeIfAbsent(Slots.FACTORY);
         int slot = slots.slotFor(owner);
         // Spread arenas along a square spiral so none of them is ever near another.
         int ring = (int) Math.ceil((Math.sqrt(slot + 1) - 1) / 2);
@@ -232,7 +232,7 @@ public final class TitanTrials {
 
     // Which arena belongs to whom. Kept in the Overworld's saved data.
     public static class Slots extends SavedData {
-        static final SavedData.Factory<Slots> FACTORY = new SavedData.Factory<>(Slots::new, Slots::load, null);
+        static final net.minecraft.world.level.saveddata.SavedDataType<Slots> FACTORY = com.sideflowgames.fulguritefusion.util.NbtBridge.savedData("fulguritefusion_titan_trials", Slots::new, Slots::load, (d, t) -> d.save(t, null));
         private final Map<UUID, Integer> owners = new HashMap<>();
         private int next;
 
@@ -248,14 +248,13 @@ public final class TitanTrials {
 
         static Slots load(CompoundTag tag, HolderLookup.Provider registries) {
             Slots s = new Slots();
-            s.next = tag.getInt("Next");
-            CompoundTag map = tag.getCompound("Owners");
-            for (String key : map.getAllKeys()) s.owners.put(UUID.fromString(key), map.getInt(key));
+            s.next = tag.getIntOr("Next", 0);
+            CompoundTag map = tag.getCompoundOrEmpty("Owners");
+            for (String key : map.keySet()) s.owners.put(UUID.fromString(key), map.getIntOr(key, 0));
             return s;
         }
 
-        @Override
-        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+                public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
             tag.putInt("Next", next);
             CompoundTag map = new CompoundTag();
             owners.forEach((id, slot) -> map.putInt(id.toString(), slot));
@@ -308,9 +307,10 @@ public final class TitanTrials {
 
     private static void onDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || !is(p.level())) return;
-        if (p.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
-        CompoundTag tag = new CompoundTag();
-        tag.put("Inventory", p.getInventory().save(new ListTag()));
+        if (p.level().getGameRules().get(net.minecraft.world.level.gamerules.GameRules.KEEP_INVENTORY)) return;
+        var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, p.registryAccess());
+        p.getInventory().save(out.list("Inventory", net.minecraft.world.ItemStackWithSlot.CODEC));
+        CompoundTag tag = out.buildResult();
         tag.putInt("XpLevel", p.experienceLevel);
         tag.putFloat("XpProgress", p.experienceProgress);
         tag.putInt("XpTotal", p.totalExperience);
@@ -332,10 +332,11 @@ public final class TitanTrials {
         Player now = event.getEntity();
         now.setData(STASH, new CompoundTag());
         if (tag.isEmpty()) return;
-        now.getInventory().load(tag.getList("Inventory", Tag.TAG_COMPOUND));
-        now.experienceLevel = tag.getInt("XpLevel");
-        now.experienceProgress = tag.getFloat("XpProgress");
-        now.totalExperience = tag.getInt("XpTotal");
+        now.getInventory().load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, now.registryAccess(), tag)
+                .listOrEmpty("Inventory", net.minecraft.world.ItemStackWithSlot.CODEC));
+        now.experienceLevel = tag.getIntOr("XpLevel", 0);
+        now.experienceProgress = tag.getFloatOr("XpProgress", 0f);
+        now.totalExperience = tag.getIntOr("XpTotal", 0);
     }
 
     public static void register(IEventBus modEventBus) {

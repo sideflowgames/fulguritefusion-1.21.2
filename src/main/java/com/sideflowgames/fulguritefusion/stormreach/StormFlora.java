@@ -4,7 +4,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
@@ -23,7 +23,7 @@ public final class StormFlora {
 
     private static TreeGrower grower(String name) {
         ResourceKey<ConfiguredFeature<?, ?>> key = ResourceKey.create(Registries.CONFIGURED_FEATURE,
-                ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name + "_tree"));
+                Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, name + "_tree"));
         return new TreeGrower(FulguriteFusion.MODID + ":" + name, Optional.empty(), Optional.of(key), Optional.empty());
     }
 }

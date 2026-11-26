@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.InteractionResult;
+
 import java.util.List;
 
 import com.sideflowgames.fulguritefusion.ModBlocks;
@@ -14,7 +16,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -35,13 +36,13 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoItem;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Tempest Staff: right-click to call a lightning strike where you aim (up to 32 blocks).
 //   - Runs on stored Fm (10,000 per strike, 500,000 when full); recharge it in a Fulgurite Charger.
@@ -70,28 +71,28 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         boolean free = player.getAbilities().instabuild;
         if (!free && FmChargeable.get(stack) < CAST_COST) {
-            if (!level.isClientSide) {
-                player.displayClientMessage(Component.literal("The staff is out of charge").withStyle(ChatFormatting.RED), true);
+            if (!level.isClientSide()) {
+                player.sendOverlayMessage(Component.literal("The staff is out of charge").withStyle(ChatFormatting.RED));
                 level.playSound(null, player.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6f, 1.6f);
             }
-            return InteractionResultHolder.fail(stack);
+            return InteractionResult.FAIL;
         }
         if (level instanceof ServerLevel server) {
             Vec3 at = aim(server, player);
             if (at == null) {
-                player.displayClientMessage(Component.literal("Nothing in reach to strike"), true);
-                return InteractionResultHolder.fail(stack);
+                player.sendOverlayMessage(Component.literal("Nothing in reach to strike"));
+                return InteractionResult.FAIL;
             }
             if (!free) FmChargeable.use(stack, CAST_COST);
             strike(server, player, at);
-            player.getCooldowns().addCooldown(this, COOLDOWN);
+            player.getCooldowns().addCooldown(stack, COOLDOWN);
         }
         player.swing(hand, true);
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Where the player is looking: the first mob or block within range, or null if there's nothing there.
@@ -106,7 +107,7 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
         if (block.getType() == HitResult.Type.MISS) return null;
         // Land on top of the block that was hit (a wall hit drops the bolt to the ground in front of it).
         BlockPos pos = block.getBlockPos().relative(block.getDirection());
-        while (pos.getY() > level.getMinBuildHeight() && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()) {
+        while (pos.getY() > level.getMinY() && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()) {
             pos = pos.below();
         }
         return new Vec3(block.getLocation().x, pos.getY(), block.getLocation().z);
@@ -114,17 +115,17 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
 
     private static void strike(ServerLevel level, Player caster, Vec3 at) {
         // The bolt itself is for show (so it can't start block fires or hit the caster); the damage is ours.
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(at.x, at.y, at.z);
+            bolt.snapTo(at.x, at.y, at.z);
             bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
         }
-        DamageSource lightning = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), caster, caster);
+        DamageSource lightning = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.LIGHTNING_BOLT), caster, caster);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(RADIUS, 3.0, RADIUS),
                 e -> e.isAlive() && !spared(caster, e))) {
-            if (e.hurt(lightning, DAMAGE)) e.igniteForSeconds(BURN_SECONDS);
+            if (e.hurtOrSimulate(lightning, DAMAGE)) e.igniteForSeconds(BURN_SECONDS);
         }
         // Charged Stormsand fuses under the strike, like in the Stormreach.
         BlockPos ground = BlockPos.containing(at).below();
@@ -136,7 +137,7 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
         Vec3 tip = caster.getEyePosition().add(caster.getLookAngle().scale(0.8));
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, tip.x, tip.y, tip.z, 12, 0.15, 0.15, 0.15, 0.15);
         level.playSound(null, caster.blockPosition(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.5f,
-                1.3f + level.random.nextFloat() * 0.2f);
+                1.3f + level.getRandom().nextFloat() * 0.2f);
     }
 
     // Never the caster, and never the caster's tamed animals.
@@ -163,7 +164,8 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         int fm = FmChargeable.get(stack);
         tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, MAX_FM)).withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.literal("Right-click: lightning where you aim (" + (int) RANGE + " blocks)").withStyle(ChatFormatting.GRAY));
@@ -176,7 +178,21 @@ public class TempestStaffItem extends Item implements FmChargeable, GeoItem {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "idle", 0, state -> state.setAndContinue(IDLE)));
+        controllers.add(new AnimationController<>("idle", 0, state -> state.setAndContinue(IDLE)));
+    }
+
+    @Override
+    public void createGeoRenderer(java.util.function.Consumer<com.geckolib.animatable.client.GeoRenderProvider> consumer) {
+        // GeckoLib 5: the item's renderer (used by the "geckolib:geckolib" special model in items/tempest_staff.json).
+        consumer.accept(new com.geckolib.animatable.client.GeoRenderProvider() {
+            private com.sideflowgames.fulguritefusion.client.TempestStaffRenderer renderer;
+
+            @Override
+            public com.geckolib.renderer.GeoItemRenderer<?> getGeoItemRenderer() {
+                if (renderer == null) renderer = new com.sideflowgames.fulguritefusion.client.TempestStaffRenderer();
+                return renderer;
+            }
+        });
     }
 
     @Override

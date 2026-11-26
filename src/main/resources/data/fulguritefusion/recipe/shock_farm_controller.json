@@ -7,18 +7,10 @@
     "GTG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "T": {
-      "item": "fulguritefusion:tempered_arc_casing"
-    },
-    "S": {
-      "item": "fulguritefusion:spark_cell"
-    }
+    "G": "minecraft:gold_ingot",
+    "C": "fulguritefusion:coil_segment",
+    "T": "fulguritefusion:tempered_arc_casing",
+    "S": "fulguritefusion:spark_cell"
   },
   "result": {
     "id": "fulguritefusion:shock_farm_controller",

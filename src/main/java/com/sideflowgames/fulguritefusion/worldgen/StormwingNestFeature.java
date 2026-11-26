@@ -39,9 +39,9 @@ public class StormwingNestFeature extends Feature<NoneFeatureConfiguration> {
         }
         BlockPos center = StormwingNests.build(level, ground, random, random.nextFloat() < Config.STORMWING_EGG_CHANCE.get());
 
-        StormwingEntity bird = ModEntities.STORMWING.get().create(level.getLevel());
+        StormwingEntity bird = ModEntities.STORMWING.get().create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bird != null) {
-            bird.moveTo(center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5, random.nextFloat() * 360f, 0f);
+            bird.snapTo(center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5, random.nextFloat() * 360f, 0f);
             bird.adoptNest(center);
             level.addFreshEntityWithPassengers(bird);
         }

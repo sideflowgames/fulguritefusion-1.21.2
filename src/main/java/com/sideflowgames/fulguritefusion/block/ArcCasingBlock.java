@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
@@ -61,36 +60,36 @@ public class ArcCasingBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!state.getValue(FORMED)) return InteractionResult.PASS;
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing && casing.controllerPos() != null) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing && casing.controllerPos() != null) {
             BlockPos c = casing.controllerPos();
             if (level.getBlockEntity(c) instanceof com.sideflowgames.fulguritefusion.harvester.LatexHarvesterBlockEntity h) h.interact(player);
             else MachineControllerBlock.interact(level, c, level.getBlockState(c), player);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Holding something: a formed casing still opens the machine's menu, like the controller does, except that a
     // Machine Connector goes onto the casing (so you can put one on the power port). Sneak to place other blocks.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         if (!state.getValue(FORMED) || stack.is(com.sideflowgames.fulguritefusion.ModBlocks.MACHINE_CONNECTOR_ITEM.get())) {
-            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.PASS;
         }
         // A Latex Vulcanizer's casings take a Latex Bucket (or any latex container) poured in.
         if (level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing && casing.getFluidHandler(null) != null
                 && net.neoforged.neoforge.fluids.FluidUtil.interactWithFluidHandler(player, hand, level, pos, null)) {
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     // Breaking a casing un-forms its machine.
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ArcCasingBlockEntity casing) {
             casing.notifyController();
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

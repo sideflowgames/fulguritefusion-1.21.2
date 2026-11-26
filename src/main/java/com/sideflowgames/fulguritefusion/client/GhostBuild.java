@@ -11,13 +11,13 @@ import com.sideflowgames.fulguritefusion.block.ReactorFacingBlock;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,7 +109,7 @@ public final class GhostBuild {
         // Fusion Injectors on the inner ring's inside face, facing the chamber.
         int[][] injectors = axisX ? new int[][]{{INJ, 0}, {-INJ, 0}} : new int[][]{{0, INJ}, {0, -INJ}};
         for (int[] s : injectors) {
-            Direction face = Direction.fromDelta(-Integer.signum(s[0]), 0, -Integer.signum(s[1]));
+            Direction face = Direction.getNearest(-Integer.signum(s[0]), 0, -Integer.signum(s[1]), null);
             BlockState want = ModBlocks.FUSION_INJECTOR.get().defaultBlockState().setValue(ReactorFacingBlock.FACING, face);
             BlockPos p = core.offset(s[0], 0, s[1]);
             BlockState have = level.getBlockState(p);
@@ -375,12 +374,15 @@ public final class GhostBuild {
     public static void render(List<Ghost> ghosts, BlockPos core, Level level, float partialTick, PoseStack poseStack,
                               MultiBufferSource buffers) {
         if (ghosts.isEmpty()) return;
-        Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().position();
         float time = level.getGameTime() + partialTick;
         float alpha = 0.32f + 0.12f * Mth.sin(time * 0.15f);
-        var dispatcher = Minecraft.getInstance().getBlockRenderer();
-        VertexConsumer blocks = buffers.getBuffer(Sheets.translucentCullBlockSheet());
-        int light = LightTexture.FULL_BRIGHT;
+        var models = Minecraft.getInstance().getModelManager().getBlockStateModelSet();
+        VertexConsumer blocks = buffers.getBuffer(Sheets.translucentBlockSheet());
+        com.mojang.blaze3d.vertex.QuadInstance tint = new com.mojang.blaze3d.vertex.QuadInstance();
+        tint.setColor(net.minecraft.util.ARGB.colorFromFloat(alpha, 0.75f, 0.9f, 1.0f));
+        java.util.List<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart> parts = new java.util.ArrayList<>();
+        int light = net.minecraft.util.LightCoordsUtil.FULL_BRIGHT;
         for (Ghost g : ghosts) {
             if (g.want == null) continue;
             if (cam.distanceToSqr(Vec3.atCenterOf(g.pos)) > MAX_DISTANCE * MAX_DISTANCE) continue;
@@ -390,28 +392,27 @@ public final class GhostBuild {
             poseStack.translate(0.5, 0.5, 0.5);
             poseStack.scale(0.98f, 0.98f, 0.98f);
             poseStack.translate(-0.5, -0.5, -0.5);
-            BakedModel model = dispatcher.getBlockModel(g.want);
             PoseStack.Pose pose = poseStack.last();
             RANDOM.setSeed(42L);
-            for (Direction d : Direction.values()) {
-                for (BakedQuad q : model.getQuads(g.want, d, RANDOM, ModelData.EMPTY, null)) {
-                    blocks.putBulkData(pose, q, 0.75f, 0.9f, 1.0f, alpha, light, OverlayTexture.NO_OVERLAY);
+            parts.clear();
+            models.get(g.want).collectParts(RANDOM, parts);
+            for (var part : parts) {
+                for (Direction d : Direction.values()) {
+                    for (BakedQuad q : part.getQuads(d)) blocks.putBakedQuad(pose, q, tint);
                 }
-            }
-            RANDOM.setSeed(42L);
-            for (BakedQuad q : model.getQuads(g.want, null, RANDOM, ModelData.EMPTY, null)) {
-                blocks.putBulkData(pose, q, 0.75f, 0.9f, 1.0f, alpha, light, OverlayTexture.NO_OVERLAY);
+                for (BakedQuad q : part.getQuads(null)) blocks.putBakedQuad(pose, q, tint);
             }
             poseStack.popPose();
         }
         // Spots that must be left empty: a red box round whatever is in the way.
-        VertexConsumer lines = buffers.getBuffer(RenderType.lines());
+        VertexConsumer lines = buffers.getBuffer(RenderTypes.lines());
         for (Ghost g : ghosts) {
             if (g.want != null) continue;
             if (cam.distanceToSqr(Vec3.atCenterOf(g.pos)) > MAX_DISTANCE * MAX_DISTANCE) continue;
             double x = g.pos.getX() - core.getX(), y = g.pos.getY() - core.getY(), z = g.pos.getZ() - core.getZ();
-            LevelRenderer.renderLineBox(poseStack, lines, new AABB(x + 0.02, y + 0.02, z + 0.02, x + 0.98, y + 0.98, z + 0.98),
-                    1.0f, 0.2f, 0.2f, 1.0f);
+            net.minecraft.client.renderer.ShapeRenderer.renderShape(poseStack, lines,
+                    net.minecraft.world.phys.shapes.Shapes.create(new AABB(x + 0.02, y + 0.02, z + 0.02, x + 0.98, y + 0.98, z + 0.98)),
+                    0, 0, 0, net.minecraft.util.ARGB.colorFromFloat(1.0f, 1.0f, 0.2f, 0.2f), 2.0f);
         }
     }
 }

@@ -51,24 +51,24 @@ public class FusionColliderBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.FUSION_COLLIDER_BE.get(), FusionColliderBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.FUSION_COLLIDER_BE.get(), FusionColliderBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof FusionColliderBlockEntity reactor) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FusionColliderBlockEntity reactor) {
             reactor.check();
-            player.displayClientMessage(Component.literal(reactor.statusText()), true);
+            player.sendOverlayMessage(Component.literal(reactor.statusText()));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Taking the collider out un-forms the ring.
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FusionColliderBlockEntity reactor) {
             reactor.unform();
         }
-        super.onRemove(state, level, pos, newState, moved);
     }
 }

@@ -1,24 +1,18 @@
 {
- "type": "minecraft:crafting_shaped",
- "category": "misc",
- "pattern": [
-  "PSP",
-  "PMP",
-  "PSP"
- ],
- "key": {
-  "P": {
-   "item": "fulguritefusion:fulgurite_item_pipe"
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "PMP",
+    "PSP"
+  ],
+  "key": {
+    "P": "fulguritefusion:fulgurite_item_pipe",
+    "S": "fulguritefusion:silver_sheet",
+    "M": "fulguritefusion:magnetite_plate"
   },
-  "S": {
-   "item": "fulguritefusion:silver_sheet"
-  },
-  "M": {
-   "item": "fulguritefusion:magnetite_plate"
+  "result": {
+    "id": "fulguritefusion:stormforged_item_pipe",
+    "count": 6
   }
- },
- "result": {
-  "id": "fulguritefusion:stormforged_item_pipe",
-  "count": 6
- }
 }

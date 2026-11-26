@@ -42,8 +42,8 @@ import org.joml.Vector3f;
 //   - Blink: when hurt it may vanish and reappear somewhere around you
 // 320 health. Drops an Aurora Shroud and a pile of Raw Aurorite.
 public class AuroraWraithEntity extends StormElite {
-    private static final DustParticleOptions GREEN = new DustParticleOptions(new Vector3f(0.4f, 1.0f, 0.7f), 1.4f);
-    private static final DustParticleOptions VIOLET = new DustParticleOptions(new Vector3f(0.7f, 0.45f, 1.0f), 1.4f);
+    private static final DustParticleOptions GREEN = new DustParticleOptions(0x66FFB2, 1.4f);
+    private static final DustParticleOptions VIOLET = new DustParticleOptions(0xB273FF, 1.4f);
     private int beamCooldown = 60, gatherCooldown = 200, blinkCooldown = 0, meleeCooldown = 0;
     @Nullable private BlockPos wander;
 
@@ -64,8 +64,8 @@ public class AuroraWraithEntity extends StormElite {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         ServerLevel server = (ServerLevel) level();
         if (beamCooldown > 0) beamCooldown--;
         if (gatherCooldown > 0) gatherCooldown--;
@@ -82,8 +82,8 @@ public class AuroraWraithEntity extends StormElite {
         if (action() == 1) {
             steer(position(), 0.0, 0.2);
             if (actionTicks() % 5 == 0 && beam(target, 3.0f, actionTicks() % 10 == 0 ? GREEN : VIOLET)) {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);
-                target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 80, 1), this);
+                target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), this);
+                target.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 80, 1), this);
             }
             return;
         }
@@ -91,7 +91,7 @@ public class AuroraWraithEntity extends StormElite {
         steer(target.getEyePosition().add(0, 0.5, 0), 0.22, 0.06);
         if (meleeCooldown == 0 && distanceToSqr(target) < 6.0) {
             swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            doHurtTarget(target);
+            doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target);
             meleeCooldown = 25;
         }
         double d = distanceTo(target);
@@ -103,9 +103,9 @@ public class AuroraWraithEntity extends StormElite {
             gatherCooldown = 400;
             int near = server.getEntitiesOfClass(IonSwarmEntity.class, getBoundingBox().inflate(16)).size();
             for (int i = 0; i < 2 && near < 4; i++, near++) {
-                IonSwarmEntity swarm = com.sideflowgames.fulguritefusion.ModEntities.ION_SWARM.get().create(server);
+                IonSwarmEntity swarm = com.sideflowgames.fulguritefusion.ModEntities.ION_SWARM.get().create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
                 if (swarm == null) continue;
-                swarm.moveTo(getX() + random.nextGaussian() * 2, getY(0.5), getZ() + random.nextGaussian() * 2, 0, 0);
+                swarm.snapTo(getX() + random.nextGaussian() * 2, getY(0.5), getZ() + random.nextGaussian() * 2, 0, 0);
                 swarm.setTarget(target);
                 server.addFreshEntity(swarm);
             }
@@ -115,9 +115,9 @@ public class AuroraWraithEntity extends StormElite {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && blinkCooldown == 0 && !level().isClientSide && getTarget() != null && random.nextInt(3) == 0) blink(getTarget());
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
+        if (hurt && blinkCooldown == 0 && !level().isClientSide() && getTarget() != null && random.nextInt(3) == 0) blink(getTarget());
         return hurt;
     }
 
@@ -140,13 +140,13 @@ public class AuroraWraithEntity extends StormElite {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(2) == 0) {
+        if (level().isClientSide() && random.nextInt(2) == 0) {
             level().addParticle(random.nextBoolean() ? GREEN : VIOLET, getRandomX(0.8), getRandomY(), getRandomZ(0.8), 0, -0.02, 0);
         }
     }
 
     @Override
-    protected boolean moving(software.bernie.geckolib.animation.AnimationState<?> s) {
+    protected boolean moving(com.geckolib.animation.state.AnimationTest<?> s) {
         return getDeltaMovement().lengthSqr() > 0.004;
     }
 

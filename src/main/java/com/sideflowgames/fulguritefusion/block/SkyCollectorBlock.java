@@ -85,19 +85,19 @@ public class SkyCollectorBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.SKY_COLLECTOR_BE.get(), SkyCollectorBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.SKY_COLLECTOR_BE.get(), SkyCollectorBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof SkyCollectorBlockEntity be) be.interact(player);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof SkyCollectorBlockEntity be) be.interact(player);
+        return InteractionResult.SUCCESS;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof SkyCollectorBlockEntity be) be.dropContents();
-        super.onRemove(state, level, pos, newState, moved);
     }
 
     // Shimmer while it gathers.

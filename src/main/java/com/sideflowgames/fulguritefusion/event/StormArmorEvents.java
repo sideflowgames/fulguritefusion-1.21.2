@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -57,8 +57,8 @@ public final class StormArmorEvents {
     private static final double SPEED_BONUS = 0.2;      // +20% movement speed
     private static final float FALL_MULTIPLIER = 0.25f;
 
-    private static final ResourceLocation KB_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormforged_knockback");
-    private static final ResourceLocation SPEED_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormforged_speed");
+    private static final Identifier KB_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormforged_knockback");
+    private static final Identifier SPEED_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormforged_speed");
 
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
@@ -76,7 +76,7 @@ public final class StormArmorEvents {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
         long time = player.level().getGameTime();
 
         // Full set bonus.
@@ -101,11 +101,11 @@ public final class StormArmorEvents {
                     helmet.set(ModDataComponents.HYDROGEN.get(), hydrogen);
                     FmChargeable.use(helmet, BREATH_DRAIN);
                     if (hydrogen >= HYDROGEN_MAX) {
-                        player.displayClientMessage(Component.literal("Hydrogen tank full: surface to vent it!")
-                                .withStyle(ChatFormatting.RED), true);
+                        player.sendOverlayMessage(Component.literal("Hydrogen tank full: surface to vent it!")
+                                .withStyle(ChatFormatting.RED));
                     } else if (hydrogen == HYDROGEN_MAX - 60 * 20) {
-                        player.displayClientMessage(Component.literal("Hydrogen tank: 1 minute left")
-                                .withStyle(ChatFormatting.YELLOW), true);
+                        player.sendOverlayMessage(Component.literal("Hydrogen tank: 1 minute left")
+                                .withStyle(ChatFormatting.YELLOW));
                     }
                 }
             }
@@ -114,7 +114,7 @@ public final class StormArmorEvents {
         }
     }
 
-    private static void setModifier(Player player, Holder<Attribute> attribute, ResourceLocation id, double amount,
+    private static void setModifier(Player player, Holder<Attribute> attribute, Identifier id, double amount,
                                     AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
@@ -149,7 +149,7 @@ public final class StormArmorEvents {
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         LivingEntity e = event.getEntity();
-        if (e.level().isClientSide || event.getDistance() <= 3 || !charged(e, EquipmentSlot.FEET)) return;
+        if (e.level().isClientSide() || event.getDistance() <= 3 || !charged(e, EquipmentSlot.FEET)) return;
         event.setDamageMultiplier(event.getDamageMultiplier() * FALL_MULTIPLIER);
         FmChargeable.use(e.getItemBySlot(EquipmentSlot.FEET), FALL_DRAIN);
     }

@@ -96,6 +96,6 @@ A power generation and processing mod designed around lightening and Fusion.
 [[dependencies.${mod_id}]]
     modId="geckolib"
     type="required"
-    versionRange="[4.9,)"
+    versionRange="[5.5,)"
     ordering="NONE"
     side="BOTH"

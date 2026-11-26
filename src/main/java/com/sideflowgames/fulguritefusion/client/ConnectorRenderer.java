@@ -8,36 +8,37 @@ import com.sideflowgames.fulguritefusion.power.WireMath;
 
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // Draws the hanging wires: a thin, sagging cable from this connector's cap to each linked connector.
 // Each wire is drawn once, by the connector with the lower position.
-public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBlockEntity> {
-    private static final ResourceLocation TEX_RAW =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_wire.png");
-    private static final ResourceLocation TEX_INSULATED =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/insulated_wire.png");
-    private static final ResourceLocation TEX_HEAVY =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/heavy_wire.png");
-    private static final ResourceLocation TEX_RAW_REINFORCED =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_reinforced_wire.png");
-    private static final ResourceLocation TEX_RAW_HEAVY =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_heavy_wire.png");
-    private static final ResourceLocation TEX_REINFORCED =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/reinforced_wire.png");
+public class ConnectorRenderer extends LegacyBlockEntityRenderer<MachineConnectorBlockEntity> {
+    private static final Identifier TEX_RAW =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_wire.png");
+    private static final Identifier TEX_INSULATED =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/insulated_wire.png");
+    private static final Identifier TEX_HEAVY =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/heavy_wire.png");
+    private static final Identifier TEX_RAW_REINFORCED =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_reinforced_wire.png");
+    private static final Identifier TEX_RAW_HEAVY =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/raw_heavy_wire.png");
+    private static final Identifier TEX_REINFORCED =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/reinforced_wire.png");
     private static final int SEGMENTS = 24;
 
     public ConnectorRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(MachineConnectorBlockEntity be, float partialTick, PoseStack poseStack,
+    protected void render(MachineConnectorBlockEntity be, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffers, int packedLight, int packedOverlay) {
         BlockPos pos = be.getBlockPos();
         Vec3 origin = Vec3.atLowerCornerOf(pos);
@@ -47,7 +48,7 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
             if (pos.asLong() > link.other().asLong()) continue;
             Vec3 b = WireMath.attachPoint(be.getLevel(), link.other());
             var tier = link.tier();
-            ResourceLocation texture = switch (tier) {
+            Identifier texture = switch (tier) {
                 case RAW -> TEX_RAW;
                 case INSULATED -> TEX_INSULATED;
                 case RAW_REINFORCED -> TEX_RAW_REINFORCED;
@@ -56,12 +57,12 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
                 case HEAVY -> TEX_HEAVY;
             };
             float radius = tier.radius;
-            VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
+            VertexConsumer vc = buffers.getBuffer(RenderTypes.entityCutout(texture));
             Vec3 prev = WireMath.point(a, b, 0, tier);
             for (int i = 1; i <= SEGMENTS; i++) {
                 Vec3 cur = WireMath.point(a, b, (double) i / SEGMENTS, tier);
                 int light = be.getLevel() != null
-                        ? LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(prev.add(cur).scale(0.5)))
+                        ? LevelRenderer.getLightCoords(be.getLevel(), BlockPos.containing(prev.add(cur).scale(0.5)))
                         : packedLight;
                 segment(vc, pose, prev.subtract(origin), cur.subtract(origin), light, i, radius);
                 prev = cur;
@@ -99,7 +100,7 @@ public class ConnectorRenderer implements BlockEntityRenderer<MachineConnectorBl
 
     // Wires can stretch far past the connector block, so keep drawing them when it's off-screen.
     @Override
-    public boolean shouldRenderOffScreen(MachineConnectorBlockEntity be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 

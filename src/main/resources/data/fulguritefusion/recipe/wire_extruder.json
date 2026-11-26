@@ -7,21 +7,11 @@
     "SSS"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "H": {
-      "item": "minecraft:shears"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    }
+    "M": "fulguritefusion:magnetite_plate",
+    "H": "minecraft:shears",
+    "C": "fulguritefusion:copper_sheet",
+    "K": "fulguritefusion:crude_arc_casing",
+    "S": "fulguritefusion:iron_sheet"
   },
   "result": {
     "id": "fulguritefusion:wire_extruder",

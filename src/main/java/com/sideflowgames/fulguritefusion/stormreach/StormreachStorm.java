@@ -10,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -53,7 +53,7 @@ public final class StormreachStorm {
     public static Consumer<Boolean> clientHandler = storming -> {};
 
     public record Payload(boolean storming) implements CustomPacketPayload {
-        public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormreach_storm"));
+        public static final Type<Payload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormreach_storm"));
         public static final StreamCodec<ByteBuf, Payload> STREAM_CODEC = ByteBufCodecs.BOOL.map(Payload::new, Payload::storming);
 
         @Override
@@ -67,22 +67,23 @@ public final class StormreachStorm {
         boolean storming = true;
         int timer = STORM_MIN;
 
+        static final net.minecraft.world.level.saveddata.SavedDataType<State> TYPE = com.sideflowgames.fulguritefusion.util.NbtBridge.savedData("fulguritefusion_storm", State::new, State::load, (d, t) -> d.save(t, null));
+
         static State load(CompoundTag tag, HolderLookup.Provider registries) {
             State s = new State();
-            s.storming = tag.getBoolean("Storming");
-            s.timer = tag.getInt("Timer");
+            s.storming = tag.getBooleanOr("Storming", false);
+            s.timer = tag.getIntOr("Timer", 0);
             return s;
         }
 
-        @Override
-        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+                public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
             tag.putBoolean("Storming", storming);
             tag.putInt("Timer", timer);
             return tag;
         }
 
         static State get(ServerLevel level) {
-            return level.getDataStorage().computeIfAbsent(new SavedData.Factory<>(State::new, State::load, null), "fulguritefusion_storm");
+            return level.getDataStorage().computeIfAbsent(TYPE);
         }
     }
 
@@ -119,12 +120,12 @@ public final class StormreachStorm {
         fizzle(level);
         if (!state.storming || level.getGameTime() % 20 != 0) return;
         for (ServerPlayer player : level.players()) {
-            if (player.isSpectator() || level.random.nextFloat() > STRIKE_CHANCE) continue;
-            int x = player.getBlockX() + level.random.nextInt(STRIKE_RANGE * 2 + 1) - STRIKE_RANGE;
-            int z = player.getBlockZ() + level.random.nextInt(STRIKE_RANGE * 2 + 1) - STRIKE_RANGE;
+            if (player.isSpectator() || level.getRandom().nextFloat() > STRIKE_CHANCE) continue;
+            int x = player.getBlockX() + level.getRandom().nextInt(STRIKE_RANGE * 2 + 1) - STRIKE_RANGE;
+            int z = player.getBlockZ() + level.getRandom().nextInt(STRIKE_RANGE * 2 + 1) - STRIKE_RANGE;
             if (!level.hasChunkAt(new BlockPos(x, 0, z))) continue;
             int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-            if (top <= level.getMinBuildHeight() + 1) continue; // open sky over the void
+            if (top <= level.getMinY() + 1) continue; // open sky over the void
             strike(level, new BlockPos(x, top, z));
         }
     }
@@ -155,19 +156,19 @@ public final class StormreachStorm {
     }
 
     private static int between(ServerLevel level, int min, int max) {
-        return min + level.random.nextInt(max - min + 1);
+        return min + level.getRandom().nextInt(max - min + 1);
     }
 
     private static void strike(ServerLevel level, BlockPos pos) {
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt == null) return;
-        bolt.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        bolt.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         level.addFreshEntity(bolt);
         FIZZLES.add(new Fizzle(pos.immutable(), level.getGameTime() + FIZZLE_TICKS));
         // Fuse Charged Stormsand around where it lands.
         BlockPos ground = pos.below();
         for (BlockPos p : BlockPos.betweenClosed(ground.offset(-1, -1, -1), ground.offset(1, 0, 1))) {
-            if (level.getBlockState(p).is(ModBlocks.CHARGED_STORMSAND.get()) && (p.equals(ground) || level.random.nextFloat() < 0.5f)) {
+            if (level.getBlockState(p).is(ModBlocks.CHARGED_STORMSAND.get()) && (p.equals(ground) || level.getRandom().nextFloat() < 0.5f)) {
                 level.setBlockAndUpdate(p, ModBlocks.FULGURITE_GLASS.get().defaultBlockState());
             }
         }

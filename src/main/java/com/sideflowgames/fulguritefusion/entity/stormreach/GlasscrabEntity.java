@@ -24,12 +24,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -48,7 +48,7 @@ public class GlasscrabEntity extends Animal implements GeoEntity {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Animal.createMobAttributes().add(Attributes.MAX_HEALTH, 12.0).add(Attributes.MOVEMENT_SPEED, 0.25)
+        return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 12.0).add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.ARMOR, 6.0);
     }
 
@@ -73,7 +73,7 @@ public class GlasscrabEntity extends Animal implements GeoEntity {
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return ModEntities.GLASSCRAB.get().create(level);
+        return ModEntities.GLASSCRAB.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
     }
 
     @Nullable
@@ -94,7 +94,7 @@ public class GlasscrabEntity extends Animal implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 4, s -> s.setAndContinue(
                 swinging ? PINCH : s.isMoving() ? WALK : IDLE)));
     }
 

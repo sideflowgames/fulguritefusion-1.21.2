@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:cobbled_stormstone"
-  },
+  "ingredient": "fulguritefusion:cobbled_stormstone",
   "result": {
     "id": "fulguritefusion:stormstone"
   },

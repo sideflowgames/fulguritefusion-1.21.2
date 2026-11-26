@@ -15,7 +15,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -29,12 +29,12 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Stormhound: a wolf of crackling static that only exists while a Stormreach storm rages. Hunts in packs of 3-5,
 // leaps at you, and its bite (5 damage) sparks. When the storm passes, every Stormhound fades away.
@@ -76,15 +76,15 @@ public class StormhoundEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("SummonedTicks", summonedTicks);
     }
 
     @Override
-    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput tag) {
         super.readAdditionalSaveData(tag);
-        summonedTicks = tag.getInt("SummonedTicks");
+        summonedTicks = tag.getIntOr("SummonedTicks", 0);
     }
 
     @Override
@@ -105,8 +105,8 @@ public class StormhoundEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit && level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.5), target.getZ(), 12, 0.3, 0.4, 0.3, 0.2);
         }
@@ -114,9 +114,9 @@ public class StormhoundEntity extends Monster implements GeoEntity {
     }
 
     // Spawns on open ground in the Stormreach, only during a storm.
-    public static boolean checkSpawn(EntityType<StormhoundEntity> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static boolean checkSpawn(EntityType<StormhoundEntity> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                      BlockPos pos, RandomSource random) {
-        if (MobSpawnType.isSpawner(reason) || reason == MobSpawnType.SPAWN_EGG) return true;
+        if (EntitySpawnReason.isSpawner(reason) || reason == EntitySpawnReason.SPAWN_ITEM_USE) return true;
         ServerLevel server = level.getLevel();
         return Stormreach.is(server) && StormreachStorm.isStorming(server) && level.getDifficulty() != Difficulty.PEACEFUL
                 && level.canSeeSky(pos) && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
@@ -129,17 +129,17 @@ public class StormhoundEntity extends Monster implements GeoEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WOLF_GROWL;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WOLF_HURT;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WOLF_DEATH;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().deathSound().value();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class StormhoundEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 4, s -> s.setAndContinue(
                 swinging ? BITE : s.isMoving() ? RUN : IDLE)));
     }
 

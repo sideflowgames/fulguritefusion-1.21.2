@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -43,26 +42,26 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         // Empty hand: fall through to useWithoutItem (status, or sneak to take the item out).
-        if (stack.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
+        if (stack.isEmpty()) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
             ItemStack left = injector.insert(stack.copy());
             int added = stack.getCount() - left.getCount();
             if (!player.getAbilities().instabuild) stack.shrink(added);
-            player.displayClientMessage(Component.literal(injector.statusText()), true);
+            player.sendOverlayMessage(Component.literal(injector.statusText()));
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
             if (player.isShiftKeyDown()) {
                 ItemStack out = injector.takeAll();
                 if (!out.isEmpty() && !player.getInventory().add(out)) player.drop(out, false);
-                player.displayClientMessage(Component.literal(injector.statusText()), true);
+                player.sendOverlayMessage(Component.literal(injector.statusText()));
             } else {
                 ColliderInputBlock.openFor(level, pos, player, injector, false);
             }
@@ -70,12 +69,12 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ColliderInjectorBlockEntity injector) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), injector.peek());
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
         if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.partRemoved(level, pos);
     }
 
@@ -86,7 +85,7 @@ public class ColliderInjectorBlock extends BaseEntityBlock {
 
     // Formed: hidden inside the ring model, so it mustn't hide the faces of the blocks around it.
     @Override
-    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state, level, pos);
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
     }
 }

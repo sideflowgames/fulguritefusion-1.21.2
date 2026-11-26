@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.InteractionResult;
+
 import com.sideflowgames.fulguritefusion.ModDataComponents;
 import com.sideflowgames.fulguritefusion.ModItems;
 
@@ -14,7 +16,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -25,17 +26,13 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.SimpleTier;
 
 import java.util.List;
 
@@ -52,8 +49,8 @@ public final class StormforgedTools {
     // mining speed            9.0         11.0
     // damage bonus            4.0         6.0
     // enchantability          15          18
-    public static final Tier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 4000, 11.0f, 6.0f, 18,
-            () -> Ingredient.of(ModItems.REFINED_FULGURITE.get()));
+    public static final net.minecraft.world.item.ToolMaterial TIER = new net.minecraft.world.item.ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 4000, 11.0f, 6.0f, 18,
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID, "stormforged_tool_materials")));
 
     public static final int MAX_FM = 1_000_000;
     public static final int MINE_COST = 100;      // Fm per block mined
@@ -84,16 +81,16 @@ public final class StormforgedTools {
     }
 
     // Sneak + right-click the air: next mode. Returns null when it isn't a mode change.
-    static InteractionResultHolder<ItemStack> cycle(Level level, Player player, InteractionHand hand) {
+    static InteractionResult cycle(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!player.isSecondaryUseActive()) return null;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             int next = ((mode(stack) & 3) + 1) % 4;
             stack.set(ModDataComponents.TOOL_MODE.get(), next | (mode(stack) & HAMMER));
-            player.displayClientMessage(Component.literal("Mode: " + MODE_NAMES[next]).withStyle(ChatFormatting.AQUA), true);
+            player.sendOverlayMessage(Component.literal("Mode: " + MODE_NAMES[next]).withStyle(ChatFormatting.AQUA));
             level.playSound(null, player.blockPosition(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.6f, 1.3f + next * 0.1f);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     static float speed(ItemStack stack, float normal) {
@@ -101,7 +98,7 @@ public final class StormforgedTools {
     }
 
     static void mined(ItemStack stack, Level level, BlockState state, BlockPos pos) {
-        if (!level.isClientSide && state.getDestroySpeed(level, pos) != 0) FmChargeable.use(stack, MINE_COST);
+        if (!level.isClientSide() && state.getDestroySpeed(level, pos) != 0) FmChargeable.use(stack, MINE_COST);
     }
 
     static int barWidth(ItemStack stack) {
@@ -124,13 +121,13 @@ public final class StormforgedTools {
 
     // ---------- Storm Blade ----------
 
-    public static class Blade extends SwordItem implements FmChargeable {
+    public static class Blade extends Item implements FmChargeable {
         public Blade(Item.Properties p) {
             this(TIER, p);
         }
 
-        protected Blade(Tier tier, Item.Properties p) {
-            super(tier, p);
+        protected Blade(net.minecraft.world.item.ToolMaterial tier, Item.Properties p) {
+            super(p);
         }
 
         protected float lightning() {
@@ -150,12 +147,12 @@ public final class StormforgedTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             if (FmChargeable.hasCharge(stack) && target.level() instanceof ServerLevel level) {
                 FmChargeable.use(stack, HIT_COST);
                 chain(level, target, attacker, chainTargets(), this instanceof PrimeTools.Blade);
             }
-            return true;
+            return;
         }
 
         @Override public boolean isBarVisible(ItemStack stack) { return true; }
@@ -163,7 +160,8 @@ public final class StormforgedTools {
         @Override public int getBarColor(ItemStack stack) { return barColor(stack); }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip.add(Component.literal("+" + (int) lightning() + " lightning damage; lightning chains to "
                     + chainTargets() + " nearby enemies").withStyle(ChatFormatting.AQUA));
             StormforgedTools.tooltip(stack, tooltip, false);
@@ -172,11 +170,11 @@ public final class StormforgedTools {
 
     // Lightning jumps from the target to up to 5 other enemies nearby (never the attacker, players or pets).
     static void chain(ServerLevel level, LivingEntity target, LivingEntity attacker, int targets, boolean prime) {
-        DamageSource lightning = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), attacker);
+        DamageSource lightning = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.LIGHTNING_BOLT), attacker);
         List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(CHAIN_RANGE),
                 e -> e != target && e != attacker && e.isAlive() && !(e instanceof Player)
-                        && !(e instanceof OwnableEntity o && o.getOwnerUUID() != null));
+                        && !(e instanceof OwnableEntity o && o.getOwnerReference() != null));
         near.sort((a, b) -> Double.compare(a.distanceToSqr(target), b.distanceToSqr(target)));
         Vec3 from = target.position().add(0, target.getBbHeight() * 0.6, 0);
         List<Vec3> path = new java.util.ArrayList<>();
@@ -185,7 +183,7 @@ public final class StormforgedTools {
             LivingEntity next = near.get(i);
             Vec3 to = next.position().add(0, next.getBbHeight() * 0.6, 0);
             path.add(to);
-            next.hurt(lightning, CHAIN_DAMAGE);
+            next.hurtOrSimulate(lightning, CHAIN_DAMAGE);
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.15);
         }
         ChainBolt.send(target, path, prime);
@@ -195,11 +193,11 @@ public final class StormforgedTools {
 
     // ---------- Tools ----------
 
-    public static class Pickaxe extends PickaxeItem implements FmChargeable {
-        public Pickaxe(Item.Properties p) { super(TIER, p); }
-        protected Pickaxe(Tier t, Item.Properties p) { super(t, p); }
+    public static class Pickaxe extends Item implements FmChargeable {
+        public Pickaxe(Item.Properties p) { super(p); }
+        protected Pickaxe(net.minecraft.world.item.ToolMaterial t, Item.Properties p) { super(p); }
         @Override public int maxFm() { return MAX_FM; }
-        @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
+        @Override public InteractionResult use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
         }
         @Override public float getDestroySpeed(ItemStack s, BlockState st) { return speed(s, super.getDestroySpeed(s, st)); }
@@ -207,14 +205,15 @@ public final class StormforgedTools {
         @Override public boolean isBarVisible(ItemStack s) { return true; }
         @Override public int getBarWidth(ItemStack s) { return barWidth(s); }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) { tooltip(s, t, true); }
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut); tooltip(s, t, true); }
     }
 
     public static class Axe extends AxeItem implements FmChargeable {
-        public Axe(Item.Properties p) { super(TIER, p); }
-        protected Axe(Tier t, Item.Properties p) { super(t, p); }
+        public Axe(Item.Properties p) { super(TIER, 5.0f, -3.0f, p); }
+        protected Axe(net.minecraft.world.item.ToolMaterial t, Item.Properties p) { super(t, 5.0f, -3.0f, p); }
         @Override public int maxFm() { return MAX_FM; }
-        @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
+        @Override public InteractionResult use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
         }
         @Override public float getDestroySpeed(ItemStack s, BlockState st) { return speed(s, super.getDestroySpeed(s, st)); }
@@ -222,14 +221,15 @@ public final class StormforgedTools {
         @Override public boolean isBarVisible(ItemStack s) { return true; }
         @Override public int getBarWidth(ItemStack s) { return barWidth(s); }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) { tooltip(s, t, true); }
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut); tooltip(s, t, true); }
     }
 
     public static class Shovel extends ShovelItem implements FmChargeable {
-        public Shovel(Item.Properties p) { super(TIER, p); }
-        protected Shovel(Tier t, Item.Properties p) { super(t, p); }
+        public Shovel(Item.Properties p) { super(TIER, 1.5f, -3.0f, p); }
+        protected Shovel(net.minecraft.world.item.ToolMaterial t, Item.Properties p) { super(t, 1.5f, -3.0f, p); }
         @Override public int maxFm() { return MAX_FM; }
-        @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
+        @Override public InteractionResult use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
         }
         @Override public float getDestroySpeed(ItemStack s, BlockState st) { return speed(s, super.getDestroySpeed(s, st)); }
@@ -237,14 +237,15 @@ public final class StormforgedTools {
         @Override public boolean isBarVisible(ItemStack s) { return true; }
         @Override public int getBarWidth(ItemStack s) { return barWidth(s); }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) { tooltip(s, t, true); }
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut); tooltip(s, t, true); }
     }
 
     public static class Hoe extends HoeItem implements FmChargeable {
-        public Hoe(Item.Properties p) { super(TIER, p); }
-        protected Hoe(Tier t, Item.Properties p) { super(t, p); }
+        public Hoe(Item.Properties p) { super(TIER, -6.0f, 0.0f, p); }
+        protected Hoe(net.minecraft.world.item.ToolMaterial t, float damage, Item.Properties p) { super(t, damage, 0.0f, p); }
         @Override public int maxFm() { return MAX_FM; }
-        @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
+        @Override public InteractionResult use(Level l, Player p, InteractionHand h) {
             var r = cycle(l, p, h); return r != null ? r : super.use(l, p, h);
         }
         @Override public float getDestroySpeed(ItemStack s, BlockState st) { return speed(s, super.getDestroySpeed(s, st)); }
@@ -252,6 +253,7 @@ public final class StormforgedTools {
         @Override public boolean isBarVisible(ItemStack s) { return true; }
         @Override public int getBarWidth(ItemStack s) { return barWidth(s); }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) { tooltip(s, t, true); }
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut); tooltip(s, t, true); }
     }
 }

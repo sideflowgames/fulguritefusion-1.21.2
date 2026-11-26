@@ -1,21 +1,17 @@
 {
- "type": "minecraft:crafting_shaped",
- "category": "misc",
- "pattern": [
-  "PPP",
-  "PRP",
-  "PPP"
- ],
- "key": {
-  "P": {
-   "item": "fulguritefusion:copper_item_pipe"
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PRP",
+    "PPP"
+  ],
+  "key": {
+    "P": "fulguritefusion:copper_item_pipe",
+    "R": "fulguritefusion:refined_fulgurite"
   },
-  "R": {
-   "item": "fulguritefusion:refined_fulgurite"
+  "result": {
+    "id": "fulguritefusion:fulgurite_item_pipe",
+    "count": 8
   }
- },
- "result": {
-  "id": "fulguritefusion:fulgurite_item_pipe",
-  "count": 8
- }
 }

@@ -13,7 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -56,20 +56,20 @@ public final class StormreachTravel {
     }
 
     public static void enter(ServerPlayer player) {
-        ServerLevel reach = player.server.getLevel(Stormreach.LEVEL);
+        ServerLevel reach = player.level().getServer().getLevel(Stormreach.LEVEL);
         if (reach == null) {
             player.sendSystemMessage(Component.literal("The Stormreach isn't loaded in this world."));
             return;
         }
         BlockPos spot = findLand(reach, player.getBlockX(), player.getBlockZ());
-        player.changeDimension(new DimensionTransition(reach, Vec3.atBottomCenterOf(spot), Vec3.ZERO,
-                player.getYRot(), player.getXRot(), DimensionTransition.DO_NOTHING));
+        player.teleport(new TeleportTransition(reach, Vec3.atBottomCenterOf(spot), Vec3.ZERO,
+                player.getYRot(), player.getXRot(), TeleportTransition.DO_NOTHING));
         reach.playSound(null, spot, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1.0f, 1.2f);
     }
 
     // Back to the bed or respawn point if there is one, otherwise world spawn.
     public static void home(ServerPlayer player) {
-        player.changeDimension(player.findRespawnPositionAndUseSpawnBlock(true, DimensionTransition.DO_NOTHING));
+        player.teleport(player.findRespawnPositionAndUseSpawnBlock(true, TeleportTransition.DO_NOTHING));
     }
 
     // Somewhere solid to stand near (x, z): the column itself, then rings further out. Over the void it builds a
@@ -81,7 +81,7 @@ public final class StormreachTravel {
                     if (r > 0 && Math.abs(dx) != r && Math.abs(dz) != r) continue;
                     int top = level.getChunk((x + dx) >> 4, (z + dz) >> 4)
                             .getHeight(Heightmap.Types.MOTION_BLOCKING, (x + dx) & 15, (z + dz) & 15);
-                    if (top > level.getMinBuildHeight() + 1) return new BlockPos(x + dx, top + 1, z + dz);
+                    if (top > level.getMinY() + 1) return new BlockPos(x + dx, top + 1, z + dz);
                 }
             }
         }

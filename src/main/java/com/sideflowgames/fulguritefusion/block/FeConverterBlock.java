@@ -61,13 +61,13 @@ public class FeConverterBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.FE_CONVERTER_BE.get(), FeConverterBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.FE_CONVERTER_BE.get(), FeConverterBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof FeConverterBlockEntity converter) {
-            player.displayClientMessage(Component.literal(converter.statusText()), true);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FeConverterBlockEntity converter) {
+            player.sendOverlayMessage(Component.literal(converter.statusText()));
         }
         return InteractionResult.SUCCESS;
     }

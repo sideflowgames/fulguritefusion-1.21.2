@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -34,7 +34,7 @@ public final class GuideProgress {
 
     public static final Supplier<AttachmentType<List<String>>> UNLOCKED = ATTACHMENTS.register("guide_topics",
             () -> AttachmentType.<List<String>>builder(() -> List.of())
-                    .serialize(Codec.STRING.listOf())
+                    .serialize(Codec.STRING.listOf().fieldOf("value"))
                     .copyOnDeath()
                     .build());
 
@@ -44,7 +44,7 @@ public final class GuideProgress {
 
     public record UnlockPayload(String topic) implements CustomPacketPayload {
         public static final Type<UnlockPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "guide_unlock"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "guide_unlock"));
         public static final StreamCodec<ByteBuf, UnlockPayload> STREAM_CODEC =
                 ByteBufCodecs.stringUtf8(64).map(UnlockPayload::new, UnlockPayload::topic);
 
@@ -56,7 +56,7 @@ public final class GuideProgress {
 
     public record SyncPayload(List<String> topics) implements CustomPacketPayload {
         public static final Type<SyncPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "guide_topics"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "guide_topics"));
         public static final StreamCodec<ByteBuf, SyncPayload> STREAM_CODEC =
                 ByteBufCodecs.stringUtf8(64).apply(ByteBufCodecs.list(256)).map(SyncPayload::new, SyncPayload::topics);
 

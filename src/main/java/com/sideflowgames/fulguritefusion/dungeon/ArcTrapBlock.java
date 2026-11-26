@@ -36,7 +36,7 @@ public class ArcTrapBlock extends Block {
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (level instanceof ServerLevel server && state.getValue(CHARGED) && entity instanceof LivingEntity living
                 && !(entity instanceof StormBeast) && !(entity instanceof Player p && (p.isCreative() || p.isSpectator()))) {
-            living.hurt(StormDamage.trap(server), 6.0f);
+            living.hurtOrSimulate(StormDamage.trap(server), 6.0f);
             living.push(0, 0.5, 0);
             living.hurtMarked = true;
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 25, 0.4, 0.3, 0.4, 0.3);

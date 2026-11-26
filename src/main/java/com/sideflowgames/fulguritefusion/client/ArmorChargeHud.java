@@ -6,7 +6,7 @@ import com.sideflowgames.fulguritefusion.item.FmChargeable;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +20,7 @@ public final class ArmorChargeHud {
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static final int CELL = 10;
 
-    public static void render(GuiGraphics g, DeltaTracker delta) {
+    public static void render(GuiGraphicsExtractor g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player == null || mc.options.hideGui || player.isSpectator()) return;
@@ -46,11 +46,11 @@ public final class ArmorChargeHud {
                 g.fill(x + 3, y0 + 3, x + 5, y0 + 5, 0x55FFFFFF); // empty slot dot
                 continue;
             }
-            g.pose().pushPose();
-            g.pose().translate(x, y0, 0);
-            g.pose().scale(0.5f, 0.5f, 1f);
-            g.renderItem(s, 0, 0);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate((float) (x), (float) (y0));
+            g.pose().scale((float) (0.5f), (float) (0.5f));
+            g.item(s, 0, 0);
+            g.pose().popMatrix();
             float f = FmChargeable.fraction(s);
             int fill = Math.round(8 * f);
             int color = f <= 0 ? 0xFF555555 : f < 0.1f ? 0xFFFF4040 : 0xFF40B0FF;

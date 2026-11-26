@@ -41,8 +41,8 @@ public final class StormreachClient {
         Minecraft mc = Minecraft.getInstance();
         SoundInstance sound = event.getSound();
         if (sound == null || mc.level == null || !Stormreach.is(mc.level)) return;
-        if (!sound.getLocation().equals(SoundEvents.LIGHTNING_BOLT_THUNDER.getLocation())) return;
+        if (!sound.getIdentifier().equals(SoundEvents.LIGHTNING_BOLT_THUNDER.location())) return;
         event.setSound(new SimpleSoundInstance(SoundEvents.LIGHTNING_BOLT_THUNDER, sound.getSource(), 2.5f,
-                0.8f + mc.level.random.nextFloat() * 0.2f, RandomSource.create(), sound.getX(), sound.getY(), sound.getZ()));
+                0.8f + mc.level.getRandom().nextFloat() * 0.2f, RandomSource.create(), sound.getX(), sound.getY(), sound.getZ()));
     }
 }

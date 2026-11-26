@@ -7,18 +7,10 @@
     "SCS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:stormstone_bricks"
-    },
-    "Q": {
-      "item": "fulguritefusion:stormquartz"
-    },
-    "H": {
-      "item": "fulguritefusion:thunderhulk_core"
-    },
-    "C": {
-      "item": "minecraft:copper_block"
-    }
+    "S": "fulguritefusion:stormstone_bricks",
+    "Q": "fulguritefusion:stormquartz",
+    "H": "fulguritefusion:thunderhulk_core",
+    "C": "minecraft:copper_block"
   },
   "result": {
     "id": "fulguritefusion:storm_ward",

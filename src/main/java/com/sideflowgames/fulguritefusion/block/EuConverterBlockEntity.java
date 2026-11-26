@@ -161,14 +161,26 @@ public class EuConverterBlockEntity extends BlockEntity implements FmHandler, Me
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveEuConverterBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveEuConverterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadEuConverterBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadEuConverterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
     }
 }

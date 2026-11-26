@@ -102,8 +102,8 @@ public class BackpackBlockEntity extends BaseContainerBlockEntity {
     }
 
     @Override
-    public void startOpen(Player player) {
-        if (!player.isSpectator() && level != null) {
+    public void startOpen(net.minecraft.world.entity.ContainerUser user) {
+        if (!(user instanceof Player player && player.isSpectator()) && level != null) {
             level.playSound(null, worldPosition, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.BLOCKS, 0.6f, 1.1f);
         }
     }
@@ -119,7 +119,7 @@ public class BackpackBlockEntity extends BaseContainerBlockEntity {
         AABB area = new AABB(pos).inflate(BackpackUpgrades.PICKUP_REACH);
         boolean changed = false;
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, area, e -> e.isAlive() && !e.hasPickUpDelay()
-                && !e.getPersistentData().getBoolean("PreventRemoteMovement"))) {
+                && !e.getPersistentData().getBooleanOr("PreventRemoteMovement", false))) {
             if (be.fm < BackpackUpgrades.PICKUP_REACH_FM) break;
             ItemStack stack = e.getItem();
             if (!BackpackUpgradeItem.matches(pickup, stack)) continue;
@@ -135,7 +135,7 @@ public class BackpackBlockEntity extends BaseContainerBlockEntity {
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput input) {
+    protected void applyImplicitComponents(net.minecraft.core.component.DataComponentGetter input) {
         super.applyImplicitComponents(input);
         upgrades = NonNullList.withSize(tier().upgradeSlots, ItemStack.EMPTY);
         input.getOrDefault(ModDataComponents.BACKPACK_UPGRADES.get(), ItemContainerContents.EMPTY).copyInto(upgrades);
@@ -150,29 +150,41 @@ public class BackpackBlockEntity extends BaseContainerBlockEntity {
     }
 
     @Override
-    public void removeComponentsFromTag(CompoundTag tag) {
+    public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput tag) {
         super.removeComponentsFromTag(tag);
-        tag.remove("Upgrades");
-        tag.remove("Fm");
+        tag.discard("Upgrades");
+        tag.discard("Fm");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ContainerHelper.saveAllItems(tag, items, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveBackpackBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveBackpackBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        com.sideflowgames.fulguritefusion.util.NbtBridge.saveAllItems(tag, items, registries);
         CompoundTag ups = new CompoundTag();
-        ContainerHelper.saveAllItems(ups, upgrades, registries);
+        com.sideflowgames.fulguritefusion.util.NbtBridge.saveAllItems(ups, upgrades, registries);
         tag.put("Upgrades", ups);
         tag.putInt("Fm", fm);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadBackpackBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadBackpackBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         items = NonNullList.withSize(tier().slots(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, items, registries);
+        com.sideflowgames.fulguritefusion.util.NbtBridge.loadAllItems(tag, items, registries);
         upgrades = NonNullList.withSize(tier().upgradeSlots, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag.getCompound("Upgrades"), upgrades, registries);
-        fm = tag.getInt("Fm");
+        com.sideflowgames.fulguritefusion.util.NbtBridge.loadAllItems(tag.getCompoundOrEmpty("Upgrades"), upgrades, registries);
+        fm = tag.getIntOr("Fm", 0);
     }
 }

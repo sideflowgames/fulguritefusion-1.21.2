@@ -17,14 +17,13 @@ import java.util.List;
 
 // Draws the items lying on the Forge Anvil (and the finished item, floating), plus the ghost build outline
 // while the anvil gets a redstone signal.
-public class StormForgeRenderer implements BlockEntityRenderer<StormForgeBlockEntity> {
+public class StormForgeRenderer extends LegacyBlockEntityRenderer<StormForgeBlockEntity> {
     public StormForgeRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(StormForgeBlockEntity be, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    protected void render(StormForgeBlockEntity be, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         var level = be.getLevel();
         if (level == null) return;
-        var items = Minecraft.getInstance().getItemRenderer();
         float time = level.getGameTime() + partialTick;
 
         ItemStack result = be.result();
@@ -33,7 +32,7 @@ public class StormForgeRenderer implements BlockEntityRenderer<StormForgeBlockEn
             pose.translate(0.5, 1.35 + Math.sin(time * 0.08) * 0.05, 0.5);
             pose.mulPose(Axis.YP.rotationDegrees(time * 2));
             pose.scale(0.6f, 0.6f, 0.6f);
-            items.renderStatic(result, ItemDisplayContext.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, pose, buffers, level, 0);
+            LegacyRender.item(result, ItemDisplayContext.FIXED, 0xF000F0, pose, level, 0);
             pose.popPose();
         } else {
             List<ItemStack> contents = be.contents();
@@ -47,8 +46,7 @@ public class StormForgeRenderer implements BlockEntityRenderer<StormForgeBlockEn
                 pose.mulPose(Axis.XP.rotationDegrees(90));
                 pose.mulPose(Axis.ZP.rotationDegrees((float) Math.toDegrees(a) + 90));
                 pose.scale(0.38f, 0.38f, 0.38f);
-                items.renderStatic(contents.get(i), ItemDisplayContext.FIXED, be.isWorking() ? 0xF000F0 : light,
-                        OverlayTexture.NO_OVERLAY, pose, buffers, level, i);
+                LegacyRender.item(contents.get(i), ItemDisplayContext.FIXED, be.isWorking() ? 0xF000F0 : light, pose, level, i);
                 pose.popPose();
             }
         }

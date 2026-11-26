@@ -6,7 +6,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -40,13 +39,13 @@ public class BackpackItem extends BlockItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            int slot = hand == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
+            int slot = hand == InteractionHand.MAIN_HAND ? sp.getInventory().getSelectedSlot() : 40;
             open(sp, stack, slot);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Open a backpack item. lockedSlot: its inventory slot (it can't be moved while open), or -1.
@@ -76,13 +75,14 @@ public class BackpackItem extends BlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         int used = 0;
-        for (ItemStack s : stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems()) used++;
+        for (ItemStack s : stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).allItemsCopyStream().filter(x -> !x.isEmpty()).toList()) used++;
         tooltip.add(Component.literal(used + " / " + tier.slots() + " slots used").withStyle(ChatFormatting.GRAY));
         var ups = stack.getOrDefault(com.sideflowgames.fulguritefusion.ModDataComponents.BACKPACK_UPGRADES.get(), ItemContainerContents.EMPTY);
         int upCount = 0;
-        for (ItemStack u : ups.nonEmptyItems()) {
+        for (ItemStack u : ups.allItemsCopyStream().filter(x -> !x.isEmpty()).toList()) {
             tooltip.add(Component.literal(" + ").append(u.getHoverName()).withStyle(ChatFormatting.AQUA));
             upCount++;
         }

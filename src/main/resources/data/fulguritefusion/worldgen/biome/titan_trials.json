@@ -1,29 +1,35 @@
 {
+  "attributes": {
+    "minecraft:visual/sky_color": "#1c1030",
+    "minecraft:visual/fog_color": "#2a1a44",
+    "minecraft:visual/water_fog_color": "#2a1a44",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "minecraft:electric_spark"
+        },
+        "probability": 0.006
+      }
+    ]
+  },
   "has_precipitation": false,
   "temperature": 0.5,
   "downfall": 0.0,
   "effects": {
-    "sky_color": 1839152,
-    "fog_color": 2759236,
-    "water_color": 7097520,
-    "water_fog_color": 2759236,
-    "grass_color": 6048896,
-    "foliage_color": 6048896,
-    "particle": {
-      "options": {
-        "type": "minecraft:electric_spark"
-      },
-      "probability": 0.006
-    },
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    }
+    "water_color": "#6c4cb0",
+    "grass_color": "#5c4c80",
+    "foliage_color": "#5c4c80"
   },
   "spawners": {},
   "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": []
 }

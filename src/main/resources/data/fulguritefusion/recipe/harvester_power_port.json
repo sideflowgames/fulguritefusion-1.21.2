@@ -7,15 +7,9 @@
     "SCS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "C": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    }
+    "S": "fulguritefusion:iron_sheet",
+    "C": "fulguritefusion:silver_sheet",
+    "K": "fulguritefusion:crude_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:harvester_power_port",

@@ -18,12 +18,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -50,13 +50,13 @@ public class StaticJellyEntity extends AmbientCreature implements GeoEntity {
 
     // Drifts slowly between spots 3-9 blocks above the ground.
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (target == null || random.nextInt(200) == 0 || target.closerToCenterThan(position(), 1.5)) {
             int x = blockPosition().getX() + random.nextInt(15) - 7;
             int z = blockPosition().getZ() + random.nextInt(15) - 7;
             int ground = level().getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-            if (ground <= level().getMinBuildHeight() + 1) ground = blockPosition().getY() - 5; // over the void: stay level
+            if (ground <= level().getMinY() + 1) ground = blockPosition().getY() - 5; // over the void: stay level
             target = new BlockPos(x, ground + 3 + random.nextInt(7), z);
         }
         Vec3 to = Vec3.atCenterOf(target).subtract(position());
@@ -78,7 +78,7 @@ public class StaticJellyEntity extends AmbientCreature implements GeoEntity {
             if (zapCooldown == 0) {
                 for (Player p : server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(0.1))) {
                     if (p.isCreative() || p.isSpectator()) continue;
-                    if (p.hurt(damageSources().mobAttack(this), 2.0f)) {
+                    if (p.hurtOrSimulate(damageSources().mobAttack(this), 2.0f)) {
                         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY(0.6), p.getZ(), 12, 0.3, 0.3, 0.3, 0.2);
                         server.playSound(null, blockPosition(), SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 0.6f, 1.8f);
                         zapCooldown = ZAP_COOLDOWN;
@@ -100,7 +100,7 @@ public class StaticJellyEntity extends AmbientCreature implements GeoEntity {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -127,7 +127,7 @@ public class StaticJellyEntity extends AmbientCreature implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(DRIFT)));
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(DRIFT)));
     }
 
     @Override

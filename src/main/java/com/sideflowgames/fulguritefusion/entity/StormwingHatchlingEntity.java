@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity;
 
+import net.minecraft.core.HolderLookup;
+
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -37,12 +39,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -121,12 +123,12 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         // Main hand only: right-click fires once per hand, and two toggles would cancel out.
         if (!feral && owner != null && player.getUUID().equals(owner) && hand == InteractionHand.MAIN_HAND && player.getItemInHand(hand).isEmpty()) {
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 sitting = !sitting;
                 getNavigation().stop();
-                player.displayClientMessage(Component.literal(sitting ? "Hatchling: staying" : "Hatchling: following"), true);
+                player.sendOverlayMessage(Component.literal(sitting ? "Hatchling: staying" : "Hatchling: following"));
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
     }
@@ -140,15 +142,15 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
             setDeltaMovement(v.x * 1.02, GLIDE_FALL, v.z * 1.02);
             fallDistance = 0;
         }
-        if (!level().isClientSide && ++age >= Config.HATCHLING_GROW_MINUTES.get() * 1200) {
+        if (!level().isClientSide() && ++age >= Config.HATCHLING_GROW_MINUTES.get() * 1200) {
             growUp((ServerLevel) level());
         }
     }
 
     private void growUp(ServerLevel level) {
-        StormwingEntity adult = ModEntities.STORMWING.get().create(level);
+        StormwingEntity adult = ModEntities.STORMWING.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (adult == null) return;
-        adult.moveTo(getX(), getY() + 0.5, getZ(), getYRot(), 0f);
+        adult.snapTo(getX(), getY() + 0.5, getZ(), getYRot(), 0f);
         adult.raise(stormwingVariant(), feral, owner);
         adult.setSitting(sitting);
         if (hasCustomName()) adult.setCustomName(getCustomName());
@@ -162,7 +164,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     public void thunderHit(ServerLevel level, LightningBolt bolt) {}
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -206,30 +208,42 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormwingHatchlingEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormwingHatchlingEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
         tag.putInt("Variant", entityData.get(VARIANT));
         tag.putBoolean("Feral", feral);
-        if (owner != null) tag.putUUID("Owner", owner);
+        if (owner != null) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Owner", owner);
         tag.putInt("Age", age);
         tag.putBoolean("Sitting", sitting);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        entityData.set(VARIANT, tag.getInt("Variant"));
-        feral = tag.getBoolean("Feral");
-        owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
-        age = tag.getInt("Age");
-        sitting = tag.getBoolean("Sitting");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadStormwingHatchlingEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormwingHatchlingEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        entityData.set(VARIANT, tag.getIntOr("Variant", 0));
+        feral = tag.getBooleanOr("Feral", false);
+        owner = com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Owner") ? com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Owner") : null;
+        age = tag.getIntOr("Age", 0);
+        sitting = tag.getBooleanOr("Sitting", false);
     }
 
     // ---------- Animation ----------
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "movement", 5,
+        controllers.add(new AnimationController<>("movement", 5,
                 state -> state.setAndContinue(onGround() ? SIT : FLAP)));
     }
 
@@ -268,7 +282,7 @@ public class StormwingHatchlingEntity extends PathfinderMob implements GeoEntity
             Vec3 away = chick.position().subtract(player.position()).multiply(1, 0, 1);
             away = away.lengthSqr() < 0.01 ? new Vec3(1, 0, 0) : away.normalize();
             chick.setDeltaMovement(away.x * 0.7, 0.85, away.z * 0.7);
-            chick.hasImpulse = true;
+            chick.needsSync = true;
             chick.level().playSound(null, chick.blockPosition(), SoundEvents.PARROT_FLY, SoundSource.NEUTRAL, 1.0f, 1.4f);
             nextLeap = chick.level().getGameTime() + 30 + chick.random.nextInt(30);
         }

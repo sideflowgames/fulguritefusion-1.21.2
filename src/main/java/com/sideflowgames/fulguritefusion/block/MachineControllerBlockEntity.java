@@ -32,12 +32,12 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.joml.Vector3f;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoBlockEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
     public static final int LATEX_CAPACITY = 16_000; // Latex Vulcanizer: 16 buckets
     public static final int LATEX_PER_RUN = 1000;
     public static final int RUBBER_PER_RUN = 3;
-    private static final DustParticleOptions OUTLINE = new DustParticleOptions(new Vector3f(0.4f, 0.85f, 1.0f), 0.8f);
+    private static final DustParticleOptions OUTLINE = new DustParticleOptions(0x66D9FF, 0.8f);
 
     private final MachineType type;
     private final DaisyChain chain = new DaisyChain();
@@ -206,7 +206,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
     // The controller was broken: free the casings and drop the items.
     public void breakApart() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         for (MachineShape.Part part : type.shape.parts(worldPosition, facing())) {
             if (level.getBlockEntity(part.pos()) instanceof ArcCasingBlockEntity be && be.belongsTo(worldPosition)) {
                 be.unlink();
@@ -300,7 +300,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
                     ? new MachineType.Result(0, 0, new ItemStack(com.sideflowgames.fulguritefusion.ModItems.DRIED_RUBBER.get(), RUBBER_PER_RUN), ItemStack.EMPTY)
                     : null;
         }
-        return type.findRecipe(level, items.getStackInSlot(0), items.getStackInSlot(1), level.random);
+        return type.findRecipe(level, items.getStackInSlot(0), items.getStackInSlot(1), level.getRandom());
     }
 
     // Latex Buckets put in the input slots are poured into the tank; the empty bucket goes to the second output.
@@ -457,7 +457,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state ->
+        controllers.add(new AnimationController<>("main", 5, state ->
                 state.setAndContinue(getBlockState().getValue(MachineControllerBlock.WORKING) ? working : idle)));
     }
 
@@ -480,7 +480,7 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
     // Sends the shown input/output items and tier to nearby clients when they change.
     private void syncDisplay() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         ItemStack in = displayIn(), out = displayOut();
         int h = java.util.Objects.hash(tier, latexSixteenths(), ItemStack.hashItemAndComponents(in), in.isEmpty(), ItemStack.hashItemAndComponents(out), out.isEmpty());
         if (h == displayHash) return;
@@ -515,8 +515,8 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
         tag.putInt("Tier", tier);
         tag.putInt("Latex", latexSixteenths());
         ItemStack in = displayIn(), out = displayOut();
-        if (!in.isEmpty()) tag.put("In", in.copyWithCount(1).save(registries));
-        if (!out.isEmpty()) tag.put("Out", out.copyWithCount(1).save(registries));
+        if (!in.isEmpty()) tag.put("In", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(in.copyWithCount(1), registries));
+        if (!out.isEmpty()) tag.put("Out", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(out.copyWithCount(1), registries));
         return tag;
     }
 
@@ -527,38 +527,70 @@ public class MachineControllerBlockEntity extends BlockEntity implements FmHandl
 
     // Clients only take the display data (the machine's real contents stay on the server).
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        shownTier = tag.getInt("Tier");
-        shownLatex = tag.getInt("Latex");
-        shownInput = tag.contains("In") ? ItemStack.parseOptional(registries, tag.getCompound("In")) : ItemStack.EMPTY;
-        shownOutput = tag.contains("Out") ? ItemStack.parseOptional(registries, tag.getCompound("Out")) : ItemStack.EMPTY;
+    public void handleUpdateTag(net.minecraft.world.level.storage.ValueInput updateInput) {
+        CompoundTag tag = com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(updateInput);
+        HolderLookup.Provider registries = updateInput.lookup();
+        shownTier = tag.getIntOr("Tier", 0);
+        shownLatex = tag.getIntOr("Latex", 0);
+        shownInput = tag.contains("In") ? com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("In")) : ItemStack.EMPTY;
+        shownOutput = tag.contains("Out") ? com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("Out")) : ItemStack.EMPTY;
     }
 
     @Override
-    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt,
-                             HolderLookup.Provider registries) {
-        handleUpdateTag(pkt.getTag(), registries);
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.world.level.storage.ValueInput packetInput) {
+        HolderLookup.Provider registries = packetInput.lookup();
+        handleUpdateTag(packetInput);
     }
 
     // ---------- Save ----------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("Items", items.serializeNBT(registries));
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveMachineControllerBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveMachineControllerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        tag.put("Items", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(items, registries));
         tag.putInt("Fm", fm);
         tag.putInt("Progress", progress);
         tag.putInt("Tier", tier);
-        if (type.usesLatex()) tag.put("Latex", latex.writeToNBT(registries, new CompoundTag()));
+        if (type.usesLatex()) tag.put("Latex", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(latex, registries));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        items.deserializeNBT(registries, tag.getCompound("Items"));
-        fm = tag.getInt("Fm");
-        progress = tag.getInt("Progress");
-        tier = tag.getInt("Tier");
-        if (tag.contains("Latex")) latex.readFromNBT(registries, tag.getCompound("Latex"));
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadMachineControllerBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
     }
+
+    protected void legacyLoadMachineControllerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(items, registries, tag.getCompoundOrEmpty("Items"));
+        fm = tag.getIntOr("Fm", 0);
+        progress = tag.getIntOr("Progress", 0);
+        tier = tag.getIntOr("Tier", 0);
+        if (tag.contains("Latex")) com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(latex, registries, tag.getCompoundOrEmpty("Latex"));
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof MachineControllerBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the real storage behind the hopper/pipe view, so an undone transfer can be put back exactly (LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {items};
+    }
+
+
+    public net.neoforged.neoforge.fluids.capability.templates.FluidTank latexTank() {
+        return latex;
+    }
+
 }

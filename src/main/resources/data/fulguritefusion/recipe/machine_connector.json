@@ -7,15 +7,9 @@
     "NRN"
   ],
   "key": {
-    "L": {
-      "item": "minecraft:lightning_rod"
-    },
-    "N": {
-      "item": "minecraft:gold_nugget"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    }
+    "L": "minecraft:lightning_rod",
+    "N": "minecraft:gold_nugget",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "fulguritefusion:machine_connector",

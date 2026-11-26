@@ -7,15 +7,9 @@
     "GMG"
   ],
   "key": {
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "M": {
-      "item": "minecraft:magma_cream"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    }
+    "G": "fulguritefusion:gold_sheet",
+    "M": "minecraft:magma_cream",
+    "F": "fulguritefusion:fulgurite"
   },
   "result": {
     "id": "fulguritefusion:cinder_ward",

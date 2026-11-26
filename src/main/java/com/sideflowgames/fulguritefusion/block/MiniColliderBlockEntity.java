@@ -141,18 +141,30 @@ public class MiniColliderBlockEntity extends ColliderCoreBlockEntity implements 
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveMiniColliderBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveMiniColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        super.legacySaveColliderCoreBlockEntity(tag, registries);
         tag.putInt("Fm", fm);
         tag.putInt("PendingFm", pendingFm);
         tag.putInt("ReleaseRate", releaseRate);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        pendingFm = tag.getInt("PendingFm");
-        releaseRate = tag.getInt("ReleaseRate");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadMiniColliderBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadMiniColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        super.legacyLoadColliderCoreBlockEntity(tag, registries);
+        fm = tag.getIntOr("Fm", 0);
+        pendingFm = tag.getIntOr("PendingFm", 0);
+        releaseRate = tag.getIntOr("ReleaseRate", 0);
     }
 }

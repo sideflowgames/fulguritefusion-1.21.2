@@ -1,6 +1,6 @@
 package com.sideflowgames.fulguritefusion.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
@@ -16,7 +16,7 @@ public final class GuideSky {
     private float time, nextBolt = 0.8f, flash;
 
     // offX/offY: how far the view has moved (screen pixels), for the drifting dots.
-    public void draw(GuiGraphics g, int width, int height, float offX, float offY, float dt, boolean lightning) {
+    public void draw(GuiGraphicsExtractor g, int width, int height, float offX, float offY, float dt, boolean lightning) {
         time += dt;
         g.fillGradient(0, 0, width, height, 0xFF060A14, 0xFF101B34);
         int step = 40;
@@ -66,7 +66,7 @@ public final class GuideSky {
         return new Bolt(segs, time);
     }
 
-    static void line(GuiGraphics g, float x0, float y0, float x1, float y1, int w, int color) {
+    static void line(GuiGraphicsExtractor g, float x0, float y0, float x1, float y1, int w, int color) {
         int steps = (int) Math.max(1, Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)));
         for (int i = 0; i <= steps; i++) {
             int x = (int) (x0 + (x1 - x0) * i / steps), y = (int) (y0 + (y1 - y0) * i / steps);

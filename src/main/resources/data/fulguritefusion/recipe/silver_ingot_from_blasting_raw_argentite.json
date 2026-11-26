@@ -1,9 +1,7 @@
 {
   "type": "minecraft:blasting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:raw_argentite"
-  },
+  "ingredient": "fulguritefusion:raw_argentite",
   "result": {
     "id": "fulguritefusion:silver_ingot"
   },

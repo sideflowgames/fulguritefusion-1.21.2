@@ -58,11 +58,11 @@ public class StormwingEggBlockEntity extends BlockEntity {
         if (egg.target <= 0) {
             int min = Config.EGG_INCUBATION_MIN_MINUTES.get();
             int max = Math.max(min, Config.EGG_INCUBATION_MAX_MINUTES.get());
-            egg.target = (min * 1200) + level.random.nextInt((max - min) * 1200 + 1);
+            egg.target = (min * 1200) + level.getRandom().nextInt((max - min) * 1200 + 1);
         }
         egg.incubation += CHECK_EVERY;
         egg.setChanged();
-        if (level.random.nextInt(4) == 0) {
+        if (level.getRandom().nextInt(4) == 0) {
             ((ServerLevel) level).sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5,
                     pos.getZ() + 0.5, 3, 0.2, 0.25, 0.2, 0.02);
         }
@@ -114,18 +114,18 @@ public class StormwingEggBlockEntity extends BlockEntity {
                 top.add(i);
             }
         }
-        return top.isEmpty() ? StormwingVariant.PLAIN : StormwingVariant.fromMaterial(top.get(level.random.nextInt(top.size())));
+        return top.isEmpty() ? StormwingVariant.PLAIN : StormwingVariant.fromMaterial(top.get(level.getRandom().nextInt(top.size())));
     }
 
     private void hatch(ServerLevel level) {
         BlockPos pos = worldPosition;
         StormwingVariant variant = variant(level);
-        boolean feral = level.random.nextDouble() >= safeChance;
+        boolean feral = level.getRandom().nextDouble() >= safeChance;
         UUID hatchOwner = owner;
         level.removeBlock(pos, false);
-        StormwingHatchlingEntity chick = ModEntities.STORMWING_HATCHLING.get().create(level);
+        StormwingHatchlingEntity chick = ModEntities.STORMWING_HATCHLING.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (chick != null) {
-            chick.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
+            chick.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
             chick.setup(variant, feral, feral ? null : hatchOwner);
             level.addFreshEntity(chick);
         }
@@ -143,20 +143,32 @@ public class StormwingEggBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormwingEggBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormwingEggBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.merge(saveProgress());
-        if (owner != null) tag.putUUID("Owner", owner);
+        if (owner != null) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Owner", owner);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        int[] t = tag.getIntArray("Tally");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadStormwingEggBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormwingEggBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        int[] t = tag.getIntArray("Tally").orElse(new int[0]);
         for (int i = 0; i < Math.min(12, t.length); i++) tally[i] = t[i];
-        safeChance = tag.contains("Safe") ? tag.getDouble("Safe") : 1.0;
-        incubation = tag.getInt("Incubation");
-        target = tag.getInt("Target");
-        owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
+        safeChance = tag.contains("Safe") ? tag.getDoubleOr("Safe", 0d) : 1.0;
+        incubation = tag.getIntOr("Incubation", 0);
+        target = tag.getIntOr("Target", 0);
+        owner = com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Owner") ? com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Owner") : null;
     }
 }

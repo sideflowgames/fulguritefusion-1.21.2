@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
@@ -43,7 +43,7 @@ public final class PairingDiscoveries {
 
     public static final Supplier<AttachmentType<List<Integer>>> DISCOVERED = ATTACHMENTS.register("discovered_pairings",
             () -> AttachmentType.<List<Integer>>builder(() -> List.of())
-                    .serialize(Codec.INT.listOf())
+                    .serialize(Codec.INT.listOf().fieldOf("value"))
                     .copyOnDeath()
                     .build());
 
@@ -82,7 +82,7 @@ public final class PairingDiscoveries {
 
     public record SyncPayload(List<Integer> ids) implements CustomPacketPayload {
         public static final Type<SyncPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "discovered_pairings"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "discovered_pairings"));
         public static final StreamCodec<ByteBuf, SyncPayload> STREAM_CODEC =
                 ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()).map(SyncPayload::new, SyncPayload::ids);
 
@@ -108,7 +108,7 @@ public final class PairingDiscoveries {
 
     private static void onCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(FulguriteFusion.MODID)
-                .requires(source -> source.hasPermission(2))
+                .requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("discover").then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.literal("all").executes(ctx -> {
                             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");

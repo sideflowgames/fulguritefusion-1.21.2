@@ -3,6 +3,7 @@ package com.sideflowgames.fulguritefusion.farm;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -54,14 +55,14 @@ public class FarmCollectorBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof FarmCollectorBlockEntity be)) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (player.isShiftKeyDown()) {
             int xp = be.takeXp();
             if (xp > 0) {
                 player.giveExperiencePoints(xp);
                 level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 0.6f, 1.0f);
             } else {
-                player.displayClientMessage(Component.literal("No XP stored").withStyle(ChatFormatting.GRAY), true);
+                player.sendOverlayMessage(Component.literal("No XP stored").withStyle(ChatFormatting.GRAY));
             }
         } else {
             player.openMenu(be);
@@ -75,16 +76,16 @@ public class FarmCollectorBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FarmCollectorBlockEntity be) {
             Containers.dropContents(level, pos, be);
             if (level instanceof ServerLevel server && be.xp() > 0) ExperienceOrb.award(server, Vec3.atCenterOf(pos), be.takeXp());
         }
-        super.onRemove(state, level, pos, newState, moved);
     }
 }

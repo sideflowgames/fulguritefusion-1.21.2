@@ -34,11 +34,11 @@ public class FusionFuelItem extends Item {
     }
 
     public static Pairings.Pairing pairing(ItemStack stack) {
-        return Pairings.byId(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("Pairing"));
+        return Pairings.byId(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getIntOr("Pairing", 0));
     }
 
     public static Pairings.Pairing result(ItemStack stack) {
-        return Pairings.byId(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("Result"));
+        return Pairings.byId(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getIntOr("Result", 0));
     }
 
     @Override
@@ -49,7 +49,8 @@ public class FusionFuelItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         Pairings.Pairing pairing = pairing(stack);
         Pairings.Pairing result = result(stack);
         if (pairing == null || result == null) {

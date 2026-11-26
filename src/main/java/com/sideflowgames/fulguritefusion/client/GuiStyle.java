@@ -1,6 +1,6 @@
 package com.sideflowgames.fulguritefusion.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 // The one look shared by every Fulgurite Fusion menu (it matches the machine GUI textures): light storm-blue
 // panel with a bevelled edge, navy slots and dark text. Screens drawn in code use these.
@@ -12,7 +12,12 @@ public final class GuiStyle {
     public static final int DARK = 0xFF26262C;
     public static final int TEXT = 0xFF26262C, GOOD = 0xFF1E7A3A, BAD = 0xFFB02020;
 
-    public static void panel(GuiGraphics g, int x, int y, int w, int h) {
+    // 1.21.1 drew text with no alpha as fully opaque; 26.1 draws it invisible. Same rule as before.
+    public static int opaque(int color) {
+        return (color & 0xFC000000) == 0 ? color | 0xFF000000 : color;
+    }
+
+    public static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h) {
         g.fill(x, y, x + w, y + h, PANEL);
         g.fill(x + 1, y + 1, x + w - 3, y + 3, LIGHT);
         g.fill(x + 1, y + 1, x + 3, y + h - 3, LIGHT);
@@ -21,13 +26,13 @@ public final class GuiStyle {
     }
 
     // x, y: where the slot's item is drawn (the frame is one pixel outside it).
-    public static void slot(GuiGraphics g, int x, int y, int fill) {
+    public static void slot(GuiGraphicsExtractor g, int x, int y, int fill) {
         g.fill(x - 1, y - 1, x + 17, y + 17, SLOT_EDGE);
         g.fill(x, y, x + 17, y + 17, SLOT_HIGHLIGHT);
         g.fill(x, y, x + 16, y + 16, fill);
     }
 
-    public static void slot(GuiGraphics g, int x, int y) {
+    public static void slot(GuiGraphicsExtractor g, int x, int y) {
         slot(g, x, y, SLOT_FILL);
     }
 }

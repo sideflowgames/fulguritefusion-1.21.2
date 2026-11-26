@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:console_casing"
-    },
-    {
-      "item": "fulguritefusion:heavy_wire"
-    }
+    "fulguritefusion:console_casing",
+    "fulguritefusion:heavy_wire"
   ],
   "result": {
     "id": "fulguritefusion:console_power_port",

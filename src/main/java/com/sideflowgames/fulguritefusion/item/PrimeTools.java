@@ -5,10 +5,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.SimpleTier;
 
 import java.util.List;
 
@@ -24,8 +22,8 @@ public final class PrimeTools {
     // mining speed            9.0         11.0          14.0
     // damage bonus            4.0         6.0           8.0
     // enchantability          15          18            22
-    public static final Tier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 6000, 14.0f, 8.0f, 22,
-            () -> Ingredient.EMPTY);
+    public static final net.minecraft.world.item.ToolMaterial TIER = new net.minecraft.world.item.ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 6000, 14.0f, 8.0f, 22,
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID, "prime_tool_materials")));
 
     public static final int MAX_FM = 8_000_000;
 
@@ -43,9 +41,10 @@ public final class PrimeTools {
         @Override protected float lightning() { return 12.0f; }
         @Override protected int chainTargets() { return 8; }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) {
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             primeLine(t);
-            super.appendHoverText(s, c, t, f);
+            super.appendHoverText(s, c, tooltipDisplay, tooltipOut, f);
         }
     }
 
@@ -53,9 +52,10 @@ public final class PrimeTools {
         public Pickaxe(Properties p) { super(PrimeTools.TIER, p); }
         @Override public int maxFm() { return PrimeTools.MAX_FM; }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) {
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             primeLine(t);
-            super.appendHoverText(s, c, t, f);
+            super.appendHoverText(s, c, tooltipDisplay, tooltipOut, f);
             boolean on = (StormforgedTools.mode(s) & StormforgedTools.HAMMER) != 0;
             t.add(Component.literal("3x3 hammer: " + (on ? "on" : "off") + " (toggle with the Prime hammer key, V by default)")
                     .withStyle(on ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.DARK_GRAY));
@@ -66,9 +66,10 @@ public final class PrimeTools {
         public Axe(Properties p) { super(PrimeTools.TIER, p); }
         @Override public int maxFm() { return PrimeTools.MAX_FM; }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) {
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             primeLine(t);
-            super.appendHoverText(s, c, t, f);
+            super.appendHoverText(s, c, tooltipDisplay, tooltipOut, f);
         }
     }
 
@@ -76,19 +77,21 @@ public final class PrimeTools {
         public Shovel(Properties p) { super(PrimeTools.TIER, p); }
         @Override public int maxFm() { return PrimeTools.MAX_FM; }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) {
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             primeLine(t);
-            super.appendHoverText(s, c, t, f);
+            super.appendHoverText(s, c, tooltipDisplay, tooltipOut, f);
         }
     }
 
     public static class Hoe extends StormforgedTools.Hoe {
-        public Hoe(Properties p) { super(PrimeTools.TIER, p); }
+        public Hoe(Properties p) { super(PrimeTools.TIER, -8.0f, p); }
         @Override public int maxFm() { return PrimeTools.MAX_FM; }
         @Override public int getBarColor(ItemStack s) { return barColor(s); }
-        @Override public void appendHoverText(ItemStack s, TooltipContext c, List<Component> t, TooltipFlag f) {
+        @Override public void appendHoverText(ItemStack s, TooltipContext c, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag f) {
+        java.util.List<Component> t = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             primeLine(t);
-            super.appendHoverText(s, c, t, f);
+            super.appendHoverText(s, c, tooltipDisplay, tooltipOut, f);
         }
     }
 }

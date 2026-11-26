@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:aurorite_block"
-    }
+    "fulguritefusion:aurorite_block"
   ],
   "result": {
     "id": "fulguritefusion:aurorite_ingot",

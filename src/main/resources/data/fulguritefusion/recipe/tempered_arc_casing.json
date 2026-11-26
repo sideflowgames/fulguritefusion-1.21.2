@@ -7,18 +7,10 @@
     "KSK"
   ],
   "key": {
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    }
+    "K": "fulguritefusion:crude_arc_casing",
+    "S": "fulguritefusion:silver_sheet",
+    "M": "fulguritefusion:magnetite_plate",
+    "F": "fulguritefusion:fulgurite"
   },
   "result": {
     "id": "fulguritefusion:tempered_arc_casing",

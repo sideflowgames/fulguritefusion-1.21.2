@@ -135,9 +135,10 @@ public enum MachineType {
         if (in.is(ModItems.LATEX_BUCKET.get())) {
             return new Result(1, 0, new ItemStack(ModItems.DRIED_RUBBER.get(), 2), new ItemStack(Items.BUCKET));
         }
-        Optional<RecipeHolder<SmeltingRecipe>> recipe = level.getRecipeManager()
-                .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(in), level);
-        return recipe.map(r -> new Result(1, 0, r.value().getResultItem(level.registryAccess()).copy(), ItemStack.EMPTY))
+        if (!(level instanceof net.minecraft.server.level.ServerLevel server)) return null;
+        SingleRecipeInput input = new SingleRecipeInput(in);
+        Optional<RecipeHolder<SmeltingRecipe>> recipe = server.recipeAccess().getRecipeFor(RecipeType.SMELTING, input, server);
+        return recipe.map(r -> new Result(1, 0, r.value().assemble(input).copy(), ItemStack.EMPTY))
                 .orElse(null);
     }
 

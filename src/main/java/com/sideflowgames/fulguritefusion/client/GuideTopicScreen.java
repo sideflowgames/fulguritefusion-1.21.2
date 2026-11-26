@@ -16,14 +16,14 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public class GuideTopicScreen extends Screen {
     // Topics you jumped from by clicking a recipe item (Back returns to them before the map).
     private static final List<String[]> HISTORY = new ArrayList<>();
     // Item -> crafting recipe id that makes it (or none), and item -> guide topic/section whose recipe makes it.
-    private static final Map<net.minecraft.world.item.Item, Optional<ResourceLocation>> RECIPE_FOR = new HashMap<>();
+    private static final Map<net.minecraft.world.item.Item, Optional<Identifier>> RECIPE_FOR = new HashMap<>();
     private static Map<net.minecraft.world.item.Item, String[]> guideRecipes;
 
     // Layout (worked out in init).
@@ -147,21 +146,20 @@ public class GuideTopicScreen extends Screen {
         HISTORY.clear();
     }
 
-    private Optional<ResourceLocation> recipeFor(ItemStack stack) {
+    private Optional<Identifier> recipeFor(ItemStack stack) {
         if (minecraft == null || minecraft.level == null || stack.isEmpty()) return Optional.empty();
         return RECIPE_FOR.computeIfAbsent(stack.getItem(), item -> {
-            var access = minecraft.level.registryAccess();
-            ResourceLocation found = null;
-            for (var h : minecraft.level.getRecipeManager().getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING)) {
+            Identifier found = null;
+            for (var h : GuideRecipes.crafting()) {
                 ItemStack out;
                 try {
-                    out = h.value().getResultItem(access);
+                    out = GuideRecipes.result(h.value(), minecraft.level);
                 } catch (Exception e) {
                     continue;
                 }
                 if (!out.is(item)) continue;
                 // Prefer this mod's recipes, then the first one found.
-                if (found == null || h.id().getNamespace().equals(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID)) found = h.id();
+                if (found == null || h.id().identifier().getNamespace().equals(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID)) found = h.id().identifier();
             }
             return Optional.ofNullable(found);
         });
@@ -172,13 +170,12 @@ public class GuideTopicScreen extends Screen {
         if (minecraft == null || minecraft.level == null) return null;
         if (guideRecipes == null) {
             guideRecipes = new HashMap<>();
-            var access = minecraft.level.registryAccess();
             for (GuideData.Chapter c : GuideData.get().chapters.values()) {
                 for (int i = 0; i < c.sections.size(); i++) {
                     for (String id : c.sections.get(i).recipes) {
                         try {
-                            var h = minecraft.level.getRecipeManager().byKey(ResourceLocation.parse(id));
-                            if (h.isPresent()) guideRecipes.putIfAbsent(h.get().value().getResultItem(access).getItem(), new String[]{c.id, String.valueOf(i)});
+                            var h = GuideRecipes.byKey(Identifier.parse(id));
+                            if (h.isPresent()) guideRecipes.putIfAbsent(GuideRecipes.result(h.get().value(), minecraft.level).getItem(), new String[]{c.id, String.valueOf(i)});
                         } catch (Exception ignored) {
                         }
                     }
@@ -237,7 +234,7 @@ public class GuideTopicScreen extends Screen {
     // ---------- Drawing ----------
 
     @Override
-    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         long now = System.nanoTime();
         dt = lastNanos == 0 ? 0 : Math.min(0.1f, (now - lastNanos) / 1e9f);
         lastNanos = now;
@@ -245,19 +242,19 @@ public class GuideTopicScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         hovered = ItemStack.EMPTY;
         hoverLine = null;
         clickables.clear();
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         // Header: icon and big title.
-        g.pose().pushPose();
-        g.pose().translate(62, 6, 0);
-        g.pose().scale(1.4f, 1.4f, 1);
-        g.renderItem(chapter.icon, 0, 0);
-        g.drawString(font, chapter.title, 20, 4, 0xFFDDEEFF, true);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate((float) (62), (float) (6));
+        g.pose().scale((float) (1.4f), (float) (1.4f));
+        g.item(chapter.icon, 0, 0);
+        g.text(font, chapter.title, 20, 4, 0xFFDDEEFF, true);
+        g.pose().popMatrix();
 
         if (chapter.sections.size() > 1) drawTabs(g, mouseX, mouseY);
         GuideData.Section sec = current();
@@ -271,21 +268,21 @@ public class GuideTopicScreen extends Screen {
         }
 
         if (fadeIn > 0) {
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 900);
+            g.pose().pushMatrix();
+            g.nextStratum();
             g.fill(0, 0, width, height, ((int) (fadeIn * fadeIn * 255) << 24) | 0xE6F6FF);
-            g.pose().popPose();
+            g.pose().popMatrix();
             fadeIn = Math.max(0, fadeIn - dt * 3);
         }
-        g.pose().pushPose();
-        g.pose().translate(0, 0, 1000);
+        g.pose().pushMatrix();
+        g.nextStratum();
         if (!hovered.isEmpty()) {
             List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, hovered));
             if (clickableAt(mouseX, mouseY) != null) tip.add(Component.literal("\u25B8 Click to see how it's made").withColor(0x7FD0FF));
-            g.renderComponentTooltip(font, tip, mouseX, mouseY);
+            g.setComponentTooltipForNextFrame(font, tip, mouseX, mouseY);
         }
-        else if (hoverLine != null) g.renderTooltip(font, hoverLine, mouseX, mouseY);
-        g.pose().popPose();
+        else if (hoverLine != null) g.setTooltipForNextFrame(font, hoverLine, mouseX, mouseY);
+        g.pose().popMatrix();
     }
 
     // ---------- Tabs ----------
@@ -310,7 +307,7 @@ public class GuideTopicScreen extends Screen {
         return out;
     }
 
-    private void drawTabs(GuiGraphics g, int mx, int my) {
+    private void drawTabs(GuiGraphicsExtractor g, int mx, int my) {
         int y = 34;
         List<Tab> tabs = tabs();
         boolean more = tabs.isEmpty() || tabs.get(tabs.size() - 1).index() < chapter.sections.size() - 1;
@@ -321,27 +318,27 @@ public class GuideTopicScreen extends Screen {
             boolean over = mx >= t.x() && mx < t.x() + t.w() && my >= y && my < y + 18;
             g.fill(t.x(), y, t.x() + t.w(), y + 18 + (active ? 2 : 0), active ? GuiStyle.PANEL : over ? 0xFF2C4064 : TAB_DARK);
             String title = font.plainSubstrByWidth(chapter.sections.get(t.index()).title, t.w() - 8);
-            g.drawString(font, title, t.x() + (t.w() - font.width(title)) / 2, y + 5, active ? GuiStyle.TEXT : 0xFFBFD6F0, false);
+            g.text(font, title, t.x() + (t.w() - font.width(title)) / 2, y + 5, GuiStyle.opaque(active ? GuiStyle.TEXT : 0xFFBFD6F0), false);
         }
     }
 
-    private void arrow(GuiGraphics g, int x, int y, String s) {
+    private void arrow(GuiGraphicsExtractor g, int x, int y, String s) {
         g.fill(x, y, x + 14, y + 18, TAB_DARK);
-        g.drawString(font, s, x + 3, y + 5, 0xFFBFD6F0, false);
+        g.text(font, s, x + 3, y + 5, 0xFFBFD6F0, false);
     }
 
     // ---------- Left: items, blocks and recipes ----------
 
-    private void drawShowcase(GuiGraphics g, GuideData.Section sec, int mx, int my) {
+    private void drawShowcase(GuiGraphicsExtractor g, GuideData.Section sec, int mx, int my) {
         int x = leftX + 8, y = top + 8, w = leftW - 16, bottom = top + panelH - 8;
         if (sec.items.isEmpty() && sec.recipes.isEmpty()) {
             // Nothing to show: the topic's icon, big.
             float s = Math.min(w, bottom - y) / 16f * 0.5f;
-            g.pose().pushPose();
-            g.pose().translate(leftX + leftW / 2f - 8 * s, top + panelH / 2f - 8 * s, 0);
-            g.pose().scale(s, s, 1);
-            g.renderItem(chapter.icon, 0, 0);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate((float) (leftX + leftW / 2f - 8 * s), (float) (top + panelH / 2f - 8 * s));
+            g.pose().scale((float) (s), (float) (s));
+            g.item(chapter.icon, 0, 0);
+            g.pose().popMatrix();
             return;
         }
         // Items and blocks along the top: icon and name, in one or two columns.
@@ -357,13 +354,13 @@ public class GuideTopicScreen extends Screen {
             for (int i = 0; i < sec.items.size() && i / cols < maxRows; i++) {
                 ItemStack s = sec.items.get(i);
                 int ix = x + (i % cols) * colW, iy = y + (i / cols) * rowH;
-                g.pose().pushPose();
-                g.pose().translate(ix, iy, 0);
-                g.pose().scale(is, is, 1);
-                g.renderItem(s, 0, 0);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate((float) (ix), (float) (iy));
+                g.pose().scale((float) (is), (float) (is));
+                g.item(s, 0, 0);
+                g.pose().popMatrix();
                 String name = font.plainSubstrByWidth(s.getHoverName().getString(), colW - (int) (20 * is) - 4);
-                g.drawString(font, name, ix + (int) (18 * is) + 2, iy + (int) (8 * is) - 4, GuiStyle.TEXT, false);
+                g.text(font, name, ix + (int) (18 * is) + 2, iy + (int) (8 * is) - 4, GuiStyle.opaque(GuiStyle.TEXT), false);
                 if (mx >= ix && mx < ix + colW - 4 && my >= iy && my < iy + 16 * is) hovered = s;
                 if (craftable(s) && !madeHere(sec, s)) clickables.add(new Clickable(ix, iy, ix + colW - 4, iy + 16 * is, s));
             }
@@ -379,7 +376,7 @@ public class GuideTopicScreen extends Screen {
     }
 
     // Recipes as big as fit, centred in the left panel (but never over the item list).
-    private void drawRecipesCentered(GuiGraphics g, List<String> recipes, int x, int w, int minY, int bottom, int mx, int my) {
+    private void drawRecipesCentered(GuiGraphicsExtractor g, List<String> recipes, int x, int w, int minY, int bottom, int mx, int my) {
         if (recipes.isEmpty()) return;
         int n = recipes.size();
         int perRow = 1;
@@ -409,43 +406,44 @@ public class GuideTopicScreen extends Screen {
     }
 
     // A recipe opened by clicking an item the guide doesn't cover.
-    private void drawTrail(GuiGraphics g, int mx, int my) {
+    private void drawTrail(GuiGraphicsExtractor g, int mx, int my) {
         ItemStack item = recipeTrail.get(recipeTrail.size() - 1);
         int x = leftX + 8, y = top + 8, w = leftW - 16, bottom = top + panelH - 8;
         button(g, x, y, 40, "\u25C0 Back", mx, my);
-        g.renderItem(item, x + 46, y - 1);
-        g.drawString(font, font.plainSubstrByWidth("How to make: " + item.getHoverName().getString(), w - 70),
-                x + 66, y + 3, TITLE, false);
+        g.item(item, x + 46, y - 1);
+        g.text(font, font.plainSubstrByWidth("How to make: " + item.getHoverName().getString(), w - 70), x + 66, y + 3, GuiStyle.opaque(TITLE), false);
         recipeFor(item).ifPresent(id -> drawRecipesCentered(g, List.of(id.toString()), x, w, y + 22, bottom, mx, my));
     }
 
-    private void drawRecipe(GuiGraphics g, String id, float x, float y, float scale, int mx, int my) {
+    private void drawRecipe(GuiGraphicsExtractor g, String id, float x, float y, float scale, int mx, int my) {
         if (minecraft == null || minecraft.level == null) return;
         Optional<RecipeHolder<?>> holder;
         try {
-            holder = minecraft.level.getRecipeManager().byKey(ResourceLocation.parse(id));
+            holder = GuideRecipes.byKey(Identifier.parse(id));
         } catch (Exception e) {
             holder = Optional.empty();
         }
-        PoseStack ps = g.pose();
-        ps.pushPose();
-        ps.translate(x, y, 0);
-        ps.scale(scale, scale, 1);
+        var ps = g.pose();
+        ps.pushMatrix();
+        ps.translate(x, y);
+        ps.scale(scale, scale);
         float lmx = (mx - x) / scale, lmy = (my - y) / scale;
         if (holder.isEmpty()) {
-            g.drawString(font, "(recipe not found)", 4, 24, FAINT, false);
-            ps.popPose();
+            g.text(font, "(recipe not found)", 4, 24, GuiStyle.opaque(FAINT), false);
+            ps.popMatrix();
             return;
         }
         Recipe<?> recipe = holder.get().value();
-        NonNullList<Ingredient> ings = recipe.getIngredients();
-        int w = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
+        GuideRecipes.Shown shown = GuideRecipes.show(recipe, minecraft.level).orElse(null);
+        java.util.List<java.util.List<ItemStack>> ings = shown == null ? java.util.List.of() : shown.slots();
+        boolean isShaped = shown != null && shown.shaped();
+        int w = shown != null && shown.shaped() ? shown.width() : 3;
         int gx = 4, gy = 2;
         for (int r = 0; r < 3; r++) for (int c = 0; c < 3; c++) GuiStyle.slot(g, gx + c * 18 + 1, gy + r * 18 + 1);
         long tick = minecraft.level.getGameTime() / 20;
         for (int i = 0; i < ings.size(); i++) {
             int r, c;
-            if (recipe instanceof ShapedRecipe) {
+            if (isShaped) {
                 r = i / w;
                 c = i % w;
             } else if (ings.size() == 1) {
@@ -456,21 +454,21 @@ public class GuideTopicScreen extends Screen {
                 c = i % 3;
             }
             if (r > 2) break;
-            ItemStack[] options = ings.get(i).getItems();
-            if (options.length == 0) continue;
-            ItemStack s = options[(int) (tick % options.length)];
+            java.util.List<ItemStack> options = ings.get(i);
+            if (options.isEmpty()) continue;
+            ItemStack s = options.get((int) (tick % options.size()));
             int ix = gx + c * 18 + 1, iy = gy + r * 18 + 1;
-            g.renderItem(s, ix, iy);
+            g.item(s, ix, iy);
             if (lmx >= ix && lmx < ix + 16 && lmy >= iy && lmy < iy + 16) hovered = s;
         }
-        g.drawString(font, "→", gx + 60, gy + 22, GuiStyle.TEXT, false);
-        ItemStack out = recipe.getResultItem(minecraft.level.registryAccess());
+        g.text(font, "→", gx + 60, gy + 22, GuiStyle.opaque(GuiStyle.TEXT), false);
+        ItemStack out = shown == null ? ItemStack.EMPTY : shown.result();
         int ox = gx + 74, oy = gy + 19;
         GuiStyle.slot(g, ox, oy);
-        g.renderItem(out, ox, oy);
-        g.renderItemDecorations(font, out, ox, oy);
+        g.item(out, ox, oy);
+        g.itemDecorations(font, out, ox, oy);
         if (lmx >= ox && lmx < ox + 16 && lmy >= oy && lmy < oy + 16) hovered = out;
-        ps.popPose();
+        ps.popMatrix();
     }
 
     // ---------- Left: step-by-step build ----------
@@ -488,7 +486,7 @@ public class GuideTopicScreen extends Screen {
         return Math.min(0.08f, 1.5f / Math.max(1, n));
     }
 
-    private void drawBuild(GuiGraphics g, String id, int mx, int my) {
+    private void drawBuild(GuiGraphicsExtractor g, String id, int mx, int my) {
         GuideBuilds.Build b = GuideBuilds.get(id);
         Scene sc = scene(id);
         int steps = b.steps.size();
@@ -520,9 +518,9 @@ public class GuideTopicScreen extends Screen {
             icon = b.steps.get(sc.step).icon();
         }
         int cy = ctlY;
-        g.renderItem(icon, viewX, cy);
+        g.item(icon, viewX, cy);
         List<FormattedCharSequence> capLines = font.split(caption, viewW - 20);
-        for (int i = 0; i < Math.min(2, capLines.size()); i++) g.drawString(font, capLines.get(i), viewX + 20, cy + (capLines.size() > 1 ? i * 9 : 4), GuiStyle.TEXT, false);
+        for (int i = 0; i < Math.min(2, capLines.size()); i++) g.text(font, capLines.get(i), viewX + 20, cy + (capLines.size() > 1 ? i * 9 : 4), GuiStyle.opaque(GuiStyle.TEXT), false);
         if (mx >= viewX && mx < viewX + 16 && my >= cy && my < cy + 16 && !icon.isEmpty()) hovered = icon;
 
         // Controls: back, play/pause, forward, replay, and where we are.
@@ -532,7 +530,7 @@ public class GuideTopicScreen extends Screen {
         button(g, viewX + 40, by, 18, "▶▶", mx, my);
         button(g, viewX + 60, by, 18, "⟲", mx, my);
         String where = sc.step >= steps ? "Done" : "Step " + (sc.step + 1) + " of " + steps;
-        g.drawString(font, where, viewX + 84, by + 4, GuiStyle.TEXT, false);
+        g.text(font, where, viewX + 84, by + 4, GuiStyle.opaque(GuiStyle.TEXT), false);
         // Everything it takes, at the right.
         List<ItemStack> mats = b.materials(-1);
         int mx0 = viewX + viewW;
@@ -542,22 +540,22 @@ public class GuideTopicScreen extends Screen {
             int w = 12 + font.width(cnt) + 6;
             mx0 -= w;
             if (mx0 < viewX + 84 + font.width(where) + 6) break;
-            g.pose().pushPose();
-            g.pose().translate(mx0, by + 1, 0);
-            g.pose().scale(0.75f, 0.75f, 1);
-            g.renderItem(s, 0, 0);
-            g.pose().popPose();
-            g.drawString(font, cnt, mx0 + 13, by + 4, GuiStyle.TEXT, false);
+            g.pose().pushMatrix();
+            g.pose().translate((float) (mx0), (float) (by + 1));
+            g.pose().scale((float) (0.75f), (float) (0.75f));
+            g.item(s, 0, 0);
+            g.pose().popMatrix();
+            g.text(font, cnt, mx0 + 13, by + 4, GuiStyle.opaque(GuiStyle.TEXT), false);
             if (mx >= mx0 && mx < mx0 + w && my >= by && my < by + 14) hovered = s.copyWithCount(1);
         }
-        g.drawString(font, "Drag to turn \u00B7 Scroll to zoom", viewX + 4, viewY + 4, 0xFF5A7090, false);
+        g.text(font, "Drag to turn \u00B7 Scroll to zoom", viewX + 4, viewY + 4, 0xFF5A7090, false);
     }
 
-    private void button(GuiGraphics g, int x, int y, int w, String text, int mx, int my) {
+    private void button(GuiGraphicsExtractor g, int x, int y, int w, String text, int mx, int my) {
         boolean over = mx >= x && mx < x + w && my >= y && my < y + 14;
         g.fill(x, y, x + w, y + 14, GuiStyle.SLOT_EDGE);
         g.fill(x + 1, y + 1, x + w - 1, y + 13, over ? 0xFF3E6A94 : GuiStyle.SLOT_FILL);
-        g.drawString(font, text, x + (w - font.width(text)) / 2 + 1, y + 3, 0xFFDDEEFF, false);
+        g.text(font, text, x + (w - font.width(text)) / 2 + 1, y + 3, 0xFFDDEEFF, false);
     }
 
     // How long the finished build waits before forming, and how long the forming flash lasts.
@@ -565,49 +563,25 @@ public class GuideTopicScreen extends Screen {
 
     // Drawn with a real perspective camera inside the view (a flat camera makes a turning cube look like it's
     // warping). The finished build then forms: blocks switch to their formed look and machines get their model.
-    private void render3D(GuiGraphics g, GuideBuilds.Build b, Scene sc) {
+    private void render3D(GuiGraphicsExtractor g, GuideBuilds.Build b, Scene sc) {
         if (b.blocks.isEmpty() || minecraft == null) return;
-        g.flush();
-        var win = minecraft.getWindow();
-        double gs = win.getGuiScale();
-        int vx = (int) (viewX * gs), vy = (int) (win.getHeight() - (viewY + viewH) * gs), vw = (int) (viewW * gs), vh = (int) (viewH * gs);
-        if (vw <= 0 || vh <= 0) return;
-
-        Matrix4f oldProjection = new Matrix4f(RenderSystem.getProjectionMatrix());
-        VertexSorting oldSorting = RenderSystem.getVertexSorting();
-        Matrix4fStack modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.identity();
-        RenderSystem.applyModelViewMatrix();
-        RenderSystem.viewport(vx, vy, vw, vh);
+        if (viewW <= 0 || viewH <= 0) return;
         float fov = 30f;
-        RenderSystem.setProjectionMatrix(new Matrix4f().setPerspective((float) Math.toRadians(fov), vw / (float) vh, 0.05f, 4000f),
-                VertexSorting.DISTANCE_TO_ORIGIN);
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
-
         float bw = b.maxX - b.minX + 1, bh = b.maxY - b.minY + 1, bd = b.maxZ - b.minZ + 1;
         float radius = (float) Math.sqrt(bw * bw + bh * bh + bd * bd) / 2;
-        float fit = radius / (float) Math.sin(Math.toRadians(fov / 2)) * Math.max(1f, vh / (float) vw);
+        float fit = radius / (float) Math.sin(Math.toRadians(fov / 2)) * Math.max(1f, viewH / (float) viewW);
         float dist = Math.max(radius * 0.3f + 1, fit / sc.zoom);
-        PoseStack ps = new PoseStack();
-        ps.translate(0, 0, -dist);
-        ps.mulPose(Axis.XP.rotationDegrees(sc.pitch));
-        ps.mulPose(Axis.YP.rotationDegrees(sc.yaw));
-        ps.translate(-(b.minX + b.maxX + 1) / 2f, -(b.minY + b.maxY + 1) / 2f, -(b.minZ + b.maxZ + 1) / 2f);
-        Lighting.setupFor3DItems();
-        var dispatcher = minecraft.getBlockRenderer();
-        var buffers = g.bufferSource();
         boolean finished = sc.step >= b.steps.size();
         boolean formed = finished && sc.stepTime >= FORM_AT && b.formLook;
+        List<GuideSceneRenderer.Block> blocks = new ArrayList<>();
         if (finished) {
             for (GuideBuilds.Placed p : b.blocks) {
                 BlockState state = formed ? formedState(p.state(), b) : p.state();
-                block(ps, dispatcher, buffers, new GuideBuilds.Placed(p.pos(), state), 0);
-                if (formed) blockEntity(ps, buffers, p.pos(), state);
+                blocks.add(new GuideSceneRenderer.Block(p.pos(), state, 0, formed ? pictureEntity(state) : null));
             }
         } else {
             for (int s = 0; s < sc.step; s++) {
-                for (GuideBuilds.Placed p : b.steps.get(s).blocks()) block(ps, dispatcher, buffers, p, 0);
+                for (GuideBuilds.Placed p : b.steps.get(s).blocks()) blocks.add(new GuideSceneRenderer.Block(p.pos(), p.state(), 0, null));
             }
             // This step's blocks drop in one after another.
             List<GuideBuilds.Placed> list = b.steps.get(sc.step).blocks();
@@ -616,16 +590,14 @@ public class GuideTopicScreen extends Screen {
                 float t = (sc.stepTime - i * st) / 0.3f;
                 if (t <= 0) break;
                 float e = 1 - (float) Math.pow(1 - Math.min(1, t), 3);
-                block(ps, dispatcher, buffers, list.get(i), (1 - e) * 2.5f);
+                GuideBuilds.Placed p = list.get(i);
+                blocks.add(new GuideSceneRenderer.Block(p.pos(), p.state(), (1 - e) * 2.5f, null));
             }
         }
-        g.flush();
-
-        RenderSystem.viewport(0, 0, win.getWidth(), win.getHeight());
-        RenderSystem.setProjectionMatrix(oldProjection, oldSorting);
-        modelView.popMatrix();
-        RenderSystem.applyModelViewMatrix();
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        g.submitPictureInPictureRenderState(new GuideSceneRenderer.State(blocks, fov, dist, sc.pitch, sc.yaw,
+                (b.minX + b.maxX + 1) / 2f, (b.minY + b.maxY + 1) / 2f, (b.minZ + b.maxZ + 1) / 2f,
+                viewX, viewY, viewX + viewW, viewY + viewH, null));
+        g.nextStratum();
 
         // The forming flash: builds up as it's about to form, then fades.
         if (finished) {
@@ -643,14 +615,6 @@ public class GuideTopicScreen extends Screen {
         }
     }
 
-    private static void block(PoseStack ps, net.minecraft.client.renderer.block.BlockRenderDispatcher dispatcher,
-                              net.minecraft.client.renderer.MultiBufferSource buffers, GuideBuilds.Placed p, float lift) {
-        ps.pushPose();
-        ps.translate(p.pos().getX(), p.pos().getY() + lift, p.pos().getZ());
-        dispatcher.renderSingleBlock(p.state(), ps, buffers, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
-        ps.popPose();
-    }
-
     // A block as it looks once its structure has formed (blocks with a "formed" state).
     private static BlockState formedState(BlockState state, GuideBuilds.Build b) {
         // The Shock Farm controller draws the merged farm for its size.
@@ -666,39 +630,33 @@ public class GuideTopicScreen extends Screen {
     // Formed machines are drawn by their block entity (their big model), so make one just for the picture.
     private static final Map<BlockState, BlockEntity> PICTURE_ENTITIES = new HashMap<>();
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void blockEntity(PoseStack ps, net.minecraft.client.renderer.MultiBufferSource buffers, BlockPos pos, BlockState state) {
+    private BlockEntity pictureEntity(BlockState state) {
         if (!(state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.MachineControllerBlock
                 || state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.MiniColliderBlock
                 || state.getBlock() instanceof com.sideflowgames.fulguritefusion.block.StormColliderBlock
-                || state.getBlock() instanceof com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock)) return;
+                || state.getBlock() instanceof com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlock)) return null;
         var block = (net.minecraft.world.level.block.BaseEntityBlock) state.getBlock();
         try {
             BlockEntity be = PICTURE_ENTITIES.computeIfAbsent(state, s -> block.newBlockEntity(BlockPos.ZERO, s));
-            if (be == null || minecraft == null) return;
+            if (be == null || minecraft == null) return null;
             if (be.getLevel() == null) be.setLevel(minecraft.level);
-            BlockEntityRenderer renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(be);
-            if (renderer == null) return;
-            ps.pushPose();
-            ps.translate(pos.getX(), pos.getY(), pos.getZ());
-            renderer.render(be, 0f, ps, buffers, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-            ps.popPose();
+            return be;
         } catch (Exception e) {
-            // A picture isn't worth a crash.
+            return null; // A picture isn't worth a crash.
         }
     }
 
     // ---------- Right: the text ----------
 
-    private void drawText(GuiGraphics g, GuideData.Section sec, int mx, int my) {
+    private void drawText(GuiGraphicsExtractor g, GuideData.Section sec, int mx, int my) {
         float ts = TEXT_SIZES[textSize];
         int x = rightX + 10, y = top + 10, w = rightW - 24, bottom = top + panelH - 10;
         // Section title.
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(ts * 1.3f, ts * 1.3f, 1);
-        g.drawString(font, font.plainSubstrByWidth(sec.title, (int) (w / (ts * 1.3f))), 0, 0, TITLE, false);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate((float) (x), (float) (y));
+        g.pose().scale((float) (ts * 1.3f), (float) (ts * 1.3f));
+        g.text(font, font.plainSubstrByWidth(sec.title, (int) (w / (ts * 1.3f))), 0, 0, GuiStyle.opaque(TITLE), false);
+        g.pose().popMatrix();
         y += (int) (14 * ts * 1.3f);
         g.fill(x, y - 3, x + w, y - 2, 0x601E4E79);
 
@@ -714,15 +672,15 @@ public class GuideTopicScreen extends Screen {
         textMax = Math.max(0, total - (bottom - viewTop));
         textScroll = Mth.clamp(textScroll, 0, textMax);
         g.enableScissor(x, viewTop, x + w + 8, bottom);
-        g.pose().pushPose();
-        g.pose().translate(x, viewTop - textScroll, 0);
-        g.pose().scale(ts, ts, 1);
+        g.pose().pushMatrix();
+        g.pose().translate((float) (x), (float) (viewTop - textScroll));
+        g.pose().scale((float) (ts), (float) (ts));
         for (int i = 0; i < lines.size(); i++) {
             float ly = i * 11;
             if ((ly + 11) * ts < textScroll || ly * ts > textScroll + (bottom - viewTop)) continue;
-            g.drawString(font, lines.get(i), 0, (int) ly, GuiStyle.TEXT, false);
+            g.text(font, lines.get(i), 0, (int) ly, GuiStyle.opaque(GuiStyle.TEXT), false);
         }
-        g.pose().popPose();
+        g.pose().popMatrix();
         g.disableScissor();
         if (textMax > 0) {
             // Scroll bar.
@@ -737,7 +695,7 @@ public class GuideTopicScreen extends Screen {
             String next = "Next: " + chapter.sections.get(section + 1).title + " ▶";
             int nx = rightX + rightW - 10 - font.width(next), ny = bottom - 9;
             boolean over = mx >= nx && my >= ny - 2 && my < ny + 10;
-            if (total + 14 < bottom - viewTop || textMax > 0) g.drawString(font, next, nx, ny, over ? 0xFF2A6FB0 : FAINT, false);
+            if (total + 14 < bottom - viewTop || textMax > 0) g.text(font, next, nx, ny, GuiStyle.opaque(over ? 0xFF2A6FB0 : FAINT), false);
         }
     }
 
@@ -751,8 +709,10 @@ public class GuideTopicScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (button == 1) {
             onClose();
             return true;
@@ -819,7 +779,9 @@ public class GuideTopicScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
         GuideData.Section sec = current();
         if (button == 0 && rotating && sec != null && sec.build != null) {
             Scene sc = scene(sec.build);
@@ -827,13 +789,15 @@ public class GuideTopicScreen extends Screen {
             sc.pitch = Mth.clamp(sc.pitch + (float) dy * 1.5f, -89, 89);
             return true;
         }
-        return super.mouseDragged(mx, my, button, dx, dy);
+        return super.mouseDragged(event, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
         if (button == 0) rotating = false;
-        return super.mouseReleased(mx, my, button);
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -853,7 +817,8 @@ public class GuideTopicScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.scancode(), mods = event.modifiers();
         switch (key) {
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_PAGE_DOWN -> {
                 select(section + 1);
@@ -876,7 +841,7 @@ public class GuideTopicScreen extends Screen {
                 return true;
             }
             default -> {
-                return super.keyPressed(key, scan, mods);
+                return super.keyPressed(event);
             }
         }
     }

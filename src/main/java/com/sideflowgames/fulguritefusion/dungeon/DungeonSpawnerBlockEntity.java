@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,11 +51,11 @@ public class DungeonSpawnerBlockEntity extends BlockEntity {
     private void release(ServerLevel server, Player player) {
         List<String> pool = mobs.isEmpty() ? List.of("fulguritefusion:arc_reaver") : mobs;
         for (int i = 0; i < count; i++) {
-            var type = EntityType.byString(pool.get(server.random.nextInt(pool.size()))).orElse(null);
-            if (type == null || !(type.create(server) instanceof Mob mob)) continue;
+            var type = EntityType.byString(pool.get(server.getRandom().nextInt(pool.size()))).orElse(null);
+            if (type == null || !(type.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED) instanceof Mob mob)) continue;
             BlockPos at = spot(server, mob);
-            mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, server.random.nextFloat() * 360, 0);
-            mob.finalizeSpawn(server, server.getCurrentDifficultyAt(at), MobSpawnType.SPAWNER, null);
+            mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, server.getRandom().nextFloat() * 360, 0);
+            mob.finalizeSpawn(server, server.getCurrentDifficultyAt(at), EntitySpawnReason.SPAWNER, null);
             mob.setPersistenceRequired();
             if (charged && mob instanceof StormBeast beast) beast.charge();
             mob.setTarget(player);
@@ -70,7 +70,7 @@ public class DungeonSpawnerBlockEntity extends BlockEntity {
     // A free spot around the cage that fits the mob, or the block above it.
     private BlockPos spot(ServerLevel server, Mob mob) {
         for (int tries = 0; tries < 16; tries++) {
-            BlockPos p = worldPosition.offset(server.random.nextInt(7) - 3, server.random.nextInt(3) - 1, server.random.nextInt(7) - 3);
+            BlockPos p = worldPosition.offset(server.getRandom().nextInt(7) - 3, server.getRandom().nextInt(3) - 1, server.getRandom().nextInt(7) - 3);
             if (!server.getBlockState(p.below()).isSolid()) continue;
             if (server.noCollision(mob, mob.getType().getDimensions().makeBoundingBox(p.getX() + 0.5, p.getY(), p.getZ() + 0.5))) return p;
         }
@@ -78,8 +78,15 @@ public class DungeonSpawnerBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveDungeonSpawnerBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveDungeonSpawnerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         ListTag list = new ListTag();
         for (String m : mobs) list.add(StringTag.valueOf(m));
         tag.put("Mobs", list);
@@ -88,11 +95,16 @@ public class DungeonSpawnerBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadDungeonSpawnerBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadDungeonSpawnerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         mobs.clear();
-        for (Tag t : tag.getList("Mobs", Tag.TAG_STRING)) mobs.add(t.getAsString());
-        if (tag.contains("Count")) count = tag.getInt("Count");
-        charged = tag.getBoolean("Charged");
+        for (Tag t : tag.getListOrEmpty("Mobs")) mobs.add(t.asString().orElse(""));
+        if (tag.contains("Count")) count = tag.getIntOr("Count", 0);
+        charged = tag.getBooleanOr("Charged", false);
     }
 }

@@ -245,25 +245,50 @@ public class FulguriteChargerBlockEntity extends BlockEntity implements FmHandle
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveFulguriteChargerBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveFulguriteChargerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         tag.putInt("Progress", progress);
-        tag.put("Inventory", items.serializeNBT(registries));
+        tag.put("Inventory", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(items, registries));
         sides.save(tag);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        progress = tag.getInt("Progress");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadFulguriteChargerBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadFulguriteChargerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        progress = tag.getIntOr("Progress", 0);
         if (tag.contains("Inventory")) {
-            items.deserializeNBT(registries, tag.getCompound("Inventory"));
+            com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(items, registries, tag.getCompoundOrEmpty("Inventory"));
         } else { // chargers saved before menus existed
-            if (tag.contains("Input")) items.setStackInSlot(INPUT, ItemStack.parseOptional(registries, tag.getCompound("Input")));
-            if (tag.contains("Output")) items.setStackInSlot(OUTPUT, ItemStack.parseOptional(registries, tag.getCompound("Output")));
+            if (tag.contains("Input")) items.setStackInSlot(INPUT, com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("Input")));
+            if (tag.contains("Output")) items.setStackInSlot(OUTPUT, com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("Output")));
         }
         sides.load(tag);
     }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof FulguriteChargerBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the real storage behind the hopper/pipe view, so an undone transfer can be put back exactly (LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {items};
+    }
+
 }

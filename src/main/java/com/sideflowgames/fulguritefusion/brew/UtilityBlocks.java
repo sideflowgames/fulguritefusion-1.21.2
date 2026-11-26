@@ -20,17 +20,17 @@ public final class UtilityBlocks {
     private UtilityBlocks() {}
 
     public static final DeferredBlock<IonLampBlock> ION_LAMP = ModBlocks.BLOCKS.registerBlock("ion_lamp", IonLampBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.6f).sound(SoundType.GLASS).lightLevel(s -> 15));
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.6f).sound(SoundType.GLASS).lightLevel(s -> 15));
     public static final DeferredBlock<StormWardBlock> STORM_WARD = ModBlocks.BLOCKS.registerBlock("storm_ward", StormWardBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(4.0f, 9.0f).sound(SoundType.METAL)
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(4.0f, 9.0f).sound(SoundType.METAL)
                     .requiresCorrectToolForDrops().lightLevel(s -> s.getValue(StormWardBlock.ACTIVE) ? 9 : 0));
     public static final DeferredBlock<UpdraftVentBlock> UPDRAFT_VENT = ModBlocks.BLOCKS.registerBlock("updraft_vent", UpdraftVentBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
     public static final DeferredBlock<SilkRopeBlock> SILK_ROPE = ModBlocks.BLOCKS.registerBlock("silk_rope", SilkRopeBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.2f).sound(SoundType.WOOL).noOcclusion()
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.2f).sound(SoundType.WOOL).noOcclusion()
                     .pushReaction(PushReaction.DESTROY));
     public static final DeferredBlock<ReaverSpikesBlock> REAVER_SPIKES = ModBlocks.BLOCKS.registerBlock("reaver_spikes", ReaverSpikesBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(2.0f).sound(SoundType.METAL).noOcclusion()
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(2.0f).sound(SoundType.METAL).noOcclusion()
                     .requiresCorrectToolForDrops());
 
     public static final DeferredItem<BlockItem> ION_LAMP_ITEM = ModItems.ITEMS.registerSimpleBlockItem("ion_lamp", ION_LAMP);
@@ -40,7 +40,7 @@ public final class UtilityBlocks {
     public static final DeferredItem<BlockItem> REAVER_SPIKES_ITEM = ModItems.ITEMS.registerSimpleBlockItem("reaver_spikes", REAVER_SPIKES);
 
     public static final Supplier<BlockEntityType<StormWardBlockEntity>> STORM_WARD_BE = ModBlocks.BLOCK_ENTITIES.register("storm_ward",
-            () -> BlockEntityType.Builder.of(StormWardBlockEntity::new, STORM_WARD.get()).build(null));
+            () -> new BlockEntityType<>(StormWardBlockEntity::new, STORM_WARD.get()));
 
     public static void init() {}
 

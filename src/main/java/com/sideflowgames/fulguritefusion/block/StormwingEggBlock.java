@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 
 // Stormwing Egg: found (rarely) in wild nests. Place it beside a running Storm Collider to incubate it;
 // whoever places it is the hatchling's owner. Breaking it keeps its incubation progress in the item.
-public class StormwingEggBlock extends BaseEntityBlock {
+public class StormwingEggBlock extends BaseEntityBlock implements com.sideflowgames.fulguritefusion.util.TooltipBlockItem.Tooltip {
     public static final MapCodec<StormwingEggBlock> CODEC = simpleCodec(StormwingEggBlock::new);
     private static final VoxelShape SHAPE = BaseEntityBlock.box(4, 0, 4, 12, 11, 12);
 
@@ -67,13 +67,13 @@ public class StormwingEggBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.STORMWING_EGG_BE.get(), StormwingEggBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.STORMWING_EGG_BE.get(), StormwingEggBlockEntity::serverTick);
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (!level.isClientSide && placer instanceof Player player && level.getBlockEntity(pos) instanceof StormwingEggBlockEntity egg) {
+        if (!level.isClientSide() && placer instanceof Player player && level.getBlockEntity(pos) instanceof StormwingEggBlockEntity egg) {
             egg.setOwner(player.getUUID());
         }
     }
@@ -81,7 +81,7 @@ public class StormwingEggBlock extends BaseEntityBlock {
     // Taking an egg from a nest angers its Stormwing.
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide) StormwingEntity.alarm(level, pos, player);
+        if (!level.isClientSide()) StormwingEntity.alarm(level, pos, player);
         return super.playerWillDestroy(level, pos, state, player);
     }
 
@@ -91,22 +91,27 @@ public class StormwingEggBlock extends BaseEntityBlock {
         BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if (be instanceof StormwingEggBlockEntity egg && egg.hasProgress()) {
             for (ItemStack stack : drops) {
-                if (stack.is(asItem())) BlockItem.setBlockEntityData(stack, ModBlocks.STORMWING_EGG_BE.get(), egg.saveProgress());
+                if (stack.is(asItem())) {
+                    var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+                            net.minecraft.util.ProblemReporter.DISCARDING, egg.getLevel().registryAccess());
+                    com.sideflowgames.fulguritefusion.util.NbtBridge.write(out, egg.saveProgress());
+                    BlockItem.setBlockEntityData(stack, ModBlocks.STORMWING_EGG_BE.get(), out);
+                }
             }
         }
         return drops;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendItemTooltip(ItemStack stack, Item.TooltipContext context, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Incubate beside a running Storm Collider").withStyle(ChatFormatting.GRAY));
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            CompoundTag tag = data.copyTag();
-            int target = tag.getInt("Target");
+            CompoundTag tag = data.copyTagWithoutId();
+            int target = tag.getIntOr("Target", 0);
             if (target > 0) {
-                int pct = Math.min(100, tag.getInt("Incubation") * 100 / target);
+                int pct = Math.min(100, tag.getIntOr("Incubation", 0) * 100 / target);
                 tooltip.add(Component.literal("Incubated: " + pct + "%").withStyle(ChatFormatting.AQUA));
             }
         }

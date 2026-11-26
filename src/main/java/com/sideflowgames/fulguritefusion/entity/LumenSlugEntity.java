@@ -7,7 +7,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -20,12 +20,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Lumen Slug: a slow, glowing, harmless slug from the Lush Caves. As it crawls it leaves a glowing
 // Lumen Trail behind; scoop the trail with a glass bottle to get Lumen Gel without hurting the slug.
@@ -59,7 +59,7 @@ public class LumenSlugEntity extends PathfinderMob implements GeoEntity {
     public void aiStep() {
         super.aiStep();
         // Leave a glowing trail while crawling.
-        if (!level().isClientSide && tickCount % TRAIL_INTERVAL == 0 && getDeltaMovement().horizontalDistanceSqr() > 1.0E-4) {
+        if (!level().isClientSide() && tickCount % TRAIL_INTERVAL == 0 && getDeltaMovement().horizontalDistanceSqr() > 1.0E-4) {
             BlockPos pos = blockPosition();
             BlockState trail = ModBlocks.LUMEN_TRAIL.get().defaultBlockState();
             if (level().getBlockState(pos).isAir() && trail.canSurvive(level(), pos)) {
@@ -69,14 +69,14 @@ public class LumenSlugEntity extends PathfinderMob implements GeoEntity {
     }
 
     // Spawns on the ground in Lush Caves (moss, clay, grass and the like), never under open sky.
-    public static boolean checkSpawn(EntityType<LumenSlugEntity> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static boolean checkSpawn(EntityType<LumenSlugEntity> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                      BlockPos pos, RandomSource random) {
         return level.getBlockState(pos.below()).is(BlockTags.LUSH_GROUND_REPLACEABLE) && !level.canSeeSky(pos);
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "move", 6,
+        controllers.add(new AnimationController<>("move", 6,
                 state -> state.setAndContinue(state.isMoving() ? CRAWL : IDLE)));
     }
 

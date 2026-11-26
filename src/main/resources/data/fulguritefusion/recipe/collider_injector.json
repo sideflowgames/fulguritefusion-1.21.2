@@ -7,18 +7,10 @@
     "FMF"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "X": {
-      "item": "fulguritefusion:spark_cell"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "M": "fulguritefusion:magnetite_plate",
+    "S": "fulguritefusion:silver_sheet",
+    "X": "fulguritefusion:spark_cell"
   },
   "result": {
     "id": "fulguritefusion:collider_injector",

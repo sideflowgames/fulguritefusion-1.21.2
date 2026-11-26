@@ -6,12 +6,8 @@
     "III"
   ],
   "key": {
-    "R": {
-      "item": "fulguritefusion:reaver_blade_shard"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    }
+    "R": "fulguritefusion:reaver_blade_shard",
+    "I": "minecraft:iron_ingot"
   },
   "result": {
     "id": "fulguritefusion:reaver_spikes",

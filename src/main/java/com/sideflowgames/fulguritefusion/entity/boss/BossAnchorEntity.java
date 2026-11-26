@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity.boss;
 
+import net.minecraft.core.HolderLookup;
+
 import java.util.UUID;
 
 import net.minecraft.nbt.CompoundTag;
@@ -10,9 +12,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.util.GeckoLibUtil;
 
 // Shared parts of a mini-boss's shield anchors (Storm Core, Magma Pylon, Void Echo). Each belongs to one boss;
 // while any of its anchors lives, that boss can't be hurt. Anchors never despawn on their own, but vanish if their
@@ -41,8 +43,8 @@ public abstract class BossAnchorEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (owner() == null) {
             if (++ownerMissing > 100) discard();
         } else {
@@ -51,29 +53,41 @@ public abstract class BossAnchorEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (ownerId != null) tag.putUUID("Owner", ownerId);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveBossAnchorEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveBossAnchorEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        if (ownerId != null) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Owner", ownerId);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.hasUUID("Owner")) ownerId = tag.getUUID("Owner");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadBossAnchorEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadBossAnchorEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        if (com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Owner")) ownerId = com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Owner");
     }
 
     // Anchors don't hurt each other or their boss.
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (source.getEntity() instanceof StormBossEntity || source.getEntity() instanceof BossAnchorEntity) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override
     public void thunderHit(ServerLevel level, LightningBolt bolt) {}
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -83,7 +97,7 @@ public abstract class BossAnchorEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean canChangeDimensions(Level from, Level to) {
+    public boolean canTeleport(Level from, Level to) {
         return false;
     }
 
@@ -93,7 +107,7 @@ public abstract class BossAnchorEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    protected boolean shouldDropLoot() {
+    protected boolean shouldDropLoot(net.minecraft.server.level.ServerLevel level) {
         return false;
     }
 

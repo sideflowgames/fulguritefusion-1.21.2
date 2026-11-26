@@ -10,41 +10,48 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoBlockRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import com.geckolib.animation.state.AnimationTest;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoBlockRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 
 // The Shock Farm. Not formed: the ghost build outline while the controller gets a redstone signal.
 // Formed: its parts hide and the whole farm is drawn here as one model (geo/block/shock_farm_5 or _7.geo.json,
 // textures/block/machine/shock_farm_5 / _7 + _glowmask), turned to face the way the controller does. Farm Collectors
 // and Farm Power Ports merge in too: the frame is drawn over them, with a panel of their own face on the farm's outer
 // wall so you can still find them. While the farm runs, the prong coils spin.
-public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlockEntity> {
+public class ShockFarmRenderer extends LegacyGeoBlockRenderer<ShockFarmControllerBlockEntity> {
     public ShockFarmRenderer(BlockEntityRendererProvider.Context context) {
-        super(new Model());
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        super(context, new Model());
+        withRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
+    // Not built yet: only the ghost of the build (when powered), no model.
     @Override
-    public void render(ShockFarmControllerBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
-                       int packedLight, int packedOverlay) {
-        Level level = be.getLevel();
-        BlockPos pos = be.getBlockPos();
-        if (level == null) return;
+    public void submit(State<ShockFarmControllerBlockEntity> state, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+                       net.minecraft.client.renderer.state.level.CameraRenderState camera) {
+        ShockFarmControllerBlockEntity be = state.blockEntity;
+        if (be == null || be.getLevel() == null) return;
         if (be.formedSize() == 0) {
+            Level level = be.getLevel();
+            BlockPos pos = be.getBlockPos();
             if (GhostBuild.powered(level, pos)) {
-                GhostBuild.render(GhostBuild.get(level, pos, l -> GhostBuild.shockFarm(l, pos)), pos, level, partialTick, poseStack, buffers);
+                LegacyRender.draw(poseStack, collector, buffers ->
+                        GhostBuild.render(GhostBuild.get(level, pos, l -> GhostBuild.shockFarm(l, pos)), pos, level, state.partialTick, poseStack, buffers));
             }
             return;
         }
-        super.render(be, partialTick, poseStack, buffers, packedLight, packedOverlay);
-        panels(be, level, poseStack, buffers, packedOverlay);
+        super.submit(state, poseStack, collector, camera);
+    }
+
+    @Override
+    protected void renderExtras(ShockFarmControllerBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
+        Level level = be.getLevel();
+        panels(be, level, poseStack, buffers, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
         if (be.getBlockState().getValue(ShockFarmControllerBlock.ACTIVE)) arcs(be, level, partialTick, poseStack, buffers);
     }
 
@@ -55,11 +62,11 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
         int size = be.formedSize(), r = size == 2 ? 3 : 2, h = size == 2 ? 3 : 2;
         long t = level.getGameTime();
         if ((t / 2) % 3 == 0) return; // flicker
-        net.minecraft.world.phys.Vec3 fwd = net.minecraft.world.phys.Vec3.atLowerCornerOf(f.getNormal());
-        net.minecraft.world.phys.Vec3 lat = net.minecraft.world.phys.Vec3.atLowerCornerOf(side.getNormal());
+        net.minecraft.world.phys.Vec3 fwd = net.minecraft.world.phys.Vec3.atLowerCornerOf(f.getUnitVec3i());
+        net.minecraft.world.phys.Vec3 lat = net.minecraft.world.phys.Vec3.atLowerCornerOf(side.getUnitVec3i());
         net.minecraft.world.phys.Vec3 origin = new net.minecraft.world.phys.Vec3(0.5, 0, 0.5);
         net.minecraft.world.phys.Vec3 pad = origin.add(fwd.scale(r)).add(0, 1.2, 0);
-        com.mojang.blaze3d.vertex.VertexConsumer vc = buffers.getBuffer(net.minecraft.client.renderer.RenderType.lightning());
+        com.mojang.blaze3d.vertex.VertexConsumer vc = buffers.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.lightning());
         org.joml.Matrix4f m = poseStack.last().pose();
         java.util.Random rnd = new java.util.Random(t / 2 * 31 + be.getBlockPos().asLong());
         int i = 0;
@@ -81,8 +88,8 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
         }
     }
 
-    private static final ResourceLocation COLLECTOR_FACE = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/farm_collector_side.png");
-    private static final ResourceLocation PORT_FACE = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/farm_power_port.png");
+    private static final Identifier COLLECTOR_FACE = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/farm_collector_side.png");
+    private static final Identifier PORT_FACE = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/farm_power_port.png");
 
     // A panel showing the collector / power port face, mounted on the outer wall of the merged farm where each one stands.
     private static void panels(ShockFarmControllerBlockEntity be, Level level, PoseStack poseStack, MultiBufferSource buffers, int overlay) {
@@ -99,16 +106,16 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
                 if (!edge || corner || (fwd == 0 && lat == 0)) continue;
                 BlockPos q = ctrl.relative(f, fwd).relative(side, lat);
                 BlockState s = level.getBlockState(q);
-                ResourceLocation tex = s.is(FarmBlocks.COLLECTOR.get()) ? COLLECTOR_FACE : s.is(FarmBlocks.POWER_PORT.get()) ? PORT_FACE : null;
+                Identifier tex = s.is(FarmBlocks.COLLECTOR.get()) ? COLLECTOR_FACE : s.is(FarmBlocks.POWER_PORT.get()) ? PORT_FACE : null;
                 if (tex == null) continue;
                 Direction out = fwd == 0 ? f.getOpposite() : fwd == 2 * r ? f : lat > 0 ? side : side.getOpposite();
-                int light = net.minecraft.client.renderer.LevelRenderer.getLightColor(level, q.relative(out));
+                int light = net.minecraft.client.renderer.LevelRenderer.getLightCoords(level, q.relative(out));
                 float nx = out.getStepX(), nz = out.getStepZ();
                 float rx = nz, rz = -nx;                // right, seen from outside
                 float cx = q.getX() - ctrl.getX() + 0.5f + nx * (0.5f + 1 / 16f + 0.004f);
                 float cz = q.getZ() - ctrl.getZ() + 0.5f + nz * (0.5f + 1 / 16f + 0.004f);
                 float cy = q.getY() - ctrl.getY() + 0.5f, h = 7 / 16f;
-                com.mojang.blaze3d.vertex.VertexConsumer vc = buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityCutoutNoCull(tex));
+                com.mojang.blaze3d.vertex.VertexConsumer vc = buffers.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(tex));
                 corner(vc, pose, cx - rx * h, cy - h, cz - rz * h, 0, 1, light, overlay, nx, nz);
                 corner(vc, pose, cx + rx * h, cy - h, cz + rz * h, 1, 1, light, overlay, nx, nz);
                 corner(vc, pose, cx + rx * h, cy + h, cz + rz * h, 1, 0, light, overlay, nx, nz);
@@ -149,12 +156,12 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
     }
 
     @Override
-    protected void rotateBlock(Direction facing, PoseStack poseStack) {
-        poseStack.mulPose(Axis.YP.rotationDegrees(degrees(facing)));
+    protected void tryRotateByBlockstate(com.geckolib.renderer.base.RenderPassInfo<State<ShockFarmControllerBlockEntity>> info, PoseStack poseStack) {
+        poseStack.mulPose(Axis.YP.rotationDegrees(degrees(getBlockStateDirection(info.renderState().blockEntity))));
     }
 
     @Override
-    public boolean shouldRenderOffScreen(ShockFarmControllerBlockEntity be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 
@@ -173,32 +180,36 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
         return "e_" + (lateral < 0 ? "m" + (-lateral) : String.valueOf(lateral)) + "_" + forward;
     }
 
-    private static class Model extends GeoModel<ShockFarmControllerBlockEntity> {
-        private static ResourceLocation rl(String path) {
-            return ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, path);
+    private static class Model extends GeoModel<ShockFarmControllerBlockEntity> implements LegacyGeoBlockRenderer.Animated<ShockFarmControllerBlockEntity> {
+        private java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bones = n -> null;
+        private static Identifier rl(String path) {
+            return Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, path);
         }
 
-        private static final ResourceLocation GEO5 = rl("geo/block/shock_farm_5.geo.json"), GEO7 = rl("geo/block/shock_farm_7.geo.json");
-        private static final ResourceLocation TEX5 = rl("textures/block/machine/shock_farm_5.png"), TEX7 = rl("textures/block/machine/shock_farm_7.png");
-        private static final ResourceLocation ANIM = rl("animations/block/shock_farm.animation.json");
+        private static final Identifier GEO5 = rl("block/shock_farm_5"), GEO7 = rl("block/shock_farm_7");
+        private static final Identifier TEX5 = rl("textures/block/machine/shock_farm_5.png"), TEX7 = rl("textures/block/machine/shock_farm_7.png");
+        private static final Identifier ANIM = rl("block/shock_farm");
 
         @Override
-        public ResourceLocation getModelResource(ShockFarmControllerBlockEntity be) {
+        public Identifier getModelResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            ShockFarmControllerBlockEntity be = LegacyGeoBlockRenderer.be(renderState);
             return be.formedSize() == 2 ? GEO7 : GEO5;
         }
 
         @Override
-        public ResourceLocation getTextureResource(ShockFarmControllerBlockEntity be) {
+        public Identifier getTextureResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            ShockFarmControllerBlockEntity be = LegacyGeoBlockRenderer.be(renderState);
             return be.formedSize() == 2 ? TEX7 : TEX5;
         }
 
         @Override
-        public ResourceLocation getAnimationResource(ShockFarmControllerBlockEntity be) {
+        public Identifier getAnimationResource(ShockFarmControllerBlockEntity be) {
             return ANIM;
         }
 
         @Override
-        public void setCustomAnimations(ShockFarmControllerBlockEntity be, long instanceId, AnimationState<ShockFarmControllerBlockEntity> state) {
+        public void animate(ShockFarmControllerBlockEntity be, float partialTick, java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bonesIn) {
+            this.bones = bonesIn;
             Level level = be.getLevel();
             if (level == null) return;
             BlockState self = be.getBlockState();
@@ -208,18 +219,18 @@ public class ShockFarmRenderer extends GeoBlockRenderer<ShockFarmControllerBlock
             // The whole frame shows, collectors and power ports included (they merge in; see panels()).
             for (int fwd = 0; fwd <= 2 * r; fwd++) {
                 for (int lat = -r; lat <= r; lat++) {
-                    GeoBone b = getAnimationProcessor().getBone(edgeBone(lat, fwd));
-                    if (b != null) b.setHidden(false);
+                    com.geckolib.animation.state.BoneSnapshot b = bones.apply(edgeBone(lat, fwd));
+                    if (b != null) b.skipRender(false);
                 }
             }
             boolean running = self.getValue(ShockFarmControllerBlock.ACTIVE);
-            float time = level.getGameTime() + state.getPartialTick();
+            float time = level.getGameTime() + partialTick;
             for (int i = 0; i < 4; i++) {
-                GeoBone coil = getAnimationProcessor().getBone("coil_" + i);
+                com.geckolib.animation.state.BoneSnapshot coil = bones.apply("coil_" + i);
                 if (coil != null) coil.setRotY(running ? time * 0.25f : 0f);
             }
-            GeoBone glow = getAnimationProcessor().getBone("pad_glow");
-            if (glow != null) glow.setHidden(!running);
+            com.geckolib.animation.state.BoneSnapshot glow = bones.apply("pad_glow");
+            if (glow != null) glow.skipRender(!running);
         }
     }
 }

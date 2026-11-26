@@ -7,15 +7,9 @@
     " S "
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    },
-    "S": {
-      "item": "minecraft:stick"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "M": "fulguritefusion:magnetite_ingot",
+    "S": "minecraft:stick"
   },
   "result": {
     "id": "fulguritefusion:fulgurite_pickaxe",

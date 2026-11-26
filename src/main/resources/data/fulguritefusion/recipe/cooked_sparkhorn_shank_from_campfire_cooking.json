@@ -1,9 +1,7 @@
 {
   "type": "minecraft:campfire_cooking",
   "category": "food",
-  "ingredient": {
-    "item": "fulguritefusion:sparkhorn_shank"
-  },
+  "ingredient": "fulguritefusion:sparkhorn_shank",
   "result": {
     "id": "fulguritefusion:cooked_sparkhorn_shank"
   },

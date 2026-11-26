@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:magnetite_block"
-    }
+    "fulguritefusion:magnetite_block"
   ],
   "result": {
     "id": "fulguritefusion:magnetite_ingot",

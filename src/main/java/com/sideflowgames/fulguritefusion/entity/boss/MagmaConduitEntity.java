@@ -31,13 +31,13 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Magma Conduit (Nether mini-boss): a towering basalt golem, about 7 blocks tall, that draws power from lava.
 // Summoned by throwing a Charged Spark Cell into lava in the Nether.
@@ -60,8 +60,8 @@ public class MagmaConduitEntity extends StormBossEntity {
     public MagmaConduitEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level, BossEvent.BossBarColor.RED);
         setPathfindingMalus(PathType.LAVA, 0.0f);
-        setPathfindingMalus(PathType.DANGER_FIRE, 0.0f);
-        setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0f);
+        setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, 0.0f);
+        setPathfindingMalus(PathType.FIRE, 0.0f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -100,8 +100,8 @@ public class MagmaConduitEntity extends StormBossEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         boolean charging = nearLava();
         entityData.set(CHARGING, charging);
         if (charging && tickCount % 20 == 0 && getHealth() < getMaxHealth()) heal(3.0f);
@@ -131,11 +131,11 @@ public class MagmaConduitEntity extends StormBossEntity {
         int n = shieldNumber == 1 ? 3 : 4;
         double start = random.nextDouble() * Math.PI * 2;
         for (int i = 0; i < n; i++) {
-            MagmaPylonEntity pylon = ModEntities.MAGMA_PYLON.get().create(level);
+            MagmaPylonEntity pylon = ModEntities.MAGMA_PYLON.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (pylon == null) continue;
             double a = start + Math.PI * 2 * i / n;
             Vec3 at = groundNear(level, position().add(Math.cos(a) * 8, 0, Math.sin(a) * 8));
-            pylon.moveTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
+            pylon.snapTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
             pylon.setOwner(this);
             level.addFreshEntity(pylon);
             level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 25, 0.6, 0.4, 0.6, 0.2);
@@ -157,8 +157,8 @@ public class MagmaConduitEntity extends StormBossEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit) {
             target.igniteForSeconds(5);
             if (level() instanceof ServerLevel server) {
@@ -172,7 +172,7 @@ public class MagmaConduitEntity extends StormBossEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (random.nextInt(isCharging() ? 1 : 4) == 0) {
                 level().addParticle(isCharging() ? ParticleTypes.FLAME : ParticleTypes.SMOKE, getRandomX(0.9), getRandomY(), getRandomZ(0.9), 0, 0.05, 0);
             }
@@ -214,7 +214,7 @@ public class MagmaConduitEntity extends StormBossEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(
                 swinging ? SLAM : s.isMoving() ? WALK : IDLE)));
     }
 }

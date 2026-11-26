@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:raw_aurorite"
-  },
+  "ingredient": "fulguritefusion:raw_aurorite",
   "result": {
     "id": "fulguritefusion:aurorite_ingot"
   },

@@ -7,18 +7,10 @@
     "STS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:silver_ingot"
-    },
-    "T": {
-      "item": "minecraft:string"
-    },
-    "O": {
-      "item": "minecraft:obsidian"
-    },
-    "L": {
-      "item": "minecraft:lava_bucket"
-    }
+    "S": "fulguritefusion:silver_ingot",
+    "T": "minecraft:string",
+    "O": "minecraft:obsidian",
+    "L": "minecraft:lava_bucket"
   },
   "result": {
     "id": "fulguritefusion:void_upgrade",

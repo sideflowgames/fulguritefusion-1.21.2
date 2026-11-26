@@ -7,18 +7,10 @@
     "SBS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    }
+    "S": "fulguritefusion:copper_sheet",
+    "G": "minecraft:glass",
+    "K": "fulguritefusion:crude_arc_casing",
+    "B": "minecraft:bucket"
   },
   "result": {
     "id": "fulguritefusion:harvester_tank",

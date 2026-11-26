@@ -7,21 +7,11 @@
     "SHS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "G": {
-      "item": "minecraft:glass_pane"
-    },
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "K": {
-      "item": "minecraft:comparator"
-    },
-    "H": {
-      "item": "fulguritefusion:heavy_wire"
-    }
+    "S": "fulguritefusion:gold_sheet",
+    "G": "minecraft:glass_pane",
+    "C": "fulguritefusion:coil_segment",
+    "K": "minecraft:comparator",
+    "H": "fulguritefusion:heavy_wire"
   },
   "result": {
     "id": "fulguritefusion:reactor_console",

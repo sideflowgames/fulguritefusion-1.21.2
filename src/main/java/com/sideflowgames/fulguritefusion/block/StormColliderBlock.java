@@ -43,25 +43,25 @@ public class StormColliderBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.STORM_COLLIDER_BE.get(), StormColliderBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.STORM_COLLIDER_BE.get(), StormColliderBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof StormColliderBlockEntity collider) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StormColliderBlockEntity collider) {
             if (player.isShiftKeyDown()) collider.takeOutputs(player);
             collider.interact(player); // menu (sneak: take products + status line)
         }
         return InteractionResult.SUCCESS;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof StormColliderBlockEntity collider) {
             collider.dropContents();
         }
         if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.unformRing(level, pos, state);
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class StormColliderBlock extends BaseEntityBlock {
 
     // Formed: the ring model draws this spot too, so the block hides and mustn't hide the faces around it.
     @Override
-    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state, level, pos);
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
     }
 }

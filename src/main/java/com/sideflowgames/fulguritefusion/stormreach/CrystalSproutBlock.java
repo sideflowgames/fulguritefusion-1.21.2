@@ -6,13 +6,13 @@ import com.sideflowgames.fulguritefusion.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 // Crystal Sprouts: small glowing growths of tempest crystal on the Shattered Highlands' Stormstone. Decorative.
-public class CrystalSproutBlock extends BushBlock {
+public class CrystalSproutBlock extends VegetationBlock {
     public static final MapCodec<CrystalSproutBlock> CODEC = simpleCodec(CrystalSproutBlock::new);
     private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 9, 13);
 
@@ -21,7 +21,7 @@ public class CrystalSproutBlock extends BushBlock {
     }
 
     @Override
-    protected MapCodec<? extends BushBlock> codec() {
+    protected MapCodec<? extends VegetationBlock> codec() {
         return CODEC;
     }
 

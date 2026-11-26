@@ -13,12 +13,12 @@ import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -43,13 +43,13 @@ public class GlimmerwingEntity extends Bat implements GeoEntity {
 
     // Flits between spots 2-8 blocks above the ground or treetops; never roosts.
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
         if (isResting()) setResting(false);
         if (target == null || random.nextInt(60) == 0 || target.closerToCenterThan(position(), 1.5)) {
             int x = blockPosition().getX() + random.nextInt(11) - 5;
             int z = blockPosition().getZ() + random.nextInt(11) - 5;
             int ground = level().getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-            if (ground <= level().getMinBuildHeight() + 1) ground = blockPosition().getY() - 4;
+            if (ground <= level().getMinY() + 1) ground = blockPosition().getY() - 4;
             target = new BlockPos(x, ground + 2 + random.nextInt(7), z);
         }
         Vec3 to = Vec3.atCenterOf(target).subtract(position());
@@ -65,7 +65,7 @@ public class GlimmerwingEntity extends Bat implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(6) == 0) {
+        if (level().isClientSide() && random.nextInt(6) == 0) {
             level().addParticle(ParticleTypes.WAX_OFF, getX(), getY(0.3), getZ(), 0, -0.02, 0);
         }
     }
@@ -98,7 +98,7 @@ public class GlimmerwingEntity extends Bat implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 3, s -> s.setAndContinue(FLY)));
+        controllers.add(new AnimationController<>("main", 3, s -> s.setAndContinue(FLY)));
     }
 
     @Override

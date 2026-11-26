@@ -60,10 +60,9 @@ public class TapBucketBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         if (direction == Direction.DOWN && !state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, scheduledTicks, pos, direction, neighborPos, neighbor, shapeRandom);
     }
 
     public static ItemStack contents(BlockState state) {
@@ -72,10 +71,10 @@ public class TapBucketBlock extends Block {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             int latex = state.getValue(LATEX);
             if (latex > 0 && latex < FULL && !player.isShiftKeyDown()) {
-                player.displayClientMessage(Component.literal("Latex: " + latex + "/" + FULL + " (sneak + right-click to take it now; the latex is lost)"), true);
+                player.sendOverlayMessage(Component.literal("Latex: " + latex + "/" + FULL + " (sneak + right-click to take it now; the latex is lost)"));
                 return InteractionResult.SUCCESS;
             }
             level.removeBlock(pos, false);
@@ -83,11 +82,11 @@ public class TapBucketBlock extends Block {
             if (!player.getInventory().add(item)) player.drop(item, false);
             level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.6f, latex >= FULL ? 0.7f : 1.2f);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return new ItemStack(Items.BUCKET);
     }
 }

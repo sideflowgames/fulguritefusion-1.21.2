@@ -3,7 +3,7 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.farm.ShockFarmControllerBlockEntity;
 import com.sideflowgames.fulguritefusion.farm.ShockFarmMenu;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,9 +24,7 @@ public class ShockFarmScreen extends AbstractContainerScreen<ShockFarmMenu> {
     private Button toggle;
 
     public ShockFarmScreen(ShockFarmMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = W;
-        imageHeight = H;
+        super(menu, inventory, title, W, H);
     }
 
     @Override
@@ -47,7 +45,8 @@ public class ShockFarmScreen extends AbstractContainerScreen<ShockFarmMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
         GuiStyle.panel(g, leftPos, topPos, imageWidth, imageHeight);
         // Power bar.
         int x = leftPos + BAR_X, y = topPos + BAR_Y;
@@ -88,8 +87,8 @@ public class ShockFarmScreen extends AbstractContainerScreen<ShockFarmMenu> {
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, 8, 6, GuiStyle.TEXT, false);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.text(font, title, 8, 6, GuiStyle.opaque(GuiStyle.TEXT), false);
         int status = menu.status();
         String text = switch (status) {
             case ShockFarmControllerBlockEntity.ST_RUNNING -> "Running";
@@ -102,47 +101,47 @@ public class ShockFarmScreen extends AbstractContainerScreen<ShockFarmMenu> {
         };
         int color = status == ShockFarmControllerBlockEntity.ST_RUNNING ? GuiStyle.GOOD
                 : status == ShockFarmControllerBlockEntity.ST_OFF ? GuiStyle.TEXT : GuiStyle.BAD;
-        g.drawString(font, "Status: ", 8, 20, GuiStyle.TEXT, false);
-        g.drawString(font, text, 8 + font.width("Status: "), 20, color, false);
+        g.text(font, "Status: ", 8, 20, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, text, 8 + font.width("Status: "), 20, GuiStyle.opaque(color), false);
         if (menu.tier() > 0) {
-            g.drawString(font, "Size: " + (menu.tier() == 2 ? "7x7" : "5x5"), 8, 32, GuiStyle.TEXT, false);
-            g.drawString(font, "Mobs on pad: " + menu.mobs() + " / " + menu.mobCap(), 8, 44, GuiStyle.TEXT, false);
-            g.drawString(font, menu.spawnCost() + " Fm / spawn, " + String.format("%.1f", menu.spawnInterval() / 20f) + "s", 8, 56, GuiStyle.TEXT, false);
+            g.text(font, "Size: " + (menu.tier() == 2 ? "7x7" : "5x5"), 8, 32, GuiStyle.opaque(GuiStyle.TEXT), false);
+            g.text(font, "Mobs on pad: " + menu.mobs() + " / " + menu.mobCap(), 8, 44, GuiStyle.opaque(GuiStyle.TEXT), false);
+            g.text(font, menu.spawnCost() + " Fm / spawn, " + String.format("%.1f", menu.spawnInterval() / 20f) + "s", 8, 56, GuiStyle.opaque(GuiStyle.TEXT), false);
         } else if (!menu.problem().isEmpty()) {
             List<FormattedCharSequence> lines = font.split(Component.literal(menu.problem()), 132);
-            for (int i = 0; i < Math.min(3, lines.size()); i++) g.drawString(font, lines.get(i), 8, 32 + i * 10, GuiStyle.BAD, false);
+            for (int i = 0; i < Math.min(3, lines.size()); i++) g.text(font, lines.get(i), 8, 32 + i * 10, GuiStyle.opaque(GuiStyle.BAD), false);
         }
 
-        g.drawString(font, "Upgrades", 148, 8, GuiStyle.TEXT, false);
-        g.drawString(font, playerInventoryTitle, ShockFarmMenu.INV_X - 1, ShockFarmMenu.INV_Y - 11, GuiStyle.TEXT, false);
-        g.drawString(font, "Spawns in this biome:", 8, LIST_Y, GuiStyle.TEXT, false);
+        g.text(font, "Upgrades", 148, 8, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, playerInventoryTitle, ShockFarmMenu.INV_X - 1, ShockFarmMenu.INV_Y - 11, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, "Spawns in this biome:", 8, LIST_Y, GuiStyle.opaque(GuiStyle.TEXT), false);
         List<ShockFarmMenu.SpawnEntry> spawns = menu.spawns();
         if (spawns.isEmpty()) {
-            g.drawString(font, "Nothing the farm can spawn.", 8, LIST_Y + 16, GuiStyle.BAD, false);
+            g.text(font, "Nothing the farm can spawn.", 8, LIST_Y + 16, GuiStyle.opaque(GuiStyle.BAD), false);
             return;
         }
         java.util.Set<EntityType<?>> filter = filters();
         int total = 0;
         for (var e : spawns) {
-            if (filter.isEmpty() || filter.contains(BuiltInRegistries.ENTITY_TYPE.get(e.id()))) total += e.weight();
+            if (filter.isEmpty() || filter.contains(BuiltInRegistries.ENTITY_TYPE.getValue(e.id()))) total += e.weight();
         }
         int shown = Math.min(spawns.size(), ROWS * 2);
         for (int i = 0; i < shown; i++) {
             var e = spawns.get(i);
             int x = 9 + (i % 2) * 104, y = LIST_Y + 12 + (i / 2) * ROW;
-            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(e.id());
+            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(e.id());
             ItemStack egg = egg(type);
-            if (!egg.isEmpty()) g.renderItem(egg, x, y);
+            if (!egg.isEmpty()) g.item(egg, x, y);
             boolean on = filter.isEmpty() || filter.contains(type);
             String name = type.getDescription().getString();
             int pct = on ? Math.round(e.weight() * 100f / Math.max(1, total)) : 0;
             String line = font.plainSubstrByWidth(name, 64);
-            g.drawString(font, line, x + 20, y + 1, on ? GuiStyle.TEXT : 0xFF8A8E96, false);
-            g.drawString(font, on ? pct + "%" : "filtered out", x + 20, y + 10, on ? 0xFF3A5A70 : 0xFF8A8E96, false);
+            g.text(font, line, x + 20, y + 1, GuiStyle.opaque(on ? GuiStyle.TEXT : 0xFF8A8E96), false);
+            g.text(font, on ? pct + "%" : "filtered out", x + 20, y + 10, GuiStyle.opaque(on ? 0xFF3A5A70 : 0xFF8A8E96), false);
             if (!on) g.fill(x, y, x + 16, y + 16, 0x90C6C6C6);
         }
         if (spawns.size() > shown) {
-            g.drawString(font, "+" + (spawns.size() - shown) + " more", 150, LIST_Y, GuiStyle.TEXT, false);
+            g.text(font, "+" + (spawns.size() - shown) + " more", 150, LIST_Y, GuiStyle.opaque(GuiStyle.TEXT), false);
         }
     }
 
@@ -161,31 +160,28 @@ public class ShockFarmScreen extends AbstractContainerScreen<ShockFarmMenu> {
     }
 
     private static ItemStack egg(EntityType<?> type) {
-        SpawnEggItem egg = SpawnEggItem.byId(type);
-        if (egg == null) egg = net.neoforged.neoforge.common.DeferredSpawnEggItem.deferredOnlyById(type);
-        return egg == null ? ItemStack.EMPTY : new ItemStack(egg);
+        return SpawnEggItem.byId(type).map(ItemStack::new).orElse(ItemStack.EMPTY);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (isHovering(BAR_X - 1, BAR_Y - 1, BAR_W + 2, BAR_H + 2, mouseX, mouseY)) {
-            g.renderTooltip(font, Component.literal(menu.fm() + " / " + menu.capacity() + " Fm"), mouseX, mouseY);
+            g.setTooltipForNextFrame(font, Component.literal(menu.fm() + " / " + menu.capacity() + " Fm"), mouseX, mouseY);
         }
         List<ShockFarmMenu.SpawnEntry> spawns = menu.spawns();
         int shown = Math.min(spawns.size(), ROWS * 2);
         for (int i = 0; i < shown; i++) {
             int x = 9 + (i % 2) * 104, y = LIST_Y + 12 + (i / 2) * ROW;
             if (isHovering(x, y, 96, 18, mouseX, mouseY)) {
-                g.renderTooltip(font, BuiltInRegistries.ENTITY_TYPE.get(spawns.get(i).id()).getDescription(), mouseX, mouseY);
+                g.setTooltipForNextFrame(font, BuiltInRegistries.ENTITY_TYPE.getValue(spawns.get(i).id()).getDescription(), mouseX, mouseY);
             }
         }
         for (int i = 0; i < ShockFarmMenu.UPGRADE_POS.length; i++) {
             if (menu.isLocked(i) && menu.upgrade(i).isEmpty()
                     && isHovering(ShockFarmMenu.UPGRADE_POS[i][0], ShockFarmMenu.UPGRADE_POS[i][1], 16, 16, mouseX, mouseY)) {
-                g.renderTooltip(font, Component.literal("Unlocks on a 7x7 farm"), mouseX, mouseY);
+                g.setTooltipForNextFrame(font, Component.literal("Unlocks on a 7x7 farm"), mouseX, mouseY);
             }
         }
-        renderTooltip(g, mouseX, mouseY);
     }
 }

@@ -3,9 +3,7 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    {
-      "item": "fulguritefusion:thunderoak_log"
-    }
+    "fulguritefusion:thunderoak_log"
   ],
   "result": {
     "id": "fulguritefusion:thunderoak_planks",

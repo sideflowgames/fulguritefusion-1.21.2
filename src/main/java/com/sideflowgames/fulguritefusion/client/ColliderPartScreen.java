@@ -3,15 +3,15 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import com.sideflowgames.fulguritefusion.menu.ColliderPartMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 // One-slot menu for a Collider Input or Injector that isn't in a finished ring yet.
 public class ColliderPartScreen extends MachineScreen<ColliderPartMenu> {
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/collider_part.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/collider_part.png");
     private static final int TEXT = 0xFF26262C;
 
     public ColliderPartScreen(ColliderPartMenu menu, Inventory inventory, Component title) {
@@ -24,12 +24,12 @@ public class ColliderPartScreen extends MachineScreen<ColliderPartMenu> {
     }
 
     @Override
-    protected void renderMachine(GuiGraphics g, float partialTick) {}
+    protected void renderMachine(GuiGraphicsExtractor g, float partialTick) {}
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        super.renderLabels(g, mouseX, mouseY);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        super.extractLabels(g, mouseX, mouseY);
         String hint = menu.isInput() ? "Spark Cells (2 per shot)" : "Material for the Storm Collider";
-        g.drawString(font, hint, (imageWidth - font.width(hint)) / 2, 58, TEXT, false);
+        g.text(font, hint, (imageWidth - font.width(hint)) / 2, 58, GuiStyle.opaque(TEXT), false);
     }
 }

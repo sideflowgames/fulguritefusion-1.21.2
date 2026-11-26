@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity;
 
+import net.minecraft.core.HolderLookup;
+
 import com.sideflowgames.fulguritefusion.Config;
 import com.sideflowgames.fulguritefusion.ModEntities;
 import com.sideflowgames.fulguritefusion.ModItems;
@@ -12,7 +14,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -36,7 +38,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -56,13 +58,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -144,7 +146,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     private static final float DIVE_DAMAGE = 8.0f;
     private static final float PLUME_CHANCE = 0.25f;
     private static final int PLUME_COOLDOWN = 200;
-    private static final DustParticleOptions CRACKLE = new DustParticleOptions(new Vector3f(0.6f, 0.85f, 1.0f), 1.0f);
+    private static final DustParticleOptions CRACKLE = new DustParticleOptions(0x99D9FF, 1.0f);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable private BlockPos nestPos;
@@ -213,13 +215,13 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         targetSelector.addGoal(2, new DefendOwnerGoal(this));
         // Wild: during thunderstorms it hunts players on its own.
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> isWild() && level().isThundering()));
+                (p, lvl) -> isWild() && level().isThundering()));
         // Loyal and aggressive: goes after monsters near its owner.
         targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false,
-                m -> isLoyal() && stormwingVariant().aggressive && !sitting));
+                (m, lvl) -> isLoyal() && stormwingVariant().aggressive && !sitting));
         // Feral: attacks everything except other Stormwings.
         targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
-                e -> mode == Mode.FERAL && !(e instanceof StormwingEntity) && !(e instanceof StormwingHatchlingEntity)));
+                (e, lvl) -> mode == Mode.FERAL && !(e instanceof StormwingEntity) && !(e instanceof StormwingHatchlingEntity)));
     }
 
     // ---------- Raised birds ----------
@@ -268,7 +270,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
                         String name, double amount) {
         AttributeInstance instance = getAttribute(attribute);
         if (instance == null || amount == 0) return;
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name);
+        Identifier id = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, name);
         instance.removeModifier(id);
         instance.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
@@ -289,7 +291,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         // Main hand only: right-click fires once per hand, and two toggles would cancel out.
         if (isLoyal() && player.getUUID().equals(owner) && hand == InteractionHand.MAIN_HAND && player.getItemInHand(hand).isEmpty()) {
             if (isBonded() && !player.isSecondaryUseActive()) {
-                if (!level().isClientSide && !isVehicle()) {
+                if (!level().isClientSide() && !isVehicle()) {
                     sitting = false;
                     setNesting(false);
                     setTarget(null);
@@ -297,16 +299,16 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
                     player.setYRot(getYRot());
                     player.startRiding(this);
                 }
-                return InteractionResult.sidedSuccess(level().isClientSide);
+                return InteractionResult.SUCCESS;
             }
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 sitting = !sitting;
                 setTarget(null);
                 getNavigation().stop();
                 if (!sitting) setNesting(false);
-                player.displayClientMessage(Component.literal(sitting ? "Stormwing: staying" : "Stormwing: following"), true);
+                player.sendOverlayMessage(Component.literal(sitting ? "Stormwing: staying" : "Stormwing: following"));
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
     }
@@ -445,7 +447,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         BlockHitResult block = level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, rider));
         Vec3 reach = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(level(), rider, eye, reach, new AABB(eye, reach).inflate(2.0),
-                e -> e instanceof LivingEntity && e.isAlive() && e != this && e != rider);
+                e -> e instanceof LivingEntity && e.isAlive() && e != this && e != rider, 0.3f);
         strikeTarget = hit != null ? hit.getEntity().getUUID() : null;
         strikePoint = reach;
         strikeRider = rider.getUUID();
@@ -468,7 +470,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(DIVE_RADIUS),
                 t -> t != this && t != rider && t.isAlive() && !(t instanceof StormwingEntity b && b.owner != null && b.owner.equals(strikeRider)))) {
             DamageSource source = rider != null ? damageSources().playerAttack(rider) : damageSources().mobAttack(this);
-            e.hurt(source, RIDER_DIVE_DAMAGE * (float) stormwingVariant().attack);
+            e.hurtOrSimulate(source, RIDER_DIVE_DAMAGE * (float) stormwingVariant().attack);
         }
         // A jagged bolt from the sky, and an arc from the bird to the spot. No fire, no block damage.
         double x = at.x, z = at.z;
@@ -484,7 +486,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
             Vec3 p = from.lerp(at, i / (double) steps);
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08, 0.01);
         }
-        server.sendParticles(ParticleTypes.FLASH, at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
+        server.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.5, at.z, 80, 1.5, 0.4, 1.5, 0.5);
         server.playSound(null, BlockPos.containing(at), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.NEUTRAL, 2.0f, 1.0f);
         server.playSound(null, BlockPos.containing(at), ModSounds.STORMWING_ARC.get(), SoundSource.NEUTRAL, 1.6f, 0.8f);
@@ -565,9 +567,9 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
         exploreTicksLeft = away / 2 + random.nextInt(away / 2 + 1); // half to all of the maximum
         setNesting(false);
         if (nestPos != null && level() instanceof ServerLevel server) {
-            ArcSerpentEntity serpent = ModEntities.ARC_SERPENT.get().create(server);
+            ArcSerpentEntity serpent = ModEntities.ARC_SERPENT.get().create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (serpent != null) {
-                serpent.moveTo(nestPos.getX() + 0.5, nestPos.getY() + 1, nestPos.getZ() + 0.5, random.nextFloat() * 360f, 0);
+                serpent.snapTo(nestPos.getX() + 0.5, nestPos.getY() + 1, nestPos.getZ() + 0.5, random.nextFloat() * 360f, 0);
                 serpent.guard(nestPos);
                 server.addFreshEntity(serpent);
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, serpent.getX(), serpent.getY() + 0.8, serpent.getZ(), 50, 0.8, 0.6, 0.8, 0.2);
@@ -589,7 +591,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     // ---------- Spawning ----------
 
     // Mountain biomes only (set in the biome modifier), under open sky, and at most 3 loaded at once.
-    public static boolean checkSpawn(EntityType<StormwingEntity> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static boolean checkSpawn(EntityType<StormwingEntity> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                      BlockPos pos, RandomSource random) {
         if (!level.canSeeSky(pos) || pos.getY() < 90) return false;
         return level.getLevel().getEntities(ModEntities.STORMWING.get(), StormwingEntity::isWild).size() < MAX_LOADED;
@@ -613,9 +615,9 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     // ---------- Combat ----------
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !level().isClientSide) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
+        if (hurt && !level().isClientSide()) {
             setNesting(false);
             ServerLevel server = (ServerLevel) level();
             // Lightning flares burst from its body.
@@ -625,7 +627,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
             if (source.getEntity() instanceof Player && level().getGameTime() - lastPlumeTime >= PLUME_COOLDOWN
                     && random.nextFloat() < PLUME_CHANCE) {
                 lastPlumeTime = level().getGameTime();
-                spawnAtLocation(new ItemStack(ModItems.STORMWING_PLUME.get()));
+                spawnAtLocation((net.minecraft.server.level.ServerLevel) level(), new ItemStack(ModItems.STORMWING_PLUME.get()));
             }
         }
         return hurt;
@@ -633,9 +635,9 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
 
     // Beak or claw, picked at random; both deal the base 2 damage.
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
         triggerAnim("attack", random.nextBoolean() ? "beak" : "claw");
-        return super.doHurtTarget(target);
+        return super.doHurtTarget(serverLevel, target);
     }
 
     // Lightning-proof and never takes fall damage.
@@ -643,7 +645,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     public void thunderHit(ServerLevel level, LightningBolt bolt) {}
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -652,7 +654,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
 
     private void strike(LivingEntity target) {
         ServerLevel server = (ServerLevel) level();
-        target.hurt(damageSources().mobAttack(this), DIVE_DAMAGE * (float) stormwingVariant().attack * (isFeral() ? 2.5f : 1f));
+        target.hurtOrSimulate(damageSources().mobAttack(this), DIVE_DAMAGE * (float) stormwingVariant().attack * (isFeral() ? 2.5f : 1f));
         // Draw a jagged bolt from the sky down to the target with particles. No real lightning: no fire, no thunder.
         Vec3 bottom = target.position();
         double x = bottom.x, z = bottom.z;
@@ -662,7 +664,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
             server.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0, 0, 0, 0);
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 1, 0.05, 0.05, 0.05, 0.02);
         }
-        server.sendParticles(ParticleTypes.FLASH, bottom.x, bottom.y + 1, bottom.z, 1, 0, 0, 0, 0);
+        server.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), bottom.x, bottom.y + 1, bottom.z, 1, 0, 0, 0, 0);
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, bottom.x, bottom.y + 0.5, bottom.z, 60, 1.0, 0.3, 1.0, 0.4);
         server.playSound(null, target.blockPosition(), ModSounds.STORMWING_ARC.get(), SoundSource.HOSTILE, 1.6f, 0.9f);
     }
@@ -672,7 +674,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             tickRiderStrike();
             tickRecharge();
             if (isVehicle() && isNesting()) setNesting(false); // gravity off while ridden
@@ -693,7 +695,7 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
             }
         }
         // Idle crackle across the wings.
-        if (level().isClientSide && random.nextInt(isNesting() ? 8 : 3) == 0) {
+        if (level().isClientSide() && random.nextInt(isNesting() ? 8 : 3) == 0) {
             double side = (random.nextBoolean() ? 1 : -1) * (0.5 + random.nextDouble() * 2.5);
             double yaw = Math.toRadians(yBodyRot);
             level().addParticle(CRACKLE, getX() + Math.cos(yaw) * side, getY() + 1.1, getZ() + Math.sin(yaw) * side, 0, 0, 0);
@@ -731,50 +733,62 @@ public class StormwingEntity extends PathfinderMob implements GeoEntity, Stormwi
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (nestPos != null) tag.put("Nest", NbtUtils.writeBlockPos(nestPos));
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormwingEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormwingEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        if (nestPos != null) tag.put("Nest", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(nestPos));
         tag.putBoolean("Nesting", isNesting());
         tag.putInt("ExploreCooldown", exploreCooldown);
         tag.putInt("ExploreTicksLeft", exploreTicksLeft);
-        if (serpentId != null) tag.putUUID("Serpent", serpentId);
+        if (serpentId != null) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Serpent", serpentId);
         tag.putString("Mode", mode.name());
         tag.putInt("Variant", entityData.get(VARIANT));
-        if (owner != null) tag.putUUID("Owner", owner);
+        if (owner != null) com.sideflowgames.fulguritefusion.util.NbtBridge.putUUID(tag, "Owner", owner);
         tag.putBoolean("Sitting", sitting);
         tag.putInt("ShedTimer", shedTimer);
         tag.putBoolean("Bonded", isBonded());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        nestPos = NbtUtils.readBlockPos(tag, "Nest").orElse(null);
-        setNesting(tag.getBoolean("Nesting"));
-        exploreCooldown = tag.contains("ExploreCooldown") ? tag.getInt("ExploreCooldown") : -1;
-        exploreTicksLeft = tag.getInt("ExploreTicksLeft");
-        serpentId = tag.hasUUID("Serpent") ? tag.getUUID("Serpent") : null;
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadStormwingEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormwingEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        nestPos = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Nest").orElse(null);
+        setNesting(tag.getBooleanOr("Nesting", false));
+        exploreCooldown = tag.contains("ExploreCooldown") ? tag.getIntOr("ExploreCooldown", 0) : -1;
+        exploreTicksLeft = tag.getIntOr("ExploreTicksLeft", 0);
+        serpentId = com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Serpent") ? com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Serpent") : null;
         try {
-            mode = tag.contains("Mode") ? Mode.valueOf(tag.getString("Mode")) : Mode.WILD;
+            mode = tag.contains("Mode") ? Mode.valueOf(tag.getStringOr("Mode", "")) : Mode.WILD;
         } catch (IllegalArgumentException e) {
             mode = Mode.WILD;
         }
-        entityData.set(VARIANT, tag.getInt("Variant"));
-        owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
-        sitting = tag.getBoolean("Sitting");
-        if (tag.contains("ShedTimer")) shedTimer = tag.getInt("ShedTimer");
-        entityData.set(BONDED, tag.getBoolean("Bonded"));
+        entityData.set(VARIANT, tag.getIntOr("Variant", 0));
+        owner = com.sideflowgames.fulguritefusion.util.NbtBridge.hasUUID(tag, "Owner") ? com.sideflowgames.fulguritefusion.util.NbtBridge.getUUID(tag, "Owner") : null;
+        sitting = tag.getBooleanOr("Sitting", false);
+        if (tag.contains("ShedTimer")) shedTimer = tag.getIntOr("ShedTimer", 0);
+        entityData.set(BONDED, tag.getBooleanOr("Bonded", false));
     }
 
     // ---------- Animation ----------
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "movement", 8, state -> {
+        controllers.add(new AnimationController<>("movement", 8, state -> {
             if (isDiving()) return state.setAndContinue(DIVE);
             return state.setAndContinue(isNesting() ? NEST : FLY);
         }));
-        controllers.add(new AnimationController<>(this, "attack", 2, state -> PlayState.STOP)
+        controllers.add(new AnimationController<>("attack", 2, state -> PlayState.STOP)
                 .triggerableAnim("beak", BEAK)
                 .triggerableAnim("claw", CLAW));
     }

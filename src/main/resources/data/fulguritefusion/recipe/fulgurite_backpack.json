@@ -7,15 +7,9 @@
     "FGF"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "B": {
-      "item": "fulguritefusion:iron_backpack"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "G": "fulguritefusion:gold_sheet",
+    "B": "fulguritefusion:iron_backpack"
   },
   "result": {
     "id": "fulguritefusion:fulgurite_backpack",

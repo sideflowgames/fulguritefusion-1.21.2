@@ -42,16 +42,16 @@ public class CreativePowerSourceBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null
+        return level.isClientSide() ? null
                 : createTickerHelper(type, ModBlocks.CREATIVE_POWER_SOURCE_BE.get(), CreativePowerSourceBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
-            player.displayClientMessage(Component.literal("Creative Power Source: " + CreativePowerSourceBlockEntity.RATE
-                    + " Fm/t, endless"), true);
+        if (!level.isClientSide()) {
+            player.sendOverlayMessage(Component.literal("Creative Power Source: " + CreativePowerSourceBlockEntity.RATE
+                    + " Fm/t, endless"));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 }

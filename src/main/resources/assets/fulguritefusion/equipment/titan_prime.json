@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "fulguritefusion:titan_prime"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "fulguritefusion:titan_prime"
+      }
+    ]
+  }
+}

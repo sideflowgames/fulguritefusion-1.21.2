@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:stormquartz_block"
-    }
+    "fulguritefusion:stormquartz_block"
   ],
   "result": {
     "id": "fulguritefusion:stormquartz",

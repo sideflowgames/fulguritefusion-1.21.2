@@ -133,7 +133,7 @@ public final class LightningEvents {
                 .setValue(StormFurnaceBlock.FACING, state.getValue(StormFurnaceBlock.FACING)), Block.UPDATE_ALL);
         BlockEntity newBe = level.getBlockEntity(pos);
         if (saved != null && newBe != null) {
-            newBe.loadWithComponents(saved, level.registryAccess());
+            newBe.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess(), saved));
             newBe.setChanged();
         }
 

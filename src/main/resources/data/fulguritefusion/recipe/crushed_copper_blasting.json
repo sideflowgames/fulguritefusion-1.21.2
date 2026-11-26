@@ -1,9 +1,7 @@
 {
   "type": "minecraft:blasting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:crushed_copper"
-  },
+  "ingredient": "fulguritefusion:crushed_copper",
   "result": {
     "id": "minecraft:copper_ingot"
   },

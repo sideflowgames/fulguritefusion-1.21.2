@@ -7,15 +7,9 @@
     "GHG"
   ],
   "key": {
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "H": {
-      "item": "fulguritefusion:heavy_wire"
-    },
-    "T": {
-      "item": "fulguritefusion:tempered_arc_casing"
-    }
+    "G": "fulguritefusion:gold_sheet",
+    "H": "fulguritefusion:heavy_wire",
+    "T": "fulguritefusion:tempered_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:forge_power_port",

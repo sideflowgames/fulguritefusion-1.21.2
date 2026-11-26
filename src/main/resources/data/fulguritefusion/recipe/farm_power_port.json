@@ -7,15 +7,9 @@
     "CGC"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "T": {
-      "item": "fulguritefusion:tempered_arc_casing"
-    }
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:gold_ingot",
+    "T": "fulguritefusion:tempered_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:farm_power_port",

@@ -45,7 +45,7 @@ public class FluidPipeBlockEntity extends BlockEntity {
             if (!state.getValue(FluidPipeBlock.SIDES.get(d))) continue;
             BlockPos n = pos.relative(d);
             if (level.getBlockState(n).getBlock() instanceof FluidPipeBlock) continue;
-            IFluidHandler source = level.getCapability(Capabilities.FluidHandler.BLOCK, n, d.getOpposite());
+            IFluidHandler source = com.sideflowgames.fulguritefusion.util.LegacyCaps.fluidsAt(level, n, d.getOpposite());
             if (source == null || !givesOnly(source)) continue;
             be.pull(level, n, source);
         }
@@ -91,7 +91,7 @@ public class FluidPipeBlockEntity extends BlockEntity {
                 if (level.getBlockState(n).getBlock() instanceof FluidPipeBlock) {
                     if (pipes.add(n)) queue.add(n);
                 } else if (!n.equals(sourcePos)) {
-                    IFluidHandler h = level.getCapability(Capabilities.FluidHandler.BLOCK, n, d.getOpposite());
+                    IFluidHandler h = com.sideflowgames.fulguritefusion.util.LegacyCaps.fluidsAt(level, n, d.getOpposite());
                     if (h != null && !givesOnly(h)) targets.add(new Target(n, h));
                 }
             }

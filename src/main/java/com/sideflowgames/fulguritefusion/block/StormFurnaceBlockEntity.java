@@ -104,7 +104,7 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
     }
 
     public static int burnTimeOf(ItemStack stack) {
-        return stack.getBurnTime(RecipeType.SMELTING);
+        return com.sideflowgames.fulguritefusion.util.Fuel.burnTime(stack);
     }
 
     // How much Fm a fuel item is worth in total.
@@ -199,7 +199,7 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
             if (Config.STATIC_ENABLED.get() && !isGrounded(level, pos)) {
                 AABB area = new AABB(pos).inflate(Config.STATIC_RANGE.get());
                 for (Player player : level.getEntitiesOfClass(Player.class, area)) {
-                    player.hurt(level.damageSources().lightningBolt(), be.getStaticDamage());
+                    player.hurtOrSimulate(level.damageSources().lightningBolt(), be.getStaticDamage());
                 }
             }
         }
@@ -273,22 +273,47 @@ public class StormFurnaceBlockEntity extends BlockEntity implements MenuProvider
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormFurnaceBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormFurnaceBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         tag.putInt("FuelFm", fuelFm);
         tag.putInt("FuelFmTotal", fuelFmTotal);
-        tag.put("Inventory", items.serializeNBT(registries));
+        tag.put("Inventory", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(items, registries));
         sides.save(tag);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        fuelFm = tag.getInt("FuelFm");
-        fuelFmTotal = tag.getInt("FuelFmTotal");
-        if (tag.contains("Inventory")) items.deserializeNBT(registries, tag.getCompound("Inventory"));
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadStormFurnaceBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormFurnaceBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        fuelFm = tag.getIntOr("FuelFm", 0);
+        fuelFmTotal = tag.getIntOr("FuelFmTotal", 0);
+        if (tag.contains("Inventory")) com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(items, registries, tag.getCompoundOrEmpty("Inventory"));
         sides.load(tag);
     }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof StormFurnaceBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the real storage behind the hopper/pipe view, so an undone transfer can be put back exactly (LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {items};
+    }
+
 }

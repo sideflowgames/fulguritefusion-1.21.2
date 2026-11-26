@@ -28,9 +28,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Thunderhead (Overworld mini-boss): a huge storm-cloud beast, about 7 blocks across. Summoned by using a Charged
 // Spark Cell on a Lightning Rod under open sky during a thunderstorm.
@@ -78,8 +78,8 @@ public class ThunderheadEntity extends StormBossEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         LivingEntity target = getTarget();
         Vec3 goal;
         double speed;
@@ -101,7 +101,7 @@ public class ThunderheadEntity extends StormBossEntity {
             goal = target.getEyePosition();
             speed = 0.9;
             if (!hitThisDive && getBoundingBox().inflate(0.8).intersects(target.getBoundingBox())) {
-                doHurtTarget(target);
+                doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target);
                 hitThisDive = true;
                 diving = 0;
             }
@@ -147,7 +147,7 @@ public class ThunderheadEntity extends StormBossEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             for (int i = 0; i < 3; i++) {
                 level().addParticle(ParticleTypes.CLOUD, getRandomX(1.0), getRandomY(), getRandomZ(1.0), 0, -0.02, 0);
             }
@@ -164,10 +164,10 @@ public class ThunderheadEntity extends StormBossEntity {
         List<Entity> out = new ArrayList<>();
         int n = shieldNumber == 1 ? 3 : 4;
         for (int i = 0; i < n; i++) {
-            StormCoreEntity core = ModEntities.STORM_CORE.get().create(level);
+            StormCoreEntity core = ModEntities.STORM_CORE.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (core == null) continue;
             double a = Math.PI * 2 * i / n;
-            core.moveTo(getX() + Math.cos(a) * 7, getY(), getZ() + Math.sin(a) * 7, 0, 0);
+            core.snapTo(getX() + Math.cos(a) * 7, getY(), getZ() + Math.sin(a) * 7, 0, 0);
             core.setAngle(a);
             core.setOwner(this);
             level.addFreshEntity(core);
@@ -208,6 +208,6 @@ public class ThunderheadEntity extends StormBossEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 6, s -> s.setAndContinue(isDiving() ? DIVE : FLY)));
+        controllers.add(new AnimationController<>("main", 6, s -> s.setAndContinue(isDiving() ? DIVE : FLY)));
     }
 }

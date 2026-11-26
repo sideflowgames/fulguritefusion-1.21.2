@@ -12,14 +12,15 @@ import com.sideflowgames.fulguritefusion.machine.MachineType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -28,11 +29,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoBlockRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import com.geckolib.animation.state.AnimationTest;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoBlockRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +48,10 @@ import java.util.Random;
 //   Crusher: the item drops between the toothed rollers and bursts into crumbs.
 //   Banbury Mixer: the rotors churn, the weight presses down on the rubber and it squishes and spreads.
 // The trim colour follows the casing tier, and higher tiers work faster. Nothing is drawn until it's built.
-public class MachineControllerRenderer extends GeoBlockRenderer<MachineControllerBlockEntity> {
+public class MachineControllerRenderer extends LegacyGeoBlockRenderer<MachineControllerBlockEntity> {
     public MachineControllerRenderer(BlockEntityRendererProvider.Context context) {
-        super(new Model());
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        super(context, new Model());
+        withRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
     // ---------- Timing ----------
@@ -100,14 +100,22 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
     // ---------- Drawing ----------
 
     @Override
-    public void render(MachineControllerBlockEntity machine, float partialTick, PoseStack poseStack,
-                       MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        if (!machine.isFormed()) return;
+    protected boolean visible(MachineControllerBlockEntity machine) {
+        return machine.isFormed();
+    }
+
+    // The controller is a solid block (always dark inside): light the machine from the air above it instead.
+    @Override
+    protected int light(MachineControllerBlockEntity machine, int packedLight) {
+        Level level = machine.getLevel();
+        return level == null ? packedLight : LevelRenderer.getLightCoords(level, machine.getBlockPos().above(machine.type().shape.size));
+    }
+
+    @Override
+    protected void renderExtras(MachineControllerBlockEntity machine, float partialTick, PoseStack poseStack,
+                                MultiBufferSource buffers, int light) {
         Level level = machine.getLevel();
         MachineShape shape = machine.type().shape;
-        // The controller is a solid block (always dark inside): light the machine from the air above it instead.
-        int light = level == null ? packedLight : LevelRenderer.getLightColor(level, machine.getBlockPos().above(shape.size));
-        super.render(machine, partialTick, poseStack, buffers, light, packedOverlay);
         if (level == null) return;
 
         float time = time(machine, partialTick);
@@ -122,22 +130,22 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
         poseStack.translate(-shape.centerRight(), 0, shape.centerBack());
         ItemStack in = machine.shownInput(), out = machine.shownOutput();
         Matrix4f m = poseStack.last().pose();
-        VertexConsumer glow = buffers.getBuffer(RenderType.lightning());
+        VertexConsumer glow = buffers.getBuffer(RenderTypes.lightning());
 
         switch (machine.type()) {
             case PRESS -> {
                 float down = working ? ramDown(p) : 0;
                 float squash = working && p > 0.3f && p < 0.6f ? 1 : 0;
                 ItemStack show = working ? in : out;
-                item(poseStack, buffers, level, light, show, 0, 10.2f / 16, 0, 0.42f, 90, 0, 1 + 0.18f * squash, 1 - 0.55f * squash);
+                item(poseStack, level, light, show, 0, 10.2f / 16, 0, 0.42f, 90, 0, 1 + 0.18f * squash, 1 - 0.55f * squash);
                 if (working) cycleEvent(machine, cycleNo, p, 0.35f, () ->
                         level.playLocalSound(machine.getBlockPos(), SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.25f, 0.6f, false));
-                if (down > 0.95f && working && level.random.nextFloat() < 0.3f) spark(level, machine, 0, 10.5f / 16, 0);
+                if (down > 0.95f && working && level.getRandom().nextFloat() < 0.3f) spark(level, machine, 0, 10.5f / 16, 0);
             }
             case FURNACE -> {
                 ItemStack show = working ? in : out;
                 float bob = working ? (float) Math.sin(time * 0.15) * 0.03f : 0;
-                item(poseStack, buffers, level, 0xF000F0, show, 0, (working ? 13.5f : 11.6f) / 16 + bob, 0, 0.28f,
+                item(poseStack, level, 0xF000F0, show, 0, (working ? 13.5f : 11.6f) / 16 + bob, 0, 0.28f,
                         working ? 0 : 90, working ? time * 4 : 0, 1, 1);
                 if (working) {
                     float drop = 1.5f + (float) Math.sin(time * 0.3) * 0.5f;
@@ -154,22 +162,22 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
             case WIRE_EXTRUDER -> {
                 if (working && !in.isEmpty()) {
                     float sink = p * 0.04f;
-                    item(poseStack, buffers, level, light, in, 0, 36.5f / 16 - sink, 0, 0.32f, 0, time * 2, 1, 1);
+                    item(poseStack, level, light, in, 0, 36.5f / 16 - sink, 0, 0.32f, 0, time * 2, 1, 1);
                     // Wire from the die onto the top of the spool.
                     float[] die = {0, 16 / 16f, 1.5f / 16f}, spool = {0, 16 / 16f, -9 / 16f};
                     ColliderRenderer.ribbon(glow, m, die, spool, 0.012f, 220, 140, 70, 230);
                 } else if (!out.isEmpty()) {
-                    item(poseStack, buffers, level, light, out, 0, 4.2f / 16, -2.5f / 16, 0.3f, 90, 0, 1, 1);
+                    item(poseStack, level, light, out, 0, 4.2f / 16, -2.5f / 16, 0.3f, 90, 0, 1, 1);
                 }
             }
             case KILN -> {
                 ItemStack show = working ? in : out;
-                item(poseStack, buffers, level, working ? 0xF000F0 : light, show, 0, 14.6f / 16, 0, 0.55f, 0, working ? time * 1.5f : 30, 1, 1);
-                if (working && level.random.nextFloat() < 0.08f) {
+                item(poseStack, level, working ? 0xF000F0 : light, show, 0, 14.6f / 16, 0, 0.55f, 0, working ? time * 1.5f : 30, 1, 1);
+                if (working && level.getRandom().nextFloat() < 0.08f) {
                     Vec3 top = world(machine, 0, 62 / 16f, 12 / 16f);
                     level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, top.x, top.y, top.z, 0, 0.03, 0);
                 }
-                if (working && level.random.nextFloat() < 0.01f) {
+                if (working && level.getRandom().nextFloat() < 0.01f) {
                     level.playLocalSound(machine.getBlockPos(), SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 0.4f, 0.8f, false);
                 }
             }
@@ -179,17 +187,17 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
                         float f = p / 0.6f;
                         float y = (42 - 16 * f * f) / 16f;
                         float s = 0.24f * (1 - 0.5f * Math.max(0, (f - 0.7f) / 0.3f));
-                        item(poseStack, buffers, level, light, in, 0, y, 0, s, 0, time * 6, 1, 1);
+                        item(poseStack, level, light, in, 0, y, 0, s, 0, time * 6, 1, 1);
                     }
-                    if (p > 0.55f && p < 0.85f && level.random.nextFloat() < 0.5f) {
+                    if (p > 0.55f && p < 0.85f && level.getRandom().nextFloat() < 0.5f) {
                         Vec3 gap = world(machine, 0, 23 / 16f, 0);
-                        level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, in), gap.x, gap.y, gap.z,
-                                (level.random.nextFloat() - 0.5f) * 0.1, -0.05, (level.random.nextFloat() - 0.5f) * 0.1);
+                        level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(in)), gap.x, gap.y, gap.z,
+                                (level.getRandom().nextFloat() - 0.5f) * 0.1, -0.05, (level.getRandom().nextFloat() - 0.5f) * 0.1);
                     }
                     cycleEvent(machine, cycleNo, p, 0.6f, () ->
                             level.playLocalSound(machine.getBlockPos(), SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 0.5f, 0.7f, false));
                 } else if (!out.isEmpty()) {
-                    item(poseStack, buffers, level, light, out, 0, 9.2f / 16, -4 / 16f, 0.4f, 90, 20, 1, 1);
+                    item(poseStack, level, light, out, 0, 9.2f / 16, -4 / 16f, 0.4f, 90, 20, 1, 1);
                 }
             }
             case BANBURY_MIXER -> {
@@ -197,29 +205,29 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
                     // Pressed by the weight: spreads out and flattens while the ram is down, then springs back.
                     float press = ramDown(p);
                     float wobble = (float) Math.sin(time * 0.7) * 0.06f;
-                    item(poseStack, buffers, level, light, in, 0, 18.0f / 16 - press * 0.6f / 16, 0, 0.22f, 90, time * 3,
+                    item(poseStack, level, light, in, 0, 18.0f / 16 - press * 0.6f / 16, 0, 0.22f, 90, time * 3,
                             1 + 0.35f * press + wobble, 1 - 0.5f * press);
                     cycleEvent(machine, cycleNo, p, 0.35f, () ->
                             level.playLocalSound(machine.getBlockPos(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.BLOCKS, 0.5f, 0.6f, false));
-                    if (level.random.nextFloat() < 0.04f) {
+                    if (level.getRandom().nextFloat() < 0.04f) {
                         Vec3 top = world(machine, 0, 41 / 16f, 0);
                         level.addParticle(ParticleTypes.POOF, top.x, top.y, top.z, 0, 0.02, 0);
                     }
                 } else if (!out.isEmpty()) {
-                    item(poseStack, buffers, level, light, out, 0, 5.2f / 16, -11 / 16f, 0.32f, 90, 0, 1, 1);
+                    item(poseStack, level, light, out, 0, 5.2f / 16, -11 / 16f, 0.32f, 90, 0, 1, 1);
                 }
             }
             case LATEX_VULCANIZER -> {
                 if (working) {
                     // Steam from the vent on top, and a hiss as each sheet comes off the drum.
-                    if (level.random.nextFloat() < 0.15f) {
+                    if (level.getRandom().nextFloat() < 0.15f) {
                         Vec3 vent = world(machine, 0, 40 / 16f, 6 / 16f);
                         level.addParticle(ParticleTypes.CLOUD, vent.x, vent.y, vent.z, 0, 0.04, 0);
                     }
                     cycleEvent(machine, cycleNo, p, 0.8f, () ->
                             level.playLocalSound(machine.getBlockPos(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.25f, 1.4f, false));
                 }
-                if (!out.isEmpty()) item(poseStack, buffers, level, light, out, 0, 5.2f / 16, -11.5f / 16, 0.32f, 90, 0, 1, 1);
+                if (!out.isEmpty()) item(poseStack, level, light, out, 0, 5.2f / 16, -11.5f / 16, 0.32f, 90, 0, 1, 1);
             }
         }
         poseStack.popPose();
@@ -234,7 +242,7 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
     private static void ports(MachineControllerBlockEntity m, PoseStack ps, MultiBufferSource buffers, float time) {
         Direction facing = facing(m);
         BlockPos base = m.getBlockPos();
-        VertexConsumer c = buffers.getBuffer(RenderType.lightning());
+        VertexConsumer c = buffers.getBuffer(RenderTypes.lightning());
         Matrix4f mat = ps.last().pose();
         int alpha = (int) (170 + 60 * Math.sin(time * 0.12));
         for (MachineShape.Part part : m.type().shape.parts(base, facing)) {
@@ -305,12 +313,12 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
 
     private static void spark(Level level, MachineControllerBlockEntity m, float x, float y, float z) {
         Vec3 v = world(m, x, y, z);
-        level.addParticle(ParticleTypes.ELECTRIC_SPARK, v.x, v.y, v.z, (level.random.nextFloat() - 0.5f) * 0.2, 0.05, (level.random.nextFloat() - 0.5f) * 0.2);
+        level.addParticle(ParticleTypes.ELECTRIC_SPARK, v.x, v.y, v.z, (level.getRandom().nextFloat() - 0.5f) * 0.2, 0.05, (level.getRandom().nextFloat() - 0.5f) * 0.2);
     }
 
     // An item in the machine's frame (front = -Z): position in blocks, size, tilt (x rotation), turn (y rotation),
     // and stretch across / squash through its thickness (for the press).
-    private static void item(PoseStack ps, MultiBufferSource buffers, Level level, int light, ItemStack stack,
+    private static void item(PoseStack ps, Level level, int light, ItemStack stack,
                              float x, float y, float z, float scale, float tilt, float turn, float stretch, float squash) {
         if (stack.isEmpty()) return;
         ps.pushPose();
@@ -318,8 +326,7 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
         ps.mulPose(Axis.YP.rotationDegrees(turn));
         ps.mulPose(Axis.XP.rotationDegrees(tilt));
         ps.scale(scale * stretch, scale * stretch, scale * squash);
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY,
-                ps, buffers, level, 0);
+        LegacyRender.item(stack, ItemDisplayContext.FIXED, light, ps, level, 0);
         ps.popPose();
     }
 
@@ -348,15 +355,16 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
 
     // Turn the model to the machine's facing, then slide it to the center of the structure.
     @Override
-    protected void rotateBlock(Direction facing, PoseStack poseStack) {
-        poseStack.mulPose(Axis.YP.rotationDegrees(degrees(facing)));
+    protected void tryRotateByBlockstate(com.geckolib.renderer.base.RenderPassInfo<State<MachineControllerBlockEntity>> info, PoseStack poseStack) {
+        MachineControllerBlockEntity animatable = info.renderState().blockEntity;
+        poseStack.mulPose(Axis.YP.rotationDegrees(degrees(facing(animatable))));
         MachineShape shape = animatable.type().shape;
         // In this turned frame the front is -Z, the back is +Z, and "right" (as you face the front) is -X.
         poseStack.translate(-shape.centerRight(), 0, shape.centerBack());
     }
 
     @Override
-    public boolean shouldRenderOffScreen(MachineControllerBlockEntity blockEntity) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 
@@ -366,49 +374,53 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
         return new AABB(machine.getBlockPos()).inflate(machine.type().shape.size + 1);
     }
 
-    private static class Model extends GeoModel<MachineControllerBlockEntity> {
+    private static class Model extends GeoModel<MachineControllerBlockEntity> implements LegacyGeoBlockRenderer.Animated<MachineControllerBlockEntity> {
+        private java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bones = n -> null;
         @Override
-        public ResourceLocation getModelResource(MachineControllerBlockEntity machine) {
-            return rl("geo/block/" + machine.type().id + ".geo.json");
+        public Identifier getModelResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            MachineControllerBlockEntity machine = LegacyGeoBlockRenderer.be(renderState);
+            return rl("block/" + machine.type().id);
         }
 
         @Override
-        public ResourceLocation getTextureResource(MachineControllerBlockEntity machine) {
+        public Identifier getTextureResource(com.geckolib.renderer.base.GeoRenderState renderState) {
+            MachineControllerBlockEntity machine = LegacyGeoBlockRenderer.be(renderState);
             return rl("textures/block/machine/" + machine.type().id + "_t" + tier(machine) + ".png");
         }
 
         @Override
-        public ResourceLocation getAnimationResource(MachineControllerBlockEntity machine) {
-            return rl("animations/block/" + machine.type().id + ".animation.json");
+        public Identifier getAnimationResource(MachineControllerBlockEntity machine) {
+            return rl("block/" + machine.type().id);
         }
 
         // The moving parts, worked out from the game clock so they match the item drawn in render().
         @Override
-        public void setCustomAnimations(MachineControllerBlockEntity machine, long instanceId, AnimationState<MachineControllerBlockEntity> state) {
-            float time = time(machine, state.getPartialTick());
+        public void animate(MachineControllerBlockEntity machine, float partialTick, java.util.function.Function<String, com.geckolib.animation.state.BoneSnapshot> bonesIn) {
+            this.bones = bonesIn;
+            float time = time(machine, partialTick);
             boolean working = working(machine);
             double c = cycle(machine, time);
             float p = (float) (c - Math.floor(c));
             float rate = rate(machine);
             switch (machine.type()) {
-                case PRESS -> bone("ram", b -> b.setPosY(working ? -2.6f * ramDown(p) : 0));
-                case FURNACE -> bone("electrodes", b -> b.setPosY(working ? -(1.5f + (float) Math.sin(time * 0.3) * 0.5f) : 0));
+                case PRESS -> bone("ram", b -> b.setTranslateY(working ? -2.6f * ramDown(p) : 0));
+                case FURNACE -> bone("electrodes", b -> b.setTranslateY(working ? -(1.5f + (float) Math.sin(time * 0.3) * 0.5f) : 0));
                 case WIRE_EXTRUDER -> bone("spool", b -> b.setRotX(working ? time * 0.12f * rate : 0));
                 case KILN -> bone("flames", b -> {
-                    b.setHidden(!working);
+                    b.skipRender(!working);
                     b.setScaleY(0.75f + 0.35f * (float) Math.abs(Math.sin(time * 0.9) * Math.sin(time * 0.37)));
                 });
                 case BANBURY_MIXER -> {
                     float a = working ? time * 0.14f * rate : 0;
                     bone("rotor_l", b -> b.setRotZ(a));
                     bone("rotor_r", b -> b.setRotZ(-a + (float) (Math.PI / 2)));
-                    bone("ram", b -> b.setPosY(working ? -2.0f * ramDown(p) : 0));
+                    bone("ram", b -> b.setTranslateY(working ? -2.0f * ramDown(p) : 0));
                 }
                 case LATEX_VULCANIZER -> {
                     bone("drum", b -> b.setRotX(working ? time * 0.08f * rate : 0));
                     float fill = machine.shownLatex();
                     bone("latex", b -> {
-                        b.setHidden(fill <= 0);
+                        b.skipRender(fill <= 0);
                         b.setScaleY(Math.max(0.01f, fill));
                     });
                 }
@@ -420,13 +432,13 @@ public class MachineControllerRenderer extends GeoBlockRenderer<MachineControlle
             }
         }
 
-        private void bone(String name, java.util.function.Consumer<GeoBone> f) {
-            GeoBone b = getAnimationProcessor().getBone(name);
+        private void bone(String name, java.util.function.Consumer<com.geckolib.animation.state.BoneSnapshot> f) {
+            com.geckolib.animation.state.BoneSnapshot b = bones.apply(name);
             if (b != null) f.accept(b);
         }
 
-        private static ResourceLocation rl(String path) {
-            return ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, path);
+        private static Identifier rl(String path) {
+            return Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, path);
         }
     }
 }

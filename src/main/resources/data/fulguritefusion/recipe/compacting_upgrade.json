@@ -7,18 +7,10 @@
     "FTF"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "T": {
-      "item": "minecraft:string"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "T": "minecraft:string",
+    "P": "minecraft:piston",
+    "G": "fulguritefusion:gold_sheet"
   },
   "result": {
     "id": "fulguritefusion:compacting_upgrade",

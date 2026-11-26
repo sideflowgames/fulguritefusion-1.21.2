@@ -10,7 +10,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 
 // Ion Bulb: a glowing bulb that grows underwater on the floor of the Ion Lakes. Only lives in water.
-public class IonBulbBlock extends BushBlock implements LiquidBlockContainer {
+public class IonBulbBlock extends VegetationBlock implements LiquidBlockContainer {
     public static final MapCodec<IonBulbBlock> CODEC = simpleCodec(IonBulbBlock::new);
     private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 10, 13);
 
@@ -31,7 +31,7 @@ public class IonBulbBlock extends BushBlock implements LiquidBlockContainer {
     }
 
     @Override
-    protected MapCodec<? extends BushBlock> codec() {
+    protected MapCodec<? extends VegetationBlock> codec() {
         return CODEC;
     }
 
@@ -58,9 +58,9 @@ public class IonBulbBlock extends BushBlock implements LiquidBlockContainer {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        BlockState result = super.updateShape(state, dir, neighbor, level, pos, neighborPos);
-        if (!result.isAir()) level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
+        BlockState result = super.updateShape(state, level, scheduledTicks, pos, dir, neighborPos, neighbor, shapeRandom);
+        if (!result.isAir()) scheduledTicks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         return result;
     }
 
@@ -70,7 +70,7 @@ public class IonBulbBlock extends BushBlock implements LiquidBlockContainer {
     }
 
     @Override
-    public boolean canPlaceLiquid(@Nullable Player player, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid) {
+    public boolean canPlaceLiquid(@Nullable net.minecraft.world.entity.LivingEntity player, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid) {
         return false;
     }
 

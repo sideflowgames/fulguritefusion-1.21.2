@@ -6,7 +6,7 @@ import com.sideflowgames.fulguritefusion.trinket.EquipmentMenu;
 import com.sideflowgames.fulguritefusion.trinket.TrinketKind;
 import com.sideflowgames.fulguritefusion.trinket.Trinkets;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -19,9 +19,7 @@ import net.minecraft.world.item.ItemStack;
 // a button back to the normal inventory.
 public class EquipmentScreen extends AbstractContainerScreen<EquipmentMenu> {
     public EquipmentScreen(EquipmentMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = EquipmentMenu.WIDTH;
-        imageHeight = EquipmentMenu.HEIGHT;
+        super(menu, inventory, title, EquipmentMenu.WIDTH, EquipmentMenu.HEIGHT);
         inventoryLabelY = EquipmentMenu.INV_Y - 11;
     }
 
@@ -49,32 +47,32 @@ public class EquipmentScreen extends AbstractContainerScreen<EquipmentMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
         GuiStyle.panel(g, leftPos, topPos, imageWidth, imageHeight);
         for (Slot s : menu.slots) GuiStyle.slot(g, leftPos + s.x, topPos + s.y);
         for (int i = 0; i < Trinkets.SIZE; i++) {
             Slot s = menu.slots.get(i);
             if (s.hasItem()) continue;
             int x = leftPos + s.x, y = topPos + s.y;
-            g.renderFakeItem(ghost(i), x, y);
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 200);
+            g.fakeItem(ghost(i), x, y);
+            g.pose().pushMatrix();
+            g.nextStratum();
             g.fill(x, y, x + 16, y + 16, 0xB0284664);
-            g.pose().popPose();
+            g.pose().popMatrix();
         }
-        g.drawString(font, "Back", leftPos + EquipmentMenu.slotX(Trinkets.BACK) - 1, topPos + EquipmentMenu.TOP + 19, GuiStyle.TEXT, false);
+        g.text(font, "Back", leftPos + EquipmentMenu.slotX(Trinkets.BACK) - 1, topPos + EquipmentMenu.TOP + 19, GuiStyle.opaque(GuiStyle.TEXT), false);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index < Trinkets.SIZE && menu.getCarried().isEmpty()) {
             int i = hoveredSlot.index;
             Component name = i == Trinkets.BACK ? Component.literal("Back: a backpack")
                     : Component.literal("Slot: ").append(ghost(i).getHoverName());
-            g.renderTooltip(font, name, mouseX, mouseY);
+            g.setTooltipForNextFrame(font, name, mouseX, mouseY);
         } else {
-            renderTooltip(g, mouseX, mouseY);
         }
     }
 }

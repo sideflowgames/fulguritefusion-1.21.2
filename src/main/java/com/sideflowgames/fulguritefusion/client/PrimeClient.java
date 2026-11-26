@@ -41,7 +41,7 @@ public final class PrimeClient {
             }
         }
         if (unreported >= 10 || (unreported > 0 && !gliding)) {
-            PacketDistributor.sendToServer(new PrimeNetwork.BoostPayload(unreported));
+            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new PrimeNetwork.BoostPayload(unreported));
             unreported = 0;
         }
     }

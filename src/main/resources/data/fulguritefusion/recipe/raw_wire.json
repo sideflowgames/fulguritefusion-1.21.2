@@ -5,12 +5,8 @@
     "SFS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    }
+    "S": "fulguritefusion:copper_sheet",
+    "F": "fulguritefusion:fulgurite"
   },
   "result": {
     "id": "fulguritefusion:raw_wire",

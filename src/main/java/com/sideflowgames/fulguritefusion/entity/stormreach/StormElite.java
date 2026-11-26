@@ -15,7 +15,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -32,14 +32,14 @@ public abstract class StormElite extends StormBeast {
 
     protected StormElite(EntityType<? extends Monster> type, Level level, String name, BossEvent.BossBarColor color) {
         super(type, level, name);
-        bossBar = new ServerBossEvent(getDisplayName(), color, BossEvent.BossBarOverlay.NOTCHED_10);
+        bossBar = new ServerBossEvent(getUUID(), getDisplayName(), color, BossEvent.BossBarOverlay.NOTCHED_10);
         xpReward = 120;
         fieldRadius = 8.0;
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 10 == 0 && level() instanceof ServerLevel server) {
             for (ServerPlayer p : server.players()) {
@@ -75,9 +75,9 @@ public abstract class StormElite extends StormBeast {
         return getHealth() >= getMaxHealth();
     }
 
-    public static <T extends Mob> boolean checkEliteSpawn(EntityType<T> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static <T extends Mob> boolean checkEliteSpawn(EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                                           BlockPos pos, RandomSource random) {
-        if (MobSpawnType.isSpawner(reason) || reason == MobSpawnType.SPAWN_EGG) return true;
+        if (EntitySpawnReason.isSpawner(reason) || reason == EntitySpawnReason.SPAWN_ITEM_USE) return true;
         ServerLevel server = level.getLevel();
         if (!Stormreach.is(server) || level.getDifficulty() == Difficulty.PEACEFUL) return false;
         if (com.sideflowgames.fulguritefusion.brew.StormWardBlockEntity.warded(server, pos)) return false;

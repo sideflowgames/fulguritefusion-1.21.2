@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -50,7 +50,7 @@ public final class ModBrews {
     // Steadfast: can't be knocked back.
     public static final DeferredHolder<MobEffect, MobEffect> STEADFAST = EFFECTS.register("steadfast",
             () -> new Simple(MobEffectCategory.BENEFICIAL, 0x5C6274).addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE,
-                    ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "steadfast"), 1.0, AttributeModifier.Operation.ADD_VALUE));
+                    Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "steadfast"), 1.0, AttributeModifier.Operation.ADD_VALUE));
     // Storm Veil: storm beasts lose track of you (see StormBeast).
     public static final DeferredHolder<MobEffect, MobEffect> STORM_VEIL = EFFECTS.register("storm_veil",
             () -> new Simple(MobEffectCategory.BENEFICIAL, 0x6C5CA8));
@@ -66,13 +66,13 @@ public final class ModBrews {
     public static final DeferredHolder<Potion, Potion> VOLT_DRAUGHT = POTIONS.register("volt_draught",
             () -> new Potion("volt_draught", new MobEffectInstance(VOLT_SURGE, 1)));
     public static final DeferredHolder<Potion, Potion> HULKS_BREW = POTIONS.register("hulks_brew",
-            () -> new Potion("hulks_brew", new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1800, 1), new MobEffectInstance(STEADFAST, 1800)));
+            () -> new Potion("hulks_brew", new MobEffectInstance(MobEffects.RESISTANCE, 1800, 1), new MobEffectInstance(STEADFAST, 1800)));
     public static final DeferredHolder<Potion, Potion> VEIL_DRAUGHT = POTIONS.register("veil_draught",
             () -> new Potion("veil_draught", new MobEffectInstance(MobEffects.INVISIBILITY, 3600), new MobEffectInstance(STORM_VEIL, 3600)));
     public static final DeferredHolder<Potion, Potion> LEECH_TONIC = POTIONS.register("leech_tonic",
             () -> new Potion("leech_tonic", new MobEffectInstance(MobEffects.REGENERATION, 600, 1)));
     public static final DeferredHolder<Potion, Potion> SKYSTEP_DRAUGHT = POTIONS.register("skystep_draught",
-            () -> new Potion("skystep_draught", new MobEffectInstance(MobEffects.SLOW_FALLING, 3600), new MobEffectInstance(MobEffects.JUMP, 3600, 1)));
+            () -> new Potion("skystep_draught", new MobEffectInstance(MobEffects.SLOW_FALLING, 3600), new MobEffectInstance(MobEffects.JUMP_BOOST, 3600, 1)));
     public static final DeferredHolder<Potion, Potion> EMBER_ELIXIR = POTIONS.register("ember_elixir",
             () -> new Potion("ember_elixir", new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 12000)));
     public static final DeferredHolder<Potion, Potion> RIME_DRAUGHT = POTIONS.register("rime_draught",
@@ -124,7 +124,7 @@ public final class ModBrews {
         }
 
         @Override
-        public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity indirect, LivingEntity entity, int amplifier, double health) {
+        public void applyInstantenousEffect(ServerLevel level, @Nullable Entity source, @Nullable Entity indirect, LivingEntity entity, int amplifier, double health) {
             int left = 250_000 * (amplifier + 1);
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                 ItemStack stack = entity.getItemBySlot(slot);
@@ -147,7 +147,7 @@ public final class ModBrews {
         }
 
         @Override
-        public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+        public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
             if (entity.getTicksFrozen() > 0) entity.setTicksFrozen(0);
             return true;
         }
@@ -164,7 +164,7 @@ public final class ModBrews {
         }
 
         @Override
-        public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+        public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
             if (entity.level() instanceof ServerLevel server) {
                 for (Mob m : server.getEntitiesOfClass(Mob.class, entity.getBoundingBox().inflate(32), m -> m instanceof Enemy && m.isAlive())) {
                     m.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));

@@ -7,18 +7,10 @@
     "GSG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "A": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    }
+    "G": "minecraft:glass",
+    "A": "fulguritefusion:gold_sheet",
+    "R": "minecraft:redstone",
+    "S": "fulguritefusion:silver_sheet"
   },
   "result": {
     "id": "fulguritefusion:empty_spark_cell",

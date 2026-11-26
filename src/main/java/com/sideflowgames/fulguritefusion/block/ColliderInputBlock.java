@@ -10,7 +10,6 @@ import net.minecraft.world.SimpleMenuProvider;
 import com.sideflowgames.fulguritefusion.menu.ColliderPartMenu;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -47,27 +46,27 @@ public class ColliderInputBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!stack.is(ModItems.SPARK_CELL.get())) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ColliderInputBlockEntity input) {
+        if (!stack.is(ModItems.SPARK_CELL.get())) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ColliderInputBlockEntity input) {
             ItemStack left = input.insert(stack.copy());
             int added = stack.getCount() - left.getCount();
             if (!player.getAbilities().instabuild) stack.shrink(added);
-            player.displayClientMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
-                    + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded"), true);
+            player.sendOverlayMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
+                    + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded"));
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ColliderInputBlockEntity input) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof ColliderInputBlockEntity input) {
             if (player.isShiftKeyDown()) {
                 ItemStack out = input.takeAll();
                 if (!out.isEmpty() && !player.getInventory().add(out)) player.drop(out, false);
-                player.displayClientMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
-                        + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded (2 per shot)"), true);
+                player.sendOverlayMessage(Component.literal("Collider Input: " + input.cellCount() + " / "
+                        + ColliderInputBlockEntity.MAX_CELLS + " Spark Cells loaded (2 per shot)"));
             } else {
                 openFor(level, pos, player, input, true);
             }
@@ -90,12 +89,12 @@ public class ColliderInputBlock extends BaseEntityBlock {
                 });
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ColliderInputBlockEntity input) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), input.getItems().getStackInSlot(0));
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
         if (!state.is(newState.getBlock())) ColliderCoreBlockEntity.partRemoved(level, pos);
     }
 
@@ -106,7 +105,7 @@ public class ColliderInputBlock extends BaseEntityBlock {
 
     // Formed: hidden inside the ring model, so it mustn't hide the faces of the blocks around it.
     @Override
-    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state, level, pos);
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(ColliderParts.FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
     }
 }

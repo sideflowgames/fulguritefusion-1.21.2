@@ -3,9 +3,7 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    {
-      "tag": "fulguritefusion:rubber_logs"
-    }
+    "#fulguritefusion:rubber_logs"
   ],
   "result": {
     "id": "fulguritefusion:rubber_planks",

@@ -12,7 +12,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ambient.Bat;
@@ -21,12 +21,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +40,7 @@ public class VoidmothEntity extends Bat implements GeoEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     // Flight tuning: lower STEERING = smoother, wider turns.
-    private static final double FLY_SPEED = 0.50;
+    private static final double FLY_SPEED = 0.22;
     private static final double STEERING = 0.06;
 
     @Nullable private BlockPos endRod;
@@ -57,9 +57,9 @@ public class VoidmothEntity extends Bat implements GeoEntity {
 
     // Every hit drains the attacker.
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !level().isClientSide && source.getEntity() instanceof Player player && !player.getAbilities().instabuild) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
+        if (hurt && !level().isClientSide() && source.getEntity() instanceof Player player && !player.getAbilities().instabuild) {
             if (player.experienceLevel > 0) player.giveExperienceLevels(-1);
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAKNESS_TICKS, 0));
             ServerLevel server = (ServerLevel) level();
@@ -72,15 +72,15 @@ public class VoidmothEntity extends Bat implements GeoEntity {
     // Bat-style wandering, but smoother: the moth picks a spot nearby (often near an End Rod), curves toward
     // it gently instead of jerking around, and now and then lands under a ceiling to rest like a bat.
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
         if (isResting()) {
-            super.customServerAiStep(); // the bat's own resting and waking logic
+            super.customServerAiStep(serverLevel); // the bat's own resting and waking logic
             return;
         }
         if (tickCount % 40 == 0) {
             endRod = BlockPos.findClosestMatch(blockPosition(), 12, 6, p -> level().getBlockState(p).is(Blocks.END_ROD)).orElse(null);
         }
-        if (target != null && (!level().isEmptyBlock(target) || target.getY() <= level().getMinBuildHeight())) target = null;
+        if (target != null && (!level().isEmptyBlock(target) || target.getY() <= level().getMinY())) target = null;
         if (target == null || random.nextInt(80) == 0 || target.closerToCenterThan(position(), 2.0)) {
             BlockPos base = endRod != null && random.nextInt(3) != 0 ? endRod : blockPosition();
             target = new BlockPos(base.getX() + random.nextInt(9) - 4, base.getY() + random.nextInt(5) - 2,
@@ -101,7 +101,7 @@ public class VoidmothEntity extends Bat implements GeoEntity {
     }
 
     // Spawns over End stone on the outer islands (biomes set in the biome modifier).
-    public static boolean checkSpawn(EntityType<VoidmothEntity> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static boolean checkSpawn(EntityType<VoidmothEntity> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                      BlockPos pos, RandomSource random) {
         if (!level.getLevel().dimension().equals(Level.END)) return false;
         for (int i = 1; i <= 8; i++) {
@@ -129,7 +129,7 @@ public class VoidmothEntity extends Bat implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "flight", 4,
+        controllers.add(new AnimationController<>("flight", 4,
                 state -> state.setAndContinue(isResting() ? REST : FLY)));
     }
 

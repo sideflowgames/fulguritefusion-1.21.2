@@ -22,7 +22,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
@@ -129,10 +129,10 @@ public final class RiftPortals {
 
     public static void enter(ServerPlayer player, BlockPos at) {
         if (player.isOnPortalCooldown() || player.isPassenger()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!Stormreach.allowed(player)) {
-            player.displayClientMessage(Component.literal("The Stormreach is still in development. It's coming in Fulgurite Fusion 2.0.")
-                    .withStyle(ChatFormatting.GRAY), true);
+            player.sendOverlayMessage(Component.literal("The Stormreach is still in development. It's coming in Fulgurite Fusion 2.0.")
+                    .withStyle(ChatFormatting.GRAY));
             player.setPortalCooldown(60);
             return;
         }
@@ -141,20 +141,20 @@ public final class RiftPortals {
             player.setDeltaMovement(-v.x * 3 - 0.2 * Math.signum(v.x), 0.35, -v.z * 3 - 0.2 * Math.signum(v.z));
             player.hurtMarked = true;
             level.playSound(null, at, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.BLOCKS, 0.8f, 1.6f);
-            player.displayClientMessage(Component.literal("The rift crackles and throws you back. The storm doesn't know you yet.")
-                    .withStyle(ChatFormatting.DARK_PURPLE), true);
+            player.sendOverlayMessage(Component.literal("The rift crackles and throws you back. The storm doesn't know you yet.")
+                    .withStyle(ChatFormatting.DARK_PURPLE));
             player.setPortalCooldown(40);
             return;
         }
         ResourceKey<Level> otherKey = Stormreach.is(level) ? Level.OVERWORLD : level.dimension() == Level.OVERWORLD ? Stormreach.LEVEL : null;
         if (otherKey == null) return;
-        ServerLevel other = player.server.getLevel(otherKey);
+        ServerLevel other = player.level().getServer().getLevel(otherKey);
         if (other == null) return;
         BlockPos keystone = keystoneOf(level, at);
         if (keystone == null) return;
         Direction.Axis axis = level.getBlockState(at).getValue(RiftPortalBlock.AXIS);
 
-        Links links = player.server.overworld().getDataStorage().computeIfAbsent(Links.FACTORY, "fulguritefusion_rifts");
+        Links links = player.level().getServer().overworld().getDataStorage().computeIfAbsent(Links.FACTORY);
         BlockPos dest = links.find(level.dimension(), keystone);
         if (dest == null) {
             dest = buildCounterpart(other, keystone.getX(), keystone.getZ(), axis);
@@ -164,8 +164,8 @@ public final class RiftPortals {
         }
         BlockPos stand = dest.below();
         while (other.getBlockState(stand.below()).is(ModBlocks.RIFT_PORTAL.get())) stand = stand.below();
-        player.changeDimension(new DimensionTransition(other, Vec3.atBottomCenterOf(stand), Vec3.ZERO, player.getYRot(), player.getXRot(),
-                DimensionTransition.DO_NOTHING));
+        player.teleport(new TeleportTransition(other, Vec3.atBottomCenterOf(stand), Vec3.ZERO, player.getYRot(), player.getXRot(),
+                TeleportTransition.DO_NOTHING));
         player.setPortalCooldown(100);
         other.playSound(null, stand, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0f, 1.3f);
     }
@@ -233,7 +233,7 @@ public final class RiftPortals {
     private static BlockPos ground(ServerLevel level, int x, int z) {
         int top = level.getChunk(x >> 4, z >> 4).getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, top, z);
-        while (p.getY() > level.getMinBuildHeight() + 1) {
+        while (p.getY() > level.getMinY() + 1) {
             BlockState s = level.getBlockState(p);
             boolean skip = s.isAir() || s.canBeReplaced() || s.is(net.minecraft.tags.BlockTags.LEAVES) || s.is(net.minecraft.tags.BlockTags.LOGS)
                     || !s.isSolid();
@@ -284,7 +284,7 @@ public final class RiftPortals {
     // ---- which rift leads to which ----
 
     public static class Links extends SavedData {
-        static final SavedData.Factory<Links> FACTORY = new SavedData.Factory<>(Links::new, Links::load, null);
+        static final net.minecraft.world.level.saveddata.SavedDataType<Links> FACTORY = com.sideflowgames.fulguritefusion.util.NbtBridge.savedData("fulguritefusion_rifts", Links::new, Links::load, (d, t) -> d.save(t, null));
 
         record Link(ResourceKey<Level> aDim, BlockPos a, ResourceKey<Level> bDim, BlockPos b) {}
 
@@ -314,25 +314,24 @@ public final class RiftPortals {
 
         static Links load(CompoundTag tag, HolderLookup.Provider registries) {
             Links out = new Links();
-            ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
+            ListTag list = tag.getListOrEmpty("Links");
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag t = list.getCompound(i);
-                ResourceLocation a = ResourceLocation.tryParse(t.getString("ADim")), b = ResourceLocation.tryParse(t.getString("BDim"));
+                CompoundTag t = list.getCompoundOrEmpty(i);
+                Identifier a = Identifier.tryParse(t.getStringOr("ADim", "")), b = Identifier.tryParse(t.getStringOr("BDim", ""));
                 if (a == null || b == null) continue;
-                out.links.add(new Link(ResourceKey.create(Registries.DIMENSION, a), BlockPos.of(t.getLong("A")),
-                        ResourceKey.create(Registries.DIMENSION, b), BlockPos.of(t.getLong("B"))));
+                out.links.add(new Link(ResourceKey.create(Registries.DIMENSION, a), BlockPos.of(t.getLongOr("A", 0L)),
+                        ResourceKey.create(Registries.DIMENSION, b), BlockPos.of(t.getLongOr("B", 0L))));
             }
             return out;
         }
 
-        @Override
-        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+                public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
             ListTag list = new ListTag();
             for (Link l : links) {
                 CompoundTag t = new CompoundTag();
-                t.putString("ADim", l.aDim().location().toString());
+                t.putString("ADim", l.aDim().identifier().toString());
                 t.putLong("A", l.a().asLong());
-                t.putString("BDim", l.bDim().location().toString());
+                t.putString("BDim", l.bDim().identifier().toString());
                 t.putLong("B", l.b().asLong());
                 list.add(t);
             }

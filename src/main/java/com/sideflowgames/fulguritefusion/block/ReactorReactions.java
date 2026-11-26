@@ -28,7 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -59,7 +59,7 @@ public final class ReactorReactions {
     }
 
     public static void react(ServerLevel level, FusionColliderBlockEntity reactor, Pairing result) {
-        Ctx x = new Ctx(level, reactor, reactor.getBlockPos(), level.random);
+        Ctx x = new Ctx(level, reactor, reactor.getBlockPos(), level.getRandom());
         boolean damage = Config.BLOCK_DAMAGE.get();
         switch (result.id()) {
             // ---------- Aurora Dust ----------
@@ -84,7 +84,7 @@ public final class ReactorReactions {
             case 25 -> freezeWater(x, 12); // Black Ice
             case 26 -> spawn(x, EntityType.DROWNED, 6, 10); // Drowned Choir
             case 27 -> pull(x, 16, 1.2); // Maelstrom
-            case 28 -> x.level.setWeatherParameters(0, 6000, true, false); // Thunderhead
+            case 28 -> x.level.getServer().setWeatherParameters(0, 6000, true, false); // Thunderhead
             case 30 -> coral(x, 12); // Reef Bloom
             case 31 -> { steam(x); if (damage) breakRing(x, 1, 3); } // Steam Burst
             case 32 -> cloud(x, MobEffects.POISON, 10, 1200); // Black Tide
@@ -302,7 +302,7 @@ public final class ReactorReactions {
     private static void steam(Ctx x) {
         particles(x, ParticleTypes.CLOUD, 300, 6);
         sound(x, SoundEvents.FIRE_EXTINGUISH, 3f, 0.5f);
-        for (LivingEntity e : near(x, 8)) e.hurt(x.level.damageSources().hotFloor(), 4f);
+        for (LivingEntity e : near(x, 8)) e.hurtOrSimulate(x.level.damageSources().hotFloor(), 4f);
     }
 
     // Glass and ice nearby shatter (vanilla glass and ice only: never the reactor's own blast glass).
@@ -355,20 +355,20 @@ public final class ReactorReactions {
         for (int i = 0; i < count; i++) {
             BlockPos p = ground(x, radius);
             if (p == null) continue;
-            Entity e = type.create(x.level);
+            Entity e = type.create(x.level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (e == null) continue;
-            e.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, x.rand.nextFloat() * 360, 0);
+            e.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, x.rand.nextFloat() * 360, 0);
             if (e instanceof Mob mob) {
-                mob.finalizeSpawn(x.level, x.level.getCurrentDifficultyAt(p), MobSpawnType.EVENT, null);
+                mob.finalizeSpawn(x.level, x.level.getCurrentDifficultyAt(p), EntitySpawnReason.EVENT, null);
             }
             x.level.addFreshEntity(e);
         }
     }
 
     private static void lightning(Ctx x, BlockPos p, boolean visualOnly) {
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(x.level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(x.level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt == null) return;
-        bolt.moveTo(Vec3.atBottomCenterOf(p));
+        bolt.snapTo(Vec3.atBottomCenterOf(p));
         bolt.setVisualOnly(visualOnly);
         x.level.addFreshEntity(bolt);
     }
@@ -398,7 +398,7 @@ public final class ReactorReactions {
         for (LivingEntity e : near(x, 24)) {
             if (x.rand.nextInt(3) == 0) {
                 lightning(x, e.blockPosition(), !real);
-                if (!real) e.hurt(x.level.damageSources().lightningBolt(), 5f);
+                if (!real) e.hurtOrSimulate(x.level.damageSources().lightningBolt(), 5f);
             }
         }
     }
@@ -411,7 +411,7 @@ public final class ReactorReactions {
         for (LivingEntity e : near(x, 16)) {
             if (x.rand.nextInt(2) == 0) {
                 lightning(x, e.blockPosition(), true);
-                e.hurt(x.level.damageSources().lightningBolt(), 4f);
+                e.hurtOrSimulate(x.level.damageSources().lightningBolt(), 4f);
                 e.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1));
             }
         }
@@ -444,9 +444,9 @@ public final class ReactorReactions {
     private static void hellfire(Ctx x) {
         if (Config.BOSS_SPAWNS.get()) {
             BlockPos p = ground(x, 10);
-            WitherBoss wither = EntityType.WITHER.create(x.level);
+            WitherBoss wither = EntityType.WITHER.create(x.level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (p != null && wither != null) {
-                wither.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, 0, 0);
+                wither.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, 0, 0);
                 wither.makeInvulnerable();
                 x.level.addFreshEntity(wither);
                 return;

@@ -3,9 +3,7 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    {
-      "item": "fulguritefusion:sparkbush_log"
-    }
+    "fulguritefusion:sparkbush_log"
   ],
   "result": {
     "id": "fulguritefusion:sparkbush_planks",

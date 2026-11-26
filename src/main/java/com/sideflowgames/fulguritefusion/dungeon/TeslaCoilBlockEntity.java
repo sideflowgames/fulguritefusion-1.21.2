@@ -46,11 +46,11 @@ public class TeslaCoilBlockEntity extends BlockEntity {
         for (int i = 0; i <= steps; i++) {
             Vec3 p = top.lerp(to, i / (double) steps);
             double j = (i == 0 || i == steps) ? 0 : 0.15;
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (server.random.nextDouble() - 0.5) * j,
-                    p.y + (server.random.nextDouble() - 0.5) * j, p.z + (server.random.nextDouble() - 0.5) * j, 1, 0, 0, 0, 0);
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (server.getRandom().nextDouble() - 0.5) * j,
+                    p.y + (server.getRandom().nextDouble() - 0.5) * j, p.z + (server.getRandom().nextDouble() - 0.5) * j, 1, 0, 0, 0, 0);
         }
-        target.hurt(StormDamage.trap(server), 5.0f);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1));
+        target.hurtOrSimulate(StormDamage.trap(server), 5.0f);
+        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 1));
         server.playSound(null, pos, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.BLOCKS, 0.4f, 1.8f);
     }
 }

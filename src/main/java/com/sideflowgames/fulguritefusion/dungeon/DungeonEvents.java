@@ -16,7 +16,7 @@ public final class DungeonEvents {
     public static void onDeath(LivingDeathEvent event) {
         var e = event.getEntity();
         if (!(e.level() instanceof ServerLevel server) || !e.getPersistentData().contains(DungeonAltarBlockEntity.BOSS_TAG)) return;
-        BlockPos altar = BlockPos.of(e.getPersistentData().getLong(DungeonAltarBlockEntity.BOSS_TAG));
+        BlockPos altar = BlockPos.of(e.getPersistentData().getLongOr(DungeonAltarBlockEntity.BOSS_TAG, 0L));
         if (server.getBlockEntity(altar) instanceof DungeonAltarBlockEntity be) be.bossDefeated(server);
     }
 }

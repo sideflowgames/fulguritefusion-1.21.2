@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -17,7 +17,7 @@ public final class TitanNetwork {
 
     public record DashPayload(float dx, float dz) implements CustomPacketPayload {
         public static final Type<DashPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_dash"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_dash"));
         public static final StreamCodec<ByteBuf, DashPayload> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.FLOAT, DashPayload::dx, ByteBufCodecs.FLOAT, DashPayload::dz, DashPayload::new);
 

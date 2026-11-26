@@ -61,14 +61,14 @@ public class FulguriteChargerBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.FULGURITE_CHARGER_BE.get(), FulguriteChargerBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.FULGURITE_CHARGER_BE.get(), FulguriteChargerBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
             if (player.isShiftKeyDown()) {
-                player.displayClientMessage(Component.literal(charger.statusText()), true);
+                player.sendOverlayMessage(Component.literal(charger.statusText()));
             } else {
                 player.openMenu(charger, buf -> buf.writeBlockPos(pos));
             }
@@ -76,13 +76,13 @@ public class FulguriteChargerBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FulguriteChargerBlockEntity charger) {
             for (int i = 0; i < charger.getItems().getSlots(); i++) {
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), charger.getItems().getStackInSlot(i));
             }
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

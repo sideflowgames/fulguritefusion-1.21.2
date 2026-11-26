@@ -2,7 +2,7 @@ package com.sideflowgames.fulguritefusion.entity;
 
 import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // DEV BUILD ONLY: the hatchling variants. Do not copy this list into the design doc or public pages.
 // A hatchling's variant is the exotic material fired most often by the Storm Collider while its egg incubated
@@ -28,18 +28,18 @@ public enum StormwingVariant {
     public final double attack;
     // Aggressive birds also go after hostile mobs near their owner on their own.
     public final boolean aggressive;
-    private final ResourceLocation texture;
+    private final Identifier texture;
 
     StormwingVariant(String id, double speed, double attack, boolean aggressive) {
         this.id = id;
         this.speed = speed;
         this.attack = attack;
         this.aggressive = aggressive;
-        this.texture = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID,
+        this.texture = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID,
                 id.equals("plain") ? "textures/entity/stormwing.png" : "textures/entity/stormwing_" + id + ".png");
     }
 
-    public ResourceLocation texture() {
+    public Identifier texture() {
         return texture;
     }
 

@@ -12,12 +12,8 @@
     "WWW"
   ],
   "key": {
-    "W": {
-      "item": "minecraft:black_wool"
-    },
-    "R": {
-      "item": "fulguritefusion:raw_wire"
-    }
+    "W": "minecraft:black_wool",
+    "R": "fulguritefusion:raw_wire"
   },
   "result": {
     "id": "fulguritefusion:insulated_wire",

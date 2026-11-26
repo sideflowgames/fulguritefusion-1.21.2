@@ -1,7 +1,7 @@
 package com.sideflowgames.fulguritefusion;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -14,7 +14,7 @@ public final class ModSounds {
 
     // Electrical arc crackle: the Stormwing's lightning dive and flares (no thunder).
     public static final Supplier<SoundEvent> STORMWING_ARC = SOUNDS.register("stormwing_arc",
-            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormwing_arc")));
+            () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormwing_arc")));
 
     // Stormwing calls: a clear, rising whistled cry (ambient), a sharp squawk with sparks (hurt),
     // and a long sagging cry (death). Hatchlings use the same calls, higher and softer.
@@ -35,11 +35,11 @@ public final class ModSounds {
     // volume 1. The reactor is huge, so its sounds get a fixed long range (players can stand at the console,
     // or anywhere round the 93-block outer ring, and still hear a run).
     private static Supplier<SoundEvent> registerFar(String name, float range) {
-        return SOUNDS.register(name, () -> SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name), range));
+        return SOUNDS.register(name, () -> SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, name), range));
     }
 
     private static Supplier<SoundEvent> register(String name) {
-        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, name)));
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, name)));
     }
 
     private ModSounds() {}

@@ -7,18 +7,10 @@
     "RHR"
   ],
   "key": {
-    "R": {
-      "item": "fulguritefusion:reinforced_fulgurite"
-    },
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "I": {
-      "item": "fulguritefusion:collider_injector"
-    },
-    "H": {
-      "item": "fulguritefusion:heavy_wire"
-    }
+    "R": "fulguritefusion:reinforced_fulgurite",
+    "C": "fulguritefusion:coil_segment",
+    "I": "fulguritefusion:collider_injector",
+    "H": "fulguritefusion:heavy_wire"
   },
   "result": {
     "id": "fulguritefusion:fusion_injector",

@@ -7,18 +7,10 @@
     "GXG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "T": {
-      "item": "minecraft:string"
-    },
-    "D": {
-      "item": "minecraft:dispenser"
-    },
-    "X": {
-      "item": "minecraft:chest"
-    }
+    "G": "minecraft:gold_ingot",
+    "T": "minecraft:string",
+    "D": "minecraft:dispenser",
+    "X": "minecraft:chest"
   },
   "result": {
     "id": "fulguritefusion:refill_upgrade",

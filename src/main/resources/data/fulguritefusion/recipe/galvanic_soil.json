@@ -7,18 +7,10 @@
     "RFR"
   ],
   "key": {
-    "R": {
-      "item": "minecraft:rotten_flesh"
-    },
-    "D": {
-      "item": "minecraft:dirt"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "R": "minecraft:rotten_flesh",
+    "D": "minecraft:dirt",
+    "G": "minecraft:gold_ingot",
+    "F": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:galvanic_soil",

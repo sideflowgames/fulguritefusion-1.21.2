@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity;
 
+import net.minecraft.core.HolderLookup;
+
 import com.sideflowgames.fulguritefusion.ModEntities;
 import com.sideflowgames.fulguritefusion.ModItems;
 import com.sideflowgames.fulguritefusion.item.SpearItem;
@@ -20,7 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -80,9 +82,9 @@ public class SpearEntity extends AbstractArrow {
     public void tick() {
         if (inGroundTime > 4) dealtDamage = true;
         Entity owner = getOwner();
-        if (isPrime() && (dealtDamage || isNoPhysics() || getY() < level().getMinBuildHeight()) && owner != null) {
+        if (isPrime() && (dealtDamage || isNoPhysics() || getY() < level().getMinY()) && owner != null) {
             if (!owner.isAlive() || owner.isSpectator() || owner.level() != level()) {
-                if (!level().isClientSide && pickup == Pickup.ALLOWED) spawnAtLocation(getPickupItem(), 0.1f);
+                if (!level().isClientSide() && pickup == Pickup.ALLOWED) spawnAtLocation((net.minecraft.server.level.ServerLevel) level(), getPickupItem(), 0.1f);
                 discard();
                 return;
             }
@@ -90,16 +92,16 @@ public class SpearEntity extends AbstractArrow {
             setNoPhysics(true);
             Vec3 to = owner.getEyePosition().subtract(position());
             setPosRaw(getX(), getY() + to.y * 0.045, getZ());
-            if (level().isClientSide) yOld = getY();
+            if (level().isClientSide()) yOld = getY();
             setDeltaMovement(getDeltaMovement().scale(0.95).add(to.normalize().scale(0.15)));
             if (returnTicks++ == 0) playSound(SoundEvents.TRIDENT_RETURN, 10.0f, 1.2f);
         }
         super.tick();
-        if (level().isClientSide && isPrime() && tickCount % 2 == 0) {
-            level().addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.75f, 0.45f, 1.0f), 1.0f),
+        if (level().isClientSide() && isPrime() && tickCount % 2 == 0) {
+            level().addParticle(new net.minecraft.core.particles.DustParticleOptions(0xBF73FF, 1.0f),
                     getX(), getY(), getZ(), 0, 0, 0);
         }
-        if (level().isClientSide && isStorm() && !inGround && tickCount % 2 == 0) {
+        if (level().isClientSide() && isStorm() && !isInGround() && tickCount % 2 == 0) {
             level().addParticle(ParticleTypes.ELECTRIC_SPARK, getX(), getY(), getZ(), 0, 0, 0);
         }
     }
@@ -120,7 +122,7 @@ public class SpearEntity extends AbstractArrow {
         Entity owner = getOwner();
         DamageSource source = damageSources().trident(this, owner == null ? this : owner);
         dealtDamage = true;
-        target.hurt(source, damage);
+        target.hurtOrSimulate(source, damage);
         setDeltaMovement(getDeltaMovement().multiply(-0.01, -0.1, -0.01));
         playSound(SoundEvents.TRIDENT_HIT, 1.0f, 1.0f);
         if (level() instanceof ServerLevel server) {
@@ -138,18 +140,18 @@ public class SpearEntity extends AbstractArrow {
     private void strike(Vec3 at) {
         if (struck || !(level() instanceof ServerLevel server)) return;
         struck = true;
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(at.x, at.y, at.z);
+            bolt.snapTo(at.x, at.y, at.z);
             bolt.setVisualOnly(true);
             server.addFreshEntity(bolt);
         }
         Entity owner = getOwner();
-        DamageSource lightning = new DamageSource(server.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), this, owner);
+        DamageSource lightning = new DamageSource(server.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.LIGHTNING_BOLT), this, owner);
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(STRIKE_RADIUS),
                 e -> e != owner && e.isAlive())) {
-            e.hurt(lightning, STRIKE_DAMAGE);
+            e.hurtOrSimulate(lightning, STRIKE_DAMAGE);
         }
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3, at.z, 50, 1.2, 0.3, 1.2, 0.4);
     }
@@ -176,8 +178,15 @@ public class SpearEntity extends AbstractArrow {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveSpearEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveSpearEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
         tag.putBoolean("DealtDamage", dealtDamage);
         tag.putBoolean("Charged", charged);
         tag.putBoolean("Struck", struck);
@@ -186,12 +195,17 @@ public class SpearEntity extends AbstractArrow {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        dealtDamage = tag.getBoolean("DealtDamage");
-        charged = tag.getBoolean("Charged");
-        struck = tag.getBoolean("Struck");
-        entityData.set(STORM, tag.getBoolean("Storm"));
-        entityData.set(PRIME, tag.getBoolean("Prime"));
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadSpearEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadSpearEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        dealtDamage = tag.getBooleanOr("DealtDamage", false);
+        charged = tag.getBooleanOr("Charged", false);
+        struck = tag.getBooleanOr("Struck", false);
+        entityData.set(STORM, tag.getBooleanOr("Storm", false));
+        entityData.set(PRIME, tag.getBooleanOr("Prime", false));
     }
 }

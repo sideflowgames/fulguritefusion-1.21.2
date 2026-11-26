@@ -78,7 +78,7 @@ public class ItemPipeBlock extends BaseEntityBlock {
     static boolean hasInventory(LevelAccessor level, BlockPos pos, Direction d) {
         BlockPos n = pos.relative(d);
         if (level.getBlockState(n).getBlock() instanceof ItemPipeBlock) return false;
-        return level instanceof Level l && l.getCapability(Capabilities.ItemHandler.BLOCK, n, d.getOpposite()) != null;
+        return level instanceof Level l && com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(l, n, d.getOpposite()) != null;
     }
 
     static PipeSide sideFor(LevelAccessor level, BlockPos pos, Direction d) {
@@ -106,16 +106,15 @@ public class ItemPipeBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
-        return state.setValue(SIDES.get(direction), sideFor(level, pos, direction));
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
+        return state.setValue(SIDES.get(direction), sideFor((net.minecraft.world.level.LevelAccessor) level, pos, direction));
     }
 
     // An inventory's capability can come and go without a shape change (a machine forming, say).
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
-        super.neighborChanged(state, level, pos, block, fromPos, moving);
-        if (!level.isClientSide) refresh(level, pos);
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, net.minecraft.world.level.redstone.Orientation orientation, boolean moving) {
+        super.neighborChanged(state, level, pos, block, orientation, moving);
+        if (!level.isClientSide()) refresh(level, pos);
     }
 
     // Which inventory side the player clicked: the arm they hit, or the face of the core.
@@ -137,15 +136,15 @@ public class ItemPipeBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         Direction d = clickedSide(pos, hit);
         if (!hasInventory(level, pos, d)) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof ItemPipeBlockEntity be)) return InteractionResult.PASS;
         String side = d.getSerializedName().substring(0, 1).toUpperCase() + d.getSerializedName().substring(1);
         if (player.isShiftKeyDown()) {
             if (tier == 1) {
-                player.displayClientMessage(Component.literal("Filters need a Fulgurite or Stormforged Item Pipe")
-                        .withStyle(ChatFormatting.GOLD), true);
+                player.sendOverlayMessage(Component.literal("Filters need a Fulgurite or Stormforged Item Pipe")
+                        .withStyle(ChatFormatting.GOLD));
             } else if (be.mode(d) == ItemPipeBlockEntity.OFF) {
-                player.displayClientMessage(Component.literal(side + " is off").withStyle(ChatFormatting.GRAY), true);
+                player.sendOverlayMessage(Component.literal(side + " is off").withStyle(ChatFormatting.GRAY));
             } else if (player instanceof ServerPlayer sp) {
                 sp.openMenu(be.filterMenu(d), buf -> be.writeFilterMenu(buf, d));
             }
@@ -157,7 +156,7 @@ public class ItemPipeBlock extends BaseEntityBlock {
         String what = mode == ItemPipeBlockEntity.OUT ? "Extract" : mode == ItemPipeBlockEntity.IN ? "Insert" : "Off";
         ChatFormatting color = mode == ItemPipeBlockEntity.OUT ? ChatFormatting.GOLD : mode == ItemPipeBlockEntity.IN
                 ? ChatFormatting.AQUA : ChatFormatting.GRAY;
-        player.displayClientMessage(Component.literal(side + ": " + what).withStyle(color), true);
+        player.sendOverlayMessage(Component.literal(side + ": " + what).withStyle(color));
         return InteractionResult.CONSUME;
     }
 
@@ -194,7 +193,7 @@ public class ItemPipeBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    protected boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 
@@ -210,6 +209,6 @@ public class ItemPipeBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, TransportBlocks.ITEM_PIPE_BE.get(), ItemPipeBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, TransportBlocks.ITEM_PIPE_BE.get(), ItemPipeBlockEntity::serverTick);
     }
 }

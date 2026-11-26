@@ -18,9 +18,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Void Echo: the Void Arc's shield anchor. A copy of the Void Arc that looks just like it. Echoes hover around you
 // and lunge in for a clawing strike (6 damage, Darkness). Meanwhile the real Void Arc swaps places with its echoes,
@@ -52,8 +52,8 @@ public class VoidEchoEntity extends BossAnchorEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) {
             StormBossEntity boss = owner();
@@ -65,7 +65,7 @@ public class VoidEchoEntity extends BossAnchorEntity {
         if (lunging > 0) {
             lunging--;
             goal = target.position();
-            if (distanceToSqr(target) < 5.0 && doHurtTarget(target)) {
+            if (distanceToSqr(target) < 5.0 && doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target)) {
                 swing(InteractionHand.MAIN_HAND);
                 lunging = 0;
             }
@@ -86,8 +86,8 @@ public class VoidEchoEntity extends BossAnchorEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit && target instanceof LivingEntity living) living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 0), this);
         return hit;
     }
@@ -95,7 +95,7 @@ public class VoidEchoEntity extends BossAnchorEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(3) == 0) {
+        if (level().isClientSide() && random.nextInt(3) == 0) {
             level().addParticle(ParticleTypes.REVERSE_PORTAL, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0, 0);
         }
     }
@@ -117,6 +117,6 @@ public class VoidEchoEntity extends BossAnchorEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> s.setAndContinue(swinging ? STRIKE : FLOAT)));
+        controllers.add(new AnimationController<>("main", 4, s -> s.setAndContinue(swinging ? STRIKE : FLOAT)));
     }
 }

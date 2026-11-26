@@ -78,15 +78,15 @@ public class StormFurnaceBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.STORM_FURNACE_BE.get(), StormFurnaceBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.STORM_FURNACE_BE.get(), StormFurnaceBlockEntity::serverTick);
     }
 
     // Right-click: open the menu. Sneak + right-click (empty hand): show status text.
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof StormFurnaceBlockEntity furnace) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StormFurnaceBlockEntity furnace) {
             if (player.isShiftKeyDown()) {
-                player.displayClientMessage(Component.literal(furnace.statusText()), true);
+                player.sendOverlayMessage(Component.literal(furnace.statusText()));
             } else {
                 player.openMenu(furnace, buf -> buf.writeBlockPos(pos));
             }
@@ -95,8 +95,9 @@ public class StormFurnaceBlock extends BaseEntityBlock {
     }
 
     // Drop the contents when the furnace is broken.
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         // Upgrading to the next tier keeps the contents, so only drop them when it is really removed.
         boolean upgrading = newState.getBlock() instanceof StormFurnaceBlock;
         if (!state.is(newState.getBlock()) && !upgrading && level.getBlockEntity(pos) instanceof StormFurnaceBlockEntity furnace) {
@@ -104,7 +105,6 @@ public class StormFurnaceBlock extends BaseEntityBlock {
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), furnace.getItems().getStackInSlot(i));
             }
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     // Charged particles: always some sparks, more while burning,

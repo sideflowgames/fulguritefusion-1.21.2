@@ -7,24 +7,12 @@
     "MFM"
   ],
   "key": {
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    }
+    "G": "fulguritefusion:gold_sheet",
+    "B": "minecraft:bucket",
+    "C": "fulguritefusion:copper_sheet",
+    "K": "fulguritefusion:crude_arc_casing",
+    "M": "fulguritefusion:magnetite_plate",
+    "F": "minecraft:furnace"
   },
   "result": {
     "id": "fulguritefusion:latex_vulcanizer",

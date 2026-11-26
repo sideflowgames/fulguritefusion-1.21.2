@@ -8,7 +8,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -84,12 +84,12 @@ public class UpgradeFilterMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void clicked(int slotId, int button, ClickType type, Player player) {
+    public void clicked(int slotId, int button, ContainerInput type, Player player) {
         if (slotId >= 0 && slotId < BackpackUpgradeItem.FILTER_SLOTS) {
-            if (type == ClickType.PICKUP || type == ClickType.QUICK_MOVE) setGhost(slotId, getCarried());
+            if (type == ContainerInput.PICKUP || type == ContainerInput.QUICK_MOVE) setGhost(slotId, getCarried());
             return;
         }
-        if (type == ClickType.SWAP && button == handSlot) return;
+        if (type == ContainerInput.SWAP && button == handSlot) return;
         super.clicked(slotId, button, type, player);
     }
 

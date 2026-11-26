@@ -59,8 +59,8 @@ public class ThunderhulkEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (slamCooldown > 0) slamCooldown--;
         if (action() == 1) {
             getNavigation().stop();

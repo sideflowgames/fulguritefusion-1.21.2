@@ -31,7 +31,7 @@ public final class DevAutoBuild {
 
     @SubscribeEvent
     public static void onPlace(BlockEvent.EntityPlaceEvent event) {
-        if (FMLEnvironment.production || !FMLEnvironment.dist.isClient()) return;
+        if (FMLEnvironment.isProduction() || !FMLEnvironment.getDist().isClient()) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         if (!(event.getEntity() instanceof Player player) || !player.isCreative() || player.isShiftKeyDown()) return;
         if (!event.getPlacedBlock().is(ModBlocks.FUSION_COLLIDER.get())) return;
@@ -43,9 +43,9 @@ public final class DevAutoBuild {
             placed++;
         }
         placed += console(level, event.getPos());
-        player.displayClientMessage(Component.literal("[Dev] Fusion Reactor auto-built: " + placed + " blocks placed"
+        player.sendSystemMessage(Component.literal("[Dev] Fusion Reactor auto-built: " + placed + " blocks placed"
                         + " (console and cables at the Ring Injection Port corner)")
-                .withStyle(ChatFormatting.LIGHT_PURPLE), false);
+                .withStyle(ChatFormatting.LIGHT_PURPLE));
     }
 
     // The Reactor Control Console, 4 blocks out past the corner with the Ring Injection Ports and facing away

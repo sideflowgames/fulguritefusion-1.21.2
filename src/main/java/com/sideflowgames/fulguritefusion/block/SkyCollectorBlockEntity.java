@@ -90,7 +90,7 @@ public class SkyCollectorBlockEntity extends BlockEntity {
             status = "waiting for clear weather";
             return SkyCollectorBlock.Mode.IDLE;
         }
-        long time = l.getDayTime() % 24000L;
+        long time = l.getDefaultClockTime() % 24000L;
         boolean night = time >= 13000 && time <= 23000, midday = time >= 4500 && time <= 7500;
         if (night) {
             if (worldPosition.getY() >= AURORA_MIN_Y) {
@@ -141,7 +141,7 @@ public class SkyCollectorBlockEntity extends BlockEntity {
         }
         if (!gave) {
             currentMode();
-            player.displayClientMessage(Component.literal("Sky Collector: " + status), true);
+            player.sendOverlayMessage(Component.literal("Sky Collector: " + status));
         }
     }
 
@@ -154,16 +154,41 @@ public class SkyCollectorBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("Store", store.serializeNBT(registries));
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveSkyCollectorBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveSkyCollectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        tag.put("Store", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(store, registries));
         tag.putInt("Progress", progress);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("Store")) store.deserializeNBT(registries, tag.getCompound("Store"));
-        progress = tag.getInt("Progress");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadSkyCollectorBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
     }
+
+    protected void legacyLoadSkyCollectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        if (tag.contains("Store")) com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(store, registries, tag.getCompoundOrEmpty("Store"));
+        progress = tag.getIntOr("Progress", 0);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof SkyCollectorBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the real storage behind the hopper/pipe view, so an undone transfer can be put back exactly (LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {store};
+    }
+
 }

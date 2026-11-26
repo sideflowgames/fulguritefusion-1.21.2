@@ -31,21 +31,21 @@ public class UpdraftVentBlock extends Block {
             return;
         }
         // Players move themselves on their own client; everything else is moved by the server.
-        boolean mine = entity instanceof Player ? level.isClientSide : !level.isClientSide;
+        boolean mine = entity instanceof Player ? level.isClientSide() : !level.isClientSide();
         if (mine) {
             Vec3 v = entity.getDeltaMovement();
             entity.setDeltaMovement(v.x, LAUNCH, v.z);
             entity.hurtMarked = true;
         }
         entity.resetFallDistance();
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             living.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 60, 0, false, false));
             level.playSound(null, pos, SoundEvents.BREEZE_JUMP, SoundSource.BLOCKS, 0.6f, 1.2f);
         }
     }
 
     @Override
-    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float distance) {
+    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, double distance) {
         entity.resetFallDistance();
     }
 

@@ -96,17 +96,36 @@ public class FarmCollectorBlockEntity extends BaseContainerBlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ContainerHelper.saveAllItems(tag, items, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveFarmCollectorBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveFarmCollectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        com.sideflowgames.fulguritefusion.util.NbtBridge.saveAllItems(tag, items, registries);
         tag.putInt("Xp", xp);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadFarmCollectorBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadFarmCollectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, items, registries);
-        xp = tag.getInt("Xp");
+        com.sideflowgames.fulguritefusion.util.NbtBridge.loadAllItems(tag, items, registries);
+        xp = tag.getIntOr("Xp", 0);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof FarmCollectorBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

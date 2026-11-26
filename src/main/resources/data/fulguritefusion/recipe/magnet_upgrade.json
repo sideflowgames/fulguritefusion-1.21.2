@@ -7,15 +7,9 @@
     "MSM"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "S": {
-      "item": "minecraft:string"
-    },
-    "A": {
-      "item": "fulguritefusion:arc_magnet"
-    }
+    "M": "fulguritefusion:magnetite_plate",
+    "S": "minecraft:string",
+    "A": "fulguritefusion:arc_magnet"
   },
   "result": {
     "id": "fulguritefusion:magnet_upgrade",

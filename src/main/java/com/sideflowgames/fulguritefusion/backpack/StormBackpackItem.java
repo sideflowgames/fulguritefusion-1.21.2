@@ -37,10 +37,11 @@ public class StormBackpackItem extends BackpackItem implements FmChargeable {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         int fm = FmChargeable.get(stack);
         tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, maxFm()))
                 .withStyle(fm > 0 ? ChatFormatting.AQUA : ChatFormatting.RED));
-        super.appendHoverText(stack, context, tooltip, flag);
+        super.appendHoverText(stack, context, tooltipDisplay, tooltipOut, flag);
     }
 }

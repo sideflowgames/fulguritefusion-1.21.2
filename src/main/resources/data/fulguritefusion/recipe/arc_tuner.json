@@ -1,24 +1,18 @@
 {
- "type": "minecraft:crafting_shaped",
- "category": "misc",
- "pattern": [
-  "  F",
-  " C ",
-  "S  "
- ],
- "key": {
-  "F": {
-   "item": "fulguritefusion:fulgurite_shard"
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  F",
+    " C ",
+    "S  "
+  ],
+  "key": {
+    "F": "fulguritefusion:fulgurite_shard",
+    "C": "minecraft:copper_ingot",
+    "S": "minecraft:stick"
   },
-  "C": {
-   "item": "minecraft:copper_ingot"
-  },
-  "S": {
-   "item": "minecraft:stick"
+  "result": {
+    "id": "fulguritefusion:arc_tuner",
+    "count": 1
   }
- },
- "result": {
-  "id": "fulguritefusion:arc_tuner",
-  "count": 1
- }
 }

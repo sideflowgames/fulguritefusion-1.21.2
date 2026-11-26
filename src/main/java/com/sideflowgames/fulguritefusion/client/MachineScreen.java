@@ -3,11 +3,11 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.machine.SideConfig;
 import com.sideflowgames.fulguritefusion.menu.MachineMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 // Shared look and parts for every machine screen:
@@ -19,15 +19,13 @@ public abstract class MachineScreen<M extends MachineMenu> extends AbstractConta
     private static final int TAB_PANEL_COLOR = GuiStyle.PANEL;
     private static final int TAB_BORDER_COLOR = GuiStyle.DARK;
 
-    protected final ResourceLocation texture;
+    protected final Identifier texture;
     private boolean sidesOpen;
     private final Button[] sideButtons = new Button[SideConfig.COUNT];
 
-    protected MachineScreen(M menu, Inventory inventory, Component title, ResourceLocation texture) {
-        super(menu, inventory, title);
+    protected MachineScreen(M menu, Inventory inventory, Component title, Identifier texture) {
+        super(menu, inventory, title, 176, 166);
         this.texture = texture;
-        this.imageWidth = 176;
-        this.imageHeight = 166;
         this.inventoryLabelY = this.imageHeight - 94;
     }
 
@@ -72,8 +70,9 @@ public abstract class MachineScreen<M extends MachineMenu> extends AbstractConta
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
-        g.blit(texture, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
+        g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, texture, leftPos, topPos, (float) 0, (float) 0, imageWidth, imageHeight, 256, 256);
         if (sidesOpen) {
             int x = leftPos + imageWidth, y = topPos + 24;
             g.fill(x, y, x + 92, y + 6 + SideConfig.COUNT * 20, TAB_BORDER_COLOR);
@@ -84,34 +83,32 @@ public abstract class MachineScreen<M extends MachineMenu> extends AbstractConta
 
     // Title and inventory label in the shared text colour (vanilla's grey is hard to read on the blue panel).
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, titleLabelX, titleLabelY, GuiStyle.TEXT, false);
-        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.TEXT, false);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.text(font, title, titleLabelX, titleLabelY, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.opaque(GuiStyle.TEXT), false);
     }
 
     // Draw the machine's moving parts (bars, arrows, animations).
-    protected abstract void renderMachine(GuiGraphics g, float partialTick);
+    protected abstract void renderMachine(GuiGraphicsExtractor g, float partialTick);
 
-    protected void drawPowerBar(GuiGraphics g, int fm, int maxFm) {
+    protected void drawPowerBar(GuiGraphicsExtractor g, int fm, int maxFm) {
         int h = maxFm > 0 ? fm * BAR_H / maxFm : 0;
         if (h > 0) {
-            g.blit(texture, leftPos + BAR_X, topPos + BAR_Y + BAR_H - h,
-                    176, BAR_H - h, BAR_W, h);
+            g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, texture, leftPos + BAR_X, topPos + BAR_Y + BAR_H - h, (float) 176, (float) BAR_H - h, BAR_W, h, 256, 256);
         }
     }
 
-    protected void powerTooltip(GuiGraphics g, int mouseX, int mouseY, int fm, int maxFm) {
+    protected void powerTooltip(GuiGraphicsExtractor g, int mouseX, int mouseY, int fm, int maxFm) {
         if (isHovering(BAR_X - 2, BAR_Y - 2, BAR_W + 4, BAR_H + 4, mouseX, mouseY)) {
-            g.renderTooltip(font, Component.literal(fm + " / " + maxFm + " Fm"), mouseX, mouseY);
+            g.setTooltipForNextFrame(font, Component.literal(fm + " / " + maxFm + " Fm"), mouseX, mouseY);
         }
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        renderTooltip(g, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         renderExtraTooltips(g, mouseX, mouseY);
     }
 
-    protected void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {}
+    protected void renderExtraTooltips(GuiGraphicsExtractor g, int mouseX, int mouseY) {}
 }

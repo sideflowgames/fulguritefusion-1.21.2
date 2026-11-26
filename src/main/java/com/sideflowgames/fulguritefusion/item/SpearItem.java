@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.InteractionResult;
+
 import com.sideflowgames.fulguritefusion.ModItems;
 import com.sideflowgames.fulguritefusion.entity.SpearEntity;
 
@@ -8,7 +10,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -16,11 +17,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
@@ -62,14 +63,14 @@ public class SpearItem extends Item {
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (stack.isDamageableItem()) stack.hurtAndBreak(1, attacker, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
-        return true;
+        return;
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.SPEAR;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.TRIDENT;
     }
 
     @Override
@@ -78,19 +79,19 @@ public class SpearItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (stack.isDamageableItem() && stack.getDamageValue() >= stack.getMaxDamage() - 1) return InteractionResultHolder.fail(stack);
+        if (stack.isDamageableItem() && stack.getDamageValue() >= stack.getMaxDamage() - 1) return InteractionResult.FAIL;
         player.startUsingItem(hand);
-        return InteractionResultHolder.consume(stack);
+        return InteractionResult.CONSUME;
     }
 
     @Override
-    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
-        if (!(entity instanceof Player player) || getUseDuration(stack, entity) - timeLeft < 10) return;
-        if (!level.isClientSide) {
+    public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+        if (!(entity instanceof Player player) || getUseDuration(stack, entity) - timeLeft < 10) return false;
+        if (!level.isClientSide()) {
             boolean charged = onThrow(stack, player);
-            if (stack.isDamageableItem()) stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
+            if (stack.isDamageableItem()) stack.hurtAndBreak(1, player, player.getUsedItemHand().asEquipmentSlot());
             SpearEntity spear = new SpearEntity(level, player, stack.copyWithCount(1), isStorm(), charged);
             spear.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 2.5f, 1.0f);
             if (player.getAbilities().instabuild) spear.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
@@ -98,6 +99,7 @@ public class SpearItem extends Item {
             level.playSound(null, spear, SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0f, isStorm() ? 0.8f : 1.1f);
             if (!player.getAbilities().instabuild) player.getInventory().removeItem(stack);
         }
+        return true;
     }
 
     // Called as it's thrown; returns whether the throw is charged (Storm Spear: calls lightning).
@@ -105,18 +107,11 @@ public class SpearItem extends Item {
         return false;
     }
 
-    @Override
-    public boolean isValidRepairItem(ItemStack stack, ItemStack repair) {
-        return repair.is(ModItems.FULGURITE.get());
-    }
+
 
     @Override
-    public int getEnchantmentValue() {
-        return 13;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("+" + (int) FULGURITE_LIGHTNING + " lightning damage").withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.literal("Hold right-click, then let go to throw").withStyle(ChatFormatting.GRAY));
     }

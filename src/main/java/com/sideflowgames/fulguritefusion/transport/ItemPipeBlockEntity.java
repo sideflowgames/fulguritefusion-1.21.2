@@ -114,7 +114,7 @@ public class ItemPipeBlockEntity extends BlockEntity {
 
     private void extract(ServerLevel level, Direction d) {
         BlockPos sourcePos = worldPosition.relative(d);
-        IItemHandler source = level.getCapability(Capabilities.ItemHandler.BLOCK, sourcePos, d.getOpposite());
+        IItemHandler source = com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(level, sourcePos, d.getOpposite());
         if (source == null) return;
         int budget = ItemPipeBlock.rate(tier()) * INTERVAL;
         // Anything to send at all?
@@ -151,7 +151,7 @@ public class ItemPipeBlockEntity extends BlockEntity {
         for (Map.Entry<Dest, ItemStack> e : shown.entrySet()) {
             if (sent++ >= 4) break;
             Dest dest = e.getKey();
-            PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(worldPosition),
+            PacketDistributor.sendToPlayersTrackingChunk(level, ChunkPos.containing(worldPosition),
                     new PipeTravel.Payload(dest.path(), d.ordinal(), dest.dir().ordinal(), e.getValue(), tier()));
         }
     }
@@ -176,7 +176,7 @@ public class ItemPipeBlockEntity extends BlockEntity {
                         queue.add(n);
                     }
                 } else if (side == PipeSide.IN && !n.equals(sourcePos)) {
-                    IItemHandler h = level.getCapability(Capabilities.ItemHandler.BLOCK, n, d.getOpposite());
+                    IItemHandler h = com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(level, n, d.getOpposite());
                     if (h != null) out.add(new Dest(pipe, d, h, path(parent, p)));
                 }
             }
@@ -199,8 +199,15 @@ public class ItemPipeBlockEntity extends BlockEntity {
     // ---------- save ----------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveItemPipeBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveItemPipeBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putByteArray("Modes", modes.clone());
         ListTag sides = new ListTag();
         for (int i = 0; i < 6; i++) {
@@ -211,7 +218,7 @@ public class ItemPipeBlockEntity extends BlockEntity {
                 if (!filters[i][j].isEmpty()) {
                     CompoundTag it = new CompoundTag();
                     it.putInt("Slot", j);
-                    it.put("Item", filters[i][j].save(registries));
+                    it.put("Item", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(filters[i][j], registries));
                     items.add(it);
                 }
             }
@@ -222,20 +229,25 @@ public class ItemPipeBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        byte[] m = tag.getByteArray("Modes");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadItemPipeBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadItemPipeBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        byte[] m = tag.getByteArray("Modes").orElse(new byte[0]);
         for (int i = 0; i < 6 && i < m.length; i++) modes[i] = m[i];
-        ListTag sides = tag.getList("Sides", Tag.TAG_COMPOUND);
+        ListTag sides = tag.getListOrEmpty("Sides");
         for (int i = 0; i < 6 && i < sides.size(); i++) {
-            CompoundTag side = sides.getCompound(i);
-            allow[i] = side.getBoolean("Allow");
+            CompoundTag side = sides.getCompoundOrEmpty(i);
+            allow[i] = side.getBooleanOr("Allow", false);
             java.util.Arrays.fill(filters[i], ItemStack.EMPTY);
-            ListTag items = side.getList("Filter", Tag.TAG_COMPOUND);
+            ListTag items = side.getListOrEmpty("Filter");
             for (int k = 0; k < items.size(); k++) {
-                CompoundTag it = items.getCompound(k);
-                int j = it.getInt("Slot");
-                if (j >= 0 && j < FILTER_SLOTS) filters[i][j] = ItemStack.parseOptional(registries, it.getCompound("Item"));
+                CompoundTag it = items.getCompoundOrEmpty(k);
+                int j = it.getIntOr("Slot", 0);
+                if (j >= 0 && j < FILTER_SLOTS) filters[i][j] = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, it.getCompoundOrEmpty("Item"));
             }
         }
     }

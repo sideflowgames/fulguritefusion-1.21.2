@@ -6,7 +6,7 @@ import com.sideflowgames.fulguritefusion.entity.boss.VoidEchoEntity;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -53,8 +53,8 @@ import java.util.UUID;
 public final class TrinketEvents {
     private TrinketEvents() {}
 
-    private static final ResourceLocation GRAVITY_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "cloudstep_gravity");
-    private static final ResourceLocation FALL_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "cloudstep_fall");
+    private static final Identifier GRAVITY_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "cloudstep_gravity");
+    private static final Identifier FALL_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "cloudstep_fall");
     private static final Map<UUID, Long> struck = new HashMap<>();
     private static final Map<UUID, Long> lavaStart = new HashMap<>();
     private static final Map<UUID, Long> lavaLast = new HashMap<>();
@@ -89,7 +89,7 @@ public final class TrinketEvents {
 
         int seer = Trinkets.level(player, TrinketKind.SEERS_RING);
         if (seer > 0) {
-            if (seer == 3 && player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+            if (seer == 3 && player.hasEffect(MobEffects.SLOWNESS)) player.removeEffect(MobEffects.SLOWNESS);
             if (player.hasEffect(MobEffects.BLINDNESS)) player.removeEffect(MobEffects.BLINDNESS);
             if (player.hasEffect(MobEffects.DARKNESS)) player.removeEffect(MobEffects.DARKNESS);
             if (now % 10 == 0) {
@@ -107,7 +107,7 @@ public final class TrinketEvents {
 
     @SubscribeEvent
     public static void onIncoming(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
+        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
         var source = event.getSource();
         int heart = Trinkets.level(player, TrinketKind.CONDUIT_HEART);
         if (source.is(DamageTypeTags.IS_FIRE) && heart > 0) {
@@ -145,7 +145,7 @@ public final class TrinketEvents {
 
     @SubscribeEvent
     public static void onHurt(LivingDamageEvent.Post event) {
-        if (event.getEntity() instanceof Player player && !player.level().isClientSide && event.getSource().is(DamageTypeTags.IS_LIGHTNING)
+        if (event.getEntity() instanceof Player player && !player.level().isClientSide() && event.getSource().is(DamageTypeTags.IS_LIGHTNING)
                 && Trinkets.level(player, TrinketKind.CONDUIT_HEART) == 1) {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 1));
         }
@@ -156,18 +156,18 @@ public final class TrinketEvents {
     public static void doubleJumped(ServerPlayer player) {
         if (Trinkets.level(player, TrinketKind.CLOUDSTEP_CHARM) == 0) return;
         player.resetFallDistance();
-        player.serverLevel().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 12, 0.3, 0.05, 0.3, 0.02);
-        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6f, 1.4f);
+        player.level().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 12, 0.3, 0.05, 0.3, 0.02);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
     public static void blink(ServerPlayer player, float dx, float dz) {
         ItemStack band = Trinkets.worn(player, TrinketKind.VOID_ARC_BAND);
-        if (!(band.getItem() instanceof TrinketItem item) || player.getCooldowns().isOnCooldown(item)) return;
+        if (!(band.getItem() instanceof TrinketItem item) || player.getCooldowns().isOnCooldown(band)) return;
         Vec3 dir = new Vec3(dx, 0, dz);
         if (dir.lengthSqr() < 1e-4) return;
         dir = dir.normalize();
         double max = item.relic ? 14 : item.empowered ? 10 : 6;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Vec3 start = player.position(), best = null;
         for (double d = 0.5; d <= max; d += 0.5) {
             Vec3 at = start.add(dir.scale(d));
@@ -180,10 +180,10 @@ public final class TrinketEvents {
         player.resetFallDistance();
         level.sendParticles(ParticleTypes.REVERSE_PORTAL, best.x, best.y + 1, best.z, 30, 0.3, 0.6, 0.3, 0.05);
         level.playSound(null, player.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.3f);
-        player.getCooldowns().addCooldown(item, item.relic ? 30 : item.empowered ? 50 : 100);
+        player.getCooldowns().addCooldown(band, item.relic ? 30 : item.empowered ? 50 : 100);
     }
 
-    private static void setModifier(Player player, Holder<Attribute> attribute, ResourceLocation id, double amount, AttributeModifier.Operation op) {
+    private static void setModifier(Player player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         AttributeModifier current = inst.getModifier(id);

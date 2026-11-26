@@ -12,7 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -26,7 +26,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -37,12 +37,12 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // The Stormreach's hostile beasts, built to be very hard without a full Titan set:
 //   - every hit is storm damage (ignores normal armor; Titan armor grounds it, see StormDamage)
@@ -55,8 +55,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // (the server sets the action; it plays on every client).
 public abstract class StormBeast extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(StormBeast.class, EntityDataSerializers.INT);
-    private static final ResourceLocation CHARGED_HEALTH = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "storm_charged_health");
-    private static final ResourceLocation CHARGED_DAMAGE = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "storm_charged_damage");
+    private static final Identifier CHARGED_HEALTH = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "storm_charged_health");
+    private static final Identifier CHARGED_DAMAGE = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "storm_charged_damage");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final RawAnimation idle, walk, attack;
@@ -118,7 +118,7 @@ public abstract class StormBeast extends Monster implements GeoEntity {
     // ---- storm damage ----
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
         float damage = (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
         boolean hit = StormDamage.hit(this, target, damage);
         if (hit) {
@@ -167,9 +167,9 @@ public abstract class StormBeast extends Monster implements GeoEntity {
     // A harmless-looking bolt at pos that hurts what stands within r of it.
     protected void callBolt(Vec3 pos, double r, float damage) {
         if (!(level() instanceof ServerLevel server)) return;
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(pos);
+            bolt.snapTo(pos);
             bolt.setVisualOnly(true);
             server.addFreshEntity(bolt);
         }
@@ -236,7 +236,7 @@ public abstract class StormBeast extends Monster implements GeoEntity {
                 p -> p.isAlive() && !p.isCreative() && !p.isSpectator())) {
             if (TitanArmorEvents.fullTitanSet(p)) continue;
             StormDamage.drain(p, 4_000);
-            p.hurt(StormDamage.source(this), 1.0f);
+            p.hurtOrSimulate(StormDamage.source(this), 1.0f);
             p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 50, 0, false, true));
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY(0.5), p.getZ(), 6, 0.3, 0.5, 0.3, 0.1);
         }
@@ -250,14 +250,14 @@ public abstract class StormBeast extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return !isNoGravity() && super.causeFallDamage(distance, multiplier, source);
     }
 
     // ---- spawning ----
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData data) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData data) {
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
         if (StormreachStorm.isStorming(level.getLevel())) charge();
         return result;
@@ -277,9 +277,9 @@ public abstract class StormBeast extends Monster implements GeoEntity {
 
     // Anywhere in the Stormreach, day or night, out of bright block light. Outside a storm, two of every three
     // tries fail.
-    public static <T extends Mob> boolean checkSpawn(EntityType<T> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static <T extends Mob> boolean checkSpawn(EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                                      BlockPos pos, RandomSource random) {
-        if (MobSpawnType.isSpawner(reason) || reason == MobSpawnType.SPAWN_EGG) return true;
+        if (EntitySpawnReason.isSpawner(reason) || reason == EntitySpawnReason.SPAWN_ITEM_USE) return true;
         ServerLevel server = level.getLevel();
         if (!Stormreach.is(server) || level.getDifficulty() == Difficulty.PEACEFUL) return false;
         if (com.sideflowgames.fulguritefusion.brew.StormWardBlockEntity.warded(server, pos)) return false;
@@ -295,13 +295,13 @@ public abstract class StormBeast extends Monster implements GeoEntity {
 
     // ---- animation ----
 
-    protected boolean moving(software.bernie.geckolib.animation.AnimationState<?> s) {
+    protected boolean moving(com.geckolib.animation.state.AnimationTest<?> s) {
         return s.isMoving();
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> {
+        controllers.add(new AnimationController<>("main", 4, s -> {
             int a = action();
             if (a > 0 && a <= 3) return s.setAndContinue(specials[a - 1]);
             if (swinging) return s.setAndContinue(attack);

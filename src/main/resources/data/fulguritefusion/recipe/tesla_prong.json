@@ -7,18 +7,10 @@
     "GSG"
   ],
   "key": {
-    "L": {
-      "item": "minecraft:lightning_rod"
-    },
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "S": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "L": "minecraft:lightning_rod",
+    "C": "fulguritefusion:coil_segment",
+    "G": "minecraft:gold_ingot",
+    "S": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:tesla_prong",

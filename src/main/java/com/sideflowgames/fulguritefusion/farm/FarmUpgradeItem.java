@@ -7,10 +7,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -47,42 +46,42 @@ public class FarmUpgradeItem extends Item {
     public static EntityType<?> filterMob(ItemStack stack) {
         CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (!tag.contains("Mob")) return null;
-        ResourceLocation id = ResourceLocation.tryParse(tag.getString("Mob"));
+        Identifier id = Identifier.tryParse(tag.getStringOr("Mob", ""));
         if (id == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(id)) return null;
-        return BuiltInRegistries.ENTITY_TYPE.get(id);
+        return BuiltInRegistries.ENTITY_TYPE.getValue(id);
     }
 
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
         if (kind != Kind.MOB_FILTER) return InteractionResult.PASS;
-        if (player.level().isClientSide) return InteractionResult.SUCCESS;
+        if (player.level().isClientSide()) return InteractionResult.SUCCESS;
         EntityType<?> type = target.getType();
         if (!(target instanceof Mob) || !ShockFarmControllerBlockEntity.allowed(type)) {
-            player.displayClientMessage(Component.literal("The Shock Farm can't spawn " + type.getDescription().getString() + ".")
-                    .withStyle(ChatFormatting.RED), true);
+            player.sendOverlayMessage(Component.literal("The Shock Farm can't spawn " + type.getDescription().getString() + ".")
+                    .withStyle(ChatFormatting.RED));
             return InteractionResult.CONSUME;
         }
         CompoundTag tag = new CompoundTag();
         tag.putString("Mob", BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
         ItemStack held = player.getItemInHand(hand);
         held.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-        player.displayClientMessage(Component.literal("Mob Filter set: " + type.getDescription().getString())
-                .withStyle(ChatFormatting.AQUA), true);
+        player.sendOverlayMessage(Component.literal("Mob Filter set: " + type.getDescription().getString())
+                .withStyle(ChatFormatting.AQUA));
         return InteractionResult.CONSUME;
     }
 
     // Sneak-use in the air clears a Mob Filter.
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (kind == Kind.MOB_FILTER && player.isShiftKeyDown() && filterMob(stack) != null) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 stack.remove(DataComponents.CUSTOM_DATA);
-                player.displayClientMessage(Component.literal("Mob Filter cleared").withStyle(ChatFormatting.GRAY), true);
+                player.sendOverlayMessage(Component.literal("Mob Filter cleared").withStyle(ChatFormatting.GRAY));
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResultHolder.pass(stack);
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -91,7 +90,8 @@ public class FarmUpgradeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> lines = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         ChatFormatting c = ChatFormatting.GRAY;
         switch (kind) {
             case BLANK -> lines.add(Component.literal("Crafting base for Shock Farm upgrades").withStyle(c));

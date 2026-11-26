@@ -21,12 +21,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -63,15 +63,15 @@ public class StaticWraithEntity extends Monster implements GeoEntity {
 
     // Steers smoothly toward its target (or a wander spot), floating through the air.
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (attackCooldown > 0) attackCooldown--;
         LivingEntity target = getTarget();
         Vec3 goal;
         if (target != null && target.isAlive()) {
             goal = target.getEyePosition().subtract(0, 0.4, 0);
             getLookControl().setLookAt(target, 30, 30);
-            if (attackCooldown == 0 && distanceToSqr(target) < 2.5 && doHurtTarget(target)) {
+            if (attackCooldown == 0 && distanceToSqr(target) < 2.5 && doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target)) {
                 attackCooldown = 25;
                 swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 drain(target);
@@ -110,13 +110,13 @@ public class StaticWraithEntity extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(4) == 0) {
+        if (level().isClientSide() && random.nextInt(4) == 0) {
             level().addParticle(ParticleTypes.SMOKE, getRandomX(0.5), getRandomY(), getRandomZ(0.5), 0, -0.02, 0);
         }
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -142,7 +142,7 @@ public class StaticWraithEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(swinging ? ATTACK : FLOAT)));
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(swinging ? ATTACK : FLOAT)));
     }
 
     @Override

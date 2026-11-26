@@ -7,15 +7,9 @@
     "III"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:tempest_feather"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "S": {
-      "item": "fulguritefusion:stormstone_bricks"
-    }
+    "F": "fulguritefusion:tempest_feather",
+    "I": "minecraft:iron_ingot",
+    "S": "fulguritefusion:stormstone_bricks"
   },
   "result": {
     "id": "fulguritefusion:updraft_vent",

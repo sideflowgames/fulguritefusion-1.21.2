@@ -64,37 +64,43 @@ public class FulguriteFusionClient {
         };
         NeoForge.EVENT_BUS.addListener(FulguriteFusionClient::onClientTick);
         com.sideflowgames.fulguritefusion.client.ChainBolts.init();
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RecipesReceivedEvent event) ->
+                com.sideflowgames.fulguritefusion.client.GuideRecipes.received(event.getRecipeMap()));
+        com.sideflowgames.fulguritefusion.util.Fuel.CLIENT = () -> net.minecraft.client.Minecraft.getInstance().level == null ? null
+                : net.minecraft.client.Minecraft.getInstance().level.fuelValues();
         com.sideflowgames.fulguritefusion.client.ItemPipeVisuals.init();
         com.sideflowgames.fulguritefusion.client.StormreachClient.init();
         com.sideflowgames.fulguritefusion.client.TrinketClient.init();
     }
 
+    // 26.1: key categories are registered objects. Shown as "key.category.fulguritefusion.fulguritefusion" in the lang file.
+    public static final KeyMapping.Category KEY_CATEGORY =
+            new KeyMapping.Category(net.minecraft.resources.Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "fulguritefusion"));
+
     // R while riding a bonded Stormwing: lightning dive. Rebindable under Controls > Fulgurite Fusion.
     public static final KeyMapping STORMWING_DIVE = new KeyMapping("key.fulguritefusion.stormwing_dive",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.fulguritefusion");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY);
 
     // Spears: a first-person wind-up pose that suits our flat spear sprites.
     @SubscribeEvent
     static void onClientExtensions(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
         event.registerItem(new com.sideflowgames.fulguritefusion.client.SpearHandTransform(),
                 ModItems.FULGURITE_SPEAR.get(), ModItems.STORM_SPEAR.get(), ModItems.PRIME_SPEAR.get());
-        event.registerItem(com.sideflowgames.fulguritefusion.client.TempestStaffRenderer.extensions(), ModItems.TEMPEST_STAFF.get());
     }
 
     // Latex: how the fluid looks in the world and in pipes/tanks of other mods.
     @SubscribeEvent
     static void onFluidExtensions(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
-        event.registerFluidType(new net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions() {
-            @Override
-            public net.minecraft.resources.ResourceLocation getStillTexture() {
-                return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "block/latex_still");
-            }
+    }
 
-            @Override
-            public net.minecraft.resources.ResourceLocation getFlowingTexture() {
-                return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "block/latex_flow");
-            }
-        }, com.sideflowgames.fulguritefusion.ModFluids.LATEX_TYPE.get());
+    // 26.1: the still/flowing textures moved from IClientFluidTypeExtensions to a fluid model.
+    @SubscribeEvent
+    static void onFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
+        event.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+                        new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "block/latex_still")),
+                        new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "block/latex_flow")),
+                        null, (net.neoforged.neoforge.client.fluid.FluidTintSource) null),
+                com.sideflowgames.fulguritefusion.ModFluids.LATEX, com.sideflowgames.fulguritefusion.ModFluids.FLOWING_LATEX);
     }
 
     // Armor charge HUD, just left of the XP bar.
@@ -103,37 +109,44 @@ public class FulguriteFusionClient {
         event.registerSpriteSet(ModParticles.LATEX_DRIP.get(), com.sideflowgames.fulguritefusion.client.LatexDripParticle.Provider::new);
     }
 
+    // The guide book's 3D build pictures.
+    @SubscribeEvent
+    static void onRegisterPictureInPicture(net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) {
+        event.register(com.sideflowgames.fulguritefusion.client.GuideSceneRenderer.State.class,
+                com.sideflowgames.fulguritefusion.client.GuideSceneRenderer::new);
+    }
+
     @SubscribeEvent
     static void onRegisterGuiLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
-        event.registerAbove(net.neoforged.neoforge.client.gui.VanillaGuiLayers.EXPERIENCE_BAR,
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "armor_charge"),
+        event.registerAbove(net.neoforged.neoforge.client.gui.VanillaGuiLayers.CONTEXTUAL_INFO_BAR,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "armor_charge"),
                 com.sideflowgames.fulguritefusion.client.ArmorChargeHud::render);
     }
 
     // B: open the backpack you're wearing or carrying. Rebindable under Controls > Fulgurite Fusion.
     public static final KeyMapping OPEN_BACKPACK = new KeyMapping("key.fulguritefusion.open_backpack",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, "key.categories.fulguritefusion");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, KEY_CATEGORY);
 
     // V: toggle the Prime pickaxe's 3x3 hammer mode. Rebindable under Controls > Fulgurite Fusion.
     public static final KeyMapping PRIME_HAMMER = new KeyMapping("key.fulguritefusion.prime_hammer",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.fulguritefusion");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, KEY_CATEGORY);
 
     // G: Void Arc Band blink. Rebindable under Controls > Fulgurite Fusion.
     public static final KeyMapping VOID_BLINK = new KeyMapping("key.fulguritefusion.void_blink",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, "key.categories.fulguritefusion");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, KEY_CATEGORY);
 
     // Worn backpacks show on the player's back.
     @SubscribeEvent
     static void onAddLayers(net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers event) {
         for (var skin : event.getSkins()) {
-            if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
-                renderer.addLayer(new com.sideflowgames.fulguritefusion.client.BackpackLayer(renderer));
-            }
+            net.minecraft.client.renderer.entity.player.AvatarRenderer<net.minecraft.client.player.AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
+            if (renderer != null) renderer.addLayer(new com.sideflowgames.fulguritefusion.client.BackpackLayer(renderer));
         }
     }
 
     @SubscribeEvent
     static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+        event.registerCategory(KEY_CATEGORY);
         event.register(OPEN_BACKPACK);
         event.register(STORMWING_DIVE);
         event.register(PRIME_HAMMER);
@@ -144,13 +157,13 @@ public class FulguriteFusionClient {
         Minecraft mc = Minecraft.getInstance();
         while (OPEN_BACKPACK.consumeClick()) {
             if (mc.player != null && mc.screen == null) {
-                PacketDistributor.sendToServer(new com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.OpenPayload());
+                net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.OpenPayload());
             }
         }
         while (PRIME_HAMMER.consumeClick()) {
             if (mc.player != null && mc.screen == null
                     && mc.player.getMainHandItem().getItem() instanceof com.sideflowgames.fulguritefusion.item.PrimeTools.Pickaxe) {
-                PacketDistributor.sendToServer(new com.sideflowgames.fulguritefusion.prime.PrimeNetwork.HammerPayload());
+                net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new com.sideflowgames.fulguritefusion.prime.PrimeNetwork.HammerPayload());
             }
         }
         com.sideflowgames.fulguritefusion.client.PrimeClient.tick(mc);
@@ -161,7 +174,7 @@ public class FulguriteFusionClient {
         while (STORMWING_DIVE.consumeClick()) {
             if (mc.player != null && mc.player.getVehicle() instanceof StormwingEntity bird
                     && bird.getControllingPassenger() == mc.player && bird.clientStartDive()) {
-                PacketDistributor.sendToServer(new StormwingRiding.DivePayload());
+                net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new StormwingRiding.DivePayload());
             }
         }
     }

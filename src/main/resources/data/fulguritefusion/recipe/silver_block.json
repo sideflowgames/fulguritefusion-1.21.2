@@ -7,9 +7,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "fulguritefusion:silver_ingot"
-    }
+    "#": "fulguritefusion:silver_ingot"
   },
   "result": {
     "id": "fulguritefusion:silver_block",

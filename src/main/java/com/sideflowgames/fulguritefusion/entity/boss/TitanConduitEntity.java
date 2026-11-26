@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity.boss;
 
+import net.minecraft.core.HolderLookup;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,9 +24,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Titan Conduit: raised by the Storm Titan at the start of each regeneration cycle.
 //   Ungrounded: it pours the storm into the Titan (heals it 1.5 health a second) and every 2.5 seconds arcs into
@@ -38,8 +40,8 @@ public class TitanConduitEntity extends BossAnchorEntity {
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.titan_conduit.idle");
     private static final RawAnimation GROUNDED_ANIM = RawAnimation.begin().thenLoop("animation.titan_conduit.grounded");
     private static final EntityDataAccessor<Boolean> GROUNDED = SynchedEntityData.defineId(TitanConduitEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final Vector3f VIOLET = new Vector3f(0.72f, 0.42f, 1.0f);
-    private static final Vector3f GOLD = new Vector3f(1.0f, 0.85f, 0.35f);
+    private static final int VIOLET = 0xB86BFF;
+    private static final int GOLD = 0xFFD959;
 
     private BlockPos rod;
     private int zapTimer = 50;
@@ -64,8 +66,8 @@ public class TitanConduitEntity extends BossAnchorEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (!(level() instanceof ServerLevel server)) return;
         StormBossEntity boss = owner();
         if (!isGrounded() && tickCount % 10 == 0) {
@@ -77,7 +79,7 @@ public class TitanConduitEntity extends BossAnchorEntity {
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY(0.5), getZ(), 40, 0.5, 1.0, 0.5, 0.3);
                 for (Player p : server.players()) {
                     if (p.distanceToSqr(this) < 48 * 48) {
-                        p.displayClientMessage(net.minecraft.network.chat.Component.literal("A conduit is grounded! Break it."), true);
+                        p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("A conduit is grounded! Break it."));
                     }
                 }
             }
@@ -96,7 +98,7 @@ public class TitanConduitEntity extends BossAnchorEntity {
             Player p = level().getNearestPlayer(this, 20);
             if (p != null && !p.isCreative() && !p.isSpectator()) {
                 beam(server, from, p.getEyePosition().subtract(0, 0.4, 0), VIOLET);
-                p.hurt(damageSources().mobAttack(this), 10.0f);
+                p.hurtOrSimulate(damageSources().mobAttack(this), 10.0f);
                 server.playSound(null, p.blockPosition(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.HOSTILE, 0.8f, 1.5f);
             }
         }
@@ -110,7 +112,7 @@ public class TitanConduitEntity extends BossAnchorEntity {
         return null;
     }
 
-    private static void beam(ServerLevel server, Vec3 from, Vec3 to, Vector3f color) {
+    private static void beam(ServerLevel server, Vec3 from, Vec3 to, int color) {
         int steps = (int) Math.max(6, from.distanceTo(to) * 2);
         for (int i = 0; i <= steps; i++) {
             Vec3 p = from.lerp(to, i / (double) steps);
@@ -120,15 +122,15 @@ public class TitanConduitEntity extends BossAnchorEntity {
 
     // Only a grounded conduit can be hurt (commands like /kill still work).
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (!isGrounded() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             if (level() instanceof ServerLevel server && invulnerableTime <= 0) {
-                server.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.0f, 1.4f);
+                server.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.HOSTILE, 1.0f, 1.4f);
                 invulnerableTime = 10;
             }
             return false;
         }
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override
@@ -142,7 +144,7 @@ public class TitanConduitEntity extends BossAnchorEntity {
         server.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.5f, 1.4f);
         server.playSound(null, blockPosition(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 2.0f, 0.6f);
         for (Player p : server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(4), p -> !p.isCreative() && !p.isSpectator())) {
-            if (p.hurt(damageSources().mobAttack(this), 8.0f)) {
+            if (p.hurtOrSimulate(damageSources().mobAttack(this), 8.0f)) {
                 Vec3 push = p.position().subtract(position()).multiply(1, 0, 1).normalize().scale(1.0);
                 p.push(push.x, 0.4, push.z);
                 p.hurtMarked = true;
@@ -157,7 +159,7 @@ public class TitanConduitEntity extends BossAnchorEntity {
     // Burst and vanish at once instead of toppling over.
     @Override
     protected void tickDeath() {
-        if (!level().isClientSide && !isRemoved()) {
+        if (!level().isClientSide() && !isRemoved()) {
             level().broadcastEntityEvent(this, (byte) 60);
             remove(RemovalReason.KILLED);
         }
@@ -172,24 +174,36 @@ public class TitanConduitEntity extends BossAnchorEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(isGrounded() ? 4 : 2) == 0) {
+        if (level().isClientSide() && random.nextInt(isGrounded() ? 4 : 2) == 0) {
             level().addParticle(isGrounded() ? ParticleTypes.SMOKE : ParticleTypes.ELECTRIC_SPARK,
                     getRandomX(0.6), getY() + getBbHeight() * (0.6 + random.nextDouble() * 0.4), getRandomZ(0.6), 0, 0.03, 0);
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveTitanConduitEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveTitanConduitEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.legacySaveBossAnchorEntity(tag, registries);
         tag.putBoolean("Grounded", isGrounded());
         if (rod != null) tag.putLong("Rod", rod.asLong());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        entityData.set(GROUNDED, tag.getBoolean("Grounded"));
-        if (tag.contains("Rod")) rod = BlockPos.of(tag.getLong("Rod"));
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadTitanConduitEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadTitanConduitEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.legacyLoadBossAnchorEntity(tag, registries);
+        entityData.set(GROUNDED, tag.getBooleanOr("Grounded", false));
+        if (tag.contains("Rod")) rod = BlockPos.of(tag.getLongOr("Rod", 0L));
     }
 
     @Override
@@ -214,6 +228,6 @@ public class TitanConduitEntity extends BossAnchorEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(isGrounded() ? GROUNDED_ANIM : IDLE)));
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(isGrounded() ? GROUNDED_ANIM : IDLE)));
     }
 }

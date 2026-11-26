@@ -7,9 +7,7 @@
     "SSS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "S": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:fulgurite",

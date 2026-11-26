@@ -59,6 +59,6 @@ public final class TitanClient {
         for (int i = 0; i < 12; i++) {
             player.level().addParticle(ParticleTypes.ELECTRIC_SPARK, player.getRandomX(0.6), player.getRandomY(), player.getRandomZ(0.6), 0, 0, 0);
         }
-        PacketDistributor.sendToServer(new TitanNetwork.DashPayload((float) dir.x, (float) dir.z));
+        net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new TitanNetwork.DashPayload((float) dir.x, (float) dir.z));
     }
 }

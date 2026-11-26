@@ -7,18 +7,10 @@
     "SSS"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    },
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    }
+    "M": "fulguritefusion:magnetite_plate",
+    "P": "minecraft:piston",
+    "S": "fulguritefusion:iron_sheet",
+    "K": "fulguritefusion:crude_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:banbury_mixer",

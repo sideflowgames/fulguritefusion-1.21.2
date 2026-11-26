@@ -15,9 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.BasicItemListing;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.village.WandererTradesEvent;
 
 // Setting a bucket down to catch latex, and wandering traders selling rubber saplings.
 @EventBusSubscriber(modid = FulguriteFusion.MODID)
@@ -38,17 +36,16 @@ public final class RubberEvents {
         if (!level.getBlockState(pos).canBeReplaced() || !level.getFluidState(pos).isEmpty()) return;
         BlockState bucket = ModBlocks.TAP_BUCKET.get().defaultBlockState();
         if (!bucket.canSurvive(level, pos) || !player.mayUseItemAt(pos, Direction.UP, held)) return;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlockAndUpdate(pos, bucket);
             level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.BLOCKS, 0.6f, 1.4f);
             if (!player.getAbilities().instabuild) held.shrink(1);
         }
         event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+        event.setCancellationResult(InteractionResult.SUCCESS);
     }
 
-    @SubscribeEvent
-    public static void trades(WandererTradesEvent event) {
-        event.getGenericTrades().add(new BasicItemListing(5, new ItemStack(ModBlocks.RUBBER_SAPLING_ITEM.get()), 8, 1));
-    }
+    // 26.1: wandering trader trades are data now. The Rubber Sapling trade (5 emeralds, up to 8 uses) lives in
+    // data/fulguritefusion/villager_trade/wandering_trader/emerald_rubber_sapling.json, added to the
+    // minecraft:wandering_trader/common villager_trade tag.
 }

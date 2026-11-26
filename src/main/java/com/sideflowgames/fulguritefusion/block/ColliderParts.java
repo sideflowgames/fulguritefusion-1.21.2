@@ -2,7 +2,7 @@ package com.sideflowgames.fulguritefusion.block;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 // Block state properties of a collider ring once it has formed: the ring blocks (Fulgurite Ring, Collider
 // Input, Collider Injectors) hide (formed = true) and the center block draws the whole ring as one model,
@@ -11,5 +11,5 @@ public final class ColliderParts {
     private ColliderParts() {}
 
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
-    public static final DirectionProperty INPUT = DirectionProperty.create("input", Direction.Plane.HORIZONTAL);
+    public static final EnumProperty<Direction> INPUT = EnumProperty.create("input", Direction.class, Direction.Plane.HORIZONTAL);
 }

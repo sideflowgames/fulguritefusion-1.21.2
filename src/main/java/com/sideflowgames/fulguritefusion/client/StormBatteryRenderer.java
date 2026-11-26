@@ -9,24 +9,25 @@ import com.sideflowgames.fulguritefusion.ModBlocks;
 import com.sideflowgames.fulguritefusion.block.StormBatteryBlockEntity;
 
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 // Draws the Storm Battery bank's charge gauge. Every flat side of the bank gets one merged window
 // (windows run across touching batteries), and the glowing liquid rises from the bank's lowest block
 // to its highest, so the whole bank reads as one tank.
-public class StormBatteryRenderer implements BlockEntityRenderer<StormBatteryBlockEntity> {
-    private static final ResourceLocation WHITE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
+public class StormBatteryRenderer extends LegacyBlockEntityRenderer<StormBatteryBlockEntity> {
+    private static final Identifier WHITE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
     private static final int SIDE_INSET = 4;   // pixels of casing left/right of the window at the bank's edges
     private static final int END_INSET = 3;    // pixels of casing above/below the window at the bank's edges
     private static final float LIFT = 0.0015f; // tiny gap off the face so the gauge doesn't flicker
@@ -36,7 +37,7 @@ public class StormBatteryRenderer implements BlockEntityRenderer<StormBatteryBlo
     public StormBatteryRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(StormBatteryBlockEntity be, float partialTick, PoseStack poseStack,
+    protected void render(StormBatteryBlockEntity be, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffers, int packedLight, int packedOverlay) {
         Level level = be.getLevel();
         if (level == null) return;
@@ -61,7 +62,7 @@ public class StormBatteryRenderer implements BlockEntityRenderer<StormBatteryBlo
         float fill = bottom + fraction * (top - bottom);
         float time = level.getGameTime() + partialTick;
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entitySolid(WHITE));
+        VertexConsumer vc = buffers.getBuffer(RenderTypes.entitySolid(WHITE));
         PoseStack.Pose pose = poseStack.last();
         for (Direction face : Direction.Plane.HORIZONTAL) {
             if (isBattery(level, pos.relative(face))) continue; // covered by another battery
@@ -82,7 +83,7 @@ public class StormBatteryRenderer implements BlockEntityRenderer<StormBatteryBlo
                           float fill, float fraction, float time) {
         Direction right = face.getClockWise();
         Direction left = right.getOpposite();
-        int light = LevelRenderer.getLightColor(level, pos.relative(face));
+        int light = LevelRenderer.getLightCoords(level, pos.relative(face));
 
         // The face is split into a 3x3 grid: the middle is always window, the edges are window only when
         // the window continues onto the neighbouring battery, and corners only when it continues three ways.
@@ -144,8 +145,8 @@ public class StormBatteryRenderer implements BlockEntityRenderer<StormBatteryBlo
             float s = fill + wave;
             float liquidTop = Mth.clamp(s, v0, v1);
             float surfaceTop = Mth.clamp(s + 1f, v0, v1);
-            if (liquidTop > v0) rect(vc, pose, face, x, x1, v0, liquidTop, LIQUID, LightTexture.FULL_BRIGHT);
-            if (!full && fraction > 0f && surfaceTop > liquidTop) rect(vc, pose, face, x, x1, liquidTop, surfaceTop, surface, LightTexture.FULL_BRIGHT);
+            if (liquidTop > v0) rect(vc, pose, face, x, x1, v0, liquidTop, LIQUID, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
+            if (!full && fraction > 0f && surfaceTop > liquidTop) rect(vc, pose, face, x, x1, liquidTop, surfaceTop, surface, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
             if (v1 > surfaceTop) rect(vc, pose, face, x, x1, surfaceTop, v1, EMPTY, light);
         }
     }

@@ -7,9 +7,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "fulguritefusion:prismite_shard"
-    }
+    "#": "fulguritefusion:prismite_shard"
   },
   "result": {
     "id": "fulguritefusion:prismite_block",

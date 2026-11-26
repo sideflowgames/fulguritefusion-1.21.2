@@ -7,15 +7,9 @@
     "MSM"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    },
-    "S": {
-      "item": "minecraft:string"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    }
+    "M": "fulguritefusion:magnetite_ingot",
+    "S": "minecraft:string",
+    "H": "minecraft:hopper"
   },
   "result": {
     "id": "fulguritefusion:pickup_upgrade",

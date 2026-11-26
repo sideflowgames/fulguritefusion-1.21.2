@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -58,33 +57,33 @@ public class StormForgeBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.STORM_FORGE_BE.get(), StormForgeBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.STORM_FORGE_BE.get(), StormForgeBlockEntity::serverTick);
     }
 
     // Holding an item: set one on the anvil.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
-        if (stack.isEmpty() || !(level.getBlockEntity(pos) instanceof StormForgeBlockEntity forge)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!level.isClientSide) {
+        if (stack.isEmpty() || !(level.getBlockEntity(pos) instanceof StormForgeBlockEntity forge)) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (!level.isClientSide()) {
             if (!forge.result().isEmpty()) {
                 give(player, forge.takeBack());
             } else {
                 String refusal = forge.insert(stack);
-                if (refusal != null) player.displayClientMessage(Component.literal(refusal), true);
+                if (refusal != null) player.sendOverlayMessage(Component.literal(refusal));
             }
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Empty hand: take the result or the last item back. Sneaking: status.
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof StormForgeBlockEntity forge) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StormForgeBlockEntity forge) {
             if (player.isSecondaryUseActive()) forge.showStatus(player);
             else give(player, forge.takeBack());
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     private static void give(Player player, ItemStack stack) {
@@ -92,9 +91,9 @@ public class StormForgeBlock extends BaseEntityBlock {
         if (!player.getInventory().add(stack)) player.drop(stack, false);
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof StormForgeBlockEntity forge) forge.dropAll();
-        super.onRemove(state, level, pos, newState, moved);
     }
 }

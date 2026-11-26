@@ -7,15 +7,9 @@
     "AFA"
   ],
   "key": {
-    "A": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "F": {
-      "item": "fulguritefusion:rift_frame"
-    },
-    "R": {
-      "item": "fulguritefusion:rift_core"
-    }
+    "A": "minecraft:amethyst_shard",
+    "F": "fulguritefusion:rift_frame",
+    "R": "fulguritefusion:rift_core"
   },
   "result": {
     "id": "fulguritefusion:rift_keystone",

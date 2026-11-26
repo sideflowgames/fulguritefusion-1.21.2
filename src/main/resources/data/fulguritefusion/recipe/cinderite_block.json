@@ -7,9 +7,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "fulguritefusion:cinderite"
-    }
+    "#": "fulguritefusion:cinderite"
   },
   "result": {
     "id": "fulguritefusion:cinderite_block",

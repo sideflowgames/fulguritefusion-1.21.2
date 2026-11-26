@@ -10,12 +10,13 @@ import com.sideflowgames.fulguritefusion.block.DataCableBlock;
 import com.sideflowgames.fulguritefusion.block.DataCableBlockEntity;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,9 +27,9 @@ import net.minecraft.world.level.block.state.BlockState;
 //   - one, three or more: arms from the middle to each side, with a rounded hub;
 //   - none: a short upright stub.
 // Where the pipe meets a port (not another cable) it gets a wider flange.
-public class DataCableRenderer implements BlockEntityRenderer<DataCableBlockEntity> {
-    private static final ResourceLocation WHITE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
+public class DataCableRenderer extends LegacyBlockEntityRenderer<DataCableBlockEntity> {
+    private static final Identifier WHITE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
     private static final float R = 0.17f;
     private static final int SIDES = 16, ELBOW_STEPS = 10;
     private static final int PIPE = 0x9AA3AE, FLANGE = 0x5C636D, HUB = 0x828B96;
@@ -36,14 +37,14 @@ public class DataCableRenderer implements BlockEntityRenderer<DataCableBlockEnti
     public DataCableRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(DataCableBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
+    protected void render(DataCableBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
                        int light, int overlay) {
         BlockState state = be.getBlockState();
         if (!(state.getBlock() instanceof DataCableBlock) || be.getLevel() == null) return;
         List<Direction> con = new ArrayList<>();
         for (Direction d : Direction.values()) if (state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(d))) con.add(d);
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entitySolid(WHITE));
+        VertexConsumer vc = buffers.getBuffer(RenderTypes.entitySolid(WHITE));
         PoseStack.Pose pose = poseStack.last();
         float[] c = {0.5f, 0.5f, 0.5f};
 

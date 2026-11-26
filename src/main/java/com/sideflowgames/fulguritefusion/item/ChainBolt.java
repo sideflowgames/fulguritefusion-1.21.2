@@ -5,7 +5,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
@@ -25,7 +25,7 @@ public final class ChainBolt {
     public static BiConsumer<List<Vec3>, Boolean> clientHandler = (points, prime) -> {};
 
     public record Payload(List<Vec3> points, boolean prime) implements CustomPacketPayload {
-        public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "chain_bolt"));
+        public static final Type<Payload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "chain_bolt"));
         public static final StreamCodec<ByteBuf, Payload> STREAM_CODEC = StreamCodec.of((buf, p) -> {
             buf.writeBoolean(p.prime());
             buf.writeByte(p.points().size());

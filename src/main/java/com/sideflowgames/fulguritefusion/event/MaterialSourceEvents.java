@@ -24,10 +24,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.cow.MushroomCow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.MagmaCube;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -78,8 +78,8 @@ public final class MaterialSourceEvents {
             BlockPos fire = level.getBlockState(pos).is(Blocks.SOUL_FIRE) ? pos : pos.relative(face);
             if (!level.getBlockState(fire).is(Blocks.SOUL_FIRE)) return;
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
-            if (level.isClientSide) return;
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            if (level.isClientSide()) return;
             level.setBlock(fire, ModBlocks.FROZEN_SOUL_FIRE.get().defaultBlockState(), Block.UPDATE_ALL);
             level.playSound(null, fire, SoundEvents.POWDER_SNOW_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);
             level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6f, 1.4f);
@@ -91,13 +91,13 @@ public final class MaterialSourceEvents {
         if (held.is(ItemTags.AXES) && level.getBlockState(pos).is(Blocks.SCULK)) {
             if (!level.getBiome(pos).is(Biomes.DEEP_DARK)) return;
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
-            if (level.isClientSide || player.getCooldowns().isOnCooldown(held.getItem())) return;
-            player.getCooldowns().addCooldown(held.getItem(), 20);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            if (level.isClientSide() || player.getCooldowns().isOnCooldown(held)) return;
+            player.getCooldowns().addCooldown(held, 20);
             level.playSound(null, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0f, 0.7f);
             level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-            held.hurtAndBreak(1, player, LivingEntity.getSlotForHand(event.getHand()));
-            if (level.random.nextFloat() < 0.6f) {
+            held.hurtAndBreak(1, player, event.getHand().asEquipmentSlot());
+            if (level.getRandom().nextFloat() < 0.6f) {
                 Block.popResourceFromFace(level, pos, face, new ItemStack(ModItems.ECHO_RESIN.get()));
             }
         }
@@ -115,17 +115,17 @@ public final class MaterialSourceEvents {
 
     private static boolean recentlyStruck(Entity e) {
         if (!e.getPersistentData().contains(STRUCK)) return false;
-        return e.level().getGameTime() - e.getPersistentData().getLong(STRUCK) <= STRUCK_WINDOW;
+        return e.level().getGameTime() - e.getPersistentData().getLongOr(STRUCK, 0L) <= STRUCK_WINDOW;
     }
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         if (!(event.getTarget() instanceof MushroomCow cow) || !event.getItemStack().is(Items.SHEARS)) return;
         if (!cow.readyForShearing() || !recentlyStruck(cow)) return;
         cow.getPersistentData().remove(STRUCK);
         int count = 2 + cow.getRandom().nextInt(2);
-        cow.spawnAtLocation(new ItemStack(ModItems.STRUCK_SPORE.get(), count), 1.0f);
+        cow.spawnAtLocation((net.minecraft.server.level.ServerLevel) cow.level(), new ItemStack(ModItems.STRUCK_SPORE.get(), count), 1.0f);
         ((ServerLevel) event.getLevel()).sendParticles(ParticleTypes.ELECTRIC_SPARK, cow.getX(), cow.getY() + 1, cow.getZ(),
                 20, 0.4, 0.4, 0.4, 0.1);
     }
@@ -136,14 +136,14 @@ public final class MaterialSourceEvents {
     public static void onDrops(LivingDropsEvent event) {
         LivingEntity e = event.getEntity();
         Level level = e.level();
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         ItemStack drop = ItemStack.EMPTY;
         if (e.getType() == EntityType.BREEZE) {
-            if (level.random.nextFloat() < 0.7f) drop = new ItemStack(ModItems.GALE_CORE.get());
+            if (level.getRandom().nextFloat() < 0.7f) drop = new ItemStack(ModItems.GALE_CORE.get());
         } else if (e instanceof MagmaCube cube && cube.getSize() >= 4 && level.getBiome(e.blockPosition()).is(Biomes.BASALT_DELTAS)) {
-            if (level.random.nextFloat() < 0.4f) drop = new ItemStack(ModItems.CINDER_HEART.get());
+            if (level.getRandom().nextFloat() < 0.4f) drop = new ItemStack(ModItems.CINDER_HEART.get());
         } else if (e instanceof WitherSkeleton && (event.getSource().is(DamageTypeTags.IS_LIGHTNING) || recentlyStruck(e))) {
-            drop = new ItemStack(ModItems.WITHER_ASH.get(), 2 + level.random.nextInt(3));
+            drop = new ItemStack(ModItems.WITHER_ASH.get(), 2 + level.getRandom().nextInt(3));
         }
         if (!drop.isEmpty()) event.getDrops().add(new ItemEntity(level, e.getX(), e.getY() + 0.5, e.getZ(), drop));
     }
@@ -170,7 +170,7 @@ public final class MaterialSourceEvents {
             }
         }
         for (BlockPos c : conduits) {
-            if (level.random.nextFloat() < 0.4f) growNacre(level, c);
+            if (level.getRandom().nextFloat() < 0.4f) growNacre(level, c);
         }
     }
 
@@ -194,8 +194,8 @@ public final class MaterialSourceEvents {
             }
         }
         if (existing >= NACRE_CAP || spots.isEmpty()) return;
-        BlockPos[] pick = spots.get(level.random.nextInt(spots.size()));
-        Direction facing = Direction.fromDelta(pick[1].getX() - pick[0].getX(), pick[1].getY() - pick[0].getY(), pick[1].getZ() - pick[0].getZ());
+        BlockPos[] pick = spots.get(level.getRandom().nextInt(spots.size()));
+        Direction facing = Direction.getNearest(pick[1].getX() - pick[0].getX(), pick[1].getY() - pick[0].getY(), pick[1].getZ() - pick[0].getZ(), null);
         if (facing == null) return;
         level.setBlock(pick[1], cluster.defaultBlockState().setValue(NacreClusterBlock.FACING, facing)
                 .setValue(NacreClusterBlock.WATERLOGGED, true), Block.UPDATE_ALL);

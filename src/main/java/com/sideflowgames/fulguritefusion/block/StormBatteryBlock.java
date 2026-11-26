@@ -47,7 +47,7 @@ import net.minecraft.world.phys.BlockHitResult;
 // (growing one bank, or joining separate banks together), the new block and the battery it touched
 // blow up in a small overload. Nothing else is damaged.
 // Breaking a battery keeps its stored Fm in the dropped item.
-public class StormBatteryBlock extends BaseEntityBlock {
+public class StormBatteryBlock extends BaseEntityBlock implements com.sideflowgames.fulguritefusion.util.TooltipBlockItem.Tooltip {
     public static final MapCodec<StormBatteryBlock> CODEC = simpleCodec(StormBatteryBlock::new);
 
     public StormBatteryBlock(Properties properties) {
@@ -77,8 +77,7 @@ public class StormBatteryBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState,
-                                     LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighbourPos, BlockState neighbourState, net.minecraft.util.RandomSource shapeRandom) {
         return state.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction), neighbourState.is(this));
     }
 
@@ -99,14 +98,14 @@ public class StormBatteryBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.STORM_BATTERY_BE.get(), StormBatteryBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.STORM_BATTERY_BE.get(), StormBatteryBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof StormBatteryBlockEntity battery) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StormBatteryBlockEntity battery) {
             if (player.isShiftKeyDown()) {
-                player.displayClientMessage(Component.literal(battery.statusText()), true);
+                player.sendOverlayMessage(Component.literal(battery.statusText()));
             } else {
                 player.openMenu(battery, buf -> buf.writeBlockPos(pos));
             }
@@ -118,7 +117,7 @@ public class StormBatteryBlock extends BaseEntityBlock {
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        if (!level.isClientSide && !oldState.is(this)) {
+        if (!level.isClientSide() && !oldState.is(this)) {
             level.scheduleTick(pos, this, 1);
         }
     }
@@ -169,9 +168,10 @@ public class StormBatteryBlock extends BaseEntityBlock {
         if (be instanceof StormBatteryBlockEntity battery && battery.getFm() > 0) {
             for (ItemStack stack : drops) {
                 if (stack.is(asItem())) {
-                    CompoundTag tag = new CompoundTag();
-                    tag.putInt("Fm", battery.getFm());
-                    BlockItem.setBlockEntityData(stack, ModBlocks.STORM_BATTERY_BE.get(), tag);
+                    var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+                            net.minecraft.util.ProblemReporter.DISCARDING, battery.getLevel().registryAccess());
+                    out.putInt("Fm", battery.getFm());
+                    BlockItem.setBlockEntityData(stack, ModBlocks.STORM_BATTERY_BE.get(), out);
                 }
             }
         }
@@ -180,10 +180,10 @@ public class StormBatteryBlock extends BaseEntityBlock {
 
     // Show the stored charge on the item's tooltip.
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        int fm = data != null ? data.copyTag().getInt("Fm") : 0;
+    public void appendItemTooltip(ItemStack stack, Item.TooltipContext context, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        int fm = data != null ? data.copyTagWithoutId().getIntOr("Fm", 0) : 0;
         tooltip.add(Component.literal("Stored: " + fm + " Fm").withStyle(ChatFormatting.AQUA));
     }
 

@@ -7,12 +7,8 @@
     "SWS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "W": {
-      "item": "fulguritefusion:insulated_wire"
-    }
+    "S": "fulguritefusion:silver_sheet",
+    "W": "fulguritefusion:insulated_wire"
   },
   "result": {
     "id": "fulguritefusion:heavy_wire",

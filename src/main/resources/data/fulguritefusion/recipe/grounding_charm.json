@@ -7,18 +7,10 @@
     " S "
   ],
   "key": {
-    "T": {
-      "item": "minecraft:string"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "R": {
-      "item": "minecraft:lightning_rod"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    }
+    "T": "minecraft:string",
+    "C": "fulguritefusion:copper_sheet",
+    "R": "minecraft:lightning_rod",
+    "S": "fulguritefusion:silver_sheet"
   },
   "result": {
     "id": "fulguritefusion:grounding_charm",

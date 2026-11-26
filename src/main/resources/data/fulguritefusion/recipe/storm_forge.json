@@ -7,18 +7,10 @@
     "TTT"
   ],
   "key": {
-    "R": {
-      "item": "fulguritefusion:refined_fulgurite"
-    },
-    "X": {
-      "item": "fulguritefusion:charged_spark_cell"
-    },
-    "A": {
-      "item": "minecraft:anvil"
-    },
-    "T": {
-      "item": "fulguritefusion:tempered_arc_casing"
-    }
+    "R": "fulguritefusion:refined_fulgurite",
+    "X": "fulguritefusion:charged_spark_cell",
+    "A": "minecraft:anvil",
+    "T": "fulguritefusion:tempered_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:storm_forge",

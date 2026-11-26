@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:crushed_gold"
-  },
+  "ingredient": "fulguritefusion:crushed_gold",
   "result": {
     "id": "minecraft:gold_ingot"
   },

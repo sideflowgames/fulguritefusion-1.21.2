@@ -7,15 +7,9 @@
     "SGS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "G": {
-      "item": "minecraft:glass_pane"
-    },
-    "A": {
-      "item": "fulguritefusion:silver_sheet"
-    }
+    "S": "fulguritefusion:iron_sheet",
+    "G": "minecraft:glass_pane",
+    "A": "fulguritefusion:silver_sheet"
   },
   "result": {
     "id": "fulguritefusion:console_casing",

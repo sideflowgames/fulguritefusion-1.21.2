@@ -19,15 +19,15 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Ion Eel: a glowing eel of the Ion Lakes. Leaves you alone, but when hit it sends a shock through the water:
 // everything else in the water within 4 blocks takes 4 damage, then it darts away. Drops Ion Scales.
@@ -63,7 +63,7 @@ public class IonEelEntity extends WaterAnimal implements GeoEntity {
 
     @Override
     public void travel(Vec3 input) {
-        if (isControlledByLocalInstance() && isInWater()) {
+        if (isLocalInstanceAuthoritative() && isInWater()) {
             moveRelative(getSpeed(), input);
             move(MoverType.SELF, getDeltaMovement());
             setDeltaMovement(getDeltaMovement().scale(0.9));
@@ -76,19 +76,19 @@ public class IonEelEntity extends WaterAnimal implements GeoEntity {
     public void aiStep() {
         super.aiStep();
         if (shockCooldown > 0) shockCooldown--;
-        if (level().isClientSide && random.nextInt(15) == 0) {
+        if (level().isClientSide() && random.nextInt(15) == 0) {
             level().addParticle(ParticleTypes.GLOW, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0, 0);
         }
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
         if (hurt && shockCooldown == 0 && level() instanceof ServerLevel server && isInWater()) {
             shockCooldown = 40;
             for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(SHOCK_RADIUS),
                     e -> e != this && e.isInWater() && !(e instanceof IonEelEntity))) {
-                e.hurt(damageSources().mobAttack(this), SHOCK_DAMAGE);
+                e.hurtOrSimulate(damageSources().mobAttack(this), SHOCK_DAMAGE);
             }
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY(0.5), getZ(), 40, 2.0, 1.0, 2.0, 0.3);
             server.playSound(null, blockPosition(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.NEUTRAL, 0.3f, 2.0f);
@@ -108,7 +108,7 @@ public class IonEelEntity extends WaterAnimal implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, s -> s.setAndContinue(SWIM)));
+        controllers.add(new AnimationController<>("main", 5, s -> s.setAndContinue(SWIM)));
     }
 
     @Override

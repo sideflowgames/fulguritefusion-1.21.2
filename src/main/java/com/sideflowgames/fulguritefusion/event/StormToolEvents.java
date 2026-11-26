@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -45,9 +45,10 @@ public final class StormToolEvents {
         boolean any = false;
         for (ItemEntity drop : event.getDrops()) {
             ItemStack stack = drop.getItem();
-            var recipe = level.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(stack), level);
+            SingleRecipeInput input = new SingleRecipeInput(stack);
+            var recipe = level.recipeAccess().getRecipeFor(RecipeType.SMELTING, input, level);
             if (recipe.isEmpty()) continue;
-            ItemStack result = recipe.get().value().getResultItem(level.registryAccess());
+            ItemStack result = recipe.get().value().assemble(input);
             if (result.isEmpty()) continue;
             int cost = SMELT_COST * stack.getCount();
             if (FmChargeable.get(tool) < cost) break;
@@ -62,7 +63,7 @@ public final class StormToolEvents {
     }
 
     @SubscribeEvent
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(BreakBlockEvent event) {
         if (veining || !(event.getPlayer() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
         ItemStack tool = player.getMainHandItem();
         if (!StormforgedTools.veinMining(tool)) return;

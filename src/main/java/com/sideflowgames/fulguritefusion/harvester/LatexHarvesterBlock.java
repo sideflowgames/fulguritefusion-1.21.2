@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 // Latex Harvester controller. Place it against the base of a rubber tree, facing away from the trunk.
@@ -30,7 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
 // The 5 Arc Casings set the speed (the lowest tier). See LatexHarvesterBlockEntity for how it works.
 public class LatexHarvesterBlock extends BaseEntityBlock {
     public static final MapCodec<LatexHarvesterBlock> CODEC = simpleCodec(LatexHarvesterBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
     public static final BooleanProperty WORKING = BooleanProperty.create("working");
 
@@ -67,18 +67,18 @@ public class LatexHarvesterBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.LATEX_HARVESTER_BE.get(), LatexHarvesterBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.LATEX_HARVESTER_BE.get(), LatexHarvesterBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) HarvesterPart.interact(level, pos, player);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        if (!level.isClientSide()) HarvesterPart.interact(level, pos, player);
+        return InteractionResult.SUCCESS;
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof LatexHarvesterBlockEntity h) h.breakApart();
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

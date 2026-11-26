@@ -7,12 +7,8 @@
     "DDD"
   ],
   "key": {
-    "D": {
-      "item": "minecraft:cobbled_deepslate"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "D": "minecraft:cobbled_deepslate",
+    "F": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:reinforced_fulgurite",

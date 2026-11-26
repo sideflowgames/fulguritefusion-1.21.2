@@ -86,6 +86,6 @@ public abstract class MachineMenu extends AbstractContainerMenu {
     public boolean stillValid(Player player) {
         // Any block of the same kind counts (e.g. a Storm Furnace that was upgraded while the menu was open).
         return access.evaluate((level, pos) -> level.getBlockState(pos).getBlock().getClass() == block.getClass()
-                && player.canInteractWithBlock(pos, 4.0), true);
+                && player.isWithinBlockInteractionRange(pos, 4.0), true);
     }
 }

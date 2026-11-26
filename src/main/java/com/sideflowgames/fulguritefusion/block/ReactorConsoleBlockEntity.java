@@ -339,6 +339,16 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         return null;
     }
 
+    // 26.1: the console's real storage behind a Fuel Input (see LegacyCaps).
+    public static net.neoforged.neoforge.items.IItemHandlerModifiable[] fuelInputStorage(Level level, BlockPos pos) {
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (level.getBlockEntity(pos.relative(d, 2).above()) instanceof ReactorConsoleBlockEntity console && console.formed) {
+                return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {console.fuel, console.byproducts};
+            }
+        }
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[0];
+    }
+
     // A Fuel Input as hoppers see it: slot 0 = its fuel slot (insert only), slot 1 = the byproduct slot (take only).
     private record InputPort(ItemStackHandler fuel, int slot, ItemStackHandler byproducts) implements IItemHandler {
         @Override
@@ -503,7 +513,7 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     // ---------- Check ----------
 
     public void check() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         String layout = validateLayout();
         if (layout != null) {
             problem = layout;
@@ -596,15 +606,15 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
         ReactorConsoleBlockEntity console = findNear(level, pos);
         if (console == null) return InteractionResult.PASS;
         console.interact(player);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     // Click: the menu once the console is formed (sneak-click, or not formed yet: the status line).
     public void interact(Player player) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         check();
         if (formed && !player.isShiftKeyDown() && player instanceof ServerPlayer sp) openMenu(sp);
-        else player.displayClientMessage(Component.literal(statusText()), true);
+        else player.sendOverlayMessage(Component.literal(statusText()));
     }
 
     private static ReactorConsoleBlockEntity findNear(Level level, BlockPos pos) {
@@ -625,20 +635,27 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     // ---------- Save ----------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveReactorConsoleBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveReactorConsoleBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putBoolean("Formed", formed);
         tag.putBoolean("Cable1", cable1);
         tag.putBoolean("Cable2", cable2);
-        if (port1 != null) tag.put("Port1", NbtUtils.writeBlockPos(port1));
-        if (port2 != null) tag.put("Port2", NbtUtils.writeBlockPos(port2));
-        if (colliderPos != null) tag.put("Collider", NbtUtils.writeBlockPos(colliderPos));
+        if (port1 != null) tag.put("Port1", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(port1));
+        if (port2 != null) tag.put("Port2", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(port2));
+        if (colliderPos != null) tag.put("Collider", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(colliderPos));
         tag.putLong("Fm", fm);
         tag.putBoolean("Auto", auto);
         tag.putString("LastResult", lastResult);
         tag.putLong("LastYield", lastYield);
-        tag.put("Fuel", fuel.serializeNBT(registries));
-        tag.put("Byproducts", byproducts.serializeNBT(registries));
+        tag.put("Fuel", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(fuel, registries));
+        tag.put("Byproducts", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(byproducts, registries));
     }
 
     @Override
@@ -655,19 +672,31 @@ public class ReactorConsoleBlockEntity extends BlockEntity implements MenuProvid
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        formed = tag.getBoolean("Formed");
-        cable1 = tag.getBoolean("Cable1");
-        cable2 = tag.getBoolean("Cable2");
-        port1 = NbtUtils.readBlockPos(tag, "Port1").orElse(null);
-        port2 = NbtUtils.readBlockPos(tag, "Port2").orElse(null);
-        colliderPos = NbtUtils.readBlockPos(tag, "Collider").orElse(null);
-        fm = tag.getLong("Fm");
-        auto = tag.getBoolean("Auto");
-        if (tag.contains("LastResult")) lastResult = tag.getString("LastResult");
-        lastYield = tag.getLong("LastYield");
-        if (tag.contains("Fuel")) fuel.deserializeNBT(registries, tag.getCompound("Fuel"));
-        if (tag.contains("Byproducts")) byproducts.deserializeNBT(registries, tag.getCompound("Byproducts"));
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadReactorConsoleBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadReactorConsoleBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        formed = tag.getBooleanOr("Formed", false);
+        cable1 = tag.getBooleanOr("Cable1", false);
+        cable2 = tag.getBooleanOr("Cable2", false);
+        port1 = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Port1").orElse(null);
+        port2 = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Port2").orElse(null);
+        colliderPos = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Collider").orElse(null);
+        fm = tag.getLongOr("Fm", 0L);
+        auto = tag.getBooleanOr("Auto", false);
+        if (tag.contains("LastResult")) lastResult = tag.getStringOr("LastResult", "");
+        lastYield = tag.getLongOr("LastYield", 0L);
+        if (tag.contains("Fuel")) com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(fuel, registries, tag.getCompoundOrEmpty("Fuel"));
+        if (tag.contains("Byproducts")) com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(byproducts, registries, tag.getCompoundOrEmpty("Byproducts"));
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof ReactorConsoleBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

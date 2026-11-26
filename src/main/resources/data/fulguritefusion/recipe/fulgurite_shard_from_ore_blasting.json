@@ -1,9 +1,7 @@
 {
   "type": "minecraft:blasting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:fulgurite_ore"
-  },
+  "ingredient": "fulguritefusion:fulgurite_ore",
   "result": {
     "id": "fulguritefusion:fulgurite_shard"
   },

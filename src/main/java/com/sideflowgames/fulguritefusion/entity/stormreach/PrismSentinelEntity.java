@@ -43,8 +43,8 @@ import org.joml.Vector3f;
 //   - Refraction: glows bright for 3 seconds, taking 80% less damage and turning arrows away
 // 420 health, very heavy armor, can't be knocked back. Drops a Sentinel Lens and a pile of Prismite Shards.
 public class PrismSentinelEntity extends StormElite {
-    private static final DustParticleOptions PRISM = new DustParticleOptions(new Vector3f(1.0f, 0.55f, 0.95f), 1.2f);
-    private static final DustParticleOptions CYAN = new DustParticleOptions(new Vector3f(0.5f, 0.95f, 1.0f), 1.2f);
+    private static final DustParticleOptions PRISM = new DustParticleOptions(0xFF8CF2, 1.2f);
+    private static final DustParticleOptions CYAN = new DustParticleOptions(0x80F2FF, 1.2f);
     private int lanceCooldown = 50, volleyCooldown = 100, refractCooldown = 160;
 
     public PrismSentinelEntity(EntityType<? extends Monster> type, Level level) {
@@ -63,8 +63,8 @@ public class PrismSentinelEntity extends StormElite {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         ServerLevel server = (ServerLevel) level();
         if (lanceCooldown > 0) lanceCooldown--;
         if (volleyCooldown > 0) volleyCooldown--;
@@ -113,12 +113,12 @@ public class PrismSentinelEntity extends StormElite {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (action() == 3) {
             if (source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.Projectile) return false;
             amount *= 0.2f;
         }
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override

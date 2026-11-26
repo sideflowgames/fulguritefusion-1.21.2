@@ -98,7 +98,7 @@ public class MachineConnectorBlockEntity extends BlockEntity {
 
     private void changedAndSync() {
         setChanged();
-        if (level != null && !level.isClientSide) {
+        if (level != null && !level.isClientSide()) {
             BlockState state = getBlockState();
             level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);
         }
@@ -143,8 +143,15 @@ public class MachineConnectorBlockEntity extends BlockEntity {
     // --- saving and syncing to clients (so the wires can be drawn) ---
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveMachineConnectorBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveMachineConnectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         ListTag list = new ListTag();
         for (Link link : links) {
             CompoundTag l = new CompoundTag();
@@ -157,20 +164,25 @@ public class MachineConnectorBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadMachineConnectorBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadMachineConnectorBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         links.clear();
-        ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("Links");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag l = list.getCompound(i);
+            CompoundTag l = list.getCompoundOrEmpty(i);
             com.sideflowgames.fulguritefusion.power.WireTier tier;
-            if (l.contains("Tier")) tier = com.sideflowgames.fulguritefusion.power.WireTier.byId(l.getString("Tier"));
-            else tier = l.getBoolean("Heavy") ? com.sideflowgames.fulguritefusion.power.WireTier.HEAVY   // older saves
-                    : l.getBoolean("Insulated") ? com.sideflowgames.fulguritefusion.power.WireTier.INSULATED
+            if (l.contains("Tier")) tier = com.sideflowgames.fulguritefusion.power.WireTier.byId(l.getStringOr("Tier", ""));
+            else tier = l.getBooleanOr("Heavy", false) ? com.sideflowgames.fulguritefusion.power.WireTier.HEAVY   // older saves
+                    : l.getBooleanOr("Insulated", false) ? com.sideflowgames.fulguritefusion.power.WireTier.INSULATED
                     : com.sideflowgames.fulguritefusion.power.WireTier.RAW;
-            links.add(new Link(BlockPos.of(l.getLong("Pos")), tier));
+            links.add(new Link(BlockPos.of(l.getLongOr("Pos", 0L)), tier));
         }
-        powered = tag.getBoolean("Powered");
+        powered = tag.getBooleanOr("Powered", false);
     }
 
     @Override
@@ -181,5 +193,12 @@ public class MachineConnectorBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof MachineConnectorBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

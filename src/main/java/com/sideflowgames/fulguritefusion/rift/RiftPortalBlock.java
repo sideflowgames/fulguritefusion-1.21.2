@@ -51,7 +51,7 @@ public class RiftPortalBlock extends Block {
 
     // The rift holds only while every neighbour in its own plane is more rift, frame or keystone.
     @Override
-    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         Direction.Axis axis = state.getValue(AXIS);
         boolean inPlane = dir.getAxis() == Direction.Axis.Y || dir.getAxis() == axis;
         if (inPlane && !holds(neighbor)) return Blocks.AIR.defaultBlockState();
@@ -63,8 +63,8 @@ public class RiftPortalBlock extends Block {
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!level.isClientSide && entity instanceof ServerPlayer player) RiftPortals.enter(player, pos);
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+        if (!level.isClientSide() && entity instanceof ServerPlayer player) RiftPortals.enter(player, pos);
     }
 
     @Override

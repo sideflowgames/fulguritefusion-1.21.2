@@ -7,24 +7,12 @@
     "MEM"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "E": {
-      "item": "fulguritefusion:empty_spark_cell"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "S": "fulguritefusion:silver_sheet",
+    "G": "minecraft:glass",
+    "C": "fulguritefusion:copper_sheet",
+    "M": "fulguritefusion:magnetite_plate",
+    "E": "fulguritefusion:empty_spark_cell"
   },
   "result": {
     "id": "fulguritefusion:fulgurite_charger",

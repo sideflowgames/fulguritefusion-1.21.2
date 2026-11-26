@@ -5,12 +5,8 @@
     "CGC"
   ],
   "key": {
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "G": {
-      "tag": "c:glass_blocks"
-    }
+    "C": "fulguritefusion:copper_sheet",
+    "G": "#c:glass_blocks"
   },
   "result": {
     "id": "fulguritefusion:fluid_pipe",

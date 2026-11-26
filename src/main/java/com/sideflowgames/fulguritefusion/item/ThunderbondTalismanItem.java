@@ -26,20 +26,21 @@ public class ThunderbondTalismanItem extends Item {
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
         if (!(target instanceof StormwingEntity bird)) return InteractionResult.PASS;
-        if (player.level().isClientSide) return InteractionResult.SUCCESS;
+        if (player.level().isClientSide()) return InteractionResult.SUCCESS;
         String refusal = bird.tryBond(player);
         if (refusal != null) {
-            player.displayClientMessage(Component.literal(refusal).withStyle(ChatFormatting.GRAY), true);
+            player.sendOverlayMessage(Component.literal(refusal).withStyle(ChatFormatting.GRAY));
             return InteractionResult.FAIL;
         }
         if (!player.getAbilities().instabuild) stack.shrink(1);
-        player.displayClientMessage(Component.literal("The Stormwing is bonded to you. Right-click it to ride.")
-                .withStyle(ChatFormatting.AQUA), true);
+        player.sendOverlayMessage(Component.literal("The Stormwing is bonded to you. Right-click it to ride.")
+                .withStyle(ChatFormatting.AQUA));
         return InteractionResult.CONSUME;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Use on a calm Stormwing during a thunderstorm").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Bonds it to you so you can ride it").withStyle(ChatFormatting.GRAY));
     }

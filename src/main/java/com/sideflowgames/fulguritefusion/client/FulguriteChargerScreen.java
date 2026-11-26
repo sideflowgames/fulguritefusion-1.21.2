@@ -3,14 +3,14 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import com.sideflowgames.fulguritefusion.menu.FulguriteChargerMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class FulguriteChargerScreen extends MachineScreen<FulguriteChargerMenu> {
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/fulgurite_charger.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/fulgurite_charger.png");
     // Lightning arrow between the slots: empty version drawn in the background, filled sprite at (176, 52), 24 x 16.
     private static final int ARROW_X = 70, ARROW_Y = 35, ARROW_W = 24, ARROW_H = 16;
     private static final int TEXT_COLOR = 0xFF26262C;
@@ -20,28 +20,27 @@ public class FulguriteChargerScreen extends MachineScreen<FulguriteChargerMenu> 
     }
 
     @Override
-    protected void renderMachine(GuiGraphics g, float partialTick) {
+    protected void renderMachine(GuiGraphicsExtractor g, float partialTick) {
         drawPowerBar(g, menu.getFm(), menu.getMaxFm());
         int cost = menu.getCost();
         int w = cost > 0 ? menu.getProgress() * ARROW_W / cost : 0;
         if (w > 0) {
-            g.blit(texture, leftPos + ARROW_X, topPos + ARROW_Y,
-                    176, 52, w, ARROW_H);
+            g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, texture, leftPos + ARROW_X, topPos + ARROW_Y, (float) 176, (float) 52, w, ARROW_H, 256, 256);
         }
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        super.renderLabels(g, mouseX, mouseY);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        super.extractLabels(g, mouseX, mouseY);
         int cost = menu.getCost();
         if (cost > 0 && menu.getProgress() > 0) {
             String pct = (menu.getProgress() * 100 / cost) + "%";
-            g.drawString(font, pct, ARROW_X + (ARROW_W - font.width(pct)) / 2, ARROW_Y + 20, TEXT_COLOR, false);
+            g.text(font, pct, ARROW_X + (ARROW_W - font.width(pct)) / 2, ARROW_Y + 20, GuiStyle.opaque(TEXT_COLOR), false);
         }
     }
 
     @Override
-    protected void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {
+    protected void renderExtraTooltips(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         powerTooltip(g, mouseX, mouseY, menu.getFm(), menu.getMaxFm());
     }
 }

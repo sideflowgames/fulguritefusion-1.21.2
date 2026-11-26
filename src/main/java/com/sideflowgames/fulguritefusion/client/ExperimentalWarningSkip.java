@@ -60,7 +60,7 @@ public final class ExperimentalWarningSkip {
     private static <T> boolean onlyOurs(Registry<T> registry) {
         for (ResourceKey<T> key : registry.registryKeySet()) {
             Lifecycle life = registry.registrationInfo(key).map(i -> i.lifecycle()).orElse(Lifecycle.stable());
-            if (!life.equals(Lifecycle.stable()) && !OURS.contains(key.location().getNamespace())) return false;
+            if (!life.equals(Lifecycle.stable()) && !OURS.contains(key.identifier().getNamespace())) return false;
         }
         return true;
     }

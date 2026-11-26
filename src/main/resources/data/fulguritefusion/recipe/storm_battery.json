@@ -7,21 +7,11 @@
     "FMF"
   ],
   "key": {
-    "L": {
-      "item": "minecraft:lightning_rod"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    }
+    "L": "minecraft:lightning_rod",
+    "F": "fulguritefusion:fulgurite",
+    "S": "fulguritefusion:silver_ingot",
+    "R": "minecraft:redstone",
+    "M": "fulguritefusion:magnetite_ingot"
   },
   "result": {
     "id": "fulguritefusion:storm_battery",

@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:cinderite_block"
-    }
+    "fulguritefusion:cinderite_block"
   ],
   "result": {
     "id": "fulguritefusion:cinderite",

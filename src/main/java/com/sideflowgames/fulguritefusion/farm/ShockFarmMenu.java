@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 // Shock Farm Controller menu: power, status, what the biome spawns here, the On/Off button (button id 0),
 // the upgrade slots (2 on a 5x5 farm, 4 on a 7x7) and the player's inventory.
 public class ShockFarmMenu extends AbstractContainerMenu {
-    public record SpawnEntry(ResourceLocation id, int weight) {}
+    public record SpawnEntry(Identifier id, int weight) {}
 
     // Slot positions, shared with ShockFarmScreen.
     public static final int[][] UPGRADE_POS = {{150, 20}, {170, 20}, {150, 40}, {170, 40}};
@@ -41,7 +41,7 @@ public class ShockFarmMenu extends AbstractContainerMenu {
         this.pos = buf.readBlockPos();
         this.problem = buf.readUtf();
         int n = buf.readVarInt();
-        for (int i = 0; i < n; i++) spawns.add(new SpawnEntry(buf.readResourceLocation(), buf.readVarInt()));
+        for (int i = 0; i < n; i++) spawns.add(new SpawnEntry(buf.readIdentifier(), buf.readVarInt()));
         addSlots(inventory);
         addDataSlots(data);
     }

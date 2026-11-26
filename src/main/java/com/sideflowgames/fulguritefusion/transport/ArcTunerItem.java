@@ -29,7 +29,7 @@ public class ArcTunerItem extends Item {
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
         if (!(state.getBlock() instanceof ArcNodeBlock node)) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (node.isSender()) {
             if (player != null && player.isShiftKeyDown() && level.getBlockEntity(pos) instanceof ArcSenderBlockEntity be) {
                 be.setTarget(null);
@@ -38,7 +38,7 @@ public class ArcTunerItem extends Item {
             }
             CompoundTag tag = new CompoundTag();
             tag.putLong("Sender", pos.asLong());
-            tag.putString("Dim", level.dimension().location().toString());
+            tag.putString("Dim", level.dimension().identifier().toString());
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
             say(player, "Sender tuned. Now use the Tuner on an Arc Receiver within 5 blocks", ChatFormatting.AQUA);
             return InteractionResult.CONSUME;
@@ -48,8 +48,8 @@ public class ArcTunerItem extends Item {
             say(player, "Use the Tuner on an Arc Sender first", ChatFormatting.GOLD);
             return InteractionResult.CONSUME;
         }
-        BlockPos sender = BlockPos.of(tag.getLong("Sender"));
-        if (!level.dimension().location().toString().equals(tag.getString("Dim"))
+        BlockPos sender = BlockPos.of(tag.getLongOr("Sender", 0L));
+        if (!level.dimension().identifier().toString().equals(tag.getStringOr("Dim", ""))
                 || !(level.getBlockEntity(sender) instanceof ArcSenderBlockEntity be)) {
             say(player, "That Arc Sender is gone", ChatFormatting.RED);
             stack.remove(DataComponents.CUSTOM_DATA);
@@ -71,6 +71,6 @@ public class ArcTunerItem extends Item {
     }
 
     private static void say(Player player, String text, ChatFormatting color) {
-        if (player != null) player.displayClientMessage(Component.literal(text).withStyle(color), true);
+        if (player != null) player.sendOverlayMessage(Component.literal(text).withStyle(color));
     }
 }

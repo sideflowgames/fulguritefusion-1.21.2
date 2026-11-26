@@ -1,7 +1,7 @@
 package com.sideflowgames.fulguritefusion.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -141,7 +141,7 @@ public class GuideMapScreen extends Screen {
     // ---------- Drawing ----------
 
     @Override
-    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         long now = System.nanoTime();
         dt = lastNanos == 0 ? 0 : Math.min(0.1f, (now - lastNanos) / 1e9f);
         lastNanos = now;
@@ -159,10 +159,10 @@ public class GuideMapScreen extends Screen {
         if (diving != null) {
             diveTime += dt;
             float f = Mth.clamp(diveTime / DIVE_TIME, 0, 1);
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 900);
+            g.pose().pushMatrix();
+            g.nextStratum();
             g.fill(0, 0, width, height, ((int) (f * f * 255) << 24) | 0xE6F6FF);
-            g.pose().popPose();
+            g.pose().popMatrix();
             if (diveTime >= DIVE_TIME) {
                 GuideData.Chapter c = data.chapters.get(diving);
                 diving = null;
@@ -175,18 +175,18 @@ public class GuideMapScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (diving != null) return;
         String title = "⚡ Fulgurite Fusion Guide";
-        g.drawString(font, title, (width - font.width(title)) / 2, 10, 0xFFBFE6FF, true);
+        g.text(font, title, (width - font.width(title)) / 2, 10, 0xFFBFE6FF, true);
         String hint = "Drag: move   ·   Scroll: zoom   ·   Click a topic to open it";
-        g.drawString(font, hint, (width - font.width(hint)) / 2, height - 12, 0xFF8FA6C8, false);
+        g.text(font, hint, (width - font.width(hint)) / 2, height - 12, 0xFF8FA6C8, false);
         if (hoverText != null) {
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 1000);
-            g.renderComponentTooltip(font, hoverText, mouseX, mouseY);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.nextStratum();
+            g.setComponentTooltipForNextFrame(font, hoverText, mouseX, mouseY);
+            g.pose().popMatrix();
         }
     }
 
@@ -196,7 +196,7 @@ public class GuideMapScreen extends Screen {
         return new float[][]{{x0, y0}, {mid, y0}, {mid, y1}, {x1, y1}};
     }
 
-    private void drawPath(GuiGraphics g, float[][] p, float w, int color) {
+    private void drawPath(GuiGraphicsExtractor g, float[][] p, float w, int color) {
         for (int i = 0; i + 1 < p.length; i++) {
             float ax = sx(p[i][0]), ay = sy(p[i][1]), bx = sx(p[i + 1][0]), by = sy(p[i + 1][1]);
             int x0 = (int) (Math.min(ax, bx) - w / 2), x1 = (int) (Math.max(ax, bx) + w / 2 + 1);
@@ -205,7 +205,7 @@ public class GuideMapScreen extends Screen {
         }
     }
 
-    private void drawTraces(GuiGraphics g) {
+    private void drawTraces(GuiGraphicsExtractor g) {
         float w = Mth.clamp(2 * zoom, 1, 4);
         for (GuideData.Chapter c : data.chapters.values()) {
             GuideData.Chapter p = c.parent == null ? null : data.chapters.get(c.parent);
@@ -259,7 +259,7 @@ public class GuideMapScreen extends Screen {
         return showAll || GuideUnlocks.unlocked(id);
     }
 
-    private void drawNodes(GuiGraphics g, int mx, int my) {
+    private void drawNodes(GuiGraphicsExtractor g, int mx, int my) {
         float s = nodeSize();
         String over = diving == null ? nodeAt(mx, my) : null;
         for (GuideData.Chapter c : data.chapters.values()) {
@@ -279,27 +279,27 @@ public class GuideMapScreen extends Screen {
             g.fill(x0 + 2, y0 + 2, x1 - 2, y1 - 2, open ? 0xFF0E1830 : 0xFF0A101E);
             if (visible) {
                 float is = s * 0.62f / 16;
-                g.pose().pushPose();
-                g.pose().translate(x, y, 0);
-                g.pose().scale(is, is, 1);
-                g.renderItem(c.icon, -8, -8);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate((float) (x), (float) (y));
+                g.pose().scale((float) (is), (float) (is));
+                g.item(c.icon, -8, -8);
+                g.pose().popMatrix();
                 if (!open) {
-                    g.pose().pushPose();
-                    g.pose().translate(0, 0, 250);
+                    g.pose().pushMatrix();
+                    g.nextStratum();
                     g.fill(x0 + 2, y0 + 2, x1 - 2, y1 - 2, 0x99060A14);
-                    g.pose().popPose();
+                    g.pose().popMatrix();
                 }
             } else {
-                g.drawString(font, "?", (int) x - font.width("?") / 2, (int) y - 4, 0xFF4A5A74, false);
+                g.text(font, "?", (int) x - font.width("?") / 2, (int) y - 4, 0xFF4A5A74, false);
             }
             String label = visible ? c.title : "???";
             float ts = Mth.clamp(zoom, 0.6f, 1f);
-            g.pose().pushPose();
-            g.pose().translate(x, y1 + 3, 0);
-            g.pose().scale(ts, ts, 1);
-            g.drawString(font, label, -font.width(label) / 2, 0, open ? 0xFFDDEEFF : 0xFF5A6A80, true);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate((float) (x), (float) (y1 + 3));
+            g.pose().scale((float) (ts), (float) (ts));
+            g.text(font, label, -font.width(label) / 2, 0, GuiStyle.opaque(open ? 0xFFDDEEFF : 0xFF5A6A80), true);
+            g.pose().popMatrix();
             if (c.id.equals(over)) {
                 hoverText = visible
                         ? List.of(Component.literal(c.title), Component.literal(open ? "Click to open" : "Not unlocked yet").withColor(0xAAAAAA))
@@ -311,9 +311,11 @@ public class GuideMapScreen extends Screen {
     // ---------- Input ----------
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
         if (diving != null) return true;
-        if (super.mouseClicked(mx, my, button)) return true;
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (button == 0) {
             pressX = mx;
             pressY = my;
@@ -324,8 +326,10 @@ public class GuideMapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (button != 0 || diving != null) return super.mouseDragged(mx, my, button, dx, dy);
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
+        if (button != 0 || diving != null) return super.mouseDragged(event, dx, dy);
         if (Math.abs(mx - pressX) + Math.abs(my - pressY) > 3) dragging = true;
         if (dragging) {
             camX -= (float) dx / zoom;
@@ -337,13 +341,15 @@ public class GuideMapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
         if (button == 0 && !dragging && diving == null) {
             String id = nodeAt(mx, my);
             if (id != null && canOpen(id)) dive(id);
         }
         if (button == 0) dragging = false;
-        return super.mouseReleased(mx, my, button);
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -358,11 +364,12 @@ public class GuideMapScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.scancode(), mods = event.modifiers();
         if (key == GLFW.GLFW_KEY_HOME) {
             overview();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 }

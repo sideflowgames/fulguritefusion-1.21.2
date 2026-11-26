@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.item.equipment.ArmorType;
+
 import com.sideflowgames.fulguritefusion.ModArmorMaterials;
 import com.sideflowgames.fulguritefusion.ModDataComponents;
 import com.sideflowgames.fulguritefusion.event.StormArmorEvents;
@@ -17,7 +19,7 @@ import java.util.List;
 public class TitanPrimeArmorItem extends TitanArmorItem {
     public static final int MAX_FM = 32_000_000;
 
-    public TitanPrimeArmorItem(Type type, Properties properties) {
+    public TitanPrimeArmorItem(ArmorType type, Properties properties) {
         super(ModArmorMaterials.TITAN_PRIME, type, properties);
     }
 
@@ -27,7 +29,8 @@ public class TitanPrimeArmorItem extends TitanArmorItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Titan Prime").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
         int fm = FmChargeable.get(stack);
         tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, MAX_FM))

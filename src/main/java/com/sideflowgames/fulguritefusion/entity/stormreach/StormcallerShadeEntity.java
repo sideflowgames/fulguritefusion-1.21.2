@@ -60,8 +60,8 @@ public class StormcallerShadeEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         ServerLevel server = (ServerLevel) level();
         if (callCooldown > 0) callCooldown--;
         LivingEntity target = getTarget();
@@ -96,14 +96,14 @@ public class StormcallerShadeEntity extends StormBeast {
     }
 
     @Override
-    protected boolean moving(software.bernie.geckolib.animation.AnimationState<?> s) {
+    protected boolean moving(com.geckolib.animation.state.AnimationTest<?> s) {
         return getDeltaMovement().lengthSqr() > 0.002;
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(3) == 0) {
+        if (level().isClientSide() && random.nextInt(3) == 0) {
             level().addParticle(ParticleTypes.SMOKE, getRandomX(0.5), getY(0.2), getRandomZ(0.5), 0, -0.03, 0);
         }
     }

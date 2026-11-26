@@ -3,20 +3,18 @@ package com.sideflowgames.fulguritefusion.client;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 
 // A drop of latex, using the vanilla drip sprites tinted latex-white: it swells on the spout for a moment, falls
 // straight down (no drift), and splats briefly where it lands.
-public class LatexDripParticle extends TextureSheetParticle {
+public class LatexDripParticle extends net.minecraft.client.particle.SingleQuadParticle {
     private final SpriteSet sprites;
     private final int hangTicks;
     private boolean landed;
 
     LatexDripParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
-        super(level, x, y, z);
+        super(level, x, y, z, sprites.get(0, 2));
         this.sprites = sprites;
         this.hangTicks = 10 + random.nextInt(10);
         this.lifetime = 200;
@@ -53,8 +51,8 @@ public class LatexDripParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    protected Layer getLayer() {
+        return Layer.OPAQUE;
     }
 
     public static class Provider implements ParticleProvider<SimpleParticleType> {
@@ -66,7 +64,7 @@ public class LatexDripParticle extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z,
-                                       double dx, double dy, double dz) {
+                                       double dx, double dy, double dz, net.minecraft.util.RandomSource random) {
             return new LatexDripParticle(level, x, y, z, sprites);
         }
     }

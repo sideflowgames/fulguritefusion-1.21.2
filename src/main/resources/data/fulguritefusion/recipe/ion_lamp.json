@@ -7,15 +7,9 @@
     " C "
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "I": {
-      "item": "fulguritefusion:ion_mote"
-    },
-    "G": {
-      "item": "minecraft:glass"
-    }
+    "C": "minecraft:copper_ingot",
+    "I": "fulguritefusion:ion_mote",
+    "G": "minecraft:glass"
   },
   "result": {
     "id": "fulguritefusion:ion_lamp",

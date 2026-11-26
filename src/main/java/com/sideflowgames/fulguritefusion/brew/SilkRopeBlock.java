@@ -1,11 +1,12 @@
 package com.sideflowgames.fulguritefusion.brew;
 
+import net.minecraft.world.InteractionResult;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -49,31 +50,31 @@ public class SilkRopeBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         if (dir == Direction.UP && !canSurvive(state, level, pos)) return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
-        return super.updateShape(state, dir, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, scheduledTicks, pos, dir, neighborPos, neighbor, shapeRandom);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
-        if (!stack.is(asItem())) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (!stack.is(asItem())) return InteractionResult.TRY_WITH_EMPTY_HAND;
         BlockPos end = pos;
-        while (level.getBlockState(end.below()).is(this) && end.getY() > level.getMinBuildHeight()) end = end.below();
+        while (level.getBlockState(end.below()).is(this) && end.getY() > level.getMinY()) end = end.below();
         BlockPos target = end.below();
-        if (target.getY() < level.getMinBuildHeight() || !level.getBlockState(target).canBeReplaced()) {
-            return ItemInteractionResult.FAIL;
+        if (target.getY() < level.getMinY() || !level.getBlockState(target).canBeReplaced()) {
+            return InteractionResult.FAIL;
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlock(target, defaultBlockState(), 3);
             level.playSound(null, target, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1f, 1f);
             if (!player.getAbilities().instabuild) stack.shrink(1);
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean isPrecise) {
         if (!(entity instanceof LivingEntity living) || living.isShiftKeyDown()) return;
         Vec3 v = entity.getDeltaMovement();
         // Climbing up: ladders cap at 0.2 a tick; rope pulls you faster.

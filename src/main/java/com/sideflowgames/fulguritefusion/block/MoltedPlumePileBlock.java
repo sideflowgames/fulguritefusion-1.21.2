@@ -54,26 +54,25 @@ public class MoltedPlumePileBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         return canSurvive(state, level, pos) ? state : Blocks.AIR.defaultBlockState();
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
-            ItemStack plumes = new ItemStack(ModItems.MOLTED_PLUME.get(), 1 + level.random.nextInt(2));
+        if (!level.isClientSide()) {
+            ItemStack plumes = new ItemStack(ModItems.MOLTED_PLUME.get(), 1 + level.getRandom().nextInt(2));
             if (!player.getInventory().add(plumes)) player.drop(plumes, false);
             level.removeBlock(pos, false);
             level.playSound(null, pos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 0.6f, 1.6f);
             StormwingEntity.alarm(level, pos, player);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide) StormwingEntity.alarm(level, pos, player);
+        if (!level.isClientSide()) StormwingEntity.alarm(level, pos, player);
         return super.playerWillDestroy(level, pos, state, player);
     }
 }

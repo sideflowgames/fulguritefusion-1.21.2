@@ -79,8 +79,8 @@ public class StaticLeechEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (latchCooldown > 0) latchCooldown--;
         if (host == null) return;
         if (!host.isAlive() || --latched <= 0 || TitanArmorEvents.fullTitanSet(host)) {
@@ -97,7 +97,7 @@ public class StaticLeechEntity extends StormBeast {
             heal(2.0f);
             StormDamage.drain(host, 3_000);
             ((ServerLevel) level()).sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY(0.5), getZ(), 6, 0.2, 0.2, 0.2, 0.1);
-            playSound(SoundEvents.HONEY_DRINK, 0.8f, 0.6f);
+            playSound(SoundEvents.HONEY_DRINK.value(), 0.8f, 0.6f);
         }
     }
 
@@ -112,8 +112,8 @@ public class StaticLeechEntity extends StormBeast {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel, source, amount);
         if (hurt && host != null && source.getEntity() != null) unlatch();
         return hurt;
     }

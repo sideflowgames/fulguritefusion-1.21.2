@@ -87,8 +87,8 @@ public final class FmNetwork {
             if (be instanceof StormBatteryBlockEntity battery) {
                 batterySet.add(on);
                 // The bank's setting for the face the connector sits on decides which way power may go.
-                net.minecraft.core.Direction face = net.minecraft.core.Direction.fromDelta(
-                        c.getX() - on.getX(), c.getY() - on.getY(), c.getZ() - on.getZ());
+                net.minecraft.core.Direction face = net.minecraft.core.Direction.getNearest(
+                        c.getX() - on.getX(), c.getY() - on.getY(), c.getZ() - on.getZ(), null);
                 if (face == null || battery.canInput(face)) batteryIn.add(on);
                 if (face == null || battery.canOutput(face)) batteryOut.add(on);
             } else if (level.getBlockState(on).is(com.sideflowgames.fulguritefusion.ModBlocks.CONSOLE_POWER_PORT.get())) {
@@ -228,7 +228,7 @@ public final class FmNetwork {
         Long last = LAST_SHOCK.get(target.getUUID());
         if (last != null && now - last < HAZARD_INTERVAL) return;
         LAST_SHOCK.put(target.getUUID(), now);
-        target.hurt(level.damageSources().lightningBolt(), damage);
+        target.hurtOrSimulate(level.damageSources().lightningBolt(), damage);
         if (tier.shockBurns() && !target.isInWater()) target.igniteForSeconds(3);
     }
 

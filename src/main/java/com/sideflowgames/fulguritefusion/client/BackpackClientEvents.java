@@ -47,14 +47,14 @@ public final class BackpackClientEvents {
         int x = screen.getGuiLeft() + screen.getXSize() + 2, y = screen.getGuiTop() + 4;
         if (has(UpgradeKind.DEPOSIT)) {
             Button b = Button.builder(Component.literal("Deposit"),
-                    btn -> PacketDistributor.sendToServer(new BackpackNetwork.UtilityPayload(0))).bounds(x, y, 54, 16).build();
+                    btn -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new BackpackNetwork.UtilityPayload(0))).bounds(x, y, 54, 16).build();
             b.setTooltip(Tooltip.create(Component.literal("Move backpack items into this container")));
             event.addListener(b);
             y += 18;
         }
         if (has(UpgradeKind.RESTOCK)) {
             Button b = Button.builder(Component.literal("Restock"),
-                    btn -> PacketDistributor.sendToServer(new BackpackNetwork.UtilityPayload(1))).bounds(x, y, 54, 16).build();
+                    btn -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new BackpackNetwork.UtilityPayload(1))).bounds(x, y, 54, 16).build();
             b.setTooltip(Tooltip.create(Component.literal("Fill your backpack from this container")));
             event.addListener(b);
         }

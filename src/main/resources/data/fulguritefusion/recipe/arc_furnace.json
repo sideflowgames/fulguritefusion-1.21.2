@@ -7,21 +7,11 @@
     "SFS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "W": {
-      "item": "fulguritefusion:raw_wire"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    }
+    "S": "fulguritefusion:iron_sheet",
+    "G": "fulguritefusion:gold_sheet",
+    "W": "fulguritefusion:raw_wire",
+    "K": "fulguritefusion:crude_arc_casing",
+    "F": "minecraft:furnace"
   },
   "result": {
     "id": "fulguritefusion:arc_furnace",

@@ -1,27 +1,19 @@
 {
- "type": "minecraft:crafting_shaped",
- "category": "misc",
- "pattern": [
-  "GRG",
-  "CFC",
-  "GCG"
- ],
- "key": {
-  "G": {
-   "item": "minecraft:gold_ingot"
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GRG",
+    "CFC",
+    "GCG"
+  ],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "R": "minecraft:lightning_rod",
+    "C": "fulguritefusion:coil_segment",
+    "F": "fulguritefusion:fulgurite_shard"
   },
-  "R": {
-   "item": "minecraft:lightning_rod"
-  },
-  "C": {
-   "item": "fulguritefusion:coil_segment"
-  },
-  "F": {
-   "item": "fulguritefusion:fulgurite_shard"
+  "result": {
+    "id": "fulguritefusion:arc_receiver",
+    "count": 1
   }
- },
- "result": {
-  "id": "fulguritefusion:arc_receiver",
-  "count": 1
- }
 }

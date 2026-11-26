@@ -1,12 +1,13 @@
 package com.sideflowgames.fulguritefusion.backpack;
 
+import net.minecraft.world.InteractionResult;
+
 import com.sideflowgames.fulguritefusion.ModDataComponents;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -54,7 +55,7 @@ public class BackpackUpgradeItem extends Item {
 
     public static List<ItemStack> filter(ItemStack upgrade) {
         List<ItemStack> list = new ArrayList<>();
-        for (ItemStack s : upgrade.getOrDefault(ModDataComponents.FILTER.get(), ItemContainerContents.EMPTY).nonEmptyItems()) list.add(s);
+        for (ItemStack s : upgrade.getOrDefault(ModDataComponents.FILTER.get(), ItemContainerContents.EMPTY).allItemsCopyStream().filter(x -> !x.isEmpty()).toList()) list.add(s);
         return list;
     }
 
@@ -74,10 +75,10 @@ public class BackpackUpgradeItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            int slot = hand == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
+            int slot = hand == InteractionHand.MAIN_HAND ? sp.getInventory().getSelectedSlot() : 40;
             boolean voidXp = storm && kind == UpgradeKind.VOID;
             sp.openMenu(new SimpleMenuProvider((id, inv, p) -> new UpgradeFilterMenu(id, inv, stack, slot, voidXp),
                     stack.getHoverName()), buf -> {
@@ -85,7 +86,7 @@ public class BackpackUpgradeItem extends Item {
                 buf.writeBoolean(voidXp);
             });
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -94,7 +95,8 @@ public class BackpackUpgradeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         String what = switch (kind) {
             case PICKUP -> storm ? "Picked-up items go into the backpack. Powered: also grabs items within 3 blocks"
                     : "Picked-up items go into the backpack first";

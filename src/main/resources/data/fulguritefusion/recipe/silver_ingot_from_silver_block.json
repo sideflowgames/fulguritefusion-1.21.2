@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:silver_block"
-    }
+    "fulguritefusion:silver_block"
   ],
   "result": {
     "id": "fulguritefusion:silver_ingot",

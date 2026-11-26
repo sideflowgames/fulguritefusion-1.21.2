@@ -61,7 +61,7 @@ public class FluidPipeBlock extends BaseEntityBlock {
         BlockPos n = pos.relative(d);
         BlockState s = level.getBlockState(n);
         if (s.getBlock() instanceof FluidPipeBlock) return true;
-        return level instanceof Level l && l.getCapability(Capabilities.FluidHandler.BLOCK, n, d.getOpposite()) != null;
+        return level instanceof Level l && com.sideflowgames.fulguritefusion.util.LegacyCaps.fluidsAt(l, n, d.getOpposite()) != null;
     }
 
     @Override
@@ -72,15 +72,14 @@ public class FluidPipeBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
-        return state.setValue(SIDES.get(direction), connects(level, pos, direction));
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
+        return state.setValue(SIDES.get(direction), connects((net.minecraft.world.level.LevelAccessor) level, pos, direction));
     }
 
     // A machine next to it forming or breaking apart (its fluid handler comes and goes) without a shape change.
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
-        super.neighborChanged(state, level, pos, block, fromPos, moving);
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, net.minecraft.world.level.redstone.Orientation orientation, boolean moving) {
+        super.neighborChanged(state, level, pos, block, orientation, moving);
         BlockState now = state;
         for (Direction d : Direction.values()) now = now.setValue(SIDES.get(d), connects(level, pos, d));
         if (now != state) level.setBlock(pos, now, Block.UPDATE_CLIENTS);
@@ -130,7 +129,7 @@ public class FluidPipeBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    protected boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 
@@ -146,6 +145,6 @@ public class FluidPipeBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.FLUID_PIPE_BE.get(), FluidPipeBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.FLUID_PIPE_BE.get(), FluidPipeBlockEntity::serverTick);
     }
 }

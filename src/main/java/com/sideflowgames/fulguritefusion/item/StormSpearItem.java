@@ -35,9 +35,9 @@ public class StormSpearItem extends SpearItem implements FmChargeable {
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.LivingEntity attacker) {
+    public void hurtEnemy(ItemStack stack, net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.LivingEntity attacker) {
         FmChargeable.use(stack, HIT_COST);
-        return true;
+        return;
     }
 
     @Override
@@ -45,22 +45,15 @@ public class StormSpearItem extends SpearItem implements FmChargeable {
         return FmChargeable.use(stack, THROW_COST) >= THROW_COST || player.getAbilities().instabuild;
     }
 
-    @Override
-    public boolean isValidRepairItem(ItemStack stack, ItemStack repair) {
-        return false;
-    }
 
-    @Override
-    public int getEnchantmentValue() {
-        return 18;
-    }
 
     @Override public boolean isBarVisible(ItemStack s) { return true; }
     @Override public int getBarWidth(ItemStack s) { return StormforgedTools.barWidth(s); }
     @Override public int getBarColor(ItemStack s) { return StormforgedTools.barColor(s); }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("+" + (int) LIGHTNING + " lightning damage; thrown, it calls lightning where it lands")
                 .withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.literal("Hold right-click, then let go to throw").withStyle(ChatFormatting.GRAY));

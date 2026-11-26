@@ -40,17 +40,17 @@ public class ReaverSpikesBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, net.minecraft.world.level.LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos,
+                                     Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         if (dir == Direction.DOWN && !canSurvive(state, level, pos)) return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
-        return super.updateShape(state, dir, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, scheduledTicks, pos, dir, neighborPos, neighbor, shapeRandom);
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (level.isClientSide || !(entity instanceof LivingEntity living) || entity instanceof Player) return;
-        if (entity instanceof OwnableEntity o && o.getOwnerUUID() != null) return;
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+        if (level.isClientSide() || !(entity instanceof LivingEntity living) || entity instanceof Player) return;
+        if (entity instanceof OwnableEntity o && o.getOwnerReference() != null) return;
         entity.makeStuckInBlock(state, new net.minecraft.world.phys.Vec3(0.8, 1.0, 0.8));
-        if (living.tickCount % 10 == 0) living.hurt(level.damageSources().cactus(), 4.0f);
+        if (living.tickCount % 10 == 0) living.hurtOrSimulate(level.damageSources().cactus(), 4.0f);
     }
 }

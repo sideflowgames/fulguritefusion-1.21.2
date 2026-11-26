@@ -59,8 +59,8 @@ public class IonSwarmEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         LivingEntity target = getTarget();
         if (target != null && target.isAlive()) {
             Vec3 jitter = new Vec3(random.nextGaussian() * 0.6, random.nextGaussian() * 0.3, random.nextGaussian() * 0.6);
@@ -80,15 +80,15 @@ public class IonSwarmEntity extends StormBeast {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.Projectile) amount *= 0.5f;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             for (int i = 0; i < 2; i++) {
                 level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(1.2), getRandomY(), getRandomZ(1.2), 0, 0, 0);
             }
@@ -96,7 +96,7 @@ public class IonSwarmEntity extends StormBeast {
     }
 
     @Override
-    protected boolean moving(software.bernie.geckolib.animation.AnimationState<?> s) {
+    protected boolean moving(com.geckolib.animation.state.AnimationTest<?> s) {
         return getTarget() != null;
     }
 

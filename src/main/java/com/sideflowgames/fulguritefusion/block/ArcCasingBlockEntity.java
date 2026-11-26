@@ -121,20 +121,52 @@ public class ArcCasingBlockEntity extends BlockEntity implements FmHandler {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        if (controllerPos != null) tag.put("Controller", NbtUtils.writeBlockPos(controllerPos));
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveArcCasingBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveArcCasingBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        if (controllerPos != null) tag.put("Controller", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(controllerPos));
         tag.putString("Role", role.name());
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        controllerPos = NbtUtils.readBlockPos(tag, "Controller").orElse(null);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadArcCasingBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadArcCasingBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        controllerPos = com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Controller").orElse(null);
         try {
-            role = Role.valueOf(tag.getString("Role"));
+            role = Role.valueOf(tag.getStringOr("Role", ""));
         } catch (IllegalArgumentException e) {
             role = Role.NONE;
         }
     }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof ArcCasingBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the controller's real storage behind this casing's ports (see LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        MachineControllerBlockEntity c = controller();
+        return c == null ? new net.neoforged.neoforge.items.IItemHandlerModifiable[0] : c.capStorage();
+    }
+
+    public net.neoforged.neoforge.fluids.capability.templates.FluidTank[] fluidStorage() {
+        MachineControllerBlockEntity c = controller();
+        return c == null ? new net.neoforged.neoforge.fluids.capability.templates.FluidTank[0]
+                : new net.neoforged.neoforge.fluids.capability.templates.FluidTank[] {c.latexTank()};
+    }
+
 }

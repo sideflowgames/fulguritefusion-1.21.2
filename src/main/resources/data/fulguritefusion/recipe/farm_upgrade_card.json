@@ -7,15 +7,9 @@
     " G "
   ],
   "key": {
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "G": "fulguritefusion:gold_sheet",
+    "C": "fulguritefusion:copper_sheet",
+    "F": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:farm_upgrade_card",

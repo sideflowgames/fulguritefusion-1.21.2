@@ -42,9 +42,9 @@ public final class GuideUnlocks {
                 if (!s.isEmpty() && c.unlock.contains(s.getItem())) {
                     GuideProgress.CLIENT_UNLOCKED.add(c.id);
                     NEW.add(c.id);
-                    PacketDistributor.sendToServer(new GuideProgress.UnlockPayload(c.id));
-                    mc.player.displayClientMessage(Component.literal("⚡ New in your guide: ").withStyle(ChatFormatting.AQUA)
-                            .append(Component.literal(c.title).withStyle(ChatFormatting.WHITE)), true);
+                    net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new GuideProgress.UnlockPayload(c.id));
+                    mc.player.sendOverlayMessage(Component.literal("⚡ New in your guide: ").withStyle(ChatFormatting.AQUA)
+                            .append(Component.literal(c.title).withStyle(ChatFormatting.WHITE)));
                     break;
                 }
             }

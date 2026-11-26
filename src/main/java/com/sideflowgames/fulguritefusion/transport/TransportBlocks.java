@@ -26,17 +26,17 @@ public final class TransportBlocks {
     }
 
     public static final DeferredBlock<ItemPipeBlock> COPPER_PIPE = ModBlocks.BLOCKS.registerBlock("copper_item_pipe",
-            p -> new ItemPipeBlock(1, p), pipe(MapColor.COLOR_ORANGE));
+            p -> new ItemPipeBlock(1, p), () -> pipe(MapColor.COLOR_ORANGE));
     public static final DeferredBlock<ItemPipeBlock> FULGURITE_PIPE = ModBlocks.BLOCKS.registerBlock("fulgurite_item_pipe",
-            p -> new ItemPipeBlock(2, p), pipe(MapColor.COLOR_CYAN));
+            p -> new ItemPipeBlock(2, p), () -> pipe(MapColor.COLOR_CYAN));
     public static final DeferredBlock<ItemPipeBlock> STORMFORGED_PIPE = ModBlocks.BLOCKS.registerBlock("stormforged_item_pipe",
-            p -> new ItemPipeBlock(3, p), pipe(MapColor.COLOR_PURPLE));
+            p -> new ItemPipeBlock(3, p), () -> pipe(MapColor.COLOR_PURPLE));
 
     public static final DeferredBlock<ArcNodeBlock> ARC_SENDER = ModBlocks.BLOCKS.registerBlock("arc_sender",
-            p -> new ArcNodeBlock(true, p), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f)
+            p -> new ArcNodeBlock(true, p), () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f, 6.0f)
                     .sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(s -> 5));
     public static final DeferredBlock<ArcNodeBlock> ARC_RECEIVER = ModBlocks.BLOCKS.registerBlock("arc_receiver",
-            p -> new ArcNodeBlock(false, p), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(3.0f, 6.0f)
+            p -> new ArcNodeBlock(false, p), () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(3.0f, 6.0f)
                     .sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(s -> 5));
 
     public static final DeferredItem<BlockItem> COPPER_PIPE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("copper_item_pipe", COPPER_PIPE);
@@ -45,12 +45,12 @@ public final class TransportBlocks {
     public static final DeferredItem<BlockItem> ARC_SENDER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arc_sender", ARC_SENDER);
     public static final DeferredItem<BlockItem> ARC_RECEIVER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("arc_receiver", ARC_RECEIVER);
     public static final DeferredItem<ArcTunerItem> ARC_TUNER = ModItems.ITEMS.registerItem("arc_tuner", ArcTunerItem::new,
-            new Item.Properties().stacksTo(1));
+            () -> new Item.Properties().stacksTo(1));
 
     public static final Supplier<BlockEntityType<ItemPipeBlockEntity>> ITEM_PIPE_BE = ModBlocks.BLOCK_ENTITIES.register("item_pipe",
-            () -> BlockEntityType.Builder.of(ItemPipeBlockEntity::new, COPPER_PIPE.get(), FULGURITE_PIPE.get(), STORMFORGED_PIPE.get()).build(null));
+            () -> new BlockEntityType<>(ItemPipeBlockEntity::new, COPPER_PIPE.get(), FULGURITE_PIPE.get(), STORMFORGED_PIPE.get()));
     public static final Supplier<BlockEntityType<ArcSenderBlockEntity>> ARC_SENDER_BE = ModBlocks.BLOCK_ENTITIES.register("arc_sender",
-            () -> BlockEntityType.Builder.of(ArcSenderBlockEntity::new, ARC_SENDER.get()).build(null));
+            () -> new BlockEntityType<>(ArcSenderBlockEntity::new, ARC_SENDER.get()));
 
     public static final Supplier<MenuType<PipeFilterMenu>> PIPE_FILTER_MENU =
             ModMenus.MENUS.register("pipe_filter", () -> IMenuTypeExtension.create(PipeFilterMenu::new));

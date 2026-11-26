@@ -56,6 +56,9 @@ public class FulguriteFusion {
         com.sideflowgames.fulguritefusion.trinket.Trinkets.register(modEventBus);
         com.sideflowgames.fulguritefusion.item.ChainBolt.register(modEventBus);
         com.sideflowgames.fulguritefusion.stormreach.StormreachStorm.register(modEventBus);
+        // 26.1: send the crafting recipes to clients too, for the guide book's recipe grids.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.OnDatapackSyncEvent event) ->
+                event.sendRecipes(net.minecraft.world.item.crafting.RecipeType.CRAFTING));
         com.sideflowgames.fulguritefusion.stormreach.Stormreach.register();
         com.sideflowgames.fulguritefusion.titan.TitanTrials.register(modEventBus);
         com.sideflowgames.fulguritefusion.rift.RiftPortals.register();
@@ -73,12 +76,20 @@ public class FulguriteFusion {
         LOGGER.info("Fulgurite Fusion: common setup");
         event.enqueueWork(() -> {
             // Rubber wood burns like any other wood.
-            var fire = (net.minecraft.world.level.block.FireBlock) net.minecraft.world.level.block.Blocks.FIRE;
-            fire.setFlammable(ModBlocks.RUBBER_LOG.get(), 5, 5);
-            fire.setFlammable(ModBlocks.RUBBER_WOOD.get(), 5, 5);
-            fire.setFlammable(ModBlocks.RUBBER_PLANKS.get(), 5, 20);
-            fire.setFlammable(ModBlocks.RUBBER_LEAVES.get(), 30, 60);
-            fire.setFlammable(ModBlocks.DRIED_RUBBER_LOG.get(), 5, 5);
+            // FireBlock.setFlammable is private in 26.1, so it is called through reflection (NeoForge runs on Mojang names).
+            try {
+                var fire = net.minecraft.world.level.block.Blocks.FIRE;
+                var set = net.minecraft.world.level.block.FireBlock.class.getDeclaredMethod("setFlammable",
+                        net.minecraft.world.level.block.Block.class, int.class, int.class);
+                set.setAccessible(true);
+                set.invoke(fire, ModBlocks.RUBBER_LOG.get(), 5, 5);
+                set.invoke(fire, ModBlocks.RUBBER_WOOD.get(), 5, 5);
+                set.invoke(fire, ModBlocks.RUBBER_PLANKS.get(), 5, 20);
+                set.invoke(fire, ModBlocks.RUBBER_LEAVES.get(), 30, 60);
+                set.invoke(fire, ModBlocks.DRIED_RUBBER_LOG.get(), 5, 5);
+            } catch (ReflectiveOperationException e) {
+                LOGGER.warn("Could not make rubber wood flammable", e);
+            }
             // Stormreach woods and plants are storm-hardened: never added here, so they don't catch or spread fire.
         });
     }

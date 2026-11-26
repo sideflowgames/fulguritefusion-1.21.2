@@ -159,7 +159,7 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
 
     // Capacity of this block, as known on this side (the client gets it from the server).
     public int displayCapacity() {
-        return level != null && level.isClientSide ? syncedCapacity : capacity();
+        return level != null && level.isClientSide() ? syncedCapacity : capacity();
     }
 
     @Override
@@ -253,18 +253,30 @@ public class StormBatteryBlockEntity extends BlockEntity implements FmHandler, F
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormBatteryBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormBatteryBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         tag.putIntArray("Sides", sides);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        if (tag.contains("Cap")) syncedCapacity = tag.getInt("Cap");
-        int[] saved = tag.getIntArray("Sides");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadStormBatteryBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormBatteryBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        if (tag.contains("Cap")) syncedCapacity = tag.getIntOr("Cap", 0);
+        int[] saved = tag.getIntArray("Sides").orElse(new int[0]);
         if (saved.length == 6) System.arraycopy(saved, 0, sides, 0, 6);
     }
 }

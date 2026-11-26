@@ -18,18 +18,18 @@ public final class FarmBlocks {
     private FarmBlocks() {}
 
     public static final DeferredBlock<GalvanicSoilBlock> GALVANIC_SOIL = ModBlocks.BLOCKS.registerBlock("galvanic_soil", GalvanicSoilBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(0.8f).sound(SoundType.SOUL_SOIL));
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(0.8f).sound(SoundType.SOUL_SOIL));
     public static final DeferredBlock<TeslaProngBlock> TESLA_PRONG = ModBlocks.BLOCKS.registerBlock("tesla_prong", TeslaProngBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(3.0f, 6.0f).sound(SoundType.COPPER)
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(3.0f, 6.0f).sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops().noOcclusion());
     public static final DeferredBlock<ShockFarmControllerBlock> CONTROLLER = ModBlocks.BLOCKS.registerBlock("shock_farm_controller",
-            ShockFarmControllerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f)
+            ShockFarmControllerBlock::new, () -> BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f)
                     .sound(SoundType.METAL).requiresCorrectToolForDrops().lightLevel(s -> s.getValue(ShockFarmControllerBlock.ACTIVE) ? 7 : 0));
     public static final DeferredBlock<FarmCollectorBlock> COLLECTOR = ModBlocks.BLOCKS.registerBlock("farm_collector", FarmCollectorBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
 
     public static final DeferredBlock<FarmPowerPortBlock> POWER_PORT = ModBlocks.BLOCKS.registerBlock("farm_power_port", FarmPowerPortBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0f, 8.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
 
     public static final DeferredItem<BlockItem> GALVANIC_SOIL_ITEM = ModItems.ITEMS.registerSimpleBlockItem("galvanic_soil", GALVANIC_SOIL);
     public static final DeferredItem<BlockItem> TESLA_PRONG_ITEM = ModItems.ITEMS.registerSimpleBlockItem("tesla_prong", TESLA_PRONG);
@@ -51,16 +51,16 @@ public final class FarmBlocks {
     public static final DeferredItem<FarmUpgradeItem> LOOTING_CARD_3 = card("looting_card_3", FarmUpgradeItem.Kind.LOOTING, 3);
 
     private static DeferredItem<FarmUpgradeItem> card(String name, FarmUpgradeItem.Kind kind, int tier) {
-        return ModItems.ITEMS.registerItem(name, p -> new FarmUpgradeItem(kind, tier, p), new net.minecraft.world.item.Item.Properties().stacksTo(16));
+        return ModItems.ITEMS.registerItem(name, p -> new FarmUpgradeItem(kind, tier, p), () -> new net.minecraft.world.item.Item.Properties().stacksTo(16));
     }
 
     public static final Supplier<BlockEntityType<ShockFarmControllerBlockEntity>> CONTROLLER_BE = ModBlocks.BLOCK_ENTITIES.register(
-            "shock_farm_controller", () -> BlockEntityType.Builder.of(ShockFarmControllerBlockEntity::new, CONTROLLER.get()).build(null));
+            "shock_farm_controller", () -> new BlockEntityType<>(ShockFarmControllerBlockEntity::new, CONTROLLER.get()));
     public static final Supplier<BlockEntityType<FarmCollectorBlockEntity>> COLLECTOR_BE = ModBlocks.BLOCK_ENTITIES.register(
-            "farm_collector", () -> BlockEntityType.Builder.of(FarmCollectorBlockEntity::new, COLLECTOR.get()).build(null));
+            "farm_collector", () -> new BlockEntityType<>(FarmCollectorBlockEntity::new, COLLECTOR.get()));
 
     public static final Supplier<BlockEntityType<FarmPowerPortBlockEntity>> POWER_PORT_BE = ModBlocks.BLOCK_ENTITIES.register(
-            "farm_power_port", () -> BlockEntityType.Builder.of(FarmPowerPortBlockEntity::new, POWER_PORT.get()).build(null));
+            "farm_power_port", () -> new BlockEntityType<>(FarmPowerPortBlockEntity::new, POWER_PORT.get()));
 
     public static void init() {
         FarmMenus.init();

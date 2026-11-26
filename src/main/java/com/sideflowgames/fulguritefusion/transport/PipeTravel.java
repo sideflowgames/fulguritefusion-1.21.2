@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -25,7 +25,7 @@ public final class PipeTravel {
     public static Consumer<Payload> clientHandler = p -> {};
 
     public record Payload(List<BlockPos> path, int fromSide, int toSide, ItemStack item, int tier) implements CustomPacketPayload {
-        public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "pipe_travel"));
+        public static final Type<Payload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "pipe_travel"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Payload> STREAM_CODEC = StreamCodec.of((buf, p) -> {
             int n = Math.min(p.path().size(), MAX_PATH);
             buf.writeVarInt(n);

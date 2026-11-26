@@ -10,13 +10,14 @@ import com.sideflowgames.fulguritefusion.block.FusionColliderBlockEntity;
 import com.sideflowgames.fulguritefusion.block.ReactorPath;
 
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import org.joml.Quaternionf;
@@ -25,9 +26,9 @@ import org.joml.Vector3f;
 // Draws the formed rings (inner and outer): smooth, rounded tubes following the channel squares, with a dark shell,
 // four see-through window bands (top, bottom, inside, outside) and a glowing channel running through it.
 // The geometry is built once; each frame just draws it around the Fusion Collider.
-public class FusionColliderRenderer implements BlockEntityRenderer<FusionColliderBlockEntity> {
-    private static final ResourceLocation WHITE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
+public class FusionColliderRenderer extends LegacyBlockEntityRenderer<FusionColliderBlockEntity> {
+    private static final Identifier WHITE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/block/storm_battery_gauge.png");
     private static final float RING = FusionColliderBlockEntity.RING;
     private static final float OUTER = FusionColliderBlockEntity.OUTER;
     private static final float TUBE_R = 2.3f;     // tube radius (the ports poke out a little past it)
@@ -64,7 +65,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
     }
 
     @Override
-    public void render(FusionColliderBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
+    protected void render(FusionColliderBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
                        int packedLight, int packedOverlay) {
         if (be.getLevel() == null) return;
         // Ghost build outline while a redstone signal reaches the collider.
@@ -74,10 +75,10 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         }
         boolean ring = be.isFormed(), chamber = be.isChamberFormed();
         if (!ring && !chamber) {
-            if (be.isRunning()) drawRun(be, buffers.getBuffer(RenderType.lightning()), poseStack.last(), partialTick, false);
+            if (be.isRunning()) drawRun(be, buffers.getBuffer(RenderTypes.lightning()), poseStack.last(), partialTick, false);
             return;
         }
-        int light = LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().above(3));
+        int light = LevelRenderer.getLightCoords(be.getLevel(), be.getBlockPos().above(3));
         float time = be.getLevel().getGameTime() + partialTick;
         PoseStack.Pose pose = poseStack.last();
         float cx = 0.5f, cy = 0.5f, cz = 0.5f;
@@ -111,9 +112,9 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         //    (All of one buffer before asking for the next: asking for another closes the first.)
         if (!ring) ports.clear();
         boolean chamberX = be.chamberAxisX();
-        int chamberLight = LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().above(3));
+        int chamberLight = LevelRenderer.getLightCoords(be.getLevel(), be.getBlockPos().above(3));
 
-        VertexConsumer solid = buffers.getBuffer(RenderType.entitySolid(WHITE));
+        VertexConsumer solid = buffers.getBuffer(RenderTypes.entitySolid(WHITE));
         if (ring) {
             tube(solid, pose, INNER_PATH, cx, cy, cz, TUBE_R, light, false, time);
             tube(solid, pose, OUTER_PATH, cx, cy, cz, TUBE_R, light, false, time);
@@ -125,7 +126,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         }
 
         // 2) The dark inside lining, visible from both sides (behind the shell only).
-        VertexConsumer lining = buffers.getBuffer(RenderType.entityCutoutNoCull(WHITE));
+        VertexConsumer lining = buffers.getBuffer(RenderTypes.entityCutout(WHITE));
         if (ring) {
             lining(lining, pose, INNER_PATH, cx, cy, cz, light);
             lining(lining, pose, OUTER_PATH, cx, cy, cz, light);
@@ -134,13 +135,13 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
 
         // 3) Glowing, additive: the energy core and a run in progress. Drawn before the windows so they show through.
         if (chamber || be.isRunning()) {
-            VertexConsumer glowAdd = buffers.getBuffer(RenderType.lightning());
+            VertexConsumer glowAdd = buffers.getBuffer(RenderTypes.lightning());
             if (chamber) coreGlow(be, glowAdd, pose, partialTick);
             if (be.isRunning()) drawRun(be, glowAdd, pose, partialTick, false);
         }
 
         // 4) Everything glowing or frosted: the channel, the window strips, the port discs, the portholes.
-        VertexConsumer glow = buffers.getBuffer(RenderType.entityTranslucent(WHITE));
+        VertexConsumer glow = buffers.getBuffer(RenderTypes.entityTranslucent(WHITE));
         if (ring) {
             for (float[][] path : new float[][][]{INNER_PATH, OUTER_PATH}) {
                 core(glow, pose, path, cx, cy, cz, time, CORE_R, 1f);
@@ -152,7 +153,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         if (chamber) chamber(glow, pose, chamberX, CH_WINDOWS, chamberLight);
 
         // 5) The charges lighting up the ring tube from inside as they pass (on top of the windows).
-        if (ring && be.isRunning()) drawRun(be, buffers.getBuffer(RenderType.lightning()), pose, partialTick, true);
+        if (ring && be.isRunning()) drawRun(be, buffers.getBuffer(RenderTypes.lightning()), pose, partialTick, true);
     }
 
     // ---------- The blast chamber: an armoured sphere ----------
@@ -222,7 +223,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                 annulus(vc, pose, along(c, w, 1.85f, w, 0), w, sd, u, 0.94f, 1.42f, LINING, light);
                 cylinder(vc, pose, c, w, sd, u, 1.85f, 2.32f, 0.94f, LINING, light, false);
             } else if (pass == CH_WINDOWS) {
-                disc(vc, pose, along(c, w, 2.25f, w, 0), w, sd, u, 0.95f, GLASS, 110, LightTexture.FULL_BRIGHT);
+                disc(vc, pose, along(c, w, 2.25f, w, 0), w, sd, u, 0.95f, GLASS, 110, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
             }
         }
 
@@ -308,15 +309,15 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
     private static void coreSolid(FusionColliderBlockEntity be, VertexConsumer vc, PoseStack.Pose pose, boolean axisX, float pt) {
         float[] c = {0.5f, 0.5f, 0.5f};
         float[][] axes = ringAxes(spin(be, pt));
-        for (int i = 0; i < 3; i++) torus(vc, pose, c, axes[i], RING_R[i], 0.035f, RING_METAL, LightTexture.FULL_BRIGHT);
+        for (int i = 0; i < 3; i++) torus(vc, pose, c, axes[i], RING_R[i], 0.035f, RING_METAL, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
         // Target prongs facing the two beam ports.
         float[] axis = axisX ? new float[]{1, 0, 0} : new float[]{0, 0, 1};
         for (int sgn = -1; sgn <= 1; sgn += 2) {
             float[] f = {axis[0] * sgn, 0, axis[2] * sgn}, sd = {f[2], 0, -f[0]}, u = {0, 1, 0};
-            cylinder(vc, pose, c, f, sd, u, 0.78f, 1.45f, 0.07f, HOUSING, LightTexture.FULL_BRIGHT, true);
-            cylinder(vc, pose, c, f, sd, u, 0.95f, 1.08f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT, true);
-            annulus(vc, pose, along(c, f, 1.08f, f, 0), f, sd, u, 0.07f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT);
-            annulus(vc, pose, along(c, f, 0.95f, f, 0), new float[]{-f[0], 0, -f[2]}, u, sd, 0.07f, 0.13f, RING_METAL, LightTexture.FULL_BRIGHT);
+            cylinder(vc, pose, c, f, sd, u, 0.78f, 1.45f, 0.07f, HOUSING, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, true);
+            cylinder(vc, pose, c, f, sd, u, 0.95f, 1.08f, 0.13f, RING_METAL, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, true);
+            annulus(vc, pose, along(c, f, 1.08f, f, 0), f, sd, u, 0.07f, 0.13f, RING_METAL, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
+            annulus(vc, pose, along(c, f, 0.95f, f, 0), new float[]{-f[0], 0, -f[2]}, u, sd, 0.07f, 0.13f, RING_METAL, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
         }
     }
 
@@ -417,7 +418,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                     {c[0] + d1[0] * rr + n[0] * w, c[1] + d1[1] * rr + n[1] * w, c[2] + d1[2] * rr + n[2] * w},
                     {c[0] + d1[0] * rr - n[0] * w, c[1] + d1[1] * rr - n[1] * w, c[2] + d1[2] * rr - n[2] * w},
                     {c[0] + d0[0] * rr - n[0] * w, c[1] + d0[1] * rr - n[1] * w, c[2] + d0[2] * rr - n[2] * w}};
-            for (float[] p : q) raw(vc, pose, p, d0, red, g, b, alpha, LightTexture.FULL_BRIGHT);
+            for (float[] p : q) raw(vc, pose, p, d0, red, g, b, alpha, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
         }
     }
 
@@ -603,10 +604,10 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
         int sides = 8;
         for (int k = 0; k < sides; k++) {
             float[] d0 = radial(s, u, (float) (Math.PI * 2 * k / sides)), d1 = radial(s, u, (float) (Math.PI * 2 * (k + 1) / sides));
-            raw(vc, pose, along(a, f, 0, d0, ra), d0, r, g, bl, alphaA, LightTexture.FULL_BRIGHT);
-            raw(vc, pose, along(a, f, 0, d1, ra), d1, r, g, bl, alphaA, LightTexture.FULL_BRIGHT);
-            raw(vc, pose, along(b, f, 0, d1, rb), d1, r, g, bl, alphaB, LightTexture.FULL_BRIGHT);
-            raw(vc, pose, along(b, f, 0, d0, rb), d0, r, g, bl, alphaB, LightTexture.FULL_BRIGHT);
+            raw(vc, pose, along(a, f, 0, d0, ra), d0, r, g, bl, alphaA, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
+            raw(vc, pose, along(a, f, 0, d1, ra), d1, r, g, bl, alphaA, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
+            raw(vc, pose, along(b, f, 0, d1, rb), d1, r, g, bl, alphaB, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
+            raw(vc, pose, along(b, f, 0, d0, rb), d0, r, g, bl, alphaB, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
         }
     }
 
@@ -620,7 +621,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                 float[][] n = {sph(t0, p0), sph(t0, p1), sph(t1, p1), sph(t1, p0)};
                 for (float[] d : n) {
                     raw(vc, pose, new float[]{c[0] + d[0] * radius, c[1] + d[1] * radius, c[2] + d[2] * radius}, d,
-                            r, g, b, alpha, LightTexture.FULL_BRIGHT);
+                            r, g, b, alpha, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
                 }
             }
         }
@@ -657,7 +658,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                                     float fx, float fz, int glowColour, float pulse) {
         float[] f = {fx, 0, fz}, u = {0, 1, 0}, sd = {fz, 0, -fx};
         float[] c = {x + fx * 0.62f, y, z + fz * 0.62f};
-        disc(glow, pose, c, f, sd, u, 0.6f, glowColour, (int) (170 + 85 * pulse), LightTexture.FULL_BRIGHT);
+        disc(glow, pose, c, f, sd, u, 0.6f, glowColour, (int) (170 + 85 * pulse), net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
     }
 
     // Side of a cylinder along f from 'from' to 'to' (distances from base), radius r, facing outward.
@@ -763,7 +764,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
                 // Windows are frosted glass lit from inside: mostly opaque, softly glowing.
                 int alpha = isWindow ? 140 : 255;
                 float t0 = (float) (Math.PI * 2 * k / SIDES), t1 = (float) (Math.PI * 2 * (k + 1) / SIDES);
-                quad(vc, pose, cx, cy, cz, a, b, r, t0, t1, colour, alpha, isWindow ? LightTexture.FULL_BRIGHT : light);
+                quad(vc, pose, cx, cy, cz, a, b, r, t0, t1, colour, alpha, isWindow ? net.minecraft.util.LightCoordsUtil.FULL_BRIGHT : light);
             }
         }
     }
@@ -803,7 +804,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
             int alpha = (int) ((110 + 120 * pulse) * strength);
             for (int k = 0; k < 12; k++) {
                 float t0 = (float) (Math.PI * 2 * k / 12), t1 = (float) (Math.PI * 2 * (k + 1) / 12);
-                quad(vc, pose, cx, cy, cz, a, b, radius, t0, t1, CORE, alpha, LightTexture.FULL_BRIGHT);
+                quad(vc, pose, cx, cy, cz, a, b, radius, t0, t1, CORE, alpha, net.minecraft.util.LightCoordsUtil.FULL_BRIGHT);
             }
         }
     }
@@ -845,7 +846,7 @@ public class FusionColliderRenderer implements BlockEntityRenderer<FusionCollide
     }
 
     @Override
-    public boolean shouldRenderOffScreen(FusionColliderBlockEntity be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 

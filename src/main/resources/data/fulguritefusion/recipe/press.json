@@ -7,21 +7,11 @@
     "III"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    }
+    "M": "fulguritefusion:magnetite_ingot",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone",
+    "K": "fulguritefusion:crude_arc_casing",
+    "I": "minecraft:iron_ingot"
   },
   "result": {
     "id": "fulguritefusion:press",

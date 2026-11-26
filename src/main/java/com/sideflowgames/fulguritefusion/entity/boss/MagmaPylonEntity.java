@@ -12,9 +12,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Magma Pylon: the Magma Conduit's shield anchor. A basalt spire that bursts out of the ground. It doesn't move,
 // sets anyone within 2.5 blocks on fire, and while any pylon stands the Conduit heals 1 health a second. 45 health.
@@ -31,8 +31,8 @@ public class MagmaPylonEntity extends BossAnchorEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         StormBossEntity boss = owner();
         if (tickCount % 20 == 0) {
             if (boss != null && boss.getHealth() < boss.getMaxHealth()) boss.heal(1.0f);
@@ -52,7 +52,7 @@ public class MagmaPylonEntity extends BossAnchorEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (random.nextInt(2) == 0) level().addParticle(ParticleTypes.FLAME, getRandomX(0.5), getY() + 2.8, getRandomZ(0.5), 0, 0.04, 0);
             if (random.nextInt(4) == 0) level().addParticle(ParticleTypes.LAVA, getRandomX(0.8), getY() + 0.3, getRandomZ(0.8), 0, 0, 0);
         }
@@ -80,6 +80,6 @@ public class MagmaPylonEntity extends BossAnchorEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, s -> s.setAndContinue(IDLE)));
+        controllers.add(new AnimationController<>("main", 0, s -> s.setAndContinue(IDLE)));
     }
 }

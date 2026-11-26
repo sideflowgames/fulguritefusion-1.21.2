@@ -61,7 +61,7 @@ public final class ForgeRecipes {
     public static final int PRIME_BACKPACK_COST = 5_000_000;
 
     private static Part item(Item item, int count) {
-        return new Part(item.getDescription().getString(), s -> s.is(item), count);
+        return new Part(item.getName(new ItemStack(item)).getString(), s -> s.is(item), count);
     }
 
     // A Fusion Fuel capsule of Strong or Jackpot tier.

@@ -7,15 +7,9 @@
     "III"
   ],
   "key": {
-    "I": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    }
+    "I": "fulguritefusion:iron_sheet",
+    "S": "fulguritefusion:silver_sheet",
+    "G": "fulguritefusion:gold_sheet"
   },
   "result": {
     "id": "fulguritefusion:data_cable",

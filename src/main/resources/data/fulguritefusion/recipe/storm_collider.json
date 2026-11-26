@@ -7,21 +7,11 @@
     "FXF"
   ],
   "key": {
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "A": {
-      "item": "fulguritefusion:arc_core"
-    },
-    "K": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "M": {
-      "item": "fulguritefusion:mini_collider"
-    },
-    "X": {
-      "item": "fulguritefusion:charged_spark_cell"
-    }
+    "F": "fulguritefusion:fulgurite",
+    "A": "fulguritefusion:arc_core",
+    "K": "fulguritefusion:coil_segment",
+    "M": "fulguritefusion:mini_collider",
+    "X": "fulguritefusion:charged_spark_cell"
   },
   "result": {
     "id": "fulguritefusion:storm_collider",

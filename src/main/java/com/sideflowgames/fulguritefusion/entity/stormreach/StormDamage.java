@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
@@ -28,12 +28,12 @@ public final class StormDamage {
     private StormDamage() {}
 
     public static final ResourceKey<DamageType> STORM =
-            ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "storm"));
+            ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "storm"));
     private static final EquipmentSlot[] ARMOR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     // Storm damage with no attacker (traps).
     public static DamageSource trap(net.minecraft.world.level.Level level) {
-        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(STORM));
+        return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(STORM));
     }
 
     public static DamageSource source(Entity attacker) {
@@ -41,18 +41,18 @@ public final class StormDamage {
     }
 
     public static DamageSource source(Entity direct, @Nullable Entity owner) {
-        return new DamageSource(direct.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(STORM), direct, owner);
+        return new DamageSource(direct.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(STORM), direct, owner);
     }
 
     // Hurts with storm damage; never hits other storm beasts.
     public static boolean hit(Entity attacker, Entity target, float amount) {
         if (target instanceof StormBeast || target == attacker) return false;
-        return target.hurt(source(attacker), amount);
+        return target.hurtOrSimulate(source(attacker), amount);
     }
 
     public static boolean hit(Entity direct, @Nullable Entity owner, Entity target, float amount) {
         if (target instanceof StormBeast || target == owner) return false;
-        return target.hurt(source(direct, owner), amount);
+        return target.hurtOrSimulate(source(direct, owner), amount);
     }
 
     // Takes up to `amount` Fm from the charged gear the entity is wearing or holding. Returns what was taken.

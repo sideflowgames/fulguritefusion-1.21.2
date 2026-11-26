@@ -183,7 +183,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
             return;
         }
         Pairing pairing = Pairings.of(ia, ib);
-        Pairing result = resolve(pairing, level.random);
+        Pairing result = resolve(pairing, level.getRandom());
         // Stormwing Eggs incubating nearby remember what was fired.
         StormwingEggBlockEntity.onPairing(level, worldPosition, pairing.a(), pairing.b(), result.tier());
         lastResult = result == pairing ? result.name() + " (" + result.tier().display() + ")"
@@ -194,7 +194,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
             return;
         }
         give(FusionFuelItem.create(pairing.id(), result.id()));
-        ItemStack byproduct = byproduct(pairing, result, level.random);
+        ItemStack byproduct = byproduct(pairing, result, level.getRandom());
         if (!byproduct.isEmpty()) {
             give(byproduct);
             level.playSound(null, worldPosition, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 1.2f);
@@ -261,7 +261,7 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
     private void shock(ServerLevel level, double range, float damage) {
         AABB area = new AABB(worldPosition).inflate(range);
         for (Player player : level.getEntitiesOfClass(Player.class, area)) {
-            player.hurt(level.damageSources().lightningBolt(), damage);
+            player.hurtOrSimulate(level.damageSources().lightningBolt(), damage);
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 10, 0.3, 0.5, 0.3, 0.1);
         }
     }
@@ -388,22 +388,47 @@ public class StormColliderBlockEntity extends ColliderCoreBlockEntity implements
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormColliderBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        super.legacySaveColliderCoreBlockEntity(tag, registries);
         tag.putInt("Fm", fm);
-        tag.put("Output", output.serializeNBT(registries));
-        if (!carriedA.isEmpty()) tag.put("CarriedA", carriedA.save(registries));
-        if (!carriedB.isEmpty()) tag.put("CarriedB", carriedB.save(registries));
+        tag.put("Output", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(output, registries));
+        if (!carriedA.isEmpty()) tag.put("CarriedA", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(carriedA, registries));
+        if (!carriedB.isEmpty()) tag.put("CarriedB", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(carriedB, registries));
         tag.putString("LastResult", lastResult);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        output.deserializeNBT(registries, tag.getCompound("Output"));
-        carriedA = ItemStack.parseOptional(registries, tag.getCompound("CarriedA"));
-        carriedB = ItemStack.parseOptional(registries, tag.getCompound("CarriedB"));
-        if (tag.contains("LastResult")) lastResult = tag.getString("LastResult");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadStormColliderBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
     }
+
+    protected void legacyLoadStormColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        super.legacyLoadColliderCoreBlockEntity(tag, registries);
+        fm = tag.getIntOr("Fm", 0);
+        com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(output, registries, tag.getCompoundOrEmpty("Output"));
+        carriedA = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("CarriedA"));
+        carriedB = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("CarriedB"));
+        if (tag.contains("LastResult")) lastResult = tag.getStringOr("LastResult", "");
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof StormColliderBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
+    }
+
+    // 26.1: the real storage behind the hopper/pipe view, so an undone transfer can be put back exactly (LegacyCaps).
+    public net.neoforged.neoforge.items.IItemHandlerModifiable[] capStorage() {
+        return new net.neoforged.neoforge.items.IItemHandlerModifiable[] {output};
+    }
+
 }

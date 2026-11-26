@@ -7,7 +7,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.capabilities.BlockCapability;
@@ -51,7 +51,7 @@ public final class EuCompat {
 
     @SuppressWarnings("unchecked")
     private static BlockCapability<Object, Direction> capability(String id, Class<?> type) {
-        return (BlockCapability<Object, Direction>) (BlockCapability<?, ?>) BlockCapability.createSided(ResourceLocation.parse(id), type);
+        return (BlockCapability<Object, Direction>) (BlockCapability<?, ?>) BlockCapability.createSided(Identifier.parse(id), type);
     }
 
     private static void init() {

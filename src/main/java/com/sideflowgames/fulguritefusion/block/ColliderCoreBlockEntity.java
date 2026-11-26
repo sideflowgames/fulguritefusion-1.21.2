@@ -36,21 +36,21 @@ import java.util.List;
 // A shot: two Spark Cells leave the input in opposite directions, each does one full lap of the ring,
 // then carries on to the first injector it reaches, which fires it into the center block where they collide.
 // What the collision does is up to the center block.
-public abstract class ColliderCoreBlockEntity extends BlockEntity implements software.bernie.geckolib.animatable.GeoBlockEntity {
+public abstract class ColliderCoreBlockEntity extends BlockEntity implements com.geckolib.animatable.GeoBlockEntity {
     public static final int RADIUS = 3;
     public static final int TICKS_PER_BLOCK = 2;
 
     // The formed ring is one GeckoLib model, drawn by the center block (see client/ColliderRenderer).
-    private final software.bernie.geckolib.animatable.instance.AnimatableInstanceCache geoCache =
-            software.bernie.geckolib.util.GeckoLibUtil.createInstanceCache(this);
+    private final com.geckolib.animatable.instance.AnimatableInstanceCache geoCache =
+            com.geckolib.util.GeckoLibUtil.createInstanceCache(this);
     // Game time the shot in flight was fired (synced to clients so they can draw it), or -1.
     protected long shotStart = -1;
 
     // Cell trail colours: one electric blue, one violet.
-    private static final DustParticleOptions TRAIL_A = new DustParticleOptions(new Vector3f(0.35f, 0.8f, 1.0f), 1.2f);
-    private static final DustParticleOptions TRAIL_B = new DustParticleOptions(new Vector3f(0.8f, 0.5f, 1.0f), 1.2f);
-    private static final DustParticleOptions TRAIL_A_FADE = new DustParticleOptions(new Vector3f(0.35f, 0.8f, 1.0f), 0.6f);
-    private static final DustParticleOptions TRAIL_B_FADE = new DustParticleOptions(new Vector3f(0.8f, 0.5f, 1.0f), 0.6f);
+    private static final DustParticleOptions TRAIL_A = new DustParticleOptions(0x59CCFF, 1.2f);
+    private static final DustParticleOptions TRAIL_B = new DustParticleOptions(0xCC80FF, 1.2f);
+    private static final DustParticleOptions TRAIL_A_FADE = new DustParticleOptions(0x59CCFF, 0.6f);
+    private static final DustParticleOptions TRAIL_B_FADE = new DustParticleOptions(0xCC80FF, 0.6f);
 
     // Local ring coordinates (u = sideways, v = toward the input). Built once.
     private static final int[][] PATH = buildPath();
@@ -217,7 +217,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
     public void interact(Player player) {
         checkStructure();
         if (player.isShiftKeyDown() || !(this instanceof MenuProvider menu)) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(statusText()), true);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(statusText()));
         } else {
             player.openMenu(menu, buf -> buf.writeBlockPos(worldPosition));
         }
@@ -255,7 +255,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
 
     // Keeps the blocks' formed look in step with the ring: formed while complete, back to normal when not.
     private void updateFormed() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         BlockState s = getBlockState();
         if (!s.hasProperty(ColliderParts.FORMED)) return;
         boolean want = inputDir != null, have = s.getValue(ColliderParts.FORMED);
@@ -281,13 +281,13 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
 
     // The center block is being removed: show its ring blocks again.
     public static void unformRing(Level level, BlockPos core, BlockState coreState) {
-        if (level.isClientSide || !coreState.hasProperty(ColliderParts.FORMED) || !coreState.getValue(ColliderParts.FORMED)) return;
+        if (level.isClientSide() || !coreState.hasProperty(ColliderParts.FORMED) || !coreState.getValue(ColliderParts.FORMED)) return;
         setRing(level, core, coreState.getValue(ColliderParts.INPUT), false);
     }
 
     // A ring block was removed: the collider it belonged to re-checks (and un-forms) straight away.
     public static void partRemoved(Level level, BlockPos pos) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         for (int dx = -RADIUS; dx <= RADIUS; dx++) {
             for (int dz = -RADIUS; dz <= RADIUS; dz++) {
                 if (Math.max(Math.abs(dx), Math.abs(dz)) != RADIUS) continue;
@@ -300,7 +300,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
 
     private void syncShot(long start) {
         shotStart = start;
-        if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        if (level != null && !level.isClientSide()) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
     @Override
@@ -317,21 +317,23 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
 
     // Clients only take the shot timing from updates (the rest stays on the server).
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        shotStart = tag.contains("ShotStart") ? tag.getLong("ShotStart") : -1;
+    public void handleUpdateTag(net.minecraft.world.level.storage.ValueInput updateInput) {
+        CompoundTag tag = com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(updateInput);
+        HolderLookup.Provider registries = updateInput.lookup();
+        shotStart = tag.contains("ShotStart") ? tag.getLongOr("ShotStart", 0L) : -1;
     }
 
     @Override
-    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt,
-                             HolderLookup.Provider registries) {
-        handleUpdateTag(pkt.getTag(), registries);
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.world.level.storage.ValueInput packetInput) {
+        HolderLookup.Provider registries = packetInput.lookup();
+        handleUpdateTag(packetInput);
     }
 
     @Override
-    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {}
+    public void registerControllers(com.geckolib.animatable.manager.AnimatableManager.ControllerRegistrar controllers) {}
 
     @Override
-    public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
+    public com.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
         return geoCache;
     }
 
@@ -421,7 +423,7 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
 
     protected void collisionEffects(ServerLevel level) {
         double x = worldPosition.getX() + 0.5, y = worldPosition.getY() + 0.5, z = worldPosition.getZ() + 0.5;
-        level.sendParticles(ParticleTypes.FLASH, x, y, z, 1, 0, 0, 0, 0);
+        level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), x, y, z, 1, 0, 0, 0, 0);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 40, 0.4, 0.4, 0.4, 0.25);
         level.sendParticles(ParticleTypes.END_ROD, x, y, z, 15, 0.2, 0.2, 0.2, 0.08);
         level.playSound(null, worldPosition, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.BLOCKS, 0.9f, 1.5f);
@@ -434,14 +436,26 @@ public abstract class ColliderCoreBlockEntity extends BlockEntity implements sof
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveColliderCoreBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveColliderCoreBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("ShotTimer", shotTimer);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        shotTimer = tag.contains("ShotTimer") ? tag.getInt("ShotTimer") : -1;
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadColliderCoreBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadColliderCoreBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        shotTimer = tag.contains("ShotTimer") ? tag.getIntOr("ShotTimer", 0) : -1;
     }
 }

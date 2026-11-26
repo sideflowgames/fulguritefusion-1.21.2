@@ -7,15 +7,9 @@
     " L "
   ],
   "key": {
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "K": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "L": {
-      "item": "minecraft:lightning_rod"
-    }
+    "G": "fulguritefusion:gold_sheet",
+    "K": "fulguritefusion:coil_segment",
+    "L": "minecraft:lightning_rod"
   },
   "result": {
     "id": "fulguritefusion:storm_caller",

@@ -13,7 +13,7 @@ public final class ItemTransfer {
     private ItemTransfer() {}
 
     private static IItemHandler neighbour(Level level, BlockPos pos, Direction dir) {
-        return level.getCapability(Capabilities.ItemHandler.BLOCK, pos.relative(dir), dir.getOpposite());
+        return com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(level, pos.relative(dir), dir.getOpposite());
     }
 
     // Push the stack in one of our slots out into the neighbour.

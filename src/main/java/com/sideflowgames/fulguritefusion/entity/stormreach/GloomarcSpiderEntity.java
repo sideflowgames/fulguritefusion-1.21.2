@@ -41,7 +41,7 @@ import org.joml.Vector3f;
 public class GloomarcSpiderEntity extends StormBeast {
     private static final net.minecraft.network.syncher.EntityDataAccessor<Boolean> CLIMBING =
             net.minecraft.network.syncher.SynchedEntityData.defineId(GloomarcSpiderEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
-    private static final DustParticleOptions WEB = new DustParticleOptions(new Vector3f(0.75f, 0.55f, 1.0f), 1.0f);
+    private static final DustParticleOptions WEB = new DustParticleOptions(0xBF8CFF, 1.0f);
     private int webCooldown = 60;
 
     public GloomarcSpiderEntity(EntityType<? extends Monster> type, Level level) {
@@ -73,7 +73,7 @@ public class GloomarcSpiderEntity extends StormBeast {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide) entityData.set(CLIMBING, horizontalCollision);
+        if (!level().isClientSide()) entityData.set(CLIMBING, horizontalCollision);
     }
 
     @Override
@@ -88,12 +88,12 @@ public class GloomarcSpiderEntity extends StormBeast {
 
     @Override
     protected void onStormHit(Entity target) {
-        if (target instanceof LivingEntity living) living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);
+        if (target instanceof LivingEntity living) living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1), this);
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (webCooldown > 0) webCooldown--;
         LivingEntity target = getTarget();
         if (target == null || webCooldown > 0) return;
@@ -102,7 +102,7 @@ public class GloomarcSpiderEntity extends StormBeast {
         setAction(1, 12);
         webCooldown = 100;
         if (beam(target, 3.0f, WEB)) {
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 50, 2), this);
+            target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 50, 2), this);
         }
         playSound(SoundEvents.SLIME_SQUISH, 1.0f, 1.6f);
     }

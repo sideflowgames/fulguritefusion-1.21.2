@@ -16,13 +16,9 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.SimpleTier;
 
 import java.util.List;
 
@@ -37,8 +33,8 @@ public final class FulguriteTools {
     // mining speed            8.0       8.5         9.0
     // damage bonus            3.0       3.5         4.0
     // enchantability          10        13          15
-    public static final Tier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_DIAMOND_TOOL, 1800, 8.5f, 3.5f, 13,
-            () -> Ingredient.of(ModItems.FULGURITE.get()));
+    public static final net.minecraft.world.item.ToolMaterial TIER = new net.minecraft.world.item.ToolMaterial(BlockTags.INCORRECT_FOR_DIAMOND_TOOL, 1800, 8.5f, 3.5f, 13,
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID, "fulgurite_tool_materials")));
 
     public static final float SWORD_LIGHTNING = 2.0f; // extra lightning damage per sword hit
     public static final float TOOL_LIGHTNING = 1.0f;  // extra lightning damage per tool hit
@@ -49,7 +45,7 @@ public final class FulguriteTools {
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.5), target.getZ(),
                     8, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.15);
             server.playSound(null, target.blockPosition(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS,
-                    0.5f, 1.6f + server.random.nextFloat() * 0.3f);
+                    0.5f, 1.6f + server.getRandom().nextFloat() * 0.3f);
         }
     }
 
@@ -57,9 +53,9 @@ public final class FulguriteTools {
         tooltip.add(Component.literal("+" + (int) lightning + " lightning damage").withStyle(ChatFormatting.AQUA));
     }
 
-    public static class Sword extends SwordItem {
+    public static class Sword extends Item {
         public Sword(Item.Properties p) {
-            super(TIER, p);
+            super(p);
         }
 
         @Override
@@ -68,20 +64,21 @@ public final class FulguriteTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             zap(target, attacker);
-            return super.hurtEnemy(stack, target, attacker);
+            super.hurtEnemy(stack, target, attacker); return;
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip(tooltip, SWORD_LIGHTNING);
         }
     }
 
-    public static class Pickaxe extends PickaxeItem {
+    public static class Pickaxe extends Item {
         public Pickaxe(Item.Properties p) {
-            super(TIER, p);
+            super(p);
         }
 
         @Override
@@ -90,20 +87,21 @@ public final class FulguriteTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             zap(target, attacker);
-            return super.hurtEnemy(stack, target, attacker);
+            super.hurtEnemy(stack, target, attacker); return;
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip(tooltip, TOOL_LIGHTNING);
         }
     }
 
     public static class Axe extends AxeItem {
         public Axe(Item.Properties p) {
-            super(TIER, p);
+            super(TIER, 5.0f, -3.0f, p);
         }
 
         @Override
@@ -112,20 +110,21 @@ public final class FulguriteTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             zap(target, attacker);
-            return super.hurtEnemy(stack, target, attacker);
+            super.hurtEnemy(stack, target, attacker); return;
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip(tooltip, TOOL_LIGHTNING);
         }
     }
 
     public static class Shovel extends ShovelItem {
         public Shovel(Item.Properties p) {
-            super(TIER, p);
+            super(TIER, 1.5f, -3.0f, p);
         }
 
         @Override
@@ -134,20 +133,21 @@ public final class FulguriteTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             zap(target, attacker);
-            return super.hurtEnemy(stack, target, attacker);
+            super.hurtEnemy(stack, target, attacker); return;
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip(tooltip, TOOL_LIGHTNING);
         }
     }
 
     public static class Hoe extends HoeItem {
         public Hoe(Item.Properties p) {
-            super(TIER, p);
+            super(TIER, -3.5f, 0.0f, p);
         }
 
         @Override
@@ -156,13 +156,14 @@ public final class FulguriteTools {
         }
 
         @Override
-        public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             zap(target, attacker);
-            return super.hurtEnemy(stack, target, attacker);
+            super.hurtEnemy(stack, target, attacker); return;
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
             tooltip(tooltip, TOOL_LIGHTNING);
         }
     }

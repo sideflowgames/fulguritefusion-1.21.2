@@ -7,18 +7,10 @@
     "MSM"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_sheet"
-    }
+    "M": "fulguritefusion:magnetite_plate",
+    "F": "fulguritefusion:fulgurite",
+    "H": "minecraft:hopper",
+    "S": "fulguritefusion:silver_sheet"
   },
   "result": {
     "id": "fulguritefusion:collider_input",

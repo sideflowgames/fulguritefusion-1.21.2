@@ -39,9 +39,9 @@ public final class ItemPipeVisuals {
         Direction from = Direction.from3DDataValue(p.fromSide()), to = Direction.from3DDataValue(p.toSide());
         List<Vec3> pts = new ArrayList<>();
         BlockPos first = p.path().get(0), last = p.path().get(p.path().size() - 1);
-        pts.add(Vec3.atCenterOf(first).add(Vec3.atLowerCornerOf(from.getNormal()).scale(0.5)));
+        pts.add(Vec3.atCenterOf(first).add(Vec3.atLowerCornerOf(from.getUnitVec3i()).scale(0.5)));
         for (BlockPos b : p.path()) pts.add(Vec3.atCenterOf(b));
-        pts.add(Vec3.atCenterOf(last).add(Vec3.atLowerCornerOf(to.getNormal()).scale(0.5)));
+        pts.add(Vec3.atCenterOf(last).add(Vec3.atLowerCornerOf(to.getUnitVec3i()).scale(0.5)));
         double len = 0;
         for (int i = 1; i < pts.size(); i++) len += pts.get(i).distanceTo(pts.get(i - 1));
         double speed = p.tier() == 3 ? 0.8 : p.tier() == 2 ? 0.45 : 0.2; // blocks a tick
@@ -59,15 +59,15 @@ public final class ItemPipeVisuals {
         return pts.get(pts.size() - 1);
     }
 
-    private static void render(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES || TRIPS.isEmpty()) return;
+    private static void render(RenderLevelStageEvent.AfterOpaqueFeatures event) {
+        if (TRIPS.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         double now = mc.level.getGameTime() + partial;
-        Vec3 cam = event.getCamera().getPosition();
+        Vec3 cam = event.getLevelRenderState().cameraRenderState.pos;
         PoseStack ps = event.getPoseStack();
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
+        var features = mc.gameRenderer.getFeatureRenderDispatcher();
         Iterator<Trip> it = TRIPS.iterator();
         while (it.hasNext()) {
             Trip t = it.next();
@@ -82,10 +82,12 @@ public final class ItemPipeVisuals {
             ps.translate(p.x - cam.x, p.y - cam.y, p.z - cam.z);
             ps.mulPose(Axis.YP.rotationDegrees((float) (now * 6 % 360)));
             ps.scale(0.28f, 0.28f, 0.28f);
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(p));
-            mc.getItemRenderer().renderStatic(t.item(), ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, ps, buffers, mc.level, 0);
+            int light = LevelRenderer.getLightCoords(mc.level, BlockPos.containing(p));
+            net.minecraft.client.renderer.item.ItemStackRenderState item = new net.minecraft.client.renderer.item.ItemStackRenderState();
+            mc.getItemModelResolver().updateForTopItem(item, t.item(), ItemDisplayContext.FIXED, mc.level, null, 0);
+            item.submit(ps, features.getSubmitNodeStorage(), light, OverlayTexture.NO_OVERLAY, 0);
             ps.popPose();
         }
-        buffers.endBatch();
+        features.renderAllFeatures();
     }
 }

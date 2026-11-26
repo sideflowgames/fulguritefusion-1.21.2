@@ -1,12 +1,13 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.InteractionResult;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,27 +37,27 @@ public class ArcMagnetItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             boolean on = !isOn(stack);
             stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, on);
-            player.displayClientMessage(Component.literal(on ? "Arc Magnet on" : "Arc Magnet off")
-                    .withStyle(on ? ChatFormatting.AQUA : ChatFormatting.GRAY), true);
+            player.sendOverlayMessage(Component.literal(on ? "Arc Magnet on" : "Arc Magnet off")
+                    .withStyle(on ? ChatFormatting.AQUA : ChatFormatting.GRAY));
             level.playSound(null, player.blockPosition(), on ? SoundEvents.COPPER_BULB_TURN_ON : SoundEvents.COPPER_BULB_TURN_OFF,
                     SoundSource.PLAYERS, 0.8f, on ? 1.4f : 0.9f);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        if (level.isClientSide || !(entity instanceof Player player) || player.isSpectator() || !isOn(stack)) return;
-        if ((level.getGameTime() + slot) % 2 != 0) return;
+    public void inventoryTick(ItemStack stack, net.minecraft.server.level.ServerLevel level, Entity entity, net.minecraft.world.entity.EquipmentSlot slot) {
+        if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || !isOn(stack)) return;
+        if (level.getGameTime() % 2 != 0) return;
         Vec3 target = player.position().add(0, 0.6, 0);
         AABB area = player.getBoundingBox().inflate(RANGE);
         for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, area, e -> e.isAlive() && !e.hasPickUpDelay()
-                && !e.getPersistentData().getBoolean("PreventRemoteMovement"))) {
+                && !e.getPersistentData().getBooleanOr("PreventRemoteMovement", false))) {
             pull(item, target);
         }
         for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, area, Entity::isAlive)) {
@@ -68,11 +69,12 @@ public class ArcMagnetItem extends Item {
         Vec3 to = target.subtract(e.position());
         if (to.lengthSqr() < 0.25) return;
         e.setDeltaMovement(to.normalize().scale(PULL));
-        e.hasImpulse = true;
+        e.needsSync = true;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal(isOn(stack) ? "On" : "Off").withStyle(isOn(stack) ? ChatFormatting.AQUA : ChatFormatting.GRAY));
         tooltip.add(Component.literal("Right-click to switch on or off").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Pulls items and XP within " + (int) RANGE + " blocks").withStyle(ChatFormatting.GRAY));

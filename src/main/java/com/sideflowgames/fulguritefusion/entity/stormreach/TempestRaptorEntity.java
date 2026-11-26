@@ -61,8 +61,8 @@ public class TempestRaptorEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (diveCooldown > 0) diveCooldown--;
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) {
@@ -76,7 +76,7 @@ public class TempestRaptorEntity extends StormBeast {
             steer(target.position().add(0, target.getBbHeight() * 0.5, 0), 0.95, 0.25);
             if (getBoundingBox().inflate(0.4).intersects(target.getBoundingBox())) {
                 swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-                doHurtTarget(target);
+                doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target);
                 setAction(0, 0);
                 setDeltaMovement(getDeltaMovement().add(0, 0.6, 0));
                 diveCooldown = StormreachStorm.isStorming((ServerLevel) level()) ? 50 : 80;
@@ -94,7 +94,7 @@ public class TempestRaptorEntity extends StormBeast {
     }
 
     @Override
-    protected boolean moving(software.bernie.geckolib.animation.AnimationState<?> s) {
+    protected boolean moving(com.geckolib.animation.state.AnimationTest<?> s) {
         return true;
     }
 

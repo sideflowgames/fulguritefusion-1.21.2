@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity.boss;
 
+import net.minecraft.core.HolderLookup;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +39,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // The Storm Titan: the final boss, a 14-block giant of storm cloud and violet plasma. Summoned at a Titan Altar in
 // the Stormreach (the three key pieces the first time, then the Storm Sigil it drops).
@@ -74,7 +76,7 @@ public class StormTitanEntity extends StormBossEntity {
     private static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(StormTitanEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> WALKING = SynchedEntityData.defineId(StormTitanEntity.class, EntityDataSerializers.BOOLEAN);
     private static final float[] CYCLES = {0.75f, 0.5f, 0.25f};
-    private static final Vector3f VIOLET = new Vector3f(0.72f, 0.42f, 1.0f);
+    private static final int VIOLET = 0xB86BFF;
 
     private int actionTimer = 60;  // until the next attack is chosen
     private int windup;             // ticks until the current attack lands
@@ -87,8 +89,8 @@ public class StormTitanEntity extends StormBossEntity {
     private EquipmentSlot targetSlot; // armor type offered at the altar, if any
     private net.minecraft.core.BlockPos home;  // centre of its arena: it won't stray far from it
     private int partySize = 1;                 // most players seen fighting it at once
-    private static final net.minecraft.resources.ResourceLocation PARTY_HEALTH =
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID, "titan_party");
+    private static final net.minecraft.resources.Identifier PARTY_HEALTH =
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sideflowgames.fulguritefusion.FulguriteFusion.MODID, "titan_party");
 
     public StormTitanEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level, BossEvent.BossBarColor.PURPLE);
@@ -157,8 +159,8 @@ public class StormTitanEntity extends StormBossEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (!(level() instanceof ServerLevel server)) return;
         if (tickCount % 40 == 0) updateParty(server);
         // Kept to its arena: pulled back if it wanders off the edge or falls.
@@ -213,16 +215,16 @@ public class StormTitanEntity extends StormBossEntity {
             houndTimer = 400;
             int hounds = (getHealth() < getMaxHealth() * 0.25f ? 3 : 2) + partySize - 1;
             for (int i = 0; i < hounds; i++) {
-                com.sideflowgames.fulguritefusion.entity.stormreach.StormhoundEntity hound = ModEntities.STORMHOUND.get().create(server);
+                com.sideflowgames.fulguritefusion.entity.stormreach.StormhoundEntity hound = ModEntities.STORMHOUND.get().create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
                 if (hound == null) continue;
                 Vec3 at = groundNear(server, inArena(position().add(random.nextInt(9) - 4, 0, random.nextInt(9) - 4), 18));
-                hound.moveTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
+                hound.snapTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
                 hound.setTarget(target);
                 hound.setSummoned(1200);
                 server.addFreshEntity(hound);
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.5, at.z, 30, 0.4, 0.6, 0.4, 0.2);
             }
-            server.playSound(null, blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.HOSTILE, 2.0f, 0.5f);
+            server.playSound(null, blockPosition(), SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value(), SoundSource.HOSTILE, 2.0f, 0.5f);
         }
 
         if (--actionTimer > 0) return;
@@ -285,7 +287,7 @@ public class StormTitanEntity extends StormBossEntity {
             Vec3 look = Vec3.directionFromRotation(0, getYRot());
             Vec3 at = position().add(look.scale(4.5));
             for (LivingEntity e : victims(new AABB(at, at).inflate(5, 4, 5))) {
-                if (e.hurt(damageSources().mobAttack(this), 32.0f)) {
+                if (e.hurtOrSimulate(damageSources().mobAttack(this), 32.0f)) {
                     Vec3 push = e.position().subtract(position()).multiply(1, 0, 1).normalize().scale(1.6);
                     e.push(push.x, 0.5, push.z);
                     e.hurtMarked = true;
@@ -297,7 +299,7 @@ public class StormTitanEntity extends StormBossEntity {
         } else if (state == STOMP_STATE) {
             for (LivingEntity e : victims(getBoundingBox().inflate(10, 2, 10))) {
                 if (!e.onGround()) continue; // jumped over the wave
-                if (e.hurt(damageSources().mobAttack(this), 24.0f)) {
+                if (e.hurtOrSimulate(damageSources().mobAttack(this), 24.0f)) {
                     Vec3 push = e.position().subtract(position()).multiply(1, 0, 1).normalize().scale(0.8);
                     e.push(push.x, 0.9, push.z);
                     e.hurtMarked = true;
@@ -314,7 +316,7 @@ public class StormTitanEntity extends StormBossEntity {
             mark(server, target, enraged() ? 6 : 4, 26.0f);
         } else if (state == PULSE_STATE) {
             for (LivingEntity e : victims(getBoundingBox().inflate(6, 3, 6))) {
-                if (e.hurt(damageSources().mobAttack(this), 22.0f)) {
+                if (e.hurtOrSimulate(damageSources().mobAttack(this), 22.0f)) {
                     Vec3 push = e.position().subtract(position()).multiply(1, 0, 1).normalize().scale(2.0);
                     e.push(push.x, 0.6, push.z);
                     e.hurtMarked = true;
@@ -356,15 +358,15 @@ public class StormTitanEntity extends StormBossEntity {
         }
         if (--markTimer > 0) return;
         for (Vec3 m : marked) {
-            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (bolt != null) {
-                bolt.moveTo(m.x, m.y, m.z);
+                bolt.snapTo(m.x, m.y, m.z);
                 bolt.setVisualOnly(true);
                 server.addFreshEntity(bolt);
             }
             for (LivingEntity e : victims(new AABB(m, m).inflate(2.5, 3, 2.5))) {
-                if (e.hurt(damageSources().mobAttack(this), markDamage) && markDamage > 20) {
-                    e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);
+                if (e.hurtOrSimulate(damageSources().mobAttack(this), markDamage) && markDamage > 20) {
+                    e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 40, 1), this);
                 }
             }
             server.sendParticles(new DustParticleOptions(VIOLET, 2.0f), m.x, m.y + 0.5, m.z, 30, 1.0, 0.5, 1.0, 0);
@@ -400,16 +402,16 @@ public class StormTitanEntity extends StormBossEntity {
         int count = 3 + partySize;
         Vec3 center = home != null ? new Vec3(home.getX() + 0.5, home.getY() + 1, home.getZ() + 0.5) : position();
         for (int i = 0; i < count; i++) {
-            TitanConduitEntity conduit = ModEntities.TITAN_CONDUIT.get().create(level);
+            TitanConduitEntity conduit = ModEntities.TITAN_CONDUIT.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (conduit == null) continue;
             double a = start + Math.PI * 2 * i / count;
             Vec3 at = groundNear(level, center.add(Math.cos(a) * 12, 0, Math.sin(a) * 12));
-            conduit.moveTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
+            conduit.snapTo(at.x, at.y, at.z, random.nextFloat() * 360, 0);
             conduit.setOwner(this);
             level.addFreshEntity(conduit);
-            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (bolt != null) {
-                bolt.moveTo(at.x, at.y, at.z);
+                bolt.snapTo(at.x, at.y, at.z);
                 bolt.setVisualOnly(true);
                 level.addFreshEntity(bolt);
             }
@@ -440,8 +442,8 @@ public class StormTitanEntity extends StormBossEntity {
 
     // Staggered: half again as much damage.
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, stagger > 0 ? amount * 1.5f : amount);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        return super.hurtServer(serverLevel, source, stagger > 0 ? amount * 1.5f : amount);
     }
 
     // Keeps a point within `radius` blocks of the arena centre (when it has one).
@@ -479,8 +481,8 @@ public class StormTitanEntity extends StormBossEntity {
         };
         ItemStack armor = new ItemStack(piece);
         FmChargeable.set(armor, FmChargeable.max(armor) / 2);
-        spawnAtLocation(armor);
-        spawnAtLocation(new ItemStack(ModItems.STORM_SIGIL.get()));
+        spawnAtLocation((net.minecraft.server.level.ServerLevel) level(), armor);
+        spawnAtLocation((net.minecraft.server.level.ServerLevel) level(), new ItemStack(ModItems.STORM_SIGIL.get()));
     }
 
     // ---- the rest ----
@@ -488,7 +490,7 @@ public class StormTitanEntity extends StormBossEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (random.nextInt(2) == 0) {
                 level().addParticle(ParticleTypes.CLOUD, getRandomX(0.8), getY() + getBbHeight() * random.nextDouble(), getRandomZ(0.8), 0, 0.02, 0);
             }
@@ -504,8 +506,15 @@ public class StormTitanEntity extends StormBossEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveStormTitanEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveStormTitanEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.legacySaveStormBossEntity(tag, registries);
         if (targetSlot != null) tag.putString("TargetSlot", targetSlot.getName());
         tag.putInt("CycleTicks", cycleTicks);
         tag.putInt("PartySize", partySize);
@@ -513,12 +522,17 @@ public class StormTitanEntity extends StormBossEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("TargetSlot")) targetSlot = EquipmentSlot.byName(tag.getString("TargetSlot"));
-        cycleTicks = tag.getInt("CycleTicks");
-        partySize = Math.max(1, tag.getInt("PartySize"));
-        if (tag.contains("Home")) home = net.minecraft.core.BlockPos.of(tag.getLong("Home"));
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadStormTitanEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadStormTitanEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.legacyLoadStormBossEntity(tag, registries);
+        if (tag.contains("TargetSlot")) targetSlot = EquipmentSlot.byName(tag.getStringOr("TargetSlot", ""));
+        cycleTicks = tag.getIntOr("CycleTicks", 0);
+        partySize = Math.max(1, tag.getIntOr("PartySize", 0));
+        if (tag.contains("Home")) home = net.minecraft.core.BlockPos.of(tag.getLongOr("Home", 0L));
     }
 
     @Override
@@ -560,7 +574,7 @@ public class StormTitanEntity extends StormBossEntity {
     // (triggerAnim), so they always restart and line up with the hit.
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> {
+        controllers.add(new AnimationController<>("main", 4, s -> {
             switch (state()) {
                 case CHANNEL_STATE: return s.setAndContinue(CHANNEL);
                 case STAGGER_STATE: return s.setAndContinue(STAGGER);

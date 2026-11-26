@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:stormstone_magnetite_ore"
-  },
+  "ingredient": "fulguritefusion:stormstone_magnetite_ore",
   "result": {
     "id": "fulguritefusion:magnetite_ingot"
   },

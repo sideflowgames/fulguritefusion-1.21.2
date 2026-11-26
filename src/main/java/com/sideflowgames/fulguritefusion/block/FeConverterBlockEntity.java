@@ -81,7 +81,7 @@ public class FeConverterBlockEntity extends BlockEntity implements FmHandler {
         Direction front = state.getValue(FeConverterBlock.FACING);
         shareChain(level, pos, front, be);
         if (be.fm <= 0 && be.remainderFe <= 0) return;
-        IEnergyStorage target = level.getCapability(Capabilities.EnergyStorage.BLOCK, pos.relative(front), front.getOpposite());
+        IEnergyStorage target = com.sideflowgames.fulguritefusion.util.LegacyCaps.energyAt(level, pos.relative(front), front.getOpposite());
         if (target != null && target.canReceive()) {
             int offer = be.takeFe(Integer.MAX_VALUE, true);
             int accepted = target.receiveEnergy(offer, false);
@@ -135,8 +135,53 @@ public class FeConverterBlockEntity extends BlockEntity implements FmHandler {
         return MAX_FM;
     }
 
-    public IEnergyStorage getEnergyHandler(Direction side) {
-        return side == getBlockState().getValue(FeConverterBlock.FACING) ? feOutput : null;
+    // 26.1: FE cables use the transaction-based EnergyHandler. Extract-only, same rules as feOutput;
+    // an undone transaction puts the Fm back exactly.
+    private final net.neoforged.neoforge.transfer.transaction.SnapshotJournal<int[]> feJournal =
+            new net.neoforged.neoforge.transfer.transaction.SnapshotJournal<>() {
+                @Override
+                protected int[] createSnapshot() {
+                    return new int[] {fm, remainderFe};
+                }
+
+                @Override
+                protected void revertToSnapshot(int[] snapshot) {
+                    fm = snapshot[0];
+                    remainderFe = snapshot[1];
+                }
+
+                @Override
+                protected void onRootCommit(int[] original) {
+                    setChanged();
+                }
+            };
+
+    private final net.neoforged.neoforge.transfer.energy.EnergyHandler feHandler = new net.neoforged.neoforge.transfer.energy.EnergyHandler() {
+        @Override
+        public long getAmountAsLong() {
+            return feOutput.getEnergyStored();
+        }
+
+        @Override
+        public long getCapacityAsLong() {
+            return feOutput.getMaxEnergyStored();
+        }
+
+        @Override
+        public int insert(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+            return 0;
+        }
+
+        @Override
+        public int extract(int amount, net.neoforged.neoforge.transfer.transaction.TransactionContext transaction) {
+            if (amount <= 0 || takeFe(amount, true) <= 0) return 0;
+            feJournal.updateSnapshots(transaction);
+            return takeFe(amount, false);
+        }
+    };
+
+    public net.neoforged.neoforge.transfer.energy.EnergyHandler getEnergyHandler(Direction side) {
+        return side == getBlockState().getValue(FeConverterBlock.FACING) ? feHandler : null;
     }
 
     public String statusText() {
@@ -144,16 +189,28 @@ public class FeConverterBlockEntity extends BlockEntity implements FmHandler {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveFeConverterBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveFeConverterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         tag.putInt("RemainderFe", remainderFe);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        remainderFe = tag.getInt("RemainderFe");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadFeConverterBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadFeConverterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        remainderFe = tag.getIntOr("RemainderFe", 0);
     }
 }

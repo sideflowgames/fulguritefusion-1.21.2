@@ -65,7 +65,7 @@ final class DungeonLayout {
             base = min - 1;
         } else {
             int ground = DungeonStructure.height(ctx, cx, cz);
-            int minY = ctx.heightAccessor().getMinBuildHeight() + 8 + k.levels * k.floorHeight();
+            int minY = ctx.heightAccessor().getMinY() + 8 + k.levels * k.floorHeight();
             base = Mth.clamp(ground - 34, minY, 70);
         }
         DungeonLayout l = new DungeonLayout(k, r, x0, z0, base);

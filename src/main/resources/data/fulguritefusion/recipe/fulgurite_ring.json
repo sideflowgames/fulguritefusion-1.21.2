@@ -7,15 +7,9 @@
     " M "
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "G": {
-      "item": "minecraft:glass"
-    }
+    "M": "fulguritefusion:magnetite_plate",
+    "F": "fulguritefusion:fulgurite",
+    "G": "minecraft:glass"
   },
   "result": {
     "id": "fulguritefusion:fulgurite_ring",

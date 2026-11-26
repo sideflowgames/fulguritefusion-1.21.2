@@ -7,21 +7,11 @@
     "SHS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "T": {
-      "item": "fulguritefusion:tree_tap"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    }
+    "S": "fulguritefusion:iron_sheet",
+    "T": "fulguritefusion:tree_tap",
+    "B": "minecraft:bucket",
+    "K": "fulguritefusion:crude_arc_casing",
+    "H": "minecraft:hopper"
   },
   "result": {
     "id": "fulguritefusion:latex_harvester",

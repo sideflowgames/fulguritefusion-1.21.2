@@ -59,8 +59,8 @@ public class ArcReaverEntity extends StormBeast {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         if (dashCooldown > 0) dashCooldown--;
         LivingEntity target = getTarget();
         ServerLevel server = (ServerLevel) level();
@@ -70,7 +70,7 @@ public class ArcReaverEntity extends StormBeast {
             if (!dashHit && target != null && getBoundingBox().inflate(0.6).intersects(target.getBoundingBox())) {
                 dashHit = true;
                 swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-                doHurtTarget(target);
+                doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target);
             }
             return;
         }

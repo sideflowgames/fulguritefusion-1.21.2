@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.block;
 
+import net.minecraft.world.InteractionResult;
+
 import com.mojang.serialization.MapCodec;
 import com.sideflowgames.fulguritefusion.ModItems;
 
@@ -11,7 +13,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -61,14 +62,13 @@ public class LumenTrailBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
         return canSurvive(state, level, pos) ? state : Blocks.AIR.defaultBlockState();
     }
 
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
-        if (!level.isClientSide) level.scheduleTick(pos, this, FADE_TICKS);
+        if (!level.isClientSide()) level.scheduleTick(pos, this, FADE_TICKS);
     }
 
     @Override
@@ -77,15 +77,15 @@ public class LumenTrailBlock extends Block {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
-        if (!stack.is(Items.GLASS_BOTTLE)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!level.isClientSide) {
+        if (!stack.is(Items.GLASS_BOTTLE)) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (!level.isClientSide()) {
             level.removeBlock(pos, false);
             player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, new ItemStack(ModItems.LUMEN_GEL.get())));
             level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.2f);
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override

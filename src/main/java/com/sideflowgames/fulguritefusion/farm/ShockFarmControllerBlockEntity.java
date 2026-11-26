@@ -15,7 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,7 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -58,16 +58,16 @@ import net.neoforged.neoforge.event.EventHooks;
 // The prongs electrocute whatever is on the pad, and the drops and XP go into the collector.
 // Upgrade cards in the controller menu (2 slots on a 5x5, 4 on a 7x7) filter the mob and change speed, cost and loot.
 public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHandler, net.minecraft.world.MenuProvider,
-        software.bernie.geckolib.animatable.GeoBlockEntity {
+        com.geckolib.animatable.GeoBlockEntity {
     public static final int CAPACITY = 50_000;
     public static final int SPAWN_FM = 2_000;
     public static final int ZAP_FM = 100;
     public static final float ZAP_DAMAGE = 10.0f;
 
     public static final TagKey<EntityType<?>> BANNED = TagKey.create(Registries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "shock_farm_banned"));
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "shock_farm_banned"));
     public static final TagKey<EntityType<?>> ALLOWED = TagKey.create(Registries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "shock_farm_allowed"));
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "shock_farm_allowed"));
 
     private int fm;
     private int tier;                       // 0 = not formed
@@ -93,8 +93,8 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
             return 1;
         }
     };
-    private final software.bernie.geckolib.animatable.instance.AnimatableInstanceCache geoCache =
-            software.bernie.geckolib.util.GeckoLibUtil.createInstanceCache(this);
+    private final com.geckolib.animatable.instance.AnimatableInstanceCache geoCache =
+            com.geckolib.util.GeckoLibUtil.createInstanceCache(this);
 
     // Menu status codes.
     public static final int ST_UNFORMED = 0, ST_RUNNING = 1, ST_OFF = 2, ST_NO_POWER = 3, ST_FULL = 4, ST_NOTHING = 5, ST_FILTER = 6;
@@ -321,7 +321,7 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
 
     // Called when the controller is broken.
     public void unform() {
-        if (level == null || level.isClientSide || formedTier == 0) return;
+        if (level == null || level.isClientSide() || formedTier == 0) return;
         setParts(formedTier, false);
         formedTier = 0;
     }
@@ -427,8 +427,8 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
         ItemStack weapon = ItemStack.EMPTY;
         if (loot > 0) {
             weapon = new ItemStack(net.minecraft.world.item.Items.STICK);
-            weapon.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                    .getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING), loot);
+            weapon.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                    .getOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING), loot);
         }
         fake.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, weapon);
         int i = 0;
@@ -439,9 +439,9 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
             }
             fm -= cost;
             arc(level, tips.get(i++ % tips.size()), m.position().add(0, m.getBbHeight() * 0.6, 0));
-            m.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 4, false, false));
+            m.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, 4, false, false));
             m.invulnerableTime = 0;
-            m.hurt(level.damageSources().playerAttack(fake), ZAP_DAMAGE);
+            m.hurtOrSimulate(level.damageSources().playerAttack(fake), ZAP_DAMAGE);
         }
         fake.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         setChanged();
@@ -454,8 +454,8 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
             double f = i / (double) steps;
             Vec3 p = from.lerp(to, f);
             double j = Math.sin(f * Math.PI) * 0.3;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (level.random.nextDouble() - 0.5) * j,
-                    p.y + (level.random.nextDouble() - 0.5) * j, p.z + (level.random.nextDouble() - 0.5) * j, 1, 0, 0, 0, 0);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + (level.getRandom().nextDouble() - 0.5) * j,
+                    p.y + (level.getRandom().nextDouble() - 0.5) * j, p.z + (level.getRandom().nextDouble() - 0.5) * j, 1, 0, 0, 0, 0);
         }
     }
 
@@ -486,7 +486,7 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
 
     private void spawnWave(ServerLevel level, AABB area) {
         int alive = level.getEntitiesOfClass(Mob.class, area.inflate(1.5, 1, 1.5), Entity::isAlive).size();
-        List<MobSpawnSettings.SpawnerData> choices = choices(level);
+        List<net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData>> choices = choices(level);
         if (choices.isEmpty()) {
             lastNote = "nothing can spawn in this biome";
             return;
@@ -494,7 +494,7 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
         if (lastNote.equals("nothing can spawn in this biome")) lastNote = "";
         java.util.Set<EntityType<?>> filter = filters();
         if (!filter.isEmpty()) {
-            choices.removeIf(d -> !filter.contains(d.type));
+            choices.removeIf(d -> !filter.contains(d.value().type()));
             if (choices.isEmpty()) {
                 lastNote = "filter mob can't spawn here";
                 return;
@@ -507,7 +507,7 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
                 lastNote = "needs power";
                 return;
             }
-            if (spawnOne(level, pick(level, choices))) {
+            if (spawnOne(level, pick(level, choices).value())) {
                 fm -= cost;
                 alive++;
                 lastNote = "";
@@ -516,29 +516,29 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
         }
     }
 
-    private List<MobSpawnSettings.SpawnerData> choices(ServerLevel level) {
+    private List<net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData>> choices(ServerLevel level) {
         BlockPos c = center(Math.max(1, tier)).above();
         MobSpawnSettings settings = level.getBiome(c).value().getMobSettings();
-        List<MobSpawnSettings.SpawnerData> out = new ArrayList<>();
+        List<net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData>> out = new ArrayList<>();
         for (MobCategory cat : new MobCategory[] {MobCategory.MONSTER, MobCategory.CREATURE}) {
             if (cat == MobCategory.MONSTER && level.getDifficulty() == Difficulty.PEACEFUL) continue;
-            for (MobSpawnSettings.SpawnerData d : settings.getMobs(cat).unwrap()) if (allowed(d.type)) out.add(d);
+            for (net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData> d : settings.getMobs(cat).unwrap()) if (allowed(d.value().type())) out.add(d);
         }
         return out;
     }
 
     public static boolean allowed(EntityType<?> type) {
-        if (type.is(BANNED)) return false;
+        if (type.builtInRegistryHolder().is(BANNED)) return false;
         if ("minecraft".equals(BuiltInRegistries.ENTITY_TYPE.getKey(type).getNamespace())) return true;
-        return type.is(ALLOWED);
+        return type.builtInRegistryHolder().is(ALLOWED);
     }
 
-    private static MobSpawnSettings.SpawnerData pick(ServerLevel level, List<MobSpawnSettings.SpawnerData> list) {
+    private static net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData> pick(ServerLevel level, List<net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData>> list) {
         int total = 0;
-        for (MobSpawnSettings.SpawnerData d : list) total += Math.max(1, d.getWeight().asInt());
-        int roll = level.random.nextInt(total);
-        for (MobSpawnSettings.SpawnerData d : list) {
-            roll -= Math.max(1, d.getWeight().asInt());
+        for (net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData> d : list) total += Math.max(1, d.weight());
+        int roll = level.getRandom().nextInt(total);
+        for (net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData> d : list) {
+            roll -= Math.max(1, d.weight());
             if (roll < 0) return d;
         }
         return list.get(0);
@@ -548,16 +548,16 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
         int r = radius(tier) - 1;
         BlockPos c = center(tier);
         for (int attempt = 0; attempt < 4; attempt++) {
-            BlockPos p = c.offset(level.random.nextInt(2 * r + 1) - r, 1, level.random.nextInt(2 * r + 1) - r);
+            BlockPos p = c.offset(level.getRandom().nextInt(2 * r + 1) - r, 1, level.getRandom().nextInt(2 * r + 1) - r);
             double x = p.getX() + 0.5, y = p.getY(), z = p.getZ() + 0.5;
-            if (!level.noCollision(data.type.getSpawnAABB(x, y, z))) continue;
-            Entity e = data.type.create(level);
+            if (!level.noCollision(data.type().getSpawnAABB(x, y, z))) continue;
+            Entity e = data.type().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (!(e instanceof Mob mob)) {
                 if (e != null) e.discard();
                 return false;
             }
-            mob.moveTo(x, y, z, level.random.nextFloat() * 360f, 0f);
-            EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(p), MobSpawnType.SPAWNER, null);
+            mob.snapTo(x, y, z, level.getRandom().nextFloat() * 360f, 0f);
+            EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(p), EntitySpawnReason.SPAWNER, null);
             mob.addTag("ff_shock_farm");
             level.addFreshEntityWithPassengers(mob);
             level.sendParticles(ParticleTypes.SOUL, x, y + 0.2, z, 10, 0.3, 0.1, 0.3, 0.02);
@@ -592,14 +592,14 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
         buf.writeBlockPos(worldPosition);
         if (level instanceof ServerLevel server) checkStructure();
         buf.writeUtf(problem == null ? "" : problem);
-        List<MobSpawnSettings.SpawnerData> list = level instanceof ServerLevel server ? choices(server) : List.of();
-        java.util.Map<ResourceLocation, Integer> weights = new java.util.LinkedHashMap<>();
-        for (MobSpawnSettings.SpawnerData d : list) {
-            weights.merge(BuiltInRegistries.ENTITY_TYPE.getKey(d.type), Math.max(1, d.getWeight().asInt()), Integer::sum);
+        List<net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData>> list = level instanceof ServerLevel server ? choices(server) : List.of();
+        java.util.Map<Identifier, Integer> weights = new java.util.LinkedHashMap<>();
+        for (net.minecraft.util.random.Weighted<MobSpawnSettings.SpawnerData> d : list) {
+            weights.merge(BuiltInRegistries.ENTITY_TYPE.getKey(d.value().type()), Math.max(1, d.weight()), Integer::sum);
         }
         buf.writeVarInt(weights.size());
         weights.forEach((id, w) -> {
-            buf.writeResourceLocation(id);
+            buf.writeIdentifier(id);
             buf.writeVarInt(w);
         });
     }
@@ -620,10 +620,10 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
     }
 
     @Override
-    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {}
+    public void registerControllers(com.geckolib.animatable.manager.AnimatableManager.ControllerRegistrar controllers) {}
 
     @Override
-    public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
+    public com.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
         return geoCache;
     }
 
@@ -640,7 +640,7 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
             line = Component.literal("Shock Farm " + size + " | " + fm + " / " + CAPACITY + " Fm" + extra)
                     .withStyle(lastNote.isEmpty() ? ChatFormatting.AQUA : ChatFormatting.GOLD);
         }
-        player.displayClientMessage(line, false);
+        player.sendSystemMessage(line);
     }
 
     // ---------- power ----------
@@ -666,23 +666,42 @@ public class ShockFarmControllerBlockEntity extends BlockEntity implements FmHan
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveShockFarmControllerBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveShockFarmControllerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         tag.putInt("SpawnTimer", spawnTimer);
         tag.putBoolean("Enabled", enabled);
         tag.putInt("FormedTier", formedTier);
-        tag.put("Upgrades", net.minecraft.world.ContainerHelper.saveAllItems(new CompoundTag(), upgrades.getItems(), registries));
+        tag.put("Upgrades", com.sideflowgames.fulguritefusion.util.NbtBridge.saveAllItems(new CompoundTag(), upgrades.getItems(), registries));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        spawnTimer = tag.getInt("SpawnTimer");
-        enabled = !tag.contains("Enabled") || tag.getBoolean("Enabled");
-        formedTier = tag.getInt("FormedTier");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadShockFarmControllerBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadShockFarmControllerBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        spawnTimer = tag.getIntOr("SpawnTimer", 0);
+        enabled = !tag.contains("Enabled") || tag.getBooleanOr("Enabled", false);
+        formedTier = tag.getIntOr("FormedTier", 0);
         upgrades.clearContent();
-        if (tag.contains("Upgrades")) net.minecraft.world.ContainerHelper.loadAllItems(tag.getCompound("Upgrades"), upgrades.getItems(), registries);
+        if (tag.contains("Upgrades")) com.sideflowgames.fulguritefusion.util.NbtBridge.loadAllItems(tag.getCompoundOrEmpty("Upgrades"), upgrades.getItems(), registries);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof ShockFarmControllerBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

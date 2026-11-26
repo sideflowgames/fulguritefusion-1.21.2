@@ -30,9 +30,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Void Arc (End mini-boss): a hooded wraith of void energy, about 6 blocks tall. Summoned by using an End Crystal
 // on a Lightning Rod in the End.
@@ -82,8 +82,8 @@ public class VoidArcEntity extends StormBossEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) {
             steer(position().add(Math.sin(tickCount / 30.0) * 4, Math.sin(tickCount / 20.0), Math.cos(tickCount / 30.0) * 4), 0.1);
@@ -102,7 +102,7 @@ public class VoidArcEntity extends StormBossEntity {
         if (strikeWindow > 0) {
             strikeWindow--;
             steer(target.getEyePosition(), 0.6);
-            if (distanceToSqr(target) < 6.0 && doHurtTarget(target)) {
+            if (distanceToSqr(target) < 6.0 && doHurtTarget((net.minecraft.server.level.ServerLevel) level(), target)) {
                 swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 strikeWindow = 0;
             }
@@ -161,10 +161,10 @@ public class VoidArcEntity extends StormBossEntity {
         List<Entity> out = new ArrayList<>();
         int n = shieldNumber == 1 ? 2 : 3;
         for (int i = 0; i < n; i++) {
-            VoidEchoEntity echo = ModEntities.VOID_ECHO.get().create(level);
+            VoidEchoEntity echo = ModEntities.VOID_ECHO.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (echo == null) continue;
             double a = Math.PI * 2 * (i + 1) / (n + 1);
-            echo.moveTo(getX() + Math.cos(a) * 4, getY(), getZ() + Math.sin(a) * 4, getYRot(), 0);
+            echo.snapTo(getX() + Math.cos(a) * 4, getY(), getZ() + Math.sin(a) * 4, getYRot(), 0);
             echo.setAngle(a);
             echo.setOwner(this);
             if (getTarget() != null) echo.setTarget(getTarget());
@@ -207,8 +207,8 @@ public class VoidArcEntity extends StormBossEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit && target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 0), this);
         }
@@ -218,16 +218,16 @@ public class VoidArcEntity extends StormBossEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(isFaded() ? 6 : 2) == 0) {
+        if (level().isClientSide() && random.nextInt(isFaded() ? 6 : 2) == 0) {
             level().addParticle(ParticleTypes.REVERSE_PORTAL, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0, 0);
         }
     }
 
     // Arrows and other projectiles have a chance to pass through it while it's faded.
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (isFaded() && source.getDirectEntity() != source.getEntity() && random.nextInt(2) == 0) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override
@@ -252,6 +252,6 @@ public class VoidArcEntity extends StormBossEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, s -> s.setAndContinue(swinging ? STRIKE : FLOAT)));
+        controllers.add(new AnimationController<>("main", 4, s -> s.setAndContinue(swinging ? STRIKE : FLOAT)));
     }
 }

@@ -1,9 +1,7 @@
 {
   "type": "minecraft:blasting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:magnetite_ore"
-  },
+  "ingredient": "fulguritefusion:magnetite_ore",
   "result": {
     "id": "fulguritefusion:magnetite_ingot"
   },

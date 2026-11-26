@@ -32,7 +32,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraft.util.TriState;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -81,7 +81,7 @@ public final class BackpackUpgrades {
 
     public static List<ItemStack> upgrades(ItemStack pack) {
         List<ItemStack> list = new ArrayList<>();
-        for (ItemStack s : pack.getOrDefault(ModDataComponents.BACKPACK_UPGRADES.get(), ItemContainerContents.EMPTY).nonEmptyItems()) {
+        for (ItemStack s : pack.getOrDefault(ModDataComponents.BACKPACK_UPGRADES.get(), ItemContainerContents.EMPTY).allItemsCopyStream().filter(x -> !x.isEmpty()).toList()) {
             if (s.getItem() instanceof BackpackUpgradeItem) list.add(s);
         }
         return list;
@@ -166,7 +166,7 @@ public final class BackpackUpgrades {
     public static void onPickup(ItemEntityPickupEvent.Pre event) {
         Player player = event.getPlayer();
         ItemEntity entity = event.getItemEntity();
-        if (player.level().isClientSide || player.isSpectator() || !entity.isAlive() || entity.hasPickUpDelay()) return;
+        if (player.level().isClientSide() || player.isSpectator() || !entity.isAlive() || entity.hasPickUpDelay()) return;
         List<ItemStack> packs = packs(player);
         if (packs.isEmpty()) return;
         // The stack is changed in place: vanilla then picks up whatever is left of this same stack.
@@ -186,7 +186,7 @@ public final class BackpackUpgrades {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
-        if (player.level().isClientSide || player.isSpectator() || !player.isAlive()) return;
+        if (player.level().isClientSide() || player.isSpectator() || !player.isAlive()) return;
         long t = player.level().getGameTime() + player.getId();
         if (t % 2 != 0) return;
         List<ItemStack> packs = packs(player);
@@ -200,7 +200,7 @@ public final class BackpackUpgrades {
     }
 
     private static boolean pullable(ItemEntity e) {
-        return e.isAlive() && !e.hasPickUpDelay() && !e.getPersistentData().getBoolean("PreventRemoteMovement");
+        return e.isAlive() && !e.hasPickUpDelay() && !e.getPersistentData().getBooleanOr("PreventRemoteMovement", false);
     }
 
     private static void magnet(Player player, List<ItemStack> packs) {
@@ -236,7 +236,7 @@ public final class BackpackUpgrades {
         Vec3 to = target.subtract(e.position());
         if (to.lengthSqr() < 0.25) return;
         e.setDeltaMovement(to.normalize().scale(PULL));
-        e.hasImpulse = true;
+        e.needsSync = true;
     }
 
     // Storm Pickup: grabs items within 3 blocks straight into the pack.
@@ -288,8 +288,13 @@ public final class BackpackUpgrades {
 
     private static boolean harmful(ItemStack s, FoodProperties food) {
         if (s.is(Items.CHORUS_FRUIT)) return true;
-        for (FoodProperties.PossibleEffect e : food.effects()) {
-            if (e.effect().getEffect().value().getCategory() == MobEffectCategory.HARMFUL) return true;
+        var consumable = s.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
+        if (consumable == null) return false;
+        for (var e : consumable.onConsumeEffects()) {
+            if (!(e instanceof net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect apply)) continue;
+            for (var effect : apply.effects()) {
+                if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) return true;
+            }
         }
         return false;
     }
@@ -310,7 +315,7 @@ public final class BackpackUpgrades {
                 for (int i = 0; i < c.getContainerSize(); i++) {
                     ItemStack s = c.getItem(i);
                     if (s.isEmpty()) continue;
-                    FoodProperties food = s.getFoodProperties(player);
+                    FoodProperties food = s.get(net.minecraft.core.component.DataComponents.FOOD);
                     // Only when none of it would go to waste.
                     if (food == null || 20 - fd.getFoodLevel() < food.nutrition() || !edible(u, s, food)) continue;
                     ItemStack one = s.split(1);
@@ -426,7 +431,7 @@ public final class BackpackUpgrades {
     // Swaps the best-scoring item in the pack with the one in the player's hand. True if it swapped.
     private static boolean swapBest(Player player, ItemStack pack, ItemStack u, java.util.function.ToDoubleFunction<ItemStack> score) {
         var inv = player.getInventory();
-        ItemStack held = inv.getSelected();
+        ItemStack held = inv.getSelectedItem();
         if (held.getItem() instanceof BackpackItem || !held.getItem().canFitInsideContainerItems()) return false;
         Container c = storage(player, pack);
         double best = held.isEmpty() ? 0 : score.applyAsDouble(held);
@@ -443,7 +448,7 @@ public final class BackpackUpgrades {
         if (bestSlot < 0) return false;
         ItemStack tool = c.getItem(bestSlot);
         c.setItem(bestSlot, held);
-        inv.setItem(inv.selected, tool);
+        inv.setItem(inv.getSelectedSlot(), tool);
         c.setChanged();
         return true;
     }
@@ -451,7 +456,7 @@ public final class BackpackUpgrades {
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         Player player = event.getEntity();
-        if (player.level().isClientSide || player.isCreative() || player.isSpectator()
+        if (player.level().isClientSide() || player.isCreative() || player.isSpectator()
                 || event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START) return;
         BlockState state = player.level().getBlockState(event.getPos());
         if (state.isAir() || state.getDestroySpeed(player.level(), event.getPos()) < 0) return;
@@ -464,7 +469,7 @@ public final class BackpackUpgrades {
     @SubscribeEvent
     public static void onAttack(AttackEntityEvent event) {
         Player player = event.getEntity();
-        if (player.level().isClientSide || player.isSpectator() || !(event.getTarget() instanceof LivingEntity)) return;
+        if (player.level().isClientSide() || player.isSpectator() || !(event.getTarget() instanceof LivingEntity)) return;
         for (ItemStack pack : packs(player)) {
             ItemStack u = find(pack, UpgradeKind.TOOL_SWAPPER);
             if (u.isEmpty() || !powered(pack, u, WEAPON_FM)) continue;
@@ -503,15 +508,15 @@ public final class BackpackUpgrades {
             ItemStack pack = m.backpackItem();
             ItemStack u = find(pack, kind);
             if (u.isEmpty() || !powered(pack, u, REMOTE_FM)) {
-                player.displayClientMessage(Component.literal("Not enough Fm (needs " + REMOTE_FM + ")").withStyle(ChatFormatting.RED), true);
+                player.sendOverlayMessage(Component.literal("Not enough Fm (needs " + REMOTE_FM + ")").withStyle(ChatFormatting.RED));
                 return;
             }
             HitResult hit = player.pick(REMOTE_RANGE, 1f, false);
             var handler = hit instanceof BlockHitResult bh && hit.getType() == HitResult.Type.BLOCK
-                    ? player.level().getCapability(Capabilities.ItemHandler.BLOCK, bh.getBlockPos(), bh.getDirection()) : null;
+                    ? com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(player.level(), bh.getBlockPos(), bh.getDirection()) : null;
             if (handler == null) {
-                player.displayClientMessage(Component.literal("Look at a container within 8 blocks when you open the pack")
-                        .withStyle(ChatFormatting.RED), true);
+                player.sendOverlayMessage(Component.literal("Look at a container within 8 blocks when you open the pack")
+                        .withStyle(ChatFormatting.RED));
                 return;
             }
             UtilityTransfer.Target target = UtilityTransfer.handler(handler);
@@ -519,7 +524,7 @@ public final class BackpackUpgrades {
             if (moved > 0) FmChargeable.use(pack, REMOTE_FM);
             m.broadcastChanges();
         }
-        player.displayClientMessage(Component.literal((deposit ? "Deposited " : "Restocked ") + moved + " item" + (moved == 1 ? "" : "s"))
-                .withStyle(ChatFormatting.AQUA), true);
+        player.sendOverlayMessage(Component.literal((deposit ? "Deposited " : "Restocked ") + moved + " item" + (moved == 1 ? "" : "s"))
+                .withStyle(ChatFormatting.AQUA));
     }
 }

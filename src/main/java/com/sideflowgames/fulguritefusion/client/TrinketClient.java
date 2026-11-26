@@ -40,7 +40,7 @@ public final class TrinketClient {
     private static void onScreenInit(ScreenEvent.Init.Post event) {
         gear = null;
         if (!(event.getScreen() instanceof InventoryScreen inv) || CuriosCompat.loaded()) return;
-        gear = Button.builder(Component.literal("Gear"), b -> PacketDistributor.sendToServer(new Trinkets.OpenPayload()))
+        gear = Button.builder(Component.literal("Gear"), b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Trinkets.OpenPayload()))
                 .bounds(inv.getGuiLeft() + inv.getXSize() - 36, inv.getGuiTop() - 15, 36, 14).build();
         event.addListener(gear);
     }
@@ -66,18 +66,18 @@ public final class TrinketClient {
             player.setDeltaMovement(v.x, 0.55, v.z);
             player.resetFallDistance();
             for (int i = 0; i < 8; i++) player.level().addParticle(ParticleTypes.CLOUD, player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0, -0.05, 0);
-            PacketDistributor.sendToServer(new Trinkets.DoubleJumpPayload());
+            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Trinkets.DoubleJumpPayload());
         }
         jumpWasDown = jump;
         // Void Arc Band: blink.
         while (FulguriteFusionClient.VOID_BLINK.consumeClick()) {
             ItemStack band = Trinkets.worn(player, TrinketKind.VOID_ARC_BAND);
-            if (mc.screen != null || !(band.getItem() instanceof TrinketItem item) || player.getCooldowns().isOnCooldown(item)) continue;
+            if (mc.screen != null || !(band.getItem() instanceof TrinketItem item) || player.getCooldowns().isOnCooldown(band)) continue;
             float yaw = player.getYRot() * Mth.DEG_TO_RAD;
             Vec3 forward = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw)), left = new Vec3(forward.z, 0, -forward.x);
-            Vec3 dir = forward.scale(player.input.forwardImpulse).add(left.scale(player.input.leftImpulse));
+            Vec3 dir = forward.scale(player.input.getMoveVector().y).add(left.scale(player.input.getMoveVector().x));
             if (dir.lengthSqr() < 1e-3) dir = forward;
-            PacketDistributor.sendToServer(new Trinkets.BlinkPayload((float) dir.x, (float) dir.z));
+            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Trinkets.BlinkPayload((float) dir.x, (float) dir.z));
         }
     }
 }

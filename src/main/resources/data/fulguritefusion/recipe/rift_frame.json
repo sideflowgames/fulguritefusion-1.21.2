@@ -7,15 +7,9 @@
     "OSO"
   ],
   "key": {
-    "O": {
-      "item": "minecraft:obsidian"
-    },
-    "S": {
-      "item": "fulguritefusion:fulgurite_shard"
-    },
-    "C": {
-      "item": "minecraft:copper_block"
-    }
+    "O": "minecraft:obsidian",
+    "S": "fulguritefusion:fulgurite_shard",
+    "C": "minecraft:copper_block"
   },
   "result": {
     "id": "fulguritefusion:rift_frame",

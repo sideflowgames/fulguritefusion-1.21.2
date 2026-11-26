@@ -7,18 +7,10 @@
     "TKT"
   ],
   "key": {
-    "T": {
-      "item": "fulguritefusion:tempered_arc_casing"
-    },
-    "K": {
-      "item": "fulguritefusion:coil_segment"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "S": {
-      "item": "fulguritefusion:spark_cell"
-    }
+    "T": "fulguritefusion:tempered_arc_casing",
+    "K": "fulguritefusion:coil_segment",
+    "G": "fulguritefusion:gold_sheet",
+    "S": "fulguritefusion:spark_cell"
   },
   "result": {
     "id": "fulguritefusion:charged_arc_casing",

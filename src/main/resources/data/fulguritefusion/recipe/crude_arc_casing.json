@@ -7,15 +7,9 @@
     "CMC"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    }
+    "C": "minecraft:copper_ingot",
+    "M": "fulguritefusion:magnetite_ingot",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "fulguritefusion:crude_arc_casing",

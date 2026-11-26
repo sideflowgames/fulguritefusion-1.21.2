@@ -6,7 +6,7 @@ import java.util.List;
 import com.sideflowgames.fulguritefusion.block.ColliderRing;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 // Draws the 7x7 collider ring as a little map: the Collider Input at the bottom, the collider in the middle.
@@ -29,7 +29,7 @@ public final class ColliderRingWidget {
     }
 
     // shot/shotLength: progress of the cells in flight (shot < 0 = none), drawn as a pulse moving round the ring.
-    public static void draw(GuiGraphics g, int x, int y, int mask, int shot, int shotLength) {
+    public static void draw(GuiGraphicsExtractor g, int x, int y, int mask, int shot, int shotLength) {
         g.fill(x - 1, y - 1, x + SIZE, y + SIZE, FRAME);
         g.fill(x, y, x + SIZE - 1, y + SIZE - 1, INSIDE);
         for (int i = 0; i < ColliderRing.SPOTS; i++) {

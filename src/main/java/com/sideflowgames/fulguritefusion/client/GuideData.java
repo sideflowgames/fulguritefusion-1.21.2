@@ -8,7 +8,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,7 +31,7 @@ import java.util.Set;
 //
 // Each titled page is a section of its topic's screen.
 public final class GuideData {
-    public static final ResourceLocation CONTENT = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "guide/guide.json");
+    public static final Identifier CONTENT = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "guide/guide.json");
     public static final String START = "start";
     // One section of a topic: what the left side shows (items, recipes, or a step-by-step build) and the text
     // for the right side. A page without a title adds its items and recipes to the section before it.
@@ -161,9 +161,9 @@ public final class GuideData {
 
     public static ItemStack item(String id) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(id);
+            Identifier rl = Identifier.parse(id);
             if (!BuiltInRegistries.ITEM.containsKey(rl)) return ItemStack.EMPTY;
-            return new ItemStack(BuiltInRegistries.ITEM.get(rl));
+            return new ItemStack(BuiltInRegistries.ITEM.getValue(rl));
         } catch (Exception e) {
             return ItemStack.EMPTY;
         }

@@ -17,12 +17,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -98,48 +96,48 @@ public class TitanAltarBlock extends Block {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
         Item item = stack.getItem();
         BooleanProperty socket = item == ModItems.STORM_EYE.get() ? EYE : item == ModItems.MOLTEN_HEART.get() ? HEART
                 : item == ModItems.VOID_SHARD.get() ? SHARD : null;
         boolean sigil = item == ModItems.STORM_SIGIL.get();
-        boolean offering = item instanceof StormforgedArmorItem && item instanceof ArmorItem;
-        if (socket == null && !sigil && !offering) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!(level instanceof ServerLevel server)) return ItemInteractionResult.SUCCESS;
+        boolean offering = item instanceof StormforgedArmorItem;
+        if (socket == null && !sigil && !offering) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (!(level instanceof ServerLevel server)) return InteractionResult.SUCCESS;
         if (!TitanTrials.is(level)) {
             hint(player, "The altar is dormant here. It only wakes in the Titan Trials.");
-            return ItemInteractionResult.FAIL;
+            return InteractionResult.FAIL;
         }
         if (socket != null) {
             hint(player, "Forge the Storm Eye, Molten Heart and Void Shard into a Storm Sigil to wake the Titan.");
-            return ItemInteractionResult.FAIL;
+            return InteractionResult.FAIL;
         }
         if (offering) {
             if (state.getValue(OFFERING) != Offering.NONE) {
                 hint(player, "An offering already rests on the altar.");
-                return ItemInteractionResult.FAIL;
+                return InteractionResult.FAIL;
             }
-            EquipmentSlot slot = ((ArmorItem) item).getEquipmentSlot();
+            EquipmentSlot slot = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE).slot();
             level.setBlockAndUpdate(pos, state.setValue(OFFERING, Offering.of(slot)));
             stack.consume(1, player);
             server.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.6f, 0.6f);
             server.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.4, 0.4, 0.4, 0.5);
             hint(player, "The altar accepts your offering.");
-            return ItemInteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
         if (titanAwake(server, pos)) {
             hint(player, "The Titan is already awake.");
-            return ItemInteractionResult.FAIL;
+            return InteractionResult.FAIL;
         }
         if (sigil) {
             stack.consume(1, player);
             summon(server, pos, state);
-            return ItemInteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
         if (state.getValue(socket)) {
             hint(player, "That piece is already set into the altar.");
-            return ItemInteractionResult.FAIL;
+            return InteractionResult.FAIL;
         }
         stack.consume(1, player);
         state = state.setValue(socket, true);
@@ -149,16 +147,16 @@ public class TitanAltarBlock extends Block {
         } else {
             level.setBlockAndUpdate(pos, state);
         }
-        return ItemInteractionResult.CONSUME;
+        return InteractionResult.CONSUME;
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         String pieces = "Use a Storm Sigil here to wake the Titan";
         Offering o = state.getValue(OFFERING);
-        player.displayClientMessage(Component.literal(pieces + (o == Offering.NONE ? "." : ". Offering: " + o.getSerializedName()))
-                .withStyle(ChatFormatting.LIGHT_PURPLE), true);
+        player.sendOverlayMessage(Component.literal(pieces + (o == Offering.NONE ? "." : ". Offering: " + o.getSerializedName()))
+                .withStyle(ChatFormatting.LIGHT_PURPLE));
         return InteractionResult.CONSUME;
     }
 
@@ -167,33 +165,33 @@ public class TitanAltarBlock extends Block {
     }
 
     private static void summon(ServerLevel level, BlockPos pos, BlockState state) {
-        StormTitanEntity titan = ModEntities.STORM_TITAN.get().create(level);
+        StormTitanEntity titan = ModEntities.STORM_TITAN.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (titan == null) return;
         Offering o = state.getValue(OFFERING);
         if (o != Offering.NONE) titan.setTargetSlot(o.slot);
         level.setBlockAndUpdate(pos, state.setValue(EYE, false).setValue(HEART, false).setValue(SHARD, false).setValue(OFFERING, Offering.NONE));
         titan.setHome(pos.below(2));
-        titan.moveTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
+        titan.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
         titan.setPersistenceRequired();
         level.addFreshEntity(titan);
         for (int i = 0; i < 6; i++) {
-            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
             if (bolt == null) continue;
             double a = Math.PI * 2 * i / 6;
-            bolt.moveTo(pos.getX() + 0.5 + Math.cos(a) * 6, pos.getY() + 1, pos.getZ() + 0.5 + Math.sin(a) * 6);
+            bolt.snapTo(pos.getX() + 0.5 + Math.cos(a) * 6, pos.getY() + 1, pos.getZ() + 0.5 + Math.sin(a) * 6);
             bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
         }
         level.playSound(null, pos, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 4.0f, 0.5f);
         for (Player p : level.players()) {
             if (p.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 96 * 96) {
-                p.displayClientMessage(Component.literal("The Storm Titan wakes!").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD), true);
+                p.sendOverlayMessage(Component.literal("The Storm Titan wakes!").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD));
             }
         }
     }
 
     private static void hint(Player player, String text) {
-        player.displayClientMessage(Component.literal(text).withStyle(ChatFormatting.GRAY), true);
+        player.sendOverlayMessage(Component.literal(text).withStyle(ChatFormatting.GRAY));
     }
 
     @Override

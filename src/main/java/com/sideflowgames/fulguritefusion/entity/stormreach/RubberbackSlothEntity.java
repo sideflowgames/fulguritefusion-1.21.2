@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity.stormreach;
 
+import net.minecraft.core.HolderLookup;
+
 import com.sideflowgames.fulguritefusion.ModBlocks;
 import com.sideflowgames.fulguritefusion.ModEntities;
 import com.sideflowgames.fulguritefusion.ModItems;
@@ -29,12 +31,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
@@ -54,7 +56,7 @@ public class RubberbackSlothEntity extends Animal implements GeoEntity {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Animal.createMobAttributes().add(Attributes.MAX_HEALTH, 20.0).add(Attributes.MOVEMENT_SPEED, 0.1);
+        return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 20.0).add(Attributes.MOVEMENT_SPEED, 0.1);
     }
 
     @Override
@@ -78,12 +80,12 @@ public class RubberbackSlothEntity extends Animal implements GeoEntity {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.is(Items.BUCKET) && !isBaby()) {
             if (sapCooldown > 0) return InteractionResult.PASS;
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 sapCooldown = REFILL_TICKS;
                 player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, new ItemStack(ModItems.LATEX_BUCKET.get())));
                 level().playSound(null, blockPosition(), SoundEvents.COW_MILK, SoundSource.NEUTRAL, 1.0f, 0.8f);
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
     }
@@ -91,25 +93,37 @@ public class RubberbackSlothEntity extends Animal implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!level().isClientSide && sapCooldown > 0) sapCooldown--;
+        if (!level().isClientSide() && sapCooldown > 0) sapCooldown--;
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveRubberbackSlothEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveRubberbackSlothEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
         tag.putInt("SapCooldown", sapCooldown);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        sapCooldown = tag.getInt("SapCooldown");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadRubberbackSlothEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadRubberbackSlothEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        sapCooldown = tag.getIntOr("SapCooldown", 0);
     }
 
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return ModEntities.RUBBERBACK_SLOTH.get().create(level);
+        return ModEntities.RUBBERBACK_SLOTH.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
     }
 
     @Override
@@ -130,7 +144,7 @@ public class RubberbackSlothEntity extends Animal implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         // It walks too slowly for GeckoLib's normal "is moving" check, so compare positions instead.
-        controllers.add(new AnimationController<>(this, "main", 8, s -> s.setAndContinue(isCrawling() ? WALK : IDLE)));
+        controllers.add(new AnimationController<>("main", 8, s -> s.setAndContinue(isCrawling() ? WALK : IDLE)));
     }
 
     private boolean isCrawling() {

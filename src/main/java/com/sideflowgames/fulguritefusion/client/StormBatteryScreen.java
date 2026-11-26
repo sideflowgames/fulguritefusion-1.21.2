@@ -3,15 +3,15 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import com.sideflowgames.fulguritefusion.menu.StormBatteryMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 // Shows the whole bank: stored Fm, capacity and how many blocks it has.
 public class StormBatteryScreen extends MachineScreen<StormBatteryMenu> {
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/storm_battery.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/storm_battery.png");
     private static final int TEXT = 0xFF26262C;
 
     public StormBatteryScreen(StormBatteryMenu menu, Inventory inventory, Component title) {
@@ -59,9 +59,9 @@ public class StormBatteryScreen extends MachineScreen<StormBatteryMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
-        super.renderBg(g, partialTick, mouseX, mouseY);
-        if (sidesOpen) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
+                if (sidesOpen) {
             int x = leftPos + imageWidth, y = topPos + 24;
             g.fill(x, y, x + 92, y + 6 + 6 * 20, 0xFF26262C);
             g.fill(x + 1, y + 1, x + 91, y + 5 + 6 * 20, 0xFFA9DCF2);
@@ -69,20 +69,20 @@ public class StormBatteryScreen extends MachineScreen<StormBatteryMenu> {
     }
 
     @Override
-    protected void renderMachine(GuiGraphics g, float partialTick) {
+    protected void renderMachine(GuiGraphicsExtractor g, float partialTick) {
         drawPowerBar(g, menu.getFm(), menu.getCapacity());
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        super.renderLabels(g, mouseX, mouseY);
-        g.drawString(font, "Bank: " + menu.getBlockCount() + " / " + menu.getMaxBlocks() + " blocks", 10, 20, TEXT, false);
-        g.drawString(font, "Stored: " + menu.getFm() + " Fm", 10, 34, TEXT, false);
-        g.drawString(font, "Max: " + menu.getCapacity() + " Fm", 10, 48, TEXT, false);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        super.extractLabels(g, mouseX, mouseY);
+        g.text(font, "Bank: " + menu.getBlockCount() + " / " + menu.getMaxBlocks() + " blocks", 10, 20, GuiStyle.opaque(TEXT), false);
+        g.text(font, "Stored: " + menu.getFm() + " Fm", 10, 34, GuiStyle.opaque(TEXT), false);
+        g.text(font, "Max: " + menu.getCapacity() + " Fm", 10, 48, GuiStyle.opaque(TEXT), false);
     }
 
     @Override
-    protected void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {
+    protected void renderExtraTooltips(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         powerTooltip(g, mouseX, mouseY, menu.getFm(), menu.getCapacity());
     }
 }

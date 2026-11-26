@@ -7,21 +7,11 @@
     "SOS"
   ],
   "key": {
-    "S": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "G": {
-      "item": "minecraft:grindstone"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    },
-    "O": {
-      "item": "minecraft:obsidian"
-    }
+    "S": "fulguritefusion:iron_sheet",
+    "G": "minecraft:grindstone",
+    "M": "fulguritefusion:magnetite_plate",
+    "K": "fulguritefusion:crude_arc_casing",
+    "O": "minecraft:obsidian"
   },
   "result": {
     "id": "fulguritefusion:crusher",

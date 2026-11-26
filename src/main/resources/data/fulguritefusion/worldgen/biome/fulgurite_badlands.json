@@ -1,26 +1,32 @@
 {
+  "attributes": {
+    "minecraft:visual/sky_color": "#c88c60",
+    "minecraft:visual/fog_color": "#d8a070",
+    "minecraft:visual/water_fog_color": "#8c7860",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "minecraft:electric_spark"
+        },
+        "probability": 0.003
+      }
+    ]
+  },
   "has_precipitation": false,
   "temperature": 1.5,
   "downfall": 0.0,
   "effects": {
-    "sky_color": 13143136,
-    "fog_color": 14196848,
-    "water_color": 9205856,
-    "water_fog_color": 9205856,
-    "grass_color": 11047008,
-    "foliage_color": 10519640,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "particle": {
-      "options": {
-        "type": "minecraft:electric_spark"
-      },
-      "probability": 0.003
-    }
+    "water_color": "#8c7860",
+    "grass_color": "#a89060",
+    "foliage_color": "#a08458"
   },
   "spawners": {
     "monster": [
@@ -126,12 +132,10 @@
     "axolotls": []
   },
   "spawn_costs": {},
-  "carvers": {
-    "air": [
-      "fulguritefusion:stormreach_cave",
-      "fulguritefusion:stormreach_cavern"
-    ]
-  },
+  "carvers": [
+    "fulguritefusion:stormreach_cave",
+    "fulguritefusion:stormreach_cavern"
+  ],
   "features": [
     [],
     [],

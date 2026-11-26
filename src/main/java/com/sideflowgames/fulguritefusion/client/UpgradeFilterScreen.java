@@ -2,7 +2,7 @@ package com.sideflowgames.fulguritefusion.client;
 
 import com.sideflowgames.fulguritefusion.backpack.UpgradeFilterMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -16,9 +16,7 @@ public class UpgradeFilterScreen extends AbstractContainerScreen<UpgradeFilterMe
     private Button listButton, xpButton;
 
     public UpgradeFilterScreen(UpgradeFilterMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = 176;
-        imageHeight = 166;
+        super(menu, inventory, title, 176, 166);
         inventoryLabelY = UpgradeFilterMenu.INV_Y - 11;
     }
 
@@ -48,7 +46,8 @@ public class UpgradeFilterScreen extends AbstractContainerScreen<UpgradeFilterMe
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
         GuiStyle.panel(g, leftPos, topPos, imageWidth, imageHeight);
         for (Slot s : menu.slots) {
             // Filter slots (copies only) are a lighter blue.
@@ -57,15 +56,14 @@ public class UpgradeFilterScreen extends AbstractContainerScreen<UpgradeFilterMe
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, 8, 5, GuiStyle.TEXT, false);
-        g.drawString(font, Component.literal("Empty hand clears a slot"), 8, UpgradeFilterMenu.FILTER_Y + 20, GuiStyle.TEXT, false);
-        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.TEXT, false);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.text(font, title, 8, 5, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, Component.literal("Empty hand clears a slot"), 8, UpgradeFilterMenu.FILTER_Y + 20, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.opaque(GuiStyle.TEXT), false);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        renderTooltip(g, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 }

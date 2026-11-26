@@ -11,7 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
@@ -87,24 +87,24 @@ public class DungeonPiece extends StructurePiece {
 
     public DungeonPiece(CompoundTag tag) {
         super(DungeonRegistry.ROOM.get(), tag);
-        kind = DungeonKind.byId(tag.getString("Kind"));
-        room = DungeonLayout.Room.values()[tag.getInt("Room")];
-        shell = tag.getIntArray("Shell");
-        doors = tag.getIntArray("Doors");
-        seals = tag.getIntArray("Seals");
-        stairs = tag.getIntArray("Stairs");
-        pathDoors = tag.getIntArray("PathDoors");
-        pathStairs = tag.getIntArray("PathStairs");
-        ext = tag.getInt("Ext");
-        flags = tag.getInt("Flags");
-        foundation = tag.getBoolean("Foundation");
-        roofOpen = tag.getBoolean("RoofOpen");
-        shaftTop = tag.getInt("ShaftTop");
-        outDoor = tag.getInt("OutDoor");
-        seed = tag.getLong("Seed");
-        level = tag.getInt("Level");
-        vault = tag.getIntArray("Vault");
-        center = tag.getIntArray("Center");
+        kind = DungeonKind.byId(tag.getStringOr("Kind", ""));
+        room = DungeonLayout.Room.values()[tag.getIntOr("Room", 0)];
+        shell = tag.getIntArray("Shell").orElse(new int[0]);
+        doors = tag.getIntArray("Doors").orElse(new int[0]);
+        seals = tag.getIntArray("Seals").orElse(new int[0]);
+        stairs = tag.getIntArray("Stairs").orElse(new int[0]);
+        pathDoors = tag.getIntArray("PathDoors").orElse(new int[0]);
+        pathStairs = tag.getIntArray("PathStairs").orElse(new int[0]);
+        ext = tag.getIntOr("Ext", 0);
+        flags = tag.getIntOr("Flags", 0);
+        foundation = tag.getBooleanOr("Foundation", false);
+        roofOpen = tag.getBooleanOr("RoofOpen", false);
+        shaftTop = tag.getIntOr("ShaftTop", 0);
+        outDoor = tag.getIntOr("OutDoor", 0);
+        seed = tag.getLongOr("Seed", 0L);
+        level = tag.getIntOr("Level", 0);
+        vault = tag.getIntArray("Vault").orElse(new int[0]);
+        center = tag.getIntArray("Center").orElse(new int[0]);
         setOrientation(null);
     }
 
@@ -916,7 +916,7 @@ public class DungeonPiece extends StructurePiece {
                     int ceil = ceilingAbove(x, z);
                     if (ceil < 0) continue;
                     int len = 2 + (int) (h(x, 8, z, 55) * 3);
-                    for (int y = ceil - 1; y > ceil - 1 - len && y > fy(); y--) set(x, y, z, Blocks.CHAIN.defaultBlockState());
+                    for (int y = ceil - 1; y > ceil - 1 - len && y > fy(); y--) set(x, y, z, Blocks.IRON_CHAIN.defaultBlockState());
                 }
     }
 
@@ -1131,7 +1131,7 @@ public class DungeonPiece extends StructurePiece {
         if (y < 0) return;
         if (!set(x, y, z, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing))) return;
         ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE,
-                ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "chests/" + kind.id + "_" + table));
+                Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "chests/" + kind.id + "_" + table));
         RandomizableContainer.setBlockEntityLootTable(lvl, RandomSource.create(seed ^ BlockPos.asLong(x, y, z)), new BlockPos(x, y, z), key);
     }
 
@@ -1317,8 +1317,8 @@ public class DungeonPiece extends StructurePiece {
             }
             if ((y - fy()) % kind.floorHeight() == kind.floorHeight() / 2) {
                 for (int[] p : new int[][] {{2, 2}, {-2, 2}, {2, -2}, {-2, -2}}) {
-                    set(cx + p[0], y, cz + p[1], Blocks.CHAIN.defaultBlockState());
-                    set(cx + p[0], y + 1, cz + p[1], Blocks.CHAIN.defaultBlockState());
+                    set(cx + p[0], y, cz + p[1], Blocks.IRON_CHAIN.defaultBlockState());
+                    set(cx + p[0], y + 1, cz + p[1], Blocks.IRON_CHAIN.defaultBlockState());
                     set(cx + p[0], y - 1, cz + p[1], Blocks.SOUL_LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
                 }
             }

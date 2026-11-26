@@ -69,8 +69,8 @@ public class CinderBehemothEntity extends StormElite {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         ServerLevel server = (ServerLevel) level();
         if (breathCooldown > 0) breathCooldown--;
         if (chargeCooldown > 0) chargeCooldown--;

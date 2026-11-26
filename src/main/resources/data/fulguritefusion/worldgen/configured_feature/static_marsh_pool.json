@@ -21,7 +21,11 @@
         {
           "if_true": {
             "type": "minecraft:matching_blocks",
-            "offset": [0, -1, 0],
+            "offset": [
+              0,
+              -1,
+              0
+            ],
             "blocks": "minecraft:air"
           },
           "then": {
@@ -31,7 +35,8 @@
             }
           }
         }
-      ]
+      ],
+      "type": "minecraft:rule_based_state_provider"
     },
     "target": {
       "type": "minecraft:matching_blocks",

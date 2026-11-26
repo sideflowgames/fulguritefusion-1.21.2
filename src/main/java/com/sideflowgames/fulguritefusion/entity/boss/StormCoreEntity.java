@@ -13,9 +13,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
 
 // Storm Core: the Thunderhead's shield anchor. A crackling orb that circles below the Thunderhead at about head
 // height, zapping the nearest player within 10 blocks every 2.5 seconds (4 damage). 30 health.
@@ -39,8 +39,8 @@ public class StormCoreEntity extends BossAnchorEntity {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         StormBossEntity boss = owner();
         if (boss == null) return;
         angle += 0.03;
@@ -58,7 +58,7 @@ public class StormCoreEntity extends BossAnchorEntity {
                     Vec3 q = from.lerp(at, i / 10.0);
                     server.sendParticles(ParticleTypes.ELECTRIC_SPARK, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.0);
                 }
-                p.hurt(damageSources().lightningBolt(), 4.0f);
+                p.hurtOrSimulate(damageSources().lightningBolt(), 4.0f);
                 server.playSound(null, blockPosition(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.HOSTILE, 0.6f, 1.8f);
             }
         }
@@ -67,7 +67,7 @@ public class StormCoreEntity extends BossAnchorEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && random.nextInt(3) == 0) {
+        if (level().isClientSide() && random.nextInt(3) == 0) {
             level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0, 0);
         }
     }
@@ -84,6 +84,6 @@ public class StormCoreEntity extends BossAnchorEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, s -> s.setAndContinue(IDLE)));
+        controllers.add(new AnimationController<>("main", 0, s -> s.setAndContinue(IDLE)));
     }
 }

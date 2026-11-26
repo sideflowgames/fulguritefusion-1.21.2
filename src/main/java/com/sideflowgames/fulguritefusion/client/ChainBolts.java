@@ -6,7 +6,8 @@ import com.sideflowgames.fulguritefusion.item.ChainBolt;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -45,16 +46,16 @@ public final class ChainBolts {
         }
     }
 
-    private static void render(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || ARCS.isEmpty()) return;
+    private static void render(RenderLevelStageEvent.AfterTranslucentParticles event) {
+        if (ARCS.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
-        Vec3 cam = event.getCamera().getPosition();
+        Vec3 cam = event.getLevelRenderState().cameraRenderState.pos;
         PoseStack ps = event.getPoseStack();
         ps.pushPose();
         ps.translate(-cam.x, -cam.y, -cam.z);
         Matrix4f m = ps.last().pose();
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        VertexConsumer c = buffers.getBuffer(RenderType.lightning());
+        VertexConsumer c = buffers.getBuffer(RenderTypes.lightning());
         for (Arc a : ARCS) {
             float strength = 1f - a.age()[0] / (float) (LIFE + 1);
             // Re-jag every other tick so the bolt flickers.
@@ -63,7 +64,7 @@ public final class ChainBolts {
                 bolt(c, m, a.points().get(i), a.points().get(i + 1), r, strength, a.prime());
             }
         }
-        buffers.endBatch(RenderType.lightning());
+        buffers.endBatch(RenderTypes.lightning());
         ps.popPose();
     }
 

@@ -7,9 +7,7 @@
     "LL"
   ],
   "key": {
-    "L": {
-      "item": "fulguritefusion:rubber_log"
-    }
+    "L": "fulguritefusion:rubber_log"
   },
   "result": {
     "id": "fulguritefusion:rubber_wood",

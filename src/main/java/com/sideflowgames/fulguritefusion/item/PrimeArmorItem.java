@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.item;
 
+import net.minecraft.world.item.equipment.ArmorType;
+
 import com.sideflowgames.fulguritefusion.ModArmorMaterials;
 import com.sideflowgames.fulguritefusion.ModDataComponents;
 import com.sideflowgames.fulguritefusion.event.StormArmorEvents;
@@ -22,11 +24,11 @@ import java.util.List;
 public class PrimeArmorItem extends StormforgedArmorItem {
     public static final int MAX_FM = 8_000_000;
 
-    public PrimeArmorItem(Type type, Properties properties) {
-        super(ModArmorMaterials.PRIME, type, properties);
+    public PrimeArmorItem(ArmorType type, Properties properties) {
+        this(ModArmorMaterials.PRIME, type, properties);
     }
 
-    protected PrimeArmorItem(net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> material, Type type, Properties properties) {
+    protected PrimeArmorItem(net.minecraft.world.item.equipment.ArmorMaterial material, ArmorType type, Properties properties) {
         super(material, type, properties);
     }
 
@@ -36,23 +38,15 @@ public class PrimeArmorItem extends StormforgedArmorItem {
     }
 
     // Gliding: the chestplate acts as an elytra while the whole Prime set is charged.
-    @Override
-    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
-        return getType() == Type.CHESTPLATE && PrimeEvents.fullPrimeSet(entity);
-    }
-
-    @Override
-    public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
-        if (!entity.level().isClientSide && flightTicks % 20 == 0) FmChargeable.use(stack, PrimeEvents.GLIDE_FM_PER_SECOND);
-        return true;
-    }
+    // In 26.1 gliding comes from the GLIDER component, so PrimeEvents.onPlayerTick adds or removes it.
 
     @Override public boolean isBarVisible(ItemStack stack) { return true; }
     @Override public int getBarWidth(ItemStack stack) { return Math.round(13 * FmChargeable.fraction(stack)); }
     @Override public int getBarColor(ItemStack stack) { return PrimeTools.barColor(stack); }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         PrimeTools.primeLine(tooltip);
         int fm = FmChargeable.get(stack);
         tooltip.add(Component.literal(String.format("Charge: %,d / %,d Fm", fm, MAX_FM))

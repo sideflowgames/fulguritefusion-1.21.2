@@ -29,7 +29,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public final class PrimeEvents {
     public static final int STATIC_FM = 2000;
     public static final float STATIC_DAMAGE = 8.0f;
     public static final int HAMMER_FM = 120;
-    public static final Vector3f VIOLET = new Vector3f(0.72f, 0.42f, 1.0f);
+    public static final int VIOLET = 0xB86BFF;
 
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static boolean hammering; // stops the extra blocks hammering in turn
@@ -64,6 +64,21 @@ public final class PrimeEvents {
         return true;
     }
 
+    // Gliding (was canElytraFly / elytraFlightTick in 1.21.1): the Prime chestplate gets the GLIDER component
+    // while the whole set is charged, and gliding costs Fm each second.
+    @SubscribeEvent
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
+        if (!(chest.getItem() instanceof PrimeArmorItem)) return;
+        boolean glide = fullPrimeSet(player);
+        if (glide != chest.has(net.minecraft.core.component.DataComponents.GLIDER)) {
+            if (glide) chest.set(net.minecraft.core.component.DataComponents.GLIDER, net.minecraft.util.Unit.INSTANCE);
+            else chest.remove(net.minecraft.core.component.DataComponents.GLIDER);
+        }
+        if (glide && player.isFallFlying() && player.getFallFlyingTicks() % 20 == 0) FmChargeable.use(chest, GLIDE_FM_PER_SECOND);
+    }
+
     // Prime boots: no fall damage at all (runs after the Stormforged quarter, so it wins).
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFall(LivingFallEvent event) {
@@ -71,7 +86,7 @@ public final class PrimeEvents {
         ItemStack boots = e.getItemBySlot(EquipmentSlot.FEET);
         if (!(boots.getItem() instanceof PrimeArmorItem) || !FmChargeable.hasCharge(boots)) return;
         event.setDamageMultiplier(0);
-        if (!e.level().isClientSide && event.getDistance() > 3) FmChargeable.use(boots, FALL_FM);
+        if (!e.level().isClientSide() && event.getDistance() > 3) FmChargeable.use(boots, FALL_FM);
     }
 
     // Static discharge: whoever hurts a full Prime set gets blasted back.
@@ -83,9 +98,9 @@ public final class PrimeEvents {
         ItemStack chest = victim.getItemBySlot(EquipmentSlot.CHEST);
         if (FmChargeable.get(chest) < STATIC_FM) return;
         FmChargeable.use(chest, STATIC_FM);
-        DamageSource zap = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), victim);
-        attacker.hurt(zap, STATIC_DAMAGE);
+        DamageSource zap = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.LIGHTNING_BOLT), victim);
+        attacker.hurtOrSimulate(zap, STATIC_DAMAGE);
         Vec3 away = attacker.position().subtract(victim.position()).multiply(1, 0, 1);
         if (away.lengthSqr() > 1e-4) attacker.knockback(1.2, -away.x, -away.z);
         // A crackling arc from you to them.
@@ -101,7 +116,7 @@ public final class PrimeEvents {
 
     // Prime pickaxe hammer mode: also break the 8 blocks around the one mined, in the plane facing you.
     @SubscribeEvent
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(BreakBlockEvent event) {
         if (hammering || !(event.getPlayer() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
         ItemStack tool = player.getMainHandItem();
         if (!(tool.getItem() instanceof PrimeTools.Pickaxe) || !StormforgedTools.hammering(tool)) return;
@@ -143,7 +158,7 @@ public final class PrimeEvents {
         if (!fullPrimeSet(player) || !player.isFallFlying()) return;
         ticks = Math.max(0, Math.min(40, ticks));
         FmChargeable.use(player.getItemBySlot(EquipmentSlot.CHEST), ticks * BOOST_FM_PER_TICK);
-        player.serverLevel().sendParticles(new DustParticleOptions(VIOLET, 1.4f), player.getX(), player.getY() + 0.4, player.getZ(),
+        player.level().sendParticles(new DustParticleOptions(VIOLET, 1.4f), player.getX(), player.getY() + 0.4, player.getZ(),
                 4, 0.2, 0.2, 0.2, 0);
     }
 
@@ -154,8 +169,8 @@ public final class PrimeEvents {
         int mode = StormforgedTools.mode(tool) ^ StormforgedTools.HAMMER;
         tool.set(com.sideflowgames.fulguritefusion.ModDataComponents.TOOL_MODE.get(), mode);
         boolean on = (mode & StormforgedTools.HAMMER) != 0;
-        player.displayClientMessage(net.minecraft.network.chat.Component.literal("3x3 hammer: " + (on ? "on" : "off"))
-                .withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE), true);
+        player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("3x3 hammer: " + (on ? "on" : "off"))
+                .withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
         player.level().playSound(null, player.blockPosition(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.6f, on ? 1.6f : 1.0f);
     }
 }

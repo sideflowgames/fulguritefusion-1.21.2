@@ -31,7 +31,7 @@ public class DungeonStructure extends Structure {
         if (kind.tower) {
             // The Stormspire needs room above it: skip sites too high for the whole tower to fit under the build limit.
             int doorGround = height(ctx, x, z - kind.depth * DungeonLayout.CELL / 2 + kind.depth * DungeonLayout.CELL + 3);
-            if (doorGround + kind.levels * kind.floorHeight() + 4 > ctx.heightAccessor().getMaxBuildHeight()) return Optional.empty();
+            if (doorGround + kind.levels * kind.floorHeight() + 4 > ctx.heightAccessor().getMaxY()) return Optional.empty();
         }
         return Optional.of(new GenerationStub(new BlockPos(x, ground, z), builder -> DungeonLayout.generate(kind, ctx, builder, x, z)));
     }

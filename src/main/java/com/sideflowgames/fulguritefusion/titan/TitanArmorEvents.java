@@ -9,7 +9,7 @@ import com.sideflowgames.fulguritefusion.stormreach.Stormreach;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -47,8 +47,8 @@ public final class TitanArmorEvents {
     public static final int DASH_COOLDOWN = 60;
     public static final int DASH_FM = 20_000;
     public static final int AURA_FM = 2_000;
-    private static final ResourceLocation HEALTH_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_health");
-    private static final ResourceLocation KB_ID = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_knockback");
+    private static final Identifier HEALTH_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_health");
+    private static final Identifier KB_ID = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "titan_knockback");
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static final Map<UUID, Long> lastDash = new HashMap<>();
 
@@ -100,7 +100,7 @@ public final class TitanArmorEvents {
                 e -> e instanceof Enemy && e.isAlive())) {
             if (FmChargeable.get(chest) < AURA_FM) break;
             FmChargeable.use(chest, AURA_FM);
-            e.hurt(level.damageSources().lightningBolt(), 4.0f);
+            e.hurtOrSimulate(level.damageSources().lightningBolt(), 4.0f);
             Vec3 from = player.position().add(0, 1.2, 0), to = e.position().add(0, e.getBbHeight() * 0.5, 0);
             int steps = (int) Math.max(4, from.distanceTo(to) * 3);
             for (int i = 0; i <= steps; i++) {
@@ -127,14 +127,14 @@ public final class TitanArmorEvents {
         lastDash.put(player.getUUID(), now);
         ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
         FmChargeable.use(chest, DASH_FM);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Vec3 dir = new Vec3(dx, 0, dz);
         if (dir.lengthSqr() < 1e-4) return;
         dir = dir.normalize();
         Vec3 start = player.position(), end = start.add(dir.scale(6));
         AABB path = new AABB(start, end).inflate(1.2, 1.5, 1.2);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, path, e -> e instanceof Enemy && e.isAlive())) {
-            e.hurt(level.damageSources().playerAttack(player), 8.0f);
+            e.hurtOrSimulate(level.damageSources().playerAttack(player), 8.0f);
         }
         for (int i = 0; i <= 18; i++) {
             Vec3 p = start.lerp(end, i / 18.0);
@@ -144,7 +144,7 @@ public final class TitanArmorEvents {
         level.playSound(null, player.blockPosition(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.PLAYERS, 0.8f, 1.6f);
     }
 
-    private static void setModifier(Player player, Holder<Attribute> attribute, ResourceLocation id, double amount) {
+    private static void setModifier(Player player, Holder<Attribute> attribute, Identifier id, double amount) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         AttributeModifier current = inst.getModifier(id);

@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:farm_upgrade_card"
-    },
-    {
-      "item": "fulguritefusion:coil_segment"
-    },
-    {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    {
-      "item": "fulguritefusion:gold_sheet"
-    }
+    "fulguritefusion:farm_upgrade_card",
+    "fulguritefusion:coil_segment",
+    "fulguritefusion:gold_sheet",
+    "fulguritefusion:gold_sheet"
   ],
   "result": {
     "id": "fulguritefusion:efficiency_card_1",

@@ -4,15 +4,15 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 import com.sideflowgames.fulguritefusion.machine.MachineTier;
 import com.sideflowgames.fulguritefusion.menu.ProcessingMachineMenu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 // Screen for the multiblock machines: 2 inputs, progress arrow, 2 outputs, power bar, and the casing tier.
 public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu> {
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/processing_machine.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/processing_machine.png");
     private static final int ARROW_X = 70, ARROW_Y = 35, ARROW_W = 24, ARROW_H = 16;
     private static final int TEXT_COLOR = 0xFF26262C;
     private static final int LATEX_X = 24, LATEX_Y = 20, LATEX_W = 8, LATEX_H = 40;
@@ -27,11 +27,11 @@ public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu
     }
 
     @Override
-    protected void renderMachine(GuiGraphics g, float partialTick) {
+    protected void renderMachine(GuiGraphicsExtractor g, float partialTick) {
         drawPowerBar(g, menu.getFm(), menu.getMaxFm());
         int needed = menu.getNeeded();
         int w = needed > 0 ? Math.min(ARROW_W, menu.getProgress() * ARROW_W / needed) : 0;
-        if (w > 0) g.blit(texture, leftPos + ARROW_X, topPos + ARROW_Y, 176, 52, w, ARROW_H);
+        if (w > 0) g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, texture, leftPos + ARROW_X, topPos + ARROW_Y, (float) 176, (float) 52, w, ARROW_H, 256, 256);
         // Latex Vulcanizer: a gauge of the latex in its vat, left of the inputs.
         int latex = menu.getLatex();
         if (latex >= 0) {
@@ -44,24 +44,24 @@ public class ProcessingMachineScreen extends MachineScreen<ProcessingMachineMenu
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        super.renderLabels(g, mouseX, mouseY);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        super.extractLabels(g, mouseX, mouseY);
         int tier = menu.getTier();
         String line = tier > 0 ? MachineTier.NAMES[tier] + " | " + menu.getRate() + " Fm/t" : "Not built";
-        g.drawString(font, line, 8, 63, TEXT_COLOR, false);
+        g.text(font, line, 8, 63, GuiStyle.opaque(TEXT_COLOR), false);
         int needed = menu.getNeeded();
         if (needed > 0 && menu.getProgress() > 0) {
             String pct = (menu.getProgress() * 100 / needed) + "%";
-            g.drawString(font, pct, ARROW_X + (ARROW_W - font.width(pct)) / 2, ARROW_Y + 18, TEXT_COLOR, false);
+            g.text(font, pct, ARROW_X + (ARROW_W - font.width(pct)) / 2, ARROW_Y + 18, GuiStyle.opaque(TEXT_COLOR), false);
         }
     }
 
     @Override
-    protected void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {
+    protected void renderExtraTooltips(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         powerTooltip(g, mouseX, mouseY, menu.getFm(), menu.getMaxFm());
         int latex = menu.getLatex();
         if (latex >= 0 && isHovering(LATEX_X - 1, LATEX_Y - 1, LATEX_W + 2, LATEX_H + 2, mouseX, mouseY)) {
-            g.renderTooltip(font, Component.literal(String.format("Latex: %.1f / %d buckets", latex / 1000f, menu.getLatexCapacity() / 1000)),
+            g.setTooltipForNextFrame(font, Component.literal(String.format("Latex: %.1f / %d buckets", latex / 1000f, menu.getLatexCapacity() / 1000)),
                     mouseX, mouseY);
         }
     }

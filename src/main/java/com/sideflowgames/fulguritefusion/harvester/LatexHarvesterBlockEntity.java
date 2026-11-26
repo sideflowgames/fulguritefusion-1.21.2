@@ -29,10 +29,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.joml.Vector3f;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoBlockEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
     public static final int MIN_TREE = 1000, MAX_TREE = 4000;
     public static final float GROW_CHANCE = 0.25f;
     public static final int GROW_FM = 500;
-    private static final DustParticleOptions OUTLINE = new DustParticleOptions(new Vector3f(0.4f, 0.85f, 1.0f), 0.8f);
+    private static final DustParticleOptions OUTLINE = new DustParticleOptions(0x66D9FF, 0.8f);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final DaisyChain chain = new DaisyChain();
@@ -268,7 +268,7 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
 
     // The controller was broken: free the other blocks (the latex in the tank is lost).
     public void breakApart() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         release();
     }
 
@@ -278,7 +278,7 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
 
     // The tank's window shows how full it is: tell clients when it changes by a 64th.
     private void syncFill() {
-        if (level == null || level.isClientSide || tier == 0) return;
+        if (level == null || level.isClientSide() || tier == 0) return;
         int f = fillNow();
         if (f != sentFill) {
             sentFill = f;
@@ -328,7 +328,7 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
             if (be.liveTrunk()) {
                 // A tree it hasn't seen yet: how much latex it holds is up to chance.
                 if (be.treeTotal == 0) {
-                    be.treeTotal = MIN_TREE + level.random.nextInt(MAX_TREE - MIN_TREE + 1);
+                    be.treeTotal = MIN_TREE + level.getRandom().nextInt(MAX_TREE - MIN_TREE + 1);
                     be.treeLeft = be.treeTotal;
                     be.setChanged();
                 }
@@ -347,9 +347,9 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
                 }
             } else if (centerState.getBlock() instanceof SaplingBlock sapling && centerState.is(ModBlocks.RUBBER_SAPLING.get())) {
                 // Help a replanted sapling along.
-                if (level.getGameTime() % 20 == 0 && be.fm >= GROW_FM && level.random.nextFloat() < GROW_CHANCE) {
+                if (level.getGameTime() % 20 == 0 && be.fm >= GROW_FM && level.getRandom().nextFloat() < GROW_CHANCE) {
                     be.fm -= GROW_FM;
-                    sapling.advanceTree(server, c, centerState, level.random);
+                    sapling.advanceTree(server, c, centerState, level.getRandom());
                     server.sendParticles(ParticleTypes.HAPPY_VILLAGER, c.getX() + 0.5, c.getY() + 0.4, c.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0);
                     be.setChanged();
                 }
@@ -366,10 +366,10 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
         checkStructure();
         if (tier == 0) {
             previewTicks = 200;
-            player.displayClientMessage(Component.literal(missing.size() + " part" + (missing.size() == 1 ? "" : "s")
+            player.sendSystemMessage(Component.literal(missing.size() + " part" + (missing.size() == 1 ? "" : "s")
                     + " missing (outlined). A 3x3x2 ring around the bottom of the trunk. Front row, top layer: the controller in the "
                     + "middle, a Harvester Tank in one corner (with another Harvester Tank under it) and a Harvester Power Port in "
-                    + "the other. The rest are Arc Casings of one tier").withStyle(ChatFormatting.YELLOW), false);
+                    + "the other. The rest are Arc Casings of one tier").withStyle(ChatFormatting.YELLOW));
             return;
         }
         String tree;
@@ -379,8 +379,8 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
         else if (c.is(ModBlocks.DRIED_RUBBER_LOG.get())) tree = "tree is dry: chop it and plant a rubber sapling";
         else tree = "no rubber tree in the middle";
         String state = tank.getSpace() < BUCKET ? " | TANK FULL" : fm < FM_PER_TICK * speed() ? " | needs power" : "";
-        player.displayClientMessage(Component.literal(String.format("Latex: %d / %d buckets | %s | %,d Fm | %dx speed%s",
-                tank.getFluidAmount() / BUCKET, CAPACITY / BUCKET, tree, fm, speed(), state)).withStyle(ChatFormatting.AQUA), false);
+        player.sendSystemMessage(Component.literal(String.format("Latex: %d / %d buckets | %s | %,d Fm | %dx speed%s",
+                tank.getFluidAmount() / BUCKET, CAPACITY / BUCKET, tree, fm, speed(), state)).withStyle(ChatFormatting.AQUA));
     }
 
     private void drawPreview(ServerLevel server) {
@@ -449,7 +449,7 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
     // ---------- Client sync (the tier, for the trim colour) ----------
 
     private void sync() {
-        if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        if (level != null && !level.isClientSide()) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
     @Override
@@ -467,43 +467,64 @@ public class LatexHarvesterBlockEntity extends BlockEntity implements FmHandler,
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        shownTier = tag.getInt("Tier");
-        shownCw = !tag.contains("TankCw") || tag.getBoolean("TankCw");
-        shownFill = tag.getInt("Fill");
+    public void handleUpdateTag(net.minecraft.world.level.storage.ValueInput updateInput) {
+        CompoundTag tag = com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(updateInput);
+        HolderLookup.Provider registries = updateInput.lookup();
+        shownTier = tag.getIntOr("Tier", 0);
+        shownCw = !tag.contains("TankCw") || tag.getBooleanOr("TankCw", false);
+        shownFill = tag.getIntOr("Fill", 0);
     }
 
     @Override
-    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt,
-                             HolderLookup.Provider registries) {
-        handleUpdateTag(pkt.getTag(), registries);
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.world.level.storage.ValueInput packetInput) {
+        HolderLookup.Provider registries = packetInput.lookup();
+        handleUpdateTag(packetInput);
     }
 
     // ---------- Save ----------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveLatexHarvesterBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveLatexHarvesterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Tier", tier);
         tag.putInt("Fm", fm);
         tag.putInt("Progress", progress);
         tag.putInt("TreeTotal", treeTotal);
         tag.putInt("TreeLeft", treeLeft);
         tag.putBoolean("TankCw", tankCw);
-        tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
+        tag.put("Tank", com.sideflowgames.fulguritefusion.util.NbtBridge.serialize(tank, registries));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        tier = tag.getInt("Tier");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadLatexHarvesterBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadLatexHarvesterBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        tier = tag.getIntOr("Tier", 0);
         shownTier = tier;
-        fm = tag.getInt("Fm");
-        progress = tag.getInt("Progress");
-        treeTotal = tag.getInt("TreeTotal");
-        treeLeft = tag.getInt("TreeLeft");
-        tankCw = !tag.contains("TankCw") || tag.getBoolean("TankCw");
+        fm = tag.getIntOr("Fm", 0);
+        progress = tag.getIntOr("Progress", 0);
+        treeTotal = tag.getIntOr("TreeTotal", 0);
+        treeLeft = tag.getIntOr("TreeLeft", 0);
+        tankCw = !tag.contains("TankCw") || tag.getBooleanOr("TankCw", false);
         shownCw = tankCw;
-        tank.readFromNBT(registries, tag.getCompound("Tank"));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.deserialize(tank, registries, tag.getCompoundOrEmpty("Tank"));
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof LatexHarvesterBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

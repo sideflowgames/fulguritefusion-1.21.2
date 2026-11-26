@@ -54,18 +54,18 @@ public class DungeonHazardBlockEntity extends BlockEntity {
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, mark.x + Math.cos(a) * 2, mark.y + 0.1, mark.z + Math.sin(a) * 2, 1, 0, 0.05, 0, 0);
             }
             if (--timer <= 0) {
-                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
                 if (bolt != null) {
-                    bolt.moveTo(mark);
+                    bolt.snapTo(mark);
                     bolt.setVisualOnly(true);
                     server.addFreshEntity(bolt);
                 }
                 for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, new AABB(mark, mark).inflate(2.5),
                         e -> !(e instanceof StormBeast) && !(e instanceof Player p && !target(p)))) {
-                    e.hurt(StormDamage.trap(server), 8.0f);
+                    e.hurtOrSimulate(StormDamage.trap(server), 8.0f);
                 }
                 mark = null;
-                timer = 60 + server.random.nextInt(60);
+                timer = 60 + server.getRandom().nextInt(60);
             }
             return;
         }
@@ -100,8 +100,8 @@ public class DungeonHazardBlockEntity extends BlockEntity {
         while (floor > pos.getY() - 7 && server.getBlockState(new BlockPos(pos.getX(), floor, pos.getZ())).isAir()) floor--;
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, below,
                 e -> !(e instanceof StormBeast) && !(e instanceof Player p && !target(p)))) {
-            e.hurt(server.damageSources().generic(), 12.0f);
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 2));
+            e.hurtOrSimulate(server.damageSources().generic(), 12.0f);
+            e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 2));
         }
         server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BLACKSTONE.defaultBlockState()),
                 pos.getX() + 0.5, floor + 1.1, pos.getZ() + 0.5, 40, 1.0, 0.2, 1.0, 0.2);
@@ -115,7 +115,7 @@ public class DungeonHazardBlockEntity extends BlockEntity {
         for (Player p : server.getEntitiesOfClass(Player.class, new AABB(pos).inflate(6), DungeonHazardBlockEntity::target)) {
             if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) > 36) continue;
             p.setTicksFrozen(Math.min(p.getTicksFrozen() + 40, p.getTicksRequiredToFreeze() + 80));
-            p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0));
+            p.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, 0));
             server.sendParticles(ParticleTypes.SNOWFLAKE, p.getX(), p.getY(1.0), p.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
         }
     }

@@ -3,7 +3,7 @@ package com.sideflowgames.fulguritefusion.client;
 import com.sideflowgames.fulguritefusion.backpack.BackpackMenu;
 import com.sideflowgames.fulguritefusion.backpack.BackpackTier;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,9 +13,7 @@ import net.minecraft.world.inventory.Slot;
 // with a strip in the tier's colour.
 public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     public BackpackScreen(BackpackMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = menu.width();
-        imageHeight = menu.height();
+        super(menu, inventory, title, menu.width(), menu.height());
         inventoryLabelY = menu.playerInventoryY() - 11;
         inventoryLabelX = (imageWidth - 9 * BackpackMenu.SLOT) / 2 + 1;
     }
@@ -43,7 +41,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         for (int action : new int[]{2, 3}) {
             if ((remoteKey & (action == 2 ? 1 : 2)) == 0) continue;
             var b = net.minecraft.client.gui.components.Button.builder(Component.literal(action == 2 ? "Deposit" : "Restock"),
-                    btn -> net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                    btn -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
                             new com.sideflowgames.fulguritefusion.backpack.BackpackNetwork.UtilityPayload(action)))
                     .bounds(x, y, 54, 16).build();
             b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
@@ -78,7 +76,8 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
         int x = leftPos, y = topPos, w = imageWidth, h = imageHeight;
         // Upgrade tab on the left, drawn first so the main panel's edge sits over its join.
         int ups = menu.tier.upgradeSlots;
@@ -97,29 +96,28 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, (imageWidth - 9 * BackpackMenu.SLOT) / 2 + 1, 6, GuiStyle.TEXT, false);
-        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.TEXT, false);
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.text(font, title, (imageWidth - 9 * BackpackMenu.SLOT) / 2 + 1, 6, GuiStyle.opaque(GuiStyle.TEXT), false);
+        g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, GuiStyle.opaque(GuiStyle.TEXT), false);
     }
 
     // The upgrade tab sits outside the main panel; clicks there aren't "outside" (which would drop items).
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top, int button) {
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
         int tx = left + BackpackMenu.UPGRADE_X - 5, ty = top + BackpackMenu.TOP - 5;
         int bottom = ty + menu.tier.upgradeSlots * BackpackMenu.SLOT + (menu.tier.powered() ? 56 : 8);
         if (mouseX >= tx && mouseX < left && mouseY >= ty && mouseY < bottom) return false;
-        return super.hasClickedOutside(mouseX, mouseY, left, top, button);
+        return super.hasClickedOutside(mouseX, mouseY, left, top);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        renderTooltip(g, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (menu.tier.powered() && menu.getCarried().isEmpty()) {
             int tx = leftPos + BackpackMenu.UPGRADE_X - 5;
             int gy = topPos + BackpackMenu.TOP - 5 + menu.tier.upgradeSlots * BackpackMenu.SLOT + 12;
             if (mouseX >= tx + 6 && mouseX < tx + 18 && mouseY >= gy && mouseY < gy + 40) {
-                g.renderTooltip(font, Component.literal(Math.round(menu.charge() * 100) + "% charged (Fm for Stormforged upgrades)"), mouseX, mouseY);
+                g.setTooltipForNextFrame(font, Component.literal(Math.round(menu.charge() * 100) + "% charged (Fm for Stormforged upgrades)"), mouseX, mouseY);
             }
         }
     }

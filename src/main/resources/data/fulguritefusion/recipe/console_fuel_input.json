@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:console_casing"
-    },
-    {
-      "item": "minecraft:hopper"
-    }
+    "fulguritefusion:console_casing",
+    "minecraft:hopper"
   ],
   "result": {
     "id": "fulguritefusion:console_fuel_input",

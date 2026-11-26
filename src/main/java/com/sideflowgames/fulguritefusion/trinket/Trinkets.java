@@ -10,13 +10,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
@@ -102,7 +102,7 @@ public final class Trinkets {
     // ---- network ----
 
     public record SyncPayload(int entity, List<ItemStack> stacks) implements CustomPacketPayload {
-        public static final Type<SyncPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "equipment_sync"));
+        public static final Type<SyncPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "equipment_sync"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncPayload> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, SyncPayload::entity, ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list(SIZE)), SyncPayload::stacks,
                 SyncPayload::new);
@@ -114,7 +114,7 @@ public final class Trinkets {
     }
 
     public record OpenPayload() implements CustomPacketPayload {
-        public static final Type<OpenPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "equipment_open"));
+        public static final Type<OpenPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "equipment_open"));
         public static final StreamCodec<ByteBuf, OpenPayload> STREAM_CODEC = StreamCodec.unit(new OpenPayload());
 
         @Override
@@ -124,7 +124,7 @@ public final class Trinkets {
     }
 
     public record DoubleJumpPayload() implements CustomPacketPayload {
-        public static final Type<DoubleJumpPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "double_jump"));
+        public static final Type<DoubleJumpPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "double_jump"));
         public static final StreamCodec<ByteBuf, DoubleJumpPayload> STREAM_CODEC = StreamCodec.unit(new DoubleJumpPayload());
 
         @Override
@@ -134,7 +134,7 @@ public final class Trinkets {
     }
 
     public record BlinkPayload(float dx, float dz) implements CustomPacketPayload {
-        public static final Type<BlinkPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "void_blink"));
+        public static final Type<BlinkPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "void_blink"));
         public static final StreamCodec<ByteBuf, BlinkPayload> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.FLOAT, BlinkPayload::dx, ByteBufCodecs.FLOAT, BlinkPayload::dz, BlinkPayload::new);
 
@@ -202,7 +202,7 @@ public final class Trinkets {
 
     private static void onDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        if (player.level().getGameRules().get(net.minecraft.world.level.gamerules.GameRules.KEEP_INVENTORY)) return;
         // Deaths in the Titan Trials keep everything, trinkets included.
         if (com.sideflowgames.fulguritefusion.titan.TitanTrials.is(player.level())) return;
         Equipment eq = player.getData(EQUIPMENT);

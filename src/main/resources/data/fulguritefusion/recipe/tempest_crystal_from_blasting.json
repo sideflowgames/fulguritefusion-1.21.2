@@ -1,9 +1,7 @@
 {
   "type": "minecraft:blasting",
   "category": "misc",
-  "ingredient": {
-    "item": "fulguritefusion:tempest_crystal_ore"
-  },
+  "ingredient": "fulguritefusion:tempest_crystal_ore",
   "result": {
     "id": "fulguritefusion:tempest_crystal"
   },

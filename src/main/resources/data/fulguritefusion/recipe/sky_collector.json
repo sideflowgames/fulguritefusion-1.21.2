@@ -7,21 +7,11 @@
     "AMA"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "D": {
-      "item": "minecraft:daylight_detector"
-    },
-    "A": {
-      "item": "minecraft:gold_ingot"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    }
+    "G": "minecraft:glass",
+    "F": "fulguritefusion:fulgurite",
+    "D": "minecraft:daylight_detector",
+    "A": "minecraft:gold_ingot",
+    "M": "fulguritefusion:magnetite_ingot"
   },
   "result": {
     "id": "fulguritefusion:sky_collector",

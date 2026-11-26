@@ -7,15 +7,9 @@
     "ISI"
   ],
   "key": {
-    "I": {
-      "item": "fulguritefusion:iron_sheet"
-    },
-    "S": {
-      "item": "fulguritefusion:silver_ingot"
-    },
-    "B": {
-      "item": "fulguritefusion:copper_backpack"
-    }
+    "I": "fulguritefusion:iron_sheet",
+    "S": "fulguritefusion:silver_ingot",
+    "B": "fulguritefusion:copper_backpack"
   },
   "result": {
     "id": "fulguritefusion:iron_backpack",

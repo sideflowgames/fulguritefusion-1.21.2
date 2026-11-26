@@ -72,8 +72,8 @@ public class NacreClusterBlock extends DirectionalBlock implements SimpleWaterlo
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (state.getValue(WATERLOGGED)) level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess scheduledTicks, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource shapeRandom) {
+        if (state.getValue(WATERLOGGED)) scheduledTicks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         return dir == state.getValue(FACING).getOpposite() && !canSurvive(state, level, pos)
                 ? Blocks.WATER.defaultBlockState() : state;
     }

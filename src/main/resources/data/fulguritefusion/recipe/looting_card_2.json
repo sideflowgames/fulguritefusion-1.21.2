@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "fulguritefusion:looting_card_1"
-    },
-    {
-      "item": "fulguritefusion:pearl_ember"
-    },
-    {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    {
-      "item": "fulguritefusion:gold_sheet"
-    }
+    "fulguritefusion:looting_card_1",
+    "fulguritefusion:pearl_ember",
+    "fulguritefusion:gold_sheet",
+    "fulguritefusion:gold_sheet"
   ],
   "result": {
     "id": "fulguritefusion:looting_card_2",

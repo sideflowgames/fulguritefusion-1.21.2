@@ -17,7 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -88,20 +88,20 @@ public final class BossSummonEvents {
             return;
         }
         if (!player.getAbilities().instabuild) stack.shrink(1);
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(Vec3.atBottomCenterOf(at.above()));
+            bolt.snapTo(Vec3.atBottomCenterOf(at.above()));
             bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
         }
-        Mob boss = type.create(level);
+        Mob boss = type.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) return;
-        boss.moveTo(spawn.x, spawn.y, spawn.z, level.random.nextFloat() * 360f, 0);
-        boss.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null);
+        boss.snapTo(spawn.x, spawn.y, spawn.z, level.getRandom().nextFloat() * 360f, 0);
+        boss.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
         level.addFreshEntity(boss);
         level.playSound(null, at, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 1.0f, 1.2f);
         for (Player p : level.getEntitiesOfClass(Player.class, new AABB(at).inflate(32))) {
-            p.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.LIGHT_PURPLE), true);
+            p.sendOverlayMessage(Component.literal(message).withStyle(ChatFormatting.LIGHT_PURPLE));
         }
     }
 
@@ -110,7 +110,7 @@ public final class BossSummonEvents {
     }
 
     private static void hint(Player player, String text) {
-        player.displayClientMessage(Component.literal(text).withStyle(ChatFormatting.GRAY), true);
+        player.sendOverlayMessage(Component.literal(text).withStyle(ChatFormatting.GRAY));
     }
 
     // A Charged Spark Cell dropped into lava in the Nether wakes the Magma Conduit.
@@ -123,23 +123,23 @@ public final class BossSummonEvents {
         if (alreadyAwake(level, ModEntities.MAGMA_CONDUIT.get(), pos)) return;
         item.getItem().shrink(1);
         if (item.getItem().isEmpty()) item.discard();
-        Mob boss = ModEntities.MAGMA_CONDUIT.get().create(level);
+        Mob boss = ModEntities.MAGMA_CONDUIT.get().create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) return;
         BlockPos top = pos;
-        while (level.getFluidState(top.above()).is(FluidTags.LAVA) && top.getY() < level.getMaxBuildHeight()) top = top.above();
-        boss.moveTo(top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
-        boss.finalizeSpawn(level, level.getCurrentDifficultyAt(top), MobSpawnType.EVENT, null);
+        while (level.getFluidState(top.above()).is(FluidTags.LAVA) && top.getY() < level.getMaxY()) top = top.above();
+        boss.snapTo(top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        boss.finalizeSpawn(level, level.getCurrentDifficultyAt(top), EntitySpawnReason.EVENT, null);
         level.addFreshEntity(boss);
         level.sendParticles(ParticleTypes.LAVA, top.getX() + 0.5, top.getY() + 1, top.getZ() + 0.5, 60, 1.5, 0.5, 1.5, 0.2);
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (bolt != null) {
-            bolt.moveTo(Vec3.atBottomCenterOf(top.above()));
+            bolt.snapTo(Vec3.atBottomCenterOf(top.above()));
             bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
         }
         level.playSound(null, top, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 1.0f, 0.7f);
         for (Player p : level.getEntitiesOfClass(Player.class, new AABB(top).inflate(32))) {
-            p.displayClientMessage(Component.literal("The lava heaves, and the Magma Conduit rises!").withStyle(ChatFormatting.GOLD), true);
+            p.sendOverlayMessage(Component.literal("The lava heaves, and the Magma Conduit rises!").withStyle(ChatFormatting.GOLD));
         }
     }
 }

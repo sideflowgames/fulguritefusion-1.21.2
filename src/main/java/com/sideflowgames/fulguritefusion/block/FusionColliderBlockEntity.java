@@ -200,11 +200,11 @@ public class FusionColliderBlockEntity extends BlockEntity {
                 }
             }
             if (metal) {
-                p.hurt(level.damageSources().lightningBolt(), 2f);
+                p.hurtOrSimulate(level.damageSources().lightningBolt(), 2f);
                 level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.5, 0.3, 0.1);
             }
         }
-        if (level.random.nextInt(4) == 0) {
+        if (level.getRandom().nextInt(4) == 0) {
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, worldPosition.getX() + 0.5, worldPosition.getY() + 3, worldPosition.getZ() + 0.5,
                     30, 12, 2, 12, 0.05);
         }
@@ -368,10 +368,10 @@ public class FusionColliderBlockEntity extends BlockEntity {
             text = a.name() + " + " + b.name();
         } else if (a.capsule() == null && b.capsule() == null && a.raw() >= 0 && b.raw() >= 0) {
             Pairing pairing = Pairings.of(a.raw(), b.raw());
-            Pairing result = StormColliderBlockEntity.resolve(pairing, level.random);
+            Pairing result = StormColliderBlockEntity.resolve(pairing, level.getRandom());
             yield = result.fuelFm();
             results.add(result);
-            byproducts.add(StormColliderBlockEntity.byproduct(pairing, result, level.random));
+            byproducts.add(StormColliderBlockEntity.byproduct(pairing, result, level.getRandom()));
             text = result.name();
         } else {
             Fuel cap = a.capsule() != null ? a : b, raw = a.capsule() != null ? b : a;
@@ -385,7 +385,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
             text = cap.name() + " + " + raw.name();
         }
         for (Pairing r : results) {
-            if (results.size() > 1 || byproducts.isEmpty()) byproducts.add(StormColliderBlockEntity.byproduct(r, r, level.random));
+            if (results.size() > 1 || byproducts.isEmpty()) byproducts.add(StormColliderBlockEntity.byproduct(r, r, level.getRandom()));
         }
         long fm = Math.round(yield * Config.REACTOR_FM_MULTIPLIER.get());
         int worst = 0;
@@ -396,7 +396,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
         if (results.stream().noneMatch(r -> r.id() == 46)) { // Silence: no sound at all
             level.playSound(null, worldPosition, ModSounds.REACTOR_IMPACT.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
         }
-        level.sendParticles(ParticleTypes.FLASH, x, y, z, 2, 0, 0, 0, 0);
+        level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), x, y, z, 2, 0, 0, 0, 0);
 
         // Each result's tier effect, then its own reaction; byproducts doubled into the console.
         for (Pairing r : results) {
@@ -462,7 +462,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
 
     private void shock(ServerLevel level, double range, float damage) {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(worldPosition).inflate(range))) {
-            e.hurt(level.damageSources().lightningBolt(), damage);
+            e.hurtOrSimulate(level.damageSources().lightningBolt(), damage);
         }
     }
 
@@ -470,7 +470,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
     public void meltRing(ServerLevel level, int count) {
         Block glass = ModBlocks.FULGURITE_BLAST_GLASS.get(), solid = ModBlocks.REINFORCED_FULGURITE.get();
         // Pick a spot on the inner channel line and melt the tube blocks round it.
-        float[] at = ReactorPath.point(RING, level.random.nextFloat() * ReactorPath.perimeter(RING));
+        float[] at = ReactorPath.point(RING, level.getRandom().nextFloat() * ReactorPath.perimeter(RING));
         int cx = Math.round(at[0]), cz = Math.round(at[1]);
         int melted = 0;
         for (int r = 0; r <= 4 && melted < count; r++) {
@@ -500,21 +500,21 @@ public class FusionColliderBlockEntity extends BlockEntity {
                 frame = ModBlocks.BLAST_CHAMBER_FRAME.get();
         int removed = 0;
         for (int tries = 0; tries < 600 && removed < count; tries++) {
-            int which = level.random.nextInt(3), dx, dy, dz;
+            int which = level.getRandom().nextInt(3), dx, dy, dz;
             if (which == 2) {
-                dx = level.random.nextInt(5) - 2;
-                dy = level.random.nextInt(5) - 2;
-                dz = level.random.nextInt(5) - 2;
+                dx = level.getRandom().nextInt(5) - 2;
+                dy = level.getRandom().nextInt(5) - 2;
+                dz = level.getRandom().nextInt(5) - 2;
             } else {
                 int reach = (which == 0 ? RING : OUTER) + TUBE;
-                dx = level.random.nextInt(2 * reach + 1) - reach;
-                dz = level.random.nextInt(2 * reach + 1) - reach;
-                dy = level.random.nextInt(5) - 2;
+                dx = level.getRandom().nextInt(2 * reach + 1) - reach;
+                dz = level.getRandom().nextInt(2 * reach + 1) - reach;
+                dy = level.getRandom().nextInt(5) - 2;
             }
             BlockPos p = at(dx, dy, dz);
             BlockState s = level.getBlockState(p);
             if (!s.is(glass) && !s.is(solid) && !s.is(frame)) continue;
-            level.destroyBlock(p, level.random.nextBoolean());
+            level.destroyBlock(p, level.getRandom().nextBoolean());
             level.sendParticles(ParticleTypes.EXPLOSION, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0);
             removed++;
         }
@@ -692,7 +692,7 @@ public class FusionColliderBlockEntity extends BlockEntity {
     }
 
     public void check() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         // The blast chamber forms on its own, as soon as it's right.
         chamberProblem = checkChamber();
         boolean chamberNow = chamberProblem == null;
@@ -768,8 +768,15 @@ public class FusionColliderBlockEntity extends BlockEntity {
     // ---------- Save / sync ----------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveFusionColliderBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveFusionColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putBoolean("Formed", formed);
         tag.putBoolean("AxisX", axisX);
         tag.putInt("Receivers", receiverPair);
@@ -782,30 +789,35 @@ public class FusionColliderBlockEntity extends BlockEntity {
         tag.putLong("HeatUntil", heatUntil);
         tag.putLong("StaticBloom", staticBloomUntil);
         if (consolePos != null) tag.putLong("Console", consolePos.asLong());
-        if (!carried[0].isEmpty()) tag.put("Carried0", carried[0].save(registries));
-        if (!carried[1].isEmpty()) tag.put("Carried1", carried[1].save(registries));
+        if (!carried[0].isEmpty()) tag.put("Carried0", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(carried[0], registries));
+        if (!carried[1].isEmpty()) tag.put("Carried1", com.sideflowgames.fulguritefusion.util.NbtBridge.saveStack(carried[1], registries));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        formed = tag.getBoolean("Formed");
-        axisX = !tag.contains("AxisX") || tag.getBoolean("AxisX");
-        receiverPair = tag.getInt("Receivers");
-        injCorner = tag.contains("InjCorner") ? tag.getInt("InjCorner") : -1;
-        chamberFormed = tag.getBoolean("Chamber");
-        chamberAxisX = !tag.contains("ChamberX") || tag.getBoolean("ChamberX");
-        runStart = tag.contains("RunStart") ? tag.getLong("RunStart") : -1;
-        if (tag.contains("Now") && level != null && level.isClientSide) {
-            clientRunStart = runStart < 0 ? -1 : level.getGameTime() - (tag.getLong("Now") - runStart);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadFusionColliderBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadFusionColliderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        formed = tag.getBooleanOr("Formed", false);
+        axisX = !tag.contains("AxisX") || tag.getBooleanOr("AxisX", false);
+        receiverPair = tag.getIntOr("Receivers", 0);
+        injCorner = tag.contains("InjCorner") ? tag.getIntOr("InjCorner", 0) : -1;
+        chamberFormed = tag.getBooleanOr("Chamber", false);
+        chamberAxisX = !tag.contains("ChamberX") || tag.getBooleanOr("ChamberX", false);
+        runStart = tag.contains("RunStart") ? tag.getLongOr("RunStart", 0L) : -1;
+        if (tag.contains("Now") && level != null && level.isClientSide()) {
+            clientRunStart = runStart < 0 ? -1 : level.getGameTime() - (tag.getLongOr("Now", 0L) - runStart);
         }
-        runMask = tag.getInt("RunMask");
-        if (tag.contains("HeatUntil")) heatUntil = tag.getLong("HeatUntil");
-        if (tag.contains("StaticBloom")) staticBloomUntil = tag.getLong("StaticBloom");
-        runSeverity = tag.contains("RunSeverity") ? tag.getInt("RunSeverity") : -1;
-        if (tag.contains("Console")) consolePos = BlockPos.of(tag.getLong("Console"));
-        carried[0] = ItemStack.parseOptional(registries, tag.getCompound("Carried0"));
-        carried[1] = ItemStack.parseOptional(registries, tag.getCompound("Carried1"));
+        runMask = tag.getIntOr("RunMask", 0);
+        if (tag.contains("HeatUntil")) heatUntil = tag.getLongOr("HeatUntil", 0L);
+        if (tag.contains("StaticBloom")) staticBloomUntil = tag.getLongOr("StaticBloom", 0L);
+        runSeverity = tag.contains("RunSeverity") ? tag.getIntOr("RunSeverity", 0) : -1;
+        if (tag.contains("Console")) consolePos = BlockPos.of(tag.getLongOr("Console", 0L));
+        carried[0] = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("Carried0"));
+        carried[1] = com.sideflowgames.fulguritefusion.util.NbtBridge.parseStack(registries, tag.getCompoundOrEmpty("Carried1"));
     }
 
     @Override
@@ -827,5 +839,12 @@ public class FusionColliderBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    // 26.1: runs the block's removal logic while this block entity still exists.
+    @Override
+    public void preRemoveSideEffects(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level == null) return;
+        if (state.getBlock() instanceof FusionColliderBlock block) block.onRemoveLegacy(state, level, pos, level.getBlockState(pos), false);
     }
 }

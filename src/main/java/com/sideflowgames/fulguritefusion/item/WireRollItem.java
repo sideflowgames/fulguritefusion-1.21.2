@@ -14,7 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +52,7 @@ public class WireRollItem extends Item {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return null;
         CompoundTag tag = data.copyTag();
-        return tag.contains(START) ? BlockPos.of(tag.getLong(START)) : null;
+        return tag.contains(START) ? BlockPos.of(tag.getLongOr(START, 0L)) : null;
     }
 
     private static void setStart(ItemStack stack, BlockPos pos) {
@@ -71,7 +70,7 @@ public class WireRollItem extends Item {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         if (!(level.getBlockEntity(pos) instanceof MachineConnectorBlockEntity here)) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
@@ -112,16 +111,16 @@ public class WireRollItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown() && getStart(stack) != null) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 setStart(stack, null);
                 message(player, "Wire cancelled.");
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResultHolder.pass(stack);
+        return InteractionResult.PASS;
     }
 
     // Glows while a wire is half-placed.
@@ -131,7 +130,8 @@ public class WireRollItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> tooltipOut, TooltipFlag flag) {
+        java.util.List<Component> tooltip = new com.sideflowgames.fulguritefusion.util.TooltipLines(tooltipOut);
         tooltip.add(Component.literal("Right-click two Machine Connectors to wire them").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Spans up to " + maxLength() + " blocks").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Carries up to " + tier.rate() + " Fm/t (a network runs at its weakest wire)").withStyle(ChatFormatting.GRAY));
@@ -145,6 +145,6 @@ public class WireRollItem extends Item {
     }
 
     private static void message(Player player, String text) {
-        if (player != null) player.displayClientMessage(Component.literal(text), true);
+        if (player != null) player.sendOverlayMessage(Component.literal(text));
     }
 }

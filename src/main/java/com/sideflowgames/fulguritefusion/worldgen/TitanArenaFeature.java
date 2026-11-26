@@ -43,7 +43,7 @@ public class TitanArenaFeature extends Feature<NoneFeatureConfiguration> {
         if (!isArenaChunk(level.getSeed(), context.origin().getX() >> 4, context.origin().getZ() >> 4)) return false;
         BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, context.origin());
         BlockPos ground = top.below();
-        if (top.getY() < level.getMinBuildHeight() + 40) return false;
+        if (top.getY() < level.getMinY() + 40) return false;
         if (level.getFluidState(ground).is(FluidTags.WATER) || level.getBlockState(ground).isAir()) return false;
         // Not over a crack or on a cliff: the ground across the arena must be roughly level.
         for (int dx = -R; dx <= R; dx += R) {

@@ -6,12 +6,8 @@
     "PP"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "P": {
-      "tag": "minecraft:planks"
-    }
+    "C": "minecraft:copper_ingot",
+    "P": "#minecraft:planks"
   },
   "result": {
     "id": "fulguritefusion:tree_tap",

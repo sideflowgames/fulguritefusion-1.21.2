@@ -7,18 +7,10 @@
     "LLL"
   ],
   "key": {
-    "S": {
-      "item": "minecraft:string"
-    },
-    "L": {
-      "item": "minecraft:leather"
-    },
-    "C": {
-      "item": "fulguritefusion:copper_sheet"
-    },
-    "X": {
-      "item": "minecraft:chest"
-    }
+    "S": "minecraft:string",
+    "L": "minecraft:leather",
+    "C": "fulguritefusion:copper_sheet",
+    "X": "minecraft:chest"
   },
   "result": {
     "id": "fulguritefusion:copper_backpack",

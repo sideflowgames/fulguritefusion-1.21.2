@@ -58,7 +58,7 @@ public final class SideConfig {
 
     public void load(CompoundTag tag) {
         if (tag.contains("Sides")) {
-            int[] saved = tag.getIntArray("Sides");
+            int[] saved = tag.getIntArray("Sides").orElse(new int[0]);
             if (saved.length == COUNT) System.arraycopy(saved, 0, modes, 0, COUNT);
         }
     }

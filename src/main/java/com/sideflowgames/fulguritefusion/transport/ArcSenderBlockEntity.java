@@ -55,8 +55,8 @@ public class ArcSenderBlockEntity extends BlockEntity implements FmHandler {
         BlockState ts = level.getBlockState(t);
         if (!(ts.getBlock() instanceof ArcNodeBlock node) || node.isSender()) return;
         Direction from = state.getValue(ArcNodeBlock.FACING), to = ts.getValue(ArcNodeBlock.FACING);
-        IItemHandler src = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.relative(from), from.getOpposite());
-        IItemHandler dst = level.getCapability(Capabilities.ItemHandler.BLOCK, t.relative(to), to.getOpposite());
+        IItemHandler src = com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(level, pos.relative(from), from.getOpposite());
+        IItemHandler dst = com.sideflowgames.fulguritefusion.util.LegacyCaps.itemsAt(level, t.relative(to), to.getOpposite());
         if (src == null || dst == null) return;
         int stacks = 0;
         for (int s = 0; s < src.getSlots() && stacks < MAX_STACKS; s++) {
@@ -75,10 +75,10 @@ public class ArcSenderBlockEntity extends BlockEntity implements FmHandler {
         be.setChanged();
         if (level instanceof ServerLevel server) {
             Vec3 a = Vec3.atCenterOf(pos), b = Vec3.atCenterOf(t);
-            PacketDistributor.sendToPlayersTrackingChunk(server, new ChunkPos(pos),
+            PacketDistributor.sendToPlayersTrackingChunk(server, ChunkPos.containing(pos),
                     new ChainBolt.Payload(List.of(a, a.lerp(b, 0.5).add(0, 0.4, 0), b), false));
             server.playSound(null, pos, com.sideflowgames.fulguritefusion.ModSounds.ARC_BUZZ.get(), SoundSource.BLOCKS, 0.45f,
-                    0.9f + server.random.nextFloat() * 0.2f);
+                    0.9f + server.getRandom().nextFloat() * 0.2f);
         }
     }
 
@@ -103,16 +103,28 @@ public class ArcSenderBlockEntity extends BlockEntity implements FmHandler {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveArcSenderBlockEntity(tag, com.sideflowgames.fulguritefusion.util.NbtBridge.registries(level));
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveArcSenderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
         tag.putInt("Fm", fm);
         if (target != null) tag.putLong("Target", target.asLong());
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        fm = tag.getInt("Fm");
-        target = tag.contains("Target") ? BlockPos.of(tag.getLong("Target")) : null;
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        legacyLoadArcSenderBlockEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadArcSenderBlockEntity(CompoundTag tag, HolderLookup.Provider registries) {
+        
+        fm = tag.getIntOr("Fm", 0);
+        target = tag.contains("Target") ? BlockPos.of(tag.getLongOr("Target", 0L)) : null;
     }
 }

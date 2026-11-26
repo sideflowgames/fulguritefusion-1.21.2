@@ -7,18 +7,10 @@
     "HCH"
   ],
   "key": {
-    "H": {
-      "item": "fulguritefusion:heavy_wire"
-    },
-    "P": {
-      "item": "fulguritefusion:prime_spark"
-    },
-    "M": {
-      "item": "fulguritefusion:mini_collider"
-    },
-    "C": {
-      "item": "fulguritefusion:coil_segment"
-    }
+    "H": "fulguritefusion:heavy_wire",
+    "P": "fulguritefusion:prime_spark",
+    "M": "fulguritefusion:mini_collider",
+    "C": "fulguritefusion:coil_segment"
   },
   "result": {
     "id": "fulguritefusion:fusion_collider",

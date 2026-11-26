@@ -7,21 +7,11 @@
     "BKB"
   ],
   "key": {
-    "B": {
-      "item": "minecraft:bricks"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite"
-    },
-    "G": {
-      "item": "fulguritefusion:gold_sheet"
-    },
-    "X": {
-      "item": "minecraft:blast_furnace"
-    },
-    "K": {
-      "item": "fulguritefusion:crude_arc_casing"
-    }
+    "B": "minecraft:bricks",
+    "F": "fulguritefusion:fulgurite",
+    "G": "fulguritefusion:gold_sheet",
+    "X": "minecraft:blast_furnace",
+    "K": "fulguritefusion:crude_arc_casing"
   },
   "result": {
     "id": "fulguritefusion:kiln",

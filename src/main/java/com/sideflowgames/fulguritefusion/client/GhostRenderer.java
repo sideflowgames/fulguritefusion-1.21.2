@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 
 // A block entity renderer that only draws ghost build outlines (see GhostBuild), while the block is powered.
 // Used for the Reactor Control Console and the Storm / Mini Collider.
-public class GhostRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
+public class GhostRenderer<T extends BlockEntity> extends LegacyBlockEntityRenderer<T> {
     private final BiFunction<Level, BlockPos, List<GhostBuild.Ghost>> build;
     private final int reach;
 
@@ -24,7 +24,7 @@ public class GhostRenderer<T extends BlockEntity> implements BlockEntityRenderer
     }
 
     @Override
-    public void render(T be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+    protected void render(T be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
         Level level = be.getLevel();
         BlockPos pos = be.getBlockPos();
         if (level == null || !GhostBuild.powered(level, pos)) return;
@@ -32,7 +32,7 @@ public class GhostRenderer<T extends BlockEntity> implements BlockEntityRenderer
     }
 
     @Override
-    public boolean shouldRenderOffScreen(T be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 

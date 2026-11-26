@@ -7,18 +7,10 @@
     " C "
   ],
   "key": {
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "R": {
-      "item": "fulguritefusion:reinforced_fulgurite"
-    },
-    "I": {
-      "item": "fulguritefusion:collider_injector"
-    },
-    "C": {
-      "item": "fulguritefusion:charged_spark_cell"
-    }
+    "E": "minecraft:ender_eye",
+    "R": "fulguritefusion:reinforced_fulgurite",
+    "I": "fulguritefusion:collider_injector",
+    "C": "fulguritefusion:charged_spark_cell"
   },
   "result": {
     "id": "fulguritefusion:receiver_portal",

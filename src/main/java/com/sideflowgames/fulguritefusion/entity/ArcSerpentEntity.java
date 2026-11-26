@@ -1,5 +1,7 @@
 package com.sideflowgames.fulguritefusion.entity;
 
+import net.minecraft.core.HolderLookup;
+
 import com.sideflowgames.fulguritefusion.ModItems;
 import com.sideflowgames.fulguritefusion.ModSounds;
 
@@ -32,20 +34,18 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     // Called by the Stormwing when it leaves: guard this nest.
     public void guard(BlockPos nest) {
         nestPos = nest;
-        restrictTo(nest, GUARD_RANGE);
+        setHomeTo(nest, GUARD_RANGE);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         // Anyone who comes close to the nest.
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> nestPos != null && p.distanceToSqr(Vec3.atCenterOf(nestPos)) < GUARD_RANGE * GUARD_RANGE));
+                (p, lvl) -> nestPos != null && p.distanceToSqr(Vec3.atCenterOf(nestPos)) < GUARD_RANGE * GUARD_RANGE));
     }
 
     // ---------- Ticking ----------
@@ -123,7 +123,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (random.nextInt(2) == 0) {
                 level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(0.8), getRandomY(), getRandomZ(0.8), 0, 0.02, 0);
             }
@@ -157,14 +157,14 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     // ---------- Attacks ----------
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
         triggerAnim("action", "strike");
-        boolean hit = super.doHurtTarget(target);
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit && target instanceof LivingEntity living) {
             float bonus = conductiveBonus(living);
             if (bonus > 0) {
                 living.invulnerableTime = 0;
-                living.hurt(damageSources().mobAttack(this), bonus);
+                living.hurtOrSimulate(damageSources().mobAttack(this), bonus);
             }
         }
         return hit;
@@ -173,9 +173,11 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     // Extra shock for each piece of iron or netherite armor.
     private static float conductiveBonus(LivingEntity target) {
         int pieces = 0;
-        for (ItemStack stack : target.getArmorSlots()) {
-            if (stack.getItem() instanceof ArmorItem armor
-                    && (armor.getMaterial().equals(ArmorMaterials.IRON) || armor.getMaterial().equals(ArmorMaterials.NETHERITE))) {
+        for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlotGroup.ARMOR) {
+            net.minecraft.world.item.equipment.Equippable gear = target.getItemBySlot(slot).get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+            if (gear != null && gear.assetId().isPresent()
+                    && (gear.assetId().get().equals(net.minecraft.world.item.equipment.EquipmentAssets.IRON)
+                        || gear.assetId().get().equals(net.minecraft.world.item.equipment.EquipmentAssets.NETHERITE))) {
                 pieces++;
             }
         }
@@ -184,7 +186,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
 
     private void shock(LivingEntity victim, float damage) {
         victim.invulnerableTime = 0;
-        victim.hurt(damageSources().mobAttack(this), damage + conductiveBonus(victim));
+        victim.hurtOrSimulate(damageSources().mobAttack(this), damage + conductiveBonus(victim));
     }
 
     // Arc from the serpent to the target, then on to up to 3 more players or mobs nearby.
@@ -231,7 +233,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
                         getZ() + Math.sin(angle) * r, 1, 0, 0.1, 0, 0.05);
             }
         }
-        server.sendParticles(ParticleTypes.FLASH, getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
+        server.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, -1), getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(6),
                 e -> e != this && !(e instanceof StormwingEntity))) {
             shock(e, 8f);
@@ -247,9 +249,9 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (!held.is(ModItems.EMPTY_SPARK_CELL.get())) return super.mobInteract(player, hand);
-        if (level().isClientSide) return InteractionResult.SUCCESS;
+        if (level().isClientSide()) return InteractionResult.SUCCESS;
         if (getHealth() <= SIPHON_FLOOR) {
-            player.displayClientMessage(Component.literal("The Arc Serpent has no charge left to siphon"), true);
+            player.sendOverlayMessage(Component.literal("The Arc Serpent has no charge left to siphon"));
             return InteractionResult.CONSUME;
         }
         setHealth(Math.max(SIPHON_FLOOR, getHealth() - SIPHON_AMOUNT));
@@ -278,7 +280,7 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     public void thunderHit(ServerLevel level, LightningBolt bolt) {}
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -301,26 +303,38 @@ public class ArcSerpentEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (nestPos != null) tag.put("Nest", NbtUtils.writeBlockPos(nestPos));
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag tag = new CompoundTag();
+        legacySaveArcSerpentEntity(tag, this.registryAccess());
+        com.sideflowgames.fulguritefusion.util.NbtBridge.write(output, tag);
+    }
+
+    protected void legacySaveArcSerpentEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        if (nestPos != null) tag.put("Nest", com.sideflowgames.fulguritefusion.util.NbtBridge.writeBlockPos(nestPos));
         tag.putInt("TicksGuarding", ticksGuarding);
         tag.putBoolean("LastStandUsed", lastStandUsed);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        NbtUtils.readBlockPos(tag, "Nest").ifPresent(this::guard);
-        ticksGuarding = tag.getInt("TicksGuarding");
-        lastStandUsed = tag.getBoolean("LastStandUsed");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        legacyLoadArcSerpentEntity(com.sideflowgames.fulguritefusion.util.NbtBridge.toTag(input), input.lookup());
+    }
+
+    protected void legacyLoadArcSerpentEntity(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        
+        com.sideflowgames.fulguritefusion.util.NbtBridge.readBlockPos(tag, "Nest").ifPresent(this::guard);
+        ticksGuarding = tag.getIntOr("TicksGuarding", 0);
+        lastStandUsed = tag.getBooleanOr("LastStandUsed", false);
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "movement", 6,
+        controllers.add(new AnimationController<>("movement", 6,
                 state -> state.setAndContinue(state.isMoving() ? SLITHER : IDLE)));
-        controllers.add(new AnimationController<>(this, "action", 2, state -> PlayState.STOP)
+        controllers.add(new AnimationController<>("action", 2, state -> PlayState.STOP)
                 .triggerableAnim("strike", STRIKE)
                 .triggerableAnim("cast", CAST));
     }

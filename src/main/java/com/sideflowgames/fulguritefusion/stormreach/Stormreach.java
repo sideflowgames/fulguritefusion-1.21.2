@@ -4,7 +4,7 @@ import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 // The Stormreach: an end-game dimension of shattered, floating landmasses over an endless storm.
@@ -17,11 +17,11 @@ public final class Stormreach {
     private Stormreach() {}
 
     public static final ResourceKey<Level> LEVEL =
-            ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "stormreach"));
+            ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "stormreach"));
 
     // True only when running from the development environment, not from a built jar.
     public static boolean devBuild() {
-        return !net.neoforged.fml.loading.FMLEnvironment.production;
+        return !net.neoforged.fml.loading.FMLEnvironment.isProduction();
     }
 
     public static final String DEV_NAME = "Dev";
@@ -31,7 +31,7 @@ public final class Stormreach {
 
     // The developer: the player named Dev, in the development build only.
     public static boolean developer(net.minecraft.world.entity.Entity entity) {
-        return devBuild() && entity instanceof net.minecraft.world.entity.player.Player p && DEV_NAME.equals(p.getGameProfile().getName());
+        return devBuild() && entity instanceof net.minecraft.world.entity.player.Player p && DEV_NAME.equals(p.getGameProfile().name());
     }
 
     // May this entity use the Stormreach's entrances (Storm Sigil, rift portal)?
@@ -49,9 +49,9 @@ public final class Stormreach {
         if (event.getDimension() != LEVEL || allowed(event.getEntity())) return;
         event.setCanceled(true);
         if (event.getEntity() instanceof net.minecraft.world.entity.player.Player player) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
                     "The Stormreach is still in development. It's coming in Fulgurite Fusion 2.0.")
-                    .withStyle(net.minecraft.ChatFormatting.GRAY), true);
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
         }
     }
 

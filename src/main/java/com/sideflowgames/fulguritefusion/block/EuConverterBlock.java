@@ -61,14 +61,14 @@ public class EuConverterBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlocks.EU_CONVERTER_BE.get(), EuConverterBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlocks.EU_CONVERTER_BE.get(), EuConverterBlockEntity::serverTick);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof EuConverterBlockEntity converter) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof EuConverterBlockEntity converter) {
             if (player.isShiftKeyDown()) {
-                player.displayClientMessage(Component.literal(converter.statusText()), true);
+                player.sendOverlayMessage(Component.literal(converter.statusText()));
             } else {
                 player.openMenu(converter, buf -> buf.writeBlockPos(pos));
             }

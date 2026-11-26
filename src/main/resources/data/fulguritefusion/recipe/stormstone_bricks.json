@@ -6,9 +6,7 @@
     "PP"
   ],
   "key": {
-    "P": {
-      "item": "fulguritefusion:polished_stormstone"
-    }
+    "P": "fulguritefusion:polished_stormstone"
   },
   "result": {
     "id": "fulguritefusion:stormstone_bricks",

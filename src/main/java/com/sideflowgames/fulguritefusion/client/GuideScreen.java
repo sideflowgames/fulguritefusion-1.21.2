@@ -12,13 +12,13 @@ import com.google.gson.JsonParser;
 import com.sideflowgames.fulguritefusion.FulguriteFusion;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.PageButton;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -40,8 +40,8 @@ import org.lwjgl.glfw.GLFW;
 // Every chapter starts on a fresh spread. Contents are on the first spread; click a chapter to jump to it,
 // and the Chapters button under the book (or the Home key) to come back.
 public class GuideScreen extends Screen {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/guide_book.png");
-    private static final ResourceLocation CONTENT = ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "guide/guide.json");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "textures/gui/guide_book.png");
+    private static final Identifier CONTENT = Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "guide/guide.json");
     private static final int BOOK_W = 288, BOOK_H = 184, TEX_W = 512, TEX_H = 256;
     private static final int PAGE_W = 116, PAGE_H = 146, LEFT_X = 18, RIGHT_X = 154, PAGE_Y = 14, LINE = 10;
     private static final int TEXT = 0xFF3B2F2F, TITLE = 0xFF1E4E79, CHAPTER = 0xFF6A1B9A, FAINT = 0xFF8A7A66, LINK = 0xFF1E4E79;
@@ -209,9 +209,9 @@ public class GuideScreen extends Screen {
 
     private static ItemStack item(String id) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(id);
+            Identifier rl = Identifier.parse(id);
             if (!BuiltInRegistries.ITEM.containsKey(rl)) return ItemStack.EMPTY;
-            return new ItemStack(BuiltInRegistries.ITEM.get(rl));
+            return new ItemStack(BuiltInRegistries.ITEM.getValue(rl));
         } catch (Exception e) {
             return ItemStack.EMPTY;
         }
@@ -234,7 +234,8 @@ public class GuideScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.scancode(), mods = event.modifiers();
         if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_PAGE_DOWN) {
             turn(1);
             return true;
@@ -247,7 +248,7 @@ public class GuideScreen extends Screen {
             jumpToPage(contentsPage);
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
@@ -257,7 +258,9 @@ public class GuideScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = event.button();
         if (button == 0) {
             // Chapter links on the contents page.
             for (int side = 0; side < 2; side++) {
@@ -274,7 +277,7 @@ public class GuideScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
@@ -285,14 +288,14 @@ public class GuideScreen extends Screen {
     // ---------- Drawing ----------
 
     @Override
-    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.blit(TEXTURE, left, top, 0, 0, BOOK_W, BOOK_H, TEX_W, TEX_H);
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(g, mouseX, mouseY, partialTick);
+        g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, left, top, (float) 0, (float) 0, BOOK_W, BOOK_H, TEX_W, TEX_H);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         ItemStack[] hovered = {ItemStack.EMPTY};
         for (int side = 0; side < 2; side++) {
             int index = spread * 2 + side;
@@ -300,53 +303,53 @@ public class GuideScreen extends Screen {
             int x = left + (side == 0 ? LEFT_X : RIGHT_X), y = top + PAGE_Y;
             drawPage(g, pages.get(index), x, y, mouseX, mouseY, hovered);
             String num = String.valueOf(index + 1);
-            g.drawString(font, num, x + PAGE_W / 2 - font.width(num) / 2, top + BOOK_H - 24, FAINT, false);
+            g.text(font, num, x + PAGE_W / 2 - font.width(num) / 2, top + BOOK_H - 24, GuiStyle.opaque(FAINT), false);
         }
-        if (!hovered[0].isEmpty()) g.renderTooltip(font, hovered[0], mouseX, mouseY);
+        if (!hovered[0].isEmpty()) g.setTooltipForNextFrame(font, hovered[0], mouseX, mouseY);
     }
 
-    private void drawPage(GuiGraphics g, Page p, int x, int y, int mx, int my, ItemStack[] hovered) {
+    private void drawPage(GuiGraphicsExtractor g, Page p, int x, int y, int mx, int my, ItemStack[] hovered) {
         if (p.contents) {
-            g.drawString(font, "Contents", x, y, CHAPTER, false);
+            g.text(font, "Contents", x, y, GuiStyle.opaque(CHAPTER), false);
             g.fill(x, y + 10, x + PAGE_W, y + 11, CHAPTER);
             int ry = y + 15;
             for (int i = p.contentsFrom; i < Math.min(chapters.size(), p.contentsFrom + ROWS); i++) {
                 Chapter c = chapters.get(i);
                 boolean over = mx >= x && mx < x + PAGE_W && my >= ry && my < ry + ROW;
-                g.pose().pushPose();
-                g.pose().translate(x, ry, 0);
-                g.pose().scale(0.625f, 0.625f, 1);
-                g.renderItem(c.icon(), 0, 0);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate((float) (x), (float) (ry));
+                g.pose().scale((float) (0.625f), (float) (0.625f));
+                g.item(c.icon(), 0, 0);
+                g.pose().popMatrix();
                 // Long titles shrink to fit instead of being cut off.
                 int room = PAGE_W - 13, w = font.width(c.title());
                 float sc = w > room ? room / (float) w : 1f;
-                g.pose().pushPose();
-                g.pose().translate(x + 13, ry + 1 + (1 - sc) * 4, 0);
-                g.pose().scale(sc, sc, 1);
-                g.drawString(font, c.title(), 0, 0, over ? LINK : TEXT, false);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate((float) (x + 13), (float) (ry + 1 + (1 - sc) * 4));
+                g.pose().scale((float) (sc), (float) (sc));
+                g.text(font, c.title(), 0, 0, GuiStyle.opaque(over ? LINK : TEXT), false);
+                g.pose().popMatrix();
                 ry += ROW;
             }
             return;
         }
         if (p.chapterTitle != null) {
-            g.pose().pushPose();
-            g.pose().translate(x, y, 0);
-            g.pose().scale(1.15f, 1.15f, 1);
-            g.drawString(font, font.plainSubstrByWidth(p.chapterTitle, (int) (PAGE_W / 1.15f)), 0, 0, CHAPTER, false);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate((float) (x), (float) (y));
+            g.pose().scale((float) (1.15f), (float) (1.15f));
+            g.text(font, font.plainSubstrByWidth(p.chapterTitle, (int) (PAGE_W / 1.15f)), 0, 0, GuiStyle.opaque(CHAPTER), false);
+            g.pose().popMatrix();
             g.fill(x, y + 12, x + PAGE_W, y + 13, CHAPTER);
             y += 20;
         }
         if (p.title != null) {
-            g.drawString(font, font.plainSubstrByWidth(p.title, PAGE_W), x, y, TITLE, false);
+            g.text(font, font.plainSubstrByWidth(p.title, PAGE_W), x, y, GuiStyle.opaque(TITLE), false);
             y += 13;
         }
         if (!p.items.isEmpty()) {
             for (int i = 0; i < p.items.size(); i++) {
                 int ix = x + (i % 6) * 19, iy = y + (i / 6) * 20;
-                g.renderItem(p.items.get(i), ix, iy);
+                g.item(p.items.get(i), ix, iy);
                 if (mx >= ix && mx < ix + 16 && my >= iy && my < iy + 16) hovered[0] = p.items.get(i);
             }
             y += 20 * ((p.items.size() + 5) / 6);
@@ -356,27 +359,29 @@ public class GuideScreen extends Screen {
             y += 62;
         }
         for (FormattedCharSequence line : p.lines) {
-            g.drawString(font, line, x, y, TEXT, false);
+            g.text(font, line, x, y, GuiStyle.opaque(TEXT), false);
             y += LINE;
         }
     }
 
     // A crafting grid: 3 x 3 ingredients, an arrow, and the result. Ingredients with several options cycle.
-    private void drawRecipe(GuiGraphics g, String id, int x, int y, int mx, int my, ItemStack[] hovered) {
+    private void drawRecipe(GuiGraphicsExtractor g, String id, int x, int y, int mx, int my, ItemStack[] hovered) {
         if (minecraft == null || minecraft.level == null) return;
         Optional<RecipeHolder<?>> holder;
         try {
-            holder = minecraft.level.getRecipeManager().byKey(ResourceLocation.parse(id));
+            holder = GuideRecipes.byKey(Identifier.parse(id));
         } catch (Exception e) {
             holder = Optional.empty();
         }
         if (holder.isEmpty()) {
-            g.drawString(font, "(recipe not found)", x, y + 22, FAINT, false);
+            g.text(font, "(recipe not found)", x, y + 22, GuiStyle.opaque(FAINT), false);
             return;
         }
         Recipe<?> recipe = holder.get().value();
-        NonNullList<Ingredient> ings = recipe.getIngredients();
-        int w = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
+        GuideRecipes.Shown shown = GuideRecipes.show(recipe, minecraft.level).orElse(null);
+        java.util.List<java.util.List<ItemStack>> ings = shown == null ? java.util.List.of() : shown.slots();
+        boolean isShaped = shown != null && shown.shaped();
+        int w = shown != null && shown.shaped() ? shown.width() : 3;
         int gx = x + 4, gy = y + 2;
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {
@@ -386,7 +391,7 @@ public class GuideScreen extends Screen {
         long tick = minecraft.level.getGameTime() / 20;
         for (int i = 0; i < ings.size(); i++) {
             int r, c;
-            if (recipe instanceof ShapedRecipe) {
+            if (isShaped) {
                 r = i / w;
                 c = i % w;
             } else if (ings.size() == 1) {
@@ -397,25 +402,25 @@ public class GuideScreen extends Screen {
                 c = i % 3;
             }
             if (r > 2) break;
-            ItemStack[] options = ings.get(i).getItems();
-            if (options.length == 0) continue;
-            ItemStack s = options[(int) (tick % options.length)];
+            java.util.List<ItemStack> options = ings.get(i);
+            if (options.isEmpty()) continue;
+            ItemStack s = options.get((int) (tick % options.size()));
             int ix = gx + c * 18 + 1, iy = gy + r * 18 + 1;
-            g.renderItem(s, ix, iy);
+            g.item(s, ix, iy);
             if (mx >= ix && mx < ix + 16 && my >= iy && my < iy + 16) hovered[0] = s;
         }
         // Arrow and result.
         int ax = gx + 58, ay = gy + 22;
-        g.drawString(font, "→", ax, ay, TEXT, false);
-        ItemStack out = recipe.getResultItem(minecraft.level.registryAccess());
+        g.text(font, "→", ax, ay, GuiStyle.opaque(TEXT), false);
+        ItemStack out = shown == null ? ItemStack.EMPTY : shown.result();
         int ox = gx + 72, oy = gy + 17;
         slot(g, ox - 1, oy - 1);
-        g.renderItem(out, ox, oy);
-        g.renderItemDecorations(font, out, ox, oy);
+        g.item(out, ox, oy);
+        g.itemDecorations(font, out, ox, oy);
         if (mx >= ox && mx < ox + 16 && my >= oy && my < oy + 16) hovered[0] = out;
     }
 
-    private static void slot(GuiGraphics g, int x, int y) {
+    private static void slot(GuiGraphicsExtractor g, int x, int y) {
         g.fill(x, y, x + 18, y + 18, 0xFF8B7B60);
         g.fill(x + 1, y + 1, x + 18, y + 18, 0xFFFFF8E8);
         g.fill(x + 1, y + 1, x + 17, y + 17, 0xFFD9CBB0);

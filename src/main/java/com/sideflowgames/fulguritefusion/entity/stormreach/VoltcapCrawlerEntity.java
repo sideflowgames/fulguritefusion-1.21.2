@@ -20,7 +20,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -32,12 +32,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 // Voltcap Crawler: a beetle with a Voltcap growing on its back. At night it sits perfectly still among the
 // mushrooms, looking like one. When you come within 6 blocks it scuttles at you; once beside you it swells for
@@ -84,7 +84,7 @@ public class VoltcapCrawlerEntity extends Monster implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
         LivingEntity target = getTarget();
         int fuse = fuse();
         if (target != null && target.isAlive() && distanceToSqr(target) < 6.25) {
@@ -100,7 +100,7 @@ public class VoltcapCrawlerEntity extends Monster implements GeoEntity {
     private void burst() {
         if (!(level() instanceof ServerLevel server)) return;
         for (LivingEntity e : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(3.0), e -> e != this)) {
-            e.hurt(damageSources().mobAttack(this), 5.0f);
+            e.hurtOrSimulate(damageSources().mobAttack(this), 5.0f);
         }
         AreaEffectCloud cloud = new AreaEffectCloud(server, getX(), getY(), getZ());
         cloud.setRadius(3.0f);
@@ -109,7 +109,7 @@ public class VoltcapCrawlerEntity extends Monster implements GeoEntity {
         cloud.setDuration(120);
         cloud.setRadiusPerTick(-cloud.getRadius() / cloud.getDuration());
         cloud.setPotionContents(new PotionContents(java.util.Optional.empty(), java.util.Optional.of(0x3CC4E4),
-                java.util.List.of(new MobEffectInstance(MobEffects.POISON, 100, 0), new MobEffectInstance(MobEffects.CONFUSION, 120, 0))));
+                java.util.List.of(new MobEffectInstance(MobEffects.POISON, 100, 0), new MobEffectInstance(MobEffects.NAUSEA, 120, 0)), java.util.Optional.empty()));
         server.addFreshEntity(cloud);
         server.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, getX(), getY(0.5), getZ(), 60, 1.5, 0.8, 1.5, 0.05);
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY(0.5), getZ(), 30, 1.0, 0.5, 1.0, 0.2);
@@ -118,11 +118,11 @@ public class VoltcapCrawlerEntity extends Monster implements GeoEntity {
     }
 
     // Spawns at night on the ground in the Voltcap Mushroom Fields (biome set in the biome file).
-    public static boolean checkSpawn(EntityType<VoltcapCrawlerEntity> type, ServerLevelAccessor level, MobSpawnType reason,
+    public static boolean checkSpawn(EntityType<VoltcapCrawlerEntity> type, ServerLevelAccessor level, EntitySpawnReason reason,
                                      BlockPos pos, RandomSource random) {
-        if (MobSpawnType.isSpawner(reason) || reason == MobSpawnType.SPAWN_EGG) return true;
+        if (EntitySpawnReason.isSpawner(reason) || reason == EntitySpawnReason.SPAWN_ITEM_USE) return true;
         ServerLevel server = level.getLevel();
-        return Stormreach.is(server) && server.isNight() && level.getDifficulty() != Difficulty.PEACEFUL
+        return Stormreach.is(server) && server.isDarkOutside() && level.getDifficulty() != Difficulty.PEACEFUL
                 && level.canSeeSky(pos) && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
@@ -143,7 +143,7 @@ public class VoltcapCrawlerEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 3, s -> s.setAndContinue(
+        controllers.add(new AnimationController<>("main", 3, s -> s.setAndContinue(
                 fuse() > 0 ? SWELL : s.isMoving() ? WALK : HIDE)));
     }
 

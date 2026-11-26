@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:book"
-    },
-    {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "minecraft:book",
+    "fulguritefusion:fulgurite_shard"
   ],
   "result": {
     "id": "fulguritefusion:guide_book",

@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +20,7 @@ public final class BackpackNetwork {
 
     public record OpenPayload() implements CustomPacketPayload {
         public static final Type<OpenPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "open_backpack"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "open_backpack"));
         public static final StreamCodec<ByteBuf, OpenPayload> STREAM_CODEC = StreamCodec.unit(new OpenPayload());
 
         @Override
@@ -32,7 +32,7 @@ public final class BackpackNetwork {
     // Restock / Deposit buttons (see BackpackUpgrades.handleUtility for the action numbers).
     public record UtilityPayload(int action) implements CustomPacketPayload {
         public static final Type<UtilityPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(FulguriteFusion.MODID, "backpack_utility"));
+                new Type<>(Identifier.fromNamespaceAndPath(FulguriteFusion.MODID, "backpack_utility"));
         public static final StreamCodec<ByteBuf, UtilityPayload> STREAM_CODEC =
                 ByteBufCodecs.VAR_INT.map(UtilityPayload::new, UtilityPayload::action);
 

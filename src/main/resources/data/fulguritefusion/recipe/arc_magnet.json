@@ -7,15 +7,9 @@
     "CFC"
   ],
   "key": {
-    "M": {
-      "item": "fulguritefusion:magnetite_ingot"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "F": {
-      "item": "fulguritefusion:fulgurite_shard"
-    }
+    "M": "fulguritefusion:magnetite_ingot",
+    "C": "minecraft:copper_ingot",
+    "F": "fulguritefusion:fulgurite_shard"
   },
   "result": {
     "id": "fulguritefusion:arc_magnet",

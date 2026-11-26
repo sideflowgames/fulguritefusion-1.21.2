@@ -7,18 +7,10 @@
     "GTG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "T": {
-      "item": "minecraft:string"
-    },
-    "C": {
-      "item": "minecraft:golden_carrot"
-    },
-    "H": {
-      "item": "minecraft:hay_block"
-    }
+    "G": "minecraft:gold_ingot",
+    "T": "minecraft:string",
+    "C": "minecraft:golden_carrot",
+    "H": "minecraft:hay_block"
   },
   "result": {
     "id": "fulguritefusion:feeding_upgrade",

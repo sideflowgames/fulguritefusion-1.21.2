@@ -23,10 +23,10 @@ public final class PanoramaCapture {
 
     @SubscribeEvent
     public static void onCommands(RegisterClientCommandsEvent event) {
-        if (FMLEnvironment.production) return;
+        if (FMLEnvironment.isProduction()) return;
         event.getDispatcher().register(Commands.literal("ffpanorama").executes(ctx -> {
             countdown = 20; // let the chat screen close first
-            Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Capturing panorama in 1 second... hold still")
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("Capturing panorama in 1 second... hold still")
                     .withStyle(ChatFormatting.AQUA));
             return 1;
         }));
@@ -38,7 +38,7 @@ public final class PanoramaCapture {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null || --countdown > 0) return;
         countdown = -1;
-        Component result = mc.grabPanoramixScreenshot(mc.gameDirectory, 1024, 1024);
-        mc.gui.getChat().addMessage(result);
+        Component result = mc.grabPanoramixScreenshot(mc.gameDirectory);
+        mc.gui.getChat().addClientSystemMessage(result);
     }
 }

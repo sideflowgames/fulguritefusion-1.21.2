@@ -7,15 +7,9 @@
     "RMR"
   ],
   "key": {
-    "R": {
-      "item": "fulguritefusion:reinforced_fulgurite"
-    },
-    "M": {
-      "item": "fulguritefusion:magnetite_plate"
-    },
-    "O": {
-      "item": "minecraft:obsidian"
-    }
+    "R": "fulguritefusion:reinforced_fulgurite",
+    "M": "fulguritefusion:magnetite_plate",
+    "O": "minecraft:obsidian"
   },
   "result": {
     "id": "fulguritefusion:blast_chamber_frame",

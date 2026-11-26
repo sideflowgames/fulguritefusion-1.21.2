@@ -48,13 +48,19 @@ public class StormWardBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, UtilityBlocks.STORM_WARD_BE.get(), StormWardBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, UtilityBlocks.STORM_WARD_BE.get(), StormWardBlockEntity::serverTick);
+    }
+
+    // 26.1: blocks no longer get onRemove. Called from the block entity just before it is removed
+    // (or after removal for blocks without one); newState is the block now standing here.
+    public void onRemoveLegacy(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock())) StormWardBlockEntity.forget(level, pos);
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock())) StormWardBlockEntity.forget(level, pos);
-        super.onRemove(state, level, pos, newState, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean moved) {
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
+        onRemoveLegacy(state, level, pos, level.getBlockState(pos), moved);
     }
 
     @Override
