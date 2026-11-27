@@ -121,8 +121,15 @@ configurations {
 }
 
 dependencies {
-    // GeckoLib 4.9.2 for NeoForge 1.21.1: animated Blockbench models for our mobs. Required by the mod.
-    implementation "curse.maven:geckolib-388172:8350073"
+    // GeckoLib 4.9.2 for NeoForge 1.21.1: animated Blockbench models for our mobs and machines.
+    // Bundled inside our jar (jar-in-jar), so players don't install it separately. GeckoLib is MIT licensed.
+    // Comes from CurseMaven (file 8350073 = GeckoLib 4.9.2).
+    jarJar(implementation("curse.maven:geckolib-388172")) {
+        version {
+            strictly '[8350073]'
+            prefer '8350073'
+        }
+    }
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
